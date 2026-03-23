@@ -1,1 +1,1 @@
-Bild-Streifen: Parallax-Effekt und weiche Gradient-Kanten
+Bilder: weiche Kanten mit mask-image + Parallax auf alle Bildsektionen

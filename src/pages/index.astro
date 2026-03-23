@@ -70,18 +70,34 @@ import Footer from '../components/Footer.astro';
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
 
-    /* Parallax Bild-Streifen */
-    var imgBreak = document.querySelector('.img-break');
-    var imgBreakImg = imgBreak ? imgBreak.querySelector('img') : null;
-    if (imgBreakImg) {
+    /* Parallax auf alle Bildsektionen */
+    var parallaxItems = [
+      { container: '.img-break', strength: 80 },
+      { container: '.klima-img', strength: 40 },
+      { container: '.why-hero-img', strength: 40 }
+    ];
+    var parallaxPairs = [];
+    parallaxItems.forEach(function(item) {
+      var el = document.querySelector(item.container);
+      var img = el ? el.querySelector('img') : null;
+      if (el && img) {
+        img.style.height = '130%';
+        img.style.width = '100%';
+        img.style.objectFit = 'cover';
+        parallaxPairs.push({ el: el, img: img, strength: item.strength });
+      }
+    });
+    if (parallaxPairs.length > 0) {
       window.addEventListener('scroll', function() {
-        var rect = imgBreak.getBoundingClientRect();
         var windowH = window.innerHeight;
-        if (rect.top < windowH && rect.bottom > 0) {
-          var progress = (windowH - rect.top) / (windowH + rect.height);
-          var translateY = (progress - 0.5) * -60;
-          imgBreakImg.style.transform = 'translateY(' + translateY + 'px) scale(1.02)';
-        }
+        parallaxPairs.forEach(function(pair) {
+          var rect = pair.el.getBoundingClientRect();
+          if (rect.top < windowH && rect.bottom > 0) {
+            var progress = (windowH - rect.top) / (windowH + rect.height);
+            var translateY = (progress - 0.5) * -pair.strength;
+            pair.img.style.transform = 'translateY(' + translateY + 'px)';
+          }
+        });
       }, { passive: true });
     }
 
