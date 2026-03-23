@@ -1,1 +1,1 @@
-Fix: backdrop-filter bei offenem Menu deaktivieren (behebt Overlay-Problem)
+Mobile Menu: Links naeher an X-Button positioniert
