@@ -1,1 +1,1 @@
-Fix: use correct new Thermowerk logo (106KB)
+Fix: use correct new Thermowerk logo
