@@ -1,1 +1,1 @@
-Remove overlay, increase logo size, fix alignment
+Align logo with hero content on desktop
