@@ -70,33 +70,6 @@ import Footer from '../components/Footer.astro';
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
 
-    /* Parallax auf alle Bilder */
-    var parallaxItems = [
-      { container: '.hero-bg', strength: 50 },
-      { container: '.img-break', strength: 80 },
-      { container: '.why-hero-img', strength: 40 },
-      { container: '.klima-img', strength: 40 }
-    ];
-    var parallaxPairs = [];
-    parallaxItems.forEach(function(item) {
-      var el = document.querySelector(item.container);
-      var img = el ? el.querySelector('img') : null;
-      if (el && img) parallaxPairs.push({ el: el, img: img, strength: item.strength });
-    });
-    if (parallaxPairs.length > 0) {
-      window.addEventListener('scroll', function() {
-        var windowH = window.innerHeight;
-        parallaxPairs.forEach(function(pair) {
-          var rect = pair.el.getBoundingClientRect();
-          if (rect.top < windowH && rect.bottom > 0) {
-            var progress = (windowH - rect.top) / (windowH + rect.height);
-            var translateY = (progress - 0.5) * -pair.strength;
-            pair.img.style.transform = 'translateY(' + translateY + 'px)';
-          }
-        });
-      }, { passive: true });
-    }
-
     /* Smooth Scroll mit Header-Offset */
     document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
       anchor.addEventListener('click', function(e) {

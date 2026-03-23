@@ -1,1 +1,1 @@
-Weiche Kanten + Parallax: alle Bilder und Section-Uebergaenge
+Revert: zurueck auf sauberen Stand bb020ba
