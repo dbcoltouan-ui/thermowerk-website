@@ -1,1 +1,1 @@
-Bilder vorbereitet: img-Tags fuer klima.jpg und heizraum.jpg eingebaut
+Bild-Streifen: Parallax-Effekt und weiche Gradient-Kanten
