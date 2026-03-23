@@ -70,21 +70,6 @@ import Footer from '../components/Footer.astro';
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
 
-    /* Parallax Bild-Streifen */
-    var imgBreak = document.querySelector('.img-break');
-    var imgBreakImg = imgBreak ? imgBreak.querySelector('img') : null;
-    if (imgBreakImg) {
-      window.addEventListener('scroll', function() {
-        var rect = imgBreak.getBoundingClientRect();
-        var windowH = window.innerHeight;
-        if (rect.top < windowH && rect.bottom > 0) {
-          var progress = (windowH - rect.top) / (windowH + rect.height);
-          var translateY = (progress - 0.5) * -60;
-          imgBreakImg.style.transform = 'translateY(' + translateY + 'px) scale(1.02)';
-        }
-      }, { passive: true });
-    }
-
     /* Smooth Scroll mit Header-Offset */
     document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
       anchor.addEventListener('click', function(e) {
