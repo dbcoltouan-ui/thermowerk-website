@@ -1,0 +1,198 @@
+---
+// Stromkosten-Rechner – komplett clientseitig
+---
+<section class="calculator section-padding" id="calculator">
+  <div class="container">
+    <div class="text-center fade-up" style="margin-bottom: 48px;">
+      <p class="section-subtitle">Kostenrechner</p>
+      <h2>Was kostet eine Wärmepumpe im Betrieb?</h2>
+      <p style="color: var(--mid-gray); max-width: 600px; margin: 0 auto;">Schätzen Sie Ihre jährlichen Heizkosten mit einer Luft-Wasser-Wärmepumpe – und vergleichen Sie mit Ihrer aktuellen Heizung.</p>
+    </div>
+
+    <div class="calc-grid fade-up">
+
+      <!-- Eingabeseite -->
+      <div class="calc-inputs">
+
+        <div class="calc-field">
+          <label for="calc-area">Wohnfläche</label>
+          <div class="calc-slider-row">
+            <input type="range" id="calc-area" min="60" max="350" value="160" step="10" class="calc-slider">
+            <span class="calc-value" id="calc-area-val">160 m²</span>
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label>Gebäudezustand</label>
+          <div class="calc-toggle-group" id="calc-insulation">
+            <button class="calc-toggle" data-value="good">Gut gedämmt</button>
+            <button class="calc-toggle active" data-value="medium">Mittel</button>
+            <button class="calc-toggle" data-value="poor">Unsaniert</button>
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label>Aktuelle Heizung</label>
+          <div class="calc-toggle-group" id="calc-fuel">
+            <button class="calc-toggle active" data-value="oil">Ölheizung</button>
+            <button class="calc-toggle" data-value="gas">Gasheizung</button>
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label for="calc-elec">Strompreis</label>
+          <div class="calc-slider-row">
+            <input type="range" id="calc-elec" min="15" max="45" value="27" step="1" class="calc-slider">
+            <span class="calc-value" id="calc-elec-val">0.27 CHF/kWh</span>
+          </div>
+        </div>
+
+        <div class="calc-field">
+          <label for="calc-oil">Heizölpreis</label>
+          <div class="calc-slider-row" id="calc-oil-row">
+            <input type="range" id="calc-oil" min="80" max="180" value="120" step="5" class="calc-slider">
+            <span class="calc-value" id="calc-oil-val">1.20 CHF/l</span>
+          </div>
+          <div class="calc-slider-row" id="calc-gas-row" style="display: none;">
+            <input type="range" id="calc-gas" min="8" max="20" value="13" step="1" class="calc-slider">
+            <span class="calc-value" id="calc-gas-val">0.13 CHF/kWh</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Ergebnisseite -->
+      <div class="calc-results">
+        <div class="calc-result-card">
+          <div class="calc-result-header">Ihre geschätzte Einsparung pro Jahr</div>
+          <div class="calc-saving" id="calc-saving">CHF 1'440</div>
+        </div>
+
+        <div class="calc-breakdown">
+          <div class="calc-row">
+            <span class="calc-label">Wärmebedarf</span>
+            <span class="calc-data" id="calc-demand">14'400 kWh/Jahr</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label">Stromverbrauch WP <span class="calc-hint">(JAZ ≈ 3.2)</span></span>
+            <span class="calc-data" id="calc-wp-kwh">4'500 kWh/Jahr</span>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-row calc-row-highlight">
+            <span class="calc-label">Jährl. Kosten Wärmepumpe</span>
+            <span class="calc-data" id="calc-wp-cost">CHF 1'215</span>
+          </div>
+          <div class="calc-row calc-row-old">
+            <span class="calc-label">Jährl. Kosten <span id="calc-fuel-label">Ölheizung</span></span>
+            <span class="calc-data" id="calc-old-cost">CHF 2'655</span>
+          </div>
+        </div>
+
+        <p class="calc-disclaimer">Grobe Schätzung basierend auf Durchschnittswerten. Die tatsächlichen Kosten hängen von Gebäude, Anlage und Nutzungsverhalten ab. Gerne berechnen wir Ihre Situation bei einer Beratung vor Ort.</p>
+        <a href="#contact" class="btn btn-primary" style="margin-top: 16px;">Persönliche Berechnung anfragen</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  /* Stromkosten-Rechner – clientseitige Berechnung */
+  (function () {
+    var areaSlider = document.getElementById('calc-area');
+    var areaVal = document.getElementById('calc-area-val');
+    var elecSlider = document.getElementById('calc-elec');
+    var elecVal = document.getElementById('calc-elec-val');
+    var oilSlider = document.getElementById('calc-oil');
+    var oilVal = document.getElementById('calc-oil-val');
+    var gasSlider = document.getElementById('calc-gas');
+    var gasVal = document.getElementById('calc-gas-val');
+    var oilRow = document.getElementById('calc-oil-row');
+    var gasRow = document.getElementById('calc-gas-row');
+    var savingEl = document.getElementById('calc-saving');
+    var demandEl = document.getElementById('calc-demand');
+    var wpKwhEl = document.getElementById('calc-wp-kwh');
+    var wpCostEl = document.getElementById('calc-wp-cost');
+    var oldCostEl = document.getElementById('calc-old-cost');
+    var fuelLabelEl = document.getElementById('calc-fuel-label');
+
+    var insulation = 'medium';
+    var fuel = 'oil';
+
+    // Heizwärmebedarf pro m² je Gebäudezustand (kWh/m²/a)
+    var demandPerM2 = { good: 55, medium: 95, poor: 155 };
+
+    // JAZ Luft-Wasser-Wärmepumpe (saisonaler Durchschnitt)
+    var JAZ = 3.2;
+
+    // Schweizer Tausender-Formatierung
+    function fmt(n) {
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+    }
+
+    function calculate() {
+      var area = parseInt(areaSlider.value);
+      var elecPrice = parseInt(elecSlider.value) / 100;
+      var oilPrice = parseInt(oilSlider.value) / 100;
+      var gasPrice = parseInt(gasSlider.value) / 100;
+
+      var demand = area * demandPerM2[insulation];
+      var wpKwh = demand / JAZ;
+      var wpCost = wpKwh * elecPrice;
+
+      var oldCost;
+      if (fuel === 'oil') {
+        var liters = demand / (10 * 0.85);
+        oldCost = liters * oilPrice;
+        fuelLabelEl.textContent = 'Ölheizung';
+      } else {
+        var gasKwh = demand / 0.90;
+        oldCost = gasKwh * gasPrice;
+        fuelLabelEl.textContent = 'Gasheizung';
+      }
+
+      var saving = oldCost - wpCost;
+
+      areaVal.textContent = area + ' m²';
+      elecVal.textContent = elecPrice.toFixed(2) + ' CHF/kWh';
+      oilVal.textContent = oilPrice.toFixed(2) + ' CHF/l';
+      gasVal.textContent = gasPrice.toFixed(2) + ' CHF/kWh';
+      demandEl.textContent = fmt(demand) + ' kWh/Jahr';
+      wpKwhEl.textContent = fmt(wpKwh) + ' kWh/Jahr';
+      wpCostEl.textContent = 'CHF ' + fmt(wpCost);
+      oldCostEl.textContent = 'CHF ' + fmt(oldCost);
+      savingEl.textContent = 'CHF ' + fmt(Math.max(0, saving));
+    }
+
+    // Toggle-Buttons: Gebäudezustand
+    document.querySelectorAll('#calc-insulation .calc-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#calc-insulation .calc-toggle').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        insulation = btn.dataset.value;
+        calculate();
+      });
+    });
+
+    // Toggle-Buttons: Brennstoff
+    document.querySelectorAll('#calc-fuel .calc-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#calc-fuel .calc-toggle').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        fuel = btn.dataset.value;
+        oilRow.style.display = fuel === 'oil' ? 'flex' : 'none';
+        gasRow.style.display = fuel === 'gas' ? 'flex' : 'none';
+        calculate();
+      });
+    });
+
+    // Slider-Events
+    areaSlider.addEventListener('input', calculate);
+    elecSlider.addEventListener('input', calculate);
+    oilSlider.addEventListener('input', calculate);
+    gasSlider.addEventListener('input', calculate);
+
+    // Erste Berechnung beim Laden
+    calculate();
+  })();
+</script>

@@ -1,0 +1,82 @@
+---
+// Kontaktformular und Kontaktinformationen
+---
+<section class="contact section-padding" id="contact">
+  <div class="container">
+    <div class="text-center fade-up" style="margin-bottom: 48px;">
+      <p class="section-subtitle">Kontakt</p>
+      <h2>Sprechen wir über Ihr Projekt</h2>
+    </div>
+    <div class="contact-grid">
+
+      <!-- Kontakt-Infos -->
+      <div class="fade-up">
+        <div class="contact-info-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/></svg></div>
+          <div>
+            <h4>Telefon</h4>
+            <a href="tel:+41XXXXXXXXX">+41 XX XXX XX XX</a>
+            <p>Mo–Fr, 07:00–18:00 Uhr</p>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div>
+            <h4>E-Mail</h4>
+            <a href="mailto:info@thermowerk.ch">info@thermowerk.ch</a>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div>
+            <h4>Standort</h4>
+            <p>Neftenbach, Kanton Zürich</p>
+            <p>Einsatzgebiet: ZH, SH, TG, AG, ZG, SZ, LU</p>
+          </div>
+        </div>
+        <div class="contact-hint">
+          <p><strong>Gut zu wissen:</strong> Die Beratung vor Ort ist unverbindlich und kostenlos. Im Umkreis von 50 km ab Neftenbach berechnen wir keine Anfahrtskosten.</p>
+        </div>
+      </div>
+
+      <!-- Formular -->
+      <div class="fade-up" style="transition-delay: 0.15s;">
+        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="DEIN-ACCESS-KEY-HIER">
+          <input type="hidden" name="subject" value="Neue Anfrage via thermowerk.ch">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name *</label>
+              <input type="text" id="name" name="name" required placeholder="Ihr Name">
+            </div>
+            <div class="form-group">
+              <label for="phone">Telefon</label>
+              <input type="tel" id="phone" name="phone" placeholder="Ihre Telefonnummer">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">E-Mail *</label>
+            <input type="email" id="email" name="email" required placeholder="Ihre E-Mail-Adresse">
+          </div>
+          <div class="form-group">
+            <label for="interest">Ich interessiere mich für</label>
+            <select id="interest" name="interest">
+              <option value="">Bitte wählen</option>
+              <option value="waermepumpe">Wärmepumpe (Heizungsersatz)</option>
+              <option value="klimaanlage">Klimaanlage</option>
+              <option value="foerderberatung">Förderberatung</option>
+              <option value="sonstiges">Sonstiges</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Nachricht</label>
+            <textarea id="message" name="message" placeholder="Beschreiben Sie kurz Ihr Anliegen – z.B. Art der aktuellen Heizung, Baujahr, Gebäudetyp."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">Anfrage senden</button>
+          <p class="form-note">Wir melden uns in der Regel innerhalb eines Arbeitstages.</p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
