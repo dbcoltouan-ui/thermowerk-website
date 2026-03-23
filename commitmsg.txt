@@ -1,1 +1,1 @@
-Alle Bilder: weiche Kanten (mask-image) + Parallax-Effekt, Hero nur unten weich
+Revert: zurueck zum Stand vor Parallax/Fade-Versuchen
