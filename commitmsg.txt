@@ -1,1 +1,1 @@
-Reduce nav spacing on desktop
+Slightly increase nav spacing
