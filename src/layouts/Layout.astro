@@ -249,6 +249,7 @@ const {
       .nav { display: none; }
       .nav.open { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + 32px); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 24px; background: var(--white); z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
       body.menu-open { overflow: hidden; }
+      body.menu-open .header { backdrop-filter: none; -webkit-backdrop-filter: none; }
       .nav.open .btn { width: 100%; justify-content: center; }
       .menu-toggle { display: flex; }
       .hero-content { margin-left: 0; }
