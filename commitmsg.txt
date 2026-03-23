@@ -1,1 +1,1 @@
-Fix: use correct new Thermowerk logo
+Remove overlay, increase logo size, fix alignment
