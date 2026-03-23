@@ -256,22 +256,38 @@ const {
       .hero-content { margin-left: 0; }
       .why-hero-img { height: 280px; }
 
-      /* === MOBILE: Image Fade Edges === */
+      /* === MOBILE: Image Fade Edges (subtil) === */
       .hero-bg {
-        -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 94%, transparent 100%);
       }
       .img-break {
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
       }
       .why-hero-img {
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
       }
       .klima-img {
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+      }
+
+      /* === MOBILE: Heatpump & Klima Bilder als Vollbreit-Streifen === */
+      .why-hero-img {
+        border-radius: 0;
+        margin-left: -24px;
+        margin-right: -24px;
+        width: calc(100% + 48px);
+        height: 260px;
+      }
+      .klima-img {
+        border-radius: 0;
+        margin-left: -24px;
+        margin-right: -24px;
+        width: calc(100% + 48px);
+        height: 260px;
       }
 
       /* === MOBILE: Parallax Image Setup === */
