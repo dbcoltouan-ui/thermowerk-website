@@ -1,1 +1,1 @@
-Update logo and add subtle overlay styling
+Replace logo with new Thermowerk logo
