@@ -1,1 +1,1 @@
-Revert komplett: Layout und Index zurueck auf Stand bb020ba (vor Parallax)
+Weiche Kanten + Parallax: alle Bilder und Section-Uebergaenge
