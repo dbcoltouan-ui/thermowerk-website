@@ -39,26 +39,26 @@ import Footer from '../components/Footer.astro';
     /* Mobile Menü */
     var menuToggle = document.getElementById('menuToggle');
     var mainNav = document.getElementById('mainNav');
+    function closeMenu() {
+      mainNav.classList.remove('open');
+      menuToggle.classList.remove('active');
+      document.body.classList.remove('menu-open');
+    }
+    function openMenu() {
+      mainNav.classList.add('open');
+      menuToggle.classList.add('active');
+      document.body.classList.add('menu-open');
+    }
     menuToggle.addEventListener('click', function() {
-      mainNav.classList.toggle('open');
-      var spans = menuToggle.querySelectorAll('span');
       if (mainNav.classList.contains('open')) {
-        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-        spans[1].style.opacity = '0';
-        spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+        closeMenu();
       } else {
-        spans[0].style.transform = '';
-        spans[1].style.opacity = '';
-        spans[2].style.transform = '';
+        openMenu();
       }
     });
     mainNav.querySelectorAll('a').forEach(function(link) {
       link.addEventListener('click', function() {
-        mainNav.classList.remove('open');
-        var spans = menuToggle.querySelectorAll('span');
-        spans[0].style.transform = '';
-        spans[1].style.opacity = '';
-        spans[2].style.transform = '';
+        closeMenu();
       });
     });
 

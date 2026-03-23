@@ -84,8 +84,11 @@ const {
     .nav a:hover::after { width: 100%; }
     .nav .btn-primary { color: var(--white) !important; font-size: 15px; padding: 12px 28px; }
     .nav .btn-primary::after { display: none; }
-    .menu-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 8px; }
-    .menu-toggle span { width: 24px; height: 2px; background: var(--dark); transition: all 0.3s; }
+    .menu-toggle { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 8px; z-index: 1002; }
+    .menu-toggle span { display: block; width: 24px; height: 2px; background: var(--dark); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; transform-origin: center; }
+    .menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-toggle.active span:nth-child(2) { opacity: 0; }
+    .menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
     /* 7. HERO */
     .hero { position: relative; min-height: 90vh; display: flex; align-items: center; background: var(--navy); overflow: hidden; padding-top: var(--header-height); }
@@ -244,7 +247,8 @@ const {
       .steps-grid, .why-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .nav { display: none; }
-      .nav.open { display: flex; flex-direction: column; position: fixed; inset: var(--header-height) 0 0 0; background: var(--white); padding: 32px 24px; gap: 24px; border-top: 1px solid var(--border); z-index: 999; }
+      .nav.open { display: flex; flex-direction: column; position: fixed; top: var(--header-height); left: 0; right: 0; bottom: 0; background: var(--white); padding: 32px 24px; gap: 24px; border-top: 1px solid var(--border); z-index: 1001; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      body.menu-open { overflow: hidden; }
       .nav.open .btn { width: 100%; justify-content: center; }
       .menu-toggle { display: flex; }
       .hero-content { margin-left: 0; }
