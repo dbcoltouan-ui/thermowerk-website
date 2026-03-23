@@ -1,1 +1,1 @@
-Bilder: weiche Kanten mit mask-image + Parallax auf alle Bildsektionen
+Alle Bilder: weiche Kanten (mask-image) + Parallax-Effekt, Hero nur unten weich
