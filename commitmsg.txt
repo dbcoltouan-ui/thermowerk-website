@@ -1,1 +1,1 @@
-Fix logo file and align overlay with content
+Fix: use correct new Thermowerk logo (106KB)
