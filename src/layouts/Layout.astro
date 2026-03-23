@@ -116,6 +116,7 @@ const {
     /* 9. BILD-STREIFEN */
     .img-break { width: 100%; height: 320px; overflow: hidden; position: relative; }
     .img-break .img-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.3); font-family: var(--font-heading); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+    .img-break img { width: 100%; height: 100%; object-fit: cover; }
 
     /* 10. ABLAUF */
     .steps { background: var(--off-white); }
@@ -254,6 +255,44 @@ const {
       .menu-toggle { display: flex; }
       .hero-content { margin-left: 0; }
       .why-hero-img { height: 280px; }
+
+      /* === MOBILE: Image Fade Edges === */
+      .hero-bg {
+        -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+      }
+      .img-break {
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+      }
+      .why-hero-img {
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+      }
+      .klima-img {
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+      }
+
+      /* === MOBILE: Parallax Image Setup === */
+      .hero-bg img,
+      .img-break img,
+      .why-hero-img img,
+      .klima-img img {
+        height: 130% !important;
+        will-change: transform;
+        transform: translateY(-11.5%);
+      }
+
+      /* === MOBILE: Soft Section Transitions === */
+      .about { background: linear-gradient(to bottom, var(--navy) 0%, var(--white) 40px, var(--white) 100%); }
+      .steps { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 40px, var(--off-white) 100%); }
+      .wpsm { background: linear-gradient(to bottom, var(--off-white) 0%, var(--white) 40px, var(--white) 100%); }
+      .why { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 40px, var(--off-white) 100%); }
+      .klima { background: linear-gradient(to bottom, var(--off-white) 0%, var(--white) 40px, var(--white) 100%); }
+      .region { background: linear-gradient(to bottom, var(--white) 0%, var(--navy) 50px, var(--navy) 100%); }
+      .contact { background: linear-gradient(to bottom, var(--navy) 0%, var(--white) 50px, var(--white) 100%); }
+      .footer { background: linear-gradient(to bottom, var(--white) 0%, var(--navy-dark) 50px, var(--navy-dark) 100%); }
     }
     @media (max-width: 640px) {
       :root { --header-height: 68px; }
