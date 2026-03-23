@@ -1,1 +1,1 @@
-Replace logo with new Thermowerk logo
+Fix logo file and align overlay with content
