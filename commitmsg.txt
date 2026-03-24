@@ -1,9 +1,10 @@
-Redesign: Neue Section-Reihenfolge, Leistungen-Karten, Herstellerlogos, aktualisierte Texte
+Überschriften bereinigt, Service-Karten redesigned, Section-Reihenfolge angepasst
 
-- Neue Komponenten: Services (3 Leistungskarten mit Links), ManufacturerLogos (Herstellerleiste)
-- About-Section nach unten verschoben mit neuem Text, USP-Karten und Bildplatzhalter
-- Klima-Section komplett überarbeitet (Split, Multisplit, Deckenkassetten, Wartung)
-- Alle Texte gemäss Briefing aktualisiert (Steps, Wpsm, WhyHeatpump, Klima, About)
-- Navigation und Footer an neue Struktur angepasst
-- ImageBreak entfernt, CSS für neue Komponenten ergänzt
-- Responsive Styles für alle neuen Layouts aktualisiert
+- Kleine Section-Subtitles entfernt, h2 als einheitliche Hauptüberschrift
+- Klima/Rechner: Zwischengrösse (section-subheading) für Untertitel
+- Mobile: Alle h2-Überschriften zentriert
+- Service-Karten im kaeltech-Style: Bild oben, Text und Button unten
+- About: Inhaberfoto rechts neben erstem Text (Desktop), auf Mobile zuerst
+- Neue Reihenfolge: Hero > Leistungen > Logos > WPSM > Ablauf > Über Thermowerk > WP > Klima > Rechner > Region > Kontakt
+- Rechner-Hinweis mit Button in der Wärmepumpen-Section eingefügt
+- btn-outline-dark Style ergänzt
