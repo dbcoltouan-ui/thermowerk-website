@@ -257,7 +257,10 @@ const {
       .why-hero-img { height: 280px; }
 
       /* === MOBILE: Image Fade Edges (subtil) === */
-      /* Hero: kein Bild-Fade an Unterkante */
+      .hero-bg {
+        -webkit-mask-image: linear-gradient(to bottom, black 99%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 99%, transparent 100%);
+      }
       .img-break {
         -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
         mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
@@ -298,7 +301,7 @@ const {
       }
 
       /* === MOBILE: Soft Section Transitions === */
-      .about { background: linear-gradient(to bottom, var(--navy) 0%, var(--white) 4px, var(--white) 100%); }
+      .about { background: linear-gradient(to bottom, var(--navy) 0%, var(--white) 3px, var(--white) 100%); }
       .steps { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 4px, var(--off-white) 100%); }
       .wpsm { background: linear-gradient(to bottom, var(--off-white) 0%, var(--white) 4px, var(--white) 100%); }
       .why { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 4px, var(--off-white) 100%); }
