@@ -111,7 +111,7 @@ const {
     .about-intro { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 48px; align-items: start; margin-bottom: 48px; }
     .about-intro-text p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; }
     .about-claim { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--dark); margin-top: 24px; }
-    .about-intro-img { position: sticky; top: calc(var(--header-height) + 24px); }
+    .about-intro-img { }
     .img-placeholder-box { background: var(--off-white); border: 2px dashed var(--border); border-radius: 16px; height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--mid-gray); font-size: 14px; font-family: var(--font-heading); }
     .about-usp-heading { margin-bottom: 24px; }
     .about-usp-heading h3 { font-size: 24px; color: var(--navy); }
@@ -137,8 +137,8 @@ const {
     .service-card-body { padding: 28px 24px; display: flex; flex-direction: column; flex: 1; }
     .service-card h3 { color: var(--navy); font-size: 20px; margin-bottom: 12px; }
     .service-card p { font-size: 15px; color: var(--mid-gray); line-height: 1.65; flex: 1; }
-    .service-link { font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--red); margin-top: 20px; transition: letter-spacing 0.3s; }
-    .service-card:hover .service-link { letter-spacing: 0.5px; }
+    .service-link { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--navy); margin-top: 20px; padding: 10px 24px; border: 2px solid var(--border); border-radius: 6px; transition: all 0.3s ease; align-self: center; }
+    .service-card:hover .service-link { border-color: var(--navy); background: var(--navy); color: var(--white); }
 
     /* 9a. HERSTELLERLOGOS */
     .logos-bar { background: var(--white); padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
