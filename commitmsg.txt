@@ -1,4 +1,9 @@
-Texte About- und Steps-Section überarbeitet
+Redesign: Neue Section-Reihenfolge, Leistungen-Karten, Herstellerlogos, aktualisierte Texte
 
-About: Neue Einleitung mit Firmengeschichte, ökologische Kältemittel, überarbeitete Versprechen-Box
-Steps: Neuer Titel, Fördergesuch-Text präzisiert, neuer CTA-Text
+- Neue Komponenten: Services (3 Leistungskarten mit Links), ManufacturerLogos (Herstellerleiste)
+- About-Section nach unten verschoben mit neuem Text, USP-Karten und Bildplatzhalter
+- Klima-Section komplett überarbeitet (Split, Multisplit, Deckenkassetten, Wartung)
+- Alle Texte gemäss Briefing aktualisiert (Steps, Wpsm, WhyHeatpump, Klima, About)
+- Navigation und Footer an neue Struktur angepasst
+- ImageBreak entfernt, CSS für neue Komponenten ergänzt
+- Responsive Styles für alle neuen Layouts aktualisiert

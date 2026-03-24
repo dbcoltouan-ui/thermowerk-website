@@ -103,20 +103,44 @@ const {
     .hero-buttons { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .hero-note { margin-top: 18px; font-size: 14px; color: rgba(255, 255, 255, 0.5); }
 
-    /* 8. ÜBER UNS */
+    /* 8. ÜBER UNS (neues Layout) */
     .about { background: var(--white); }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
-    .promise-box { background: var(--off-white); border-radius: 12px; padding: 36px; border: 1px solid var(--border); }
-    .promise-box h4 { margin-bottom: 20px; color: var(--navy); }
-    .promise-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
-    .promise-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.6; }
-    .promise-icon { flex-shrink: 0; width: 24px; height: 24px; background: var(--navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
-    .promise-icon svg { width: 14px; height: 14px; stroke: var(--white); fill: none; stroke-width: 2.5; }
+    .about-header { margin-bottom: 36px; }
+    .about-text-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 24px; }
+    .about-text-cols p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; }
+    .about-claim { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 48px; }
+    .about-usp-heading { margin-bottom: 24px; }
+    .about-usp-heading h3 { font-size: 24px; color: var(--navy); }
+    .about-usp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 56px; }
+    .about-usp-card { background: var(--off-white); border-radius: 12px; padding: 28px 24px; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+    .about-usp-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); }
+    .about-usp-icon { width: 48px; height: 48px; background: var(--navy); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .about-usp-icon svg { width: 24px; height: 24px; stroke: var(--white); fill: none; stroke-width: 1.8; }
+    .about-usp-card h4 { margin-bottom: 8px; font-size: 17px; color: var(--navy); }
+    .about-usp-card p { font-size: 14px; color: var(--mid-gray); line-height: 1.65; }
+    .about-bottom { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 48px; align-items: center; }
+    .about-bottom-text p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; }
+    .about-bottom-img { }
+    .img-placeholder-box { background: var(--off-white); border: 2px dashed var(--border); border-radius: 16px; height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--mid-gray); font-size: 14px; font-family: var(--font-heading); }
 
-    /* 9. BILD-STREIFEN */
-    .img-break { width: 100%; height: 320px; overflow: hidden; position: relative; }
-    .img-break .img-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.3); font-family: var(--font-heading); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-    .img-break img { width: 100%; height: 100%; object-fit: cover; }
+    /* 9. LEISTUNGEN (Service-Karten) */
+    .services { background: var(--off-white); }
+    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
+    .service-card { display: flex; flex-direction: column; background: var(--white); border-radius: 14px; padding: 36px 28px; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; text-decoration: none; color: inherit; }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); border-color: var(--navy); }
+    .service-icon { width: 56px; height: 56px; background: var(--blue-tint); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .service-icon svg { width: 28px; height: 28px; stroke: var(--navy); fill: none; stroke-width: 1.8; }
+    .service-card h3 { color: var(--navy); font-size: 20px; margin-bottom: 12px; }
+    .service-card p { font-size: 15px; color: var(--mid-gray); line-height: 1.65; flex: 1; }
+    .service-link { font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--red); margin-top: 20px; transition: gap 0.3s; }
+    .service-card:hover .service-link { letter-spacing: 0.5px; }
+
+    /* 9a. HERSTELLERLOGOS */
+    .logos-bar { background: var(--white); padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .logos-track { display: flex; align-items: center; justify-content: center; gap: clamp(32px, 5vw, 64px); flex-wrap: wrap; }
+    .logo-placeholder { font-family: var(--font-heading); font-size: 16px; font-weight: 600; color: var(--light-gray); letter-spacing: 1px; text-transform: uppercase; padding: 8px 16px; border: 2px dashed var(--border); border-radius: 8px; white-space: nowrap; }
+    .logos-track img { height: 32px; width: auto; filter: grayscale(100%) opacity(0.45); transition: filter 0.3s; }
+    .logos-track img:hover { filter: grayscale(0%) opacity(1); }
 
     /* 10. ABLAUF */
     .steps { background: var(--off-white); }
@@ -149,14 +173,21 @@ const {
     .why-card h4 { margin-bottom: 8px; font-size: 16px; }
     .why-card p { font-size: 14px; color: var(--mid-gray); line-height: 1.6; }
 
-    /* 12a. KLIMAANLAGEN */
+    /* 12a. KLIMAANLAGEN (neues Layout) */
     .klima { background: var(--white); }
-    .klima-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-    .klima-img { border-radius: 16px; overflow: hidden; height: 400px; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); }
-    .klima-img img { width: 100%; height: 100%; object-fit: cover; }
-    .klima-features { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
-    .klima-feature { display: flex; align-items: center; gap: 12px; font-size: 15px; line-height: 1.5; }
-    .klima-feature svg { width: 22px; height: 22px; stroke: var(--navy); fill: none; stroke-width: 2; flex-shrink: 0; }
+    .klima-header { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 48px; align-items: center; margin-bottom: 48px; }
+    .klima-header-text p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; margin-top: 16px; }
+    .klima-header-img { border-radius: 16px; overflow: hidden; height: 320px; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); }
+    .klima-header-img img { width: 100%; height: 100%; object-fit: cover; }
+    .klima-types-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
+    .klima-type-card { background: var(--off-white); border-radius: 12px; padding: 28px 24px; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+    .klima-type-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); }
+    .klima-type-icon { width: 48px; height: 48px; background: var(--blue-tint); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .klima-type-icon svg { width: 24px; height: 24px; stroke: var(--navy); fill: none; stroke-width: 1.8; }
+    .klima-type-card h4 { margin-bottom: 8px; font-size: 17px; color: var(--navy); }
+    .klima-type-card p { font-size: 14px; color: var(--mid-gray); line-height: 1.65; }
+    .klima-cta { text-align: center; padding-top: 8px; }
+    .klima-cta p { font-size: 16px; color: var(--mid-gray); margin-bottom: 20px; }
 
     /* 12b. KOSTENRECHNER */
     .calculator { background: var(--white); }
@@ -244,8 +275,10 @@ const {
     /* 17. RESPONSIVE */
     @media (max-width: 968px) {
       :root { --header-height: 76px; --hero-left-offset: 0px; }
-      .about-grid, .wpsm-grid, .contact-grid, .region-grid, .why-hero, .calc-grid, .klima-grid { grid-template-columns: 1fr; }
-      .steps-grid, .why-grid { grid-template-columns: 1fr 1fr; }
+      .about-text-cols, .about-bottom, .wpsm-grid, .contact-grid, .region-grid, .why-hero, .calc-grid, .klima-header { grid-template-columns: 1fr; }
+      .steps-grid, .why-grid, .klima-types-grid { grid-template-columns: 1fr 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+      .about-usp-grid { grid-template-columns: 1fr 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .nav { display: none; }
       .nav.open { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + 8px); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 24px; background: var(--white); z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -261,15 +294,11 @@ const {
         -webkit-mask-image: linear-gradient(to bottom, black 99%, transparent 100%);
         mask-image: linear-gradient(to bottom, black 99%, transparent 100%);
       }
-      .img-break {
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
-      }
       .why-hero-img {
         -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
         mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
       }
-      .klima-img {
+      .klima-header-img {
         -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
         mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
       }
@@ -282,7 +311,7 @@ const {
         width: calc(100% + 48px);
         height: 260px;
       }
-      .klima-img {
+      .klima-header-img {
         border-radius: 0;
         margin-left: -24px;
         margin-right: -24px;
@@ -291,16 +320,16 @@ const {
       }
 
       /* === MOBILE: Parallax Image Setup === */
-      .img-break img,
       .why-hero-img img,
-      .klima-img img {
+      .klima-header-img img {
         height: 130% !important;
         will-change: transform;
         transform: translateY(-11.5%);
       }
 
-      /* === MOBILE: Soft Section Transitions === */
-      .about { background: linear-gradient(to bottom, var(--navy) 0%, var(--white) 3px, var(--white) 100%); }
+      /* === MOBILE: Soft Section Transitions (neue Reihenfolge) === */
+      /* Hero→Services(off-white)→Logos(white)→Steps(off-white)→Wpsm(white)→Why(off-white)→Klima(white)→Calc(white)→About(white)→Region(navy)→Contact(white)→Footer */
+      .services { background: linear-gradient(to bottom, var(--navy) 0%, var(--off-white) 3px, var(--off-white) 100%); }
       .steps { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 4px, var(--off-white) 100%); }
       .wpsm { background: linear-gradient(to bottom, var(--off-white) 0%, var(--white) 4px, var(--white) 100%); }
       .why { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 4px, var(--off-white) 100%); }
@@ -312,7 +341,7 @@ const {
     @media (max-width: 640px) {
       :root { --header-height: 68px; }
       .section-padding { padding: 64px 0; }
-      .steps-grid, .why-grid { grid-template-columns: 1fr; }
+      .steps-grid, .why-grid, .klima-types-grid, .about-usp-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
       .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
@@ -329,7 +358,7 @@ const {
       .hero-note { font-size: 13px; }
       .wpsm-badge { padding: 32px; }
       .wpsm-badge-number { font-size: 56px; }
-      .img-break { height: 200px; }
+      .klima-header-img { height: 200px; }
       .calc-saving { font-size: 36px; }
       .calc-toggle-group { flex-direction: column; }
     }

@@ -1,15 +1,16 @@
 ---
-// Hauptseite – alle Komponenten zusammengefügt
+// Hauptseite – neue Section-Reihenfolge
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
-import About from '../components/About.astro';
-import ImageBreak from '../components/ImageBreak.astro';
+import Services from '../components/Services.astro';
+import ManufacturerLogos from '../components/ManufacturerLogos.astro';
 import Steps from '../components/Steps.astro';
 import Wpsm from '../components/Wpsm.astro';
 import WhyHeatpump from '../components/WhyHeatpump.astro';
 import Klima from '../components/Klima.astro';
 import Calculator from '../components/Calculator.astro';
+import About from '../components/About.astro';
 import Region from '../components/Region.astro';
 import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
@@ -17,13 +18,14 @@ import Footer from '../components/Footer.astro';
 <Layout>
   <Header />
   <Hero />
-  <About />
-  <ImageBreak />
+  <Services />
+  <ManufacturerLogos />
   <Steps />
   <Wpsm />
   <WhyHeatpump />
   <Klima />
   <Calculator />
+  <About />
   <Region />
   <Contact />
   <Footer />
@@ -73,7 +75,7 @@ import Footer from '../components/Footer.astro';
     /* Parallax – Nur Mobile */
     (function() {
       if (window.innerWidth > 968) return;
-      var imgs = document.querySelectorAll('.img-break img, .why-hero-img img, .klima-img img');
+      var imgs = document.querySelectorAll('.why-hero-img img, .klima-header-img img');
       var ticking = false;
       function update() {
         var vh = window.innerHeight;
