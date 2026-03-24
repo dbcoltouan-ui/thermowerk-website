@@ -1,1 +1,4 @@
-Anweisung Claude.md hinzugefuegt
+Texte About- und Steps-Section überarbeitet
+
+About: Neue Einleitung mit Firmengeschichte, ökologische Kältemittel, überarbeitete Versprechen-Box
+Steps: Neuer Titel, Fördergesuch-Text präzisiert, neuer CTA-Text
