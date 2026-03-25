@@ -1,1 +1,1 @@
-Bilder in public/img auf deutsche Bezeichnungen umbenannt
+About-Section: Platzhalter durch Inhaber-Bild ersetzt (inhaber-thermowerk.jpg)
