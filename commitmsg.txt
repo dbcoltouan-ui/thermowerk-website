@@ -1,1 +1,1 @@
-Section-Paddings und Typografie: proportional mit svh/vw/clamp
+Buttons, Karten, About, Steps: proportional mit svh/vw/clamp

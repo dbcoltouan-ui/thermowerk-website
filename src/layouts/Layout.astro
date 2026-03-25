@@ -65,7 +65,7 @@ const {
     .section-subheading { font-family: var(--font-heading); font-size: clamp(20px, 2.5vw, 26px); font-weight: 500; color: var(--mid-gray); line-height: 1.4; margin-bottom: clamp(14px, 2.5svh, 20px); }
 
     /* 5. BUTTONS */
-    .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 600; font-size: 16px; padding: 15px 34px; border-radius: 3px; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 600; font-size: clamp(14px, 1.6vw, 16px); padding: clamp(12px, 1.8svh, 15px) clamp(24px, 3vw, 34px); border-radius: 3px; border: none; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
     .btn-primary { background: var(--red); color: var(--white); }
     .btn-primary:hover { background: var(--red-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(217, 48, 37, 0.3); }
     .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255, 255, 255, 0.4); }
@@ -123,36 +123,36 @@ const {
 
     /* 8. ÜBER UNS (neues Layout mit Bild rechts) */
     .about { background: var(--white); }
-    .about-intro { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 48px; align-items: start; margin-bottom: 48px; }
-    .about-intro-text p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; }
-    .about-claim { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--dark); margin-top: 24px; }
+    .about-intro { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: clamp(32px, 4vw, 48px); align-items: start; margin-bottom: clamp(32px, 5svh, 48px); }
+    .about-intro-text p { font-size: clamp(14px, 1.6vw, 16px); color: var(--mid-gray); line-height: 1.7; }
+    .about-claim { font-family: var(--font-heading); font-size: clamp(17px, 2vw, 20px); font-weight: 700; color: var(--dark); margin-top: clamp(16px, 3svh, 24px); }
     .about-intro-img { }
     .img-placeholder-box { background: var(--off-white); border: 2px dashed var(--border); border-radius: 2px; height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--mid-gray); font-size: 14px; font-family: var(--font-heading); }
-    .about-usp-heading { margin-bottom: 24px; }
-    .about-usp-heading h3 { font-size: 24px; color: var(--navy); }
-    .about-usp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 48px; }
-    .about-usp-card { background: var(--off-white); border-radius: 2px; padding: 28px 24px; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+    .about-usp-heading { margin-bottom: clamp(16px, 3svh, 24px); }
+    .about-usp-heading h3 { font-size: clamp(20px, 2.5vw, 24px); color: var(--navy); }
+    .about-usp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2.5vw, 24px); margin-bottom: clamp(32px, 5svh, 48px); }
+    .about-usp-card { background: var(--off-white); border-radius: 2px; padding: clamp(20px, 3svh, 28px) clamp(18px, 2.5vw, 24px); border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
     .about-usp-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); }
-    .about-usp-icon { width: 48px; height: 48px; background: var(--navy); border-radius: 2px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-    .about-usp-icon svg { width: 24px; height: 24px; stroke: var(--white); fill: none; stroke-width: 1.8; }
-    .about-usp-card h4 { margin-bottom: 8px; font-size: 17px; color: var(--navy); }
-    .about-usp-card p { font-size: 14px; color: var(--mid-gray); line-height: 1.65; }
+    .about-usp-icon { width: clamp(40px, 5vw, 48px); height: clamp(40px, 5vw, 48px); background: var(--navy); border-radius: 2px; display: flex; align-items: center; justify-content: center; margin-bottom: clamp(12px, 2svh, 16px); }
+    .about-usp-icon svg { width: clamp(20px, 2.5vw, 24px); height: clamp(20px, 2.5vw, 24px); stroke: var(--white); fill: none; stroke-width: 1.8; }
+    .about-usp-card h4 { margin-bottom: clamp(6px, 1svh, 8px); font-size: clamp(15px, 1.7vw, 17px); color: var(--navy); }
+    .about-usp-card p { font-size: clamp(13px, 1.4vw, 14px); color: var(--mid-gray); line-height: 1.65; }
     .about-closing { max-width: 800px; }
-    .about-closing p { font-size: 16px; color: var(--mid-gray); line-height: 1.7; }
+    .about-closing p { font-size: clamp(14px, 1.6vw, 16px); color: var(--mid-gray); line-height: 1.7; }
 
     /* 9. LEISTUNGEN (Service-Karten – kaeltech-Style mit Bild oben) */
     .services { background: var(--off-white); }
-    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
+    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.5vw, 28px); margin-top: clamp(32px, 5svh, 48px); }
     .service-card { display: flex; flex-direction: column; background: var(--white); border-radius: 2px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; text-decoration: none; color: inherit; }
     .service-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); border-color: var(--navy); }
     .service-card-img { height: 200px; overflow: hidden; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); }
     .service-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
     .service-card:hover .service-card-img img { transform: scale(1.05); }
     .service-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.35); }
-    .service-card-body { padding: 28px 24px; display: flex; flex-direction: column; flex: 1; }
-    .service-card h3 { color: var(--navy); font-size: 20px; margin-bottom: 12px; }
-    .service-card p { font-size: 15px; color: var(--mid-gray); line-height: 1.65; flex: 1; }
-    .service-link { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--navy); margin-top: 20px; padding: 10px 24px; border: 2px solid var(--navy); border-radius: 3px; transition: all 0.3s ease; align-self: center; }
+    .service-card-body { padding: clamp(20px, 3svh, 28px) clamp(18px, 2.5vw, 24px); display: flex; flex-direction: column; flex: 1; }
+    .service-card h3 { color: var(--navy); font-size: clamp(18px, 2vw, 20px); margin-bottom: clamp(8px, 1.5svh, 12px); }
+    .service-card p { font-size: clamp(14px, 1.5vw, 15px); color: var(--mid-gray); line-height: 1.65; flex: 1; }
+    .service-link { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: 600; font-size: clamp(14px, 1.5vw, 15px); color: var(--navy); margin-top: clamp(14px, 2.5svh, 20px); padding: clamp(8px, 1.2svh, 10px) clamp(18px, 2.5vw, 24px); border: 2px solid var(--navy); border-radius: 3px; transition: all 0.3s ease; align-self: center; }
     .service-card:hover .service-link { background: var(--navy); color: var(--white); }
 
     /* 9a. HERSTELLERLOGOS */
@@ -164,13 +164,13 @@ const {
 
     /* 10. ABLAUF */
     .steps { background: var(--off-white); }
-    .steps-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: 48px; }
-    .step-card { background: var(--white); border-radius: 2px; padding: 32px 24px; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+    .steps-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(14px, 2vw, 20px); margin-top: clamp(32px, 5svh, 48px); }
+    .step-card { background: var(--white); border-radius: 2px; padding: clamp(24px, 3.5svh, 32px) clamp(18px, 2.5vw, 24px); border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
     .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); }
-    .step-number { font-family: var(--font-heading); font-size: 48px; font-weight: 800; color: var(--light-gray); line-height: 1; margin-bottom: 16px; }
-    .step-card h3 { color: var(--navy); font-size: 18px; margin-bottom: 12px; }
-    .step-card p { font-size: 14px; color: var(--mid-gray); line-height: 1.6; }
-    .steps-cta { text-align: center; margin-top: 48px; }
+    .step-number { font-family: var(--font-heading); font-size: clamp(36px, 4.5vw, 48px); font-weight: 800; color: var(--light-gray); line-height: 1; margin-bottom: clamp(12px, 2svh, 16px); }
+    .step-card h3 { color: var(--navy); font-size: clamp(16px, 1.8vw, 18px); margin-bottom: clamp(8px, 1.5svh, 12px); }
+    .step-card p { font-size: clamp(13px, 1.4vw, 14px); color: var(--mid-gray); line-height: 1.6; }
+    .steps-cta { text-align: center; margin-top: clamp(32px, 5svh, 48px); }
 
     /* 11. WPSM */
     .wpsm { background: var(--white); }
