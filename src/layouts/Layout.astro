@@ -81,7 +81,7 @@ const {
     .header-inner { display: flex; align-items: center; justify-content: space-between; height: var(--header-height); max-width: 1120px; margin: 0 auto; padding: 0 24px; }
     .logo-img { height: clamp(34px, 3.5vw, 36px); width: auto; }
     .nav { display: flex; align-items: center; gap: clamp(20px, 3vw, 44px); }
-    .nav > a, .nav-dropdown-trigger { font-family: 'Montserrat', var(--font-heading); font-size: 15px; font-weight: 500; letter-spacing: -0.1px; color: var(--dark); transition: color 0.2s; position: relative; cursor: pointer; display: inline-flex; align-items: center; text-decoration: none; }
+    .nav > a, .nav-dropdown-trigger { font-family: 'Montserrat', var(--font-heading); font-size: 16px; font-weight: 500; letter-spacing: -0.1px; color: var(--dark); transition: color 0.2s; position: relative; cursor: pointer; display: inline-flex; align-items: center; text-decoration: none; }
     .nav > a:hover, .nav-dropdown-trigger:hover { color: var(--navy); }
     .nav > a::after, .nav-dropdown-trigger::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.3s ease; }
     .nav > a:hover::after, .nav-dropdown-trigger:hover::after { width: 100%; }
@@ -317,13 +317,14 @@ const {
       body.menu-open .header { backdrop-filter: none; -webkit-backdrop-filter: none; }
       .nav.open .btn { width: 100%; justify-content: center; }
       .menu-toggle { display: flex; }
-      /* Mobile dropdown: inline statt hover */
-      .nav-dropdown-menu { position: static; opacity: 1; visibility: visible; transform: none; padding-top: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 16px; }
-      .nav-dropdown-menu a { background: none; border: none; padding: 0; font-size: 16px; }
+      /* Mobile: kein Dropdown, flache Liste */
+      .nav-dropdown { display: contents; }
+      .nav-dropdown-trigger { display: none !important; }
+      .nav-dropdown-menu { position: static; opacity: 1; visibility: visible; transform: none; padding-top: 0; padding-left: 0; display: contents; }
+      .nav-dropdown-menu a { background: none; border: none; padding: 0; font-size: inherit; font-family: 'Montserrat', var(--font-heading); font-weight: 500; color: var(--dark); }
       .nav-dropdown-menu a:first-child { border: none; border-radius: 0; }
       .nav-dropdown-menu a:last-child { border-radius: 0; }
       .nav-dropdown-menu a:hover { background: none; }
-      .nav-dropdown-trigger svg { display: none; }
       .hero-content { }
       .why-hero-img { height: 280px; }
 
