@@ -1,1 +1,1 @@
-Herstellerlogos alle auf gleiche Groesse (feste Hoehe + Breite mit object-fit contain)
+Herstellerlogos Mobile: 2x2 Grid Layout, proportionale Groesse
