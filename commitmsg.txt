@@ -1,1 +1,1 @@
-Hero Mobile: Text oben, Buttons unten, Gesichter frei via flexbox margin-auto
+Hero Mobile: Bild auf 50% runter, Buttons via margin-top auto ganz unten
