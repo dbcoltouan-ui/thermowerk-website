@@ -74,9 +74,9 @@ const {
     .btn-dark:hover { background: var(--navy-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27, 42, 74, 0.3); }
     .btn-outline-dark { background: transparent; color: var(--navy); border: 2px solid var(--navy); }
     .btn-outline-dark:hover { background: var(--navy); color: var(--white); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27, 42, 74, 0.2); }
-    /* Einheitliche CTA-Button-Breiten */
-    .btn-cta { min-width: clamp(200px, 18vw, 240px); justify-content: center; text-align: center; }
-    .btn-cta-lg { min-width: clamp(260px, 24vw, 320px); justify-content: center; text-align: center; }
+    /* Einheitliche CTA-Button-Breiten – zentriert via margin auto */
+    .btn-cta { display: flex; width: fit-content; min-width: clamp(200px, 18vw, 240px); justify-content: center; text-align: center; margin-left: auto; margin-right: auto; }
+    .btn-cta-lg { display: flex; width: fit-content; min-width: clamp(260px, 24vw, 320px); justify-content: center; text-align: center; margin-left: auto; margin-right: auto; }
 
     /* 6. HEADER */
     .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #FFFFFF; border-bottom: 1px solid var(--border); transition: box-shadow 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
@@ -279,7 +279,7 @@ const {
     .form-group textarea { resize: vertical; min-height: clamp(90px, 14svh, 120px); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 1.5vw, 16px); }
     .form-submit { display: flex; justify-content: center; margin: 4px auto 0; }
-    .form-note { font-size: clamp(12px, 1.2vw, 13px); color: var(--mid-gray); margin-top: clamp(8px, 1.5svh, 12px); }
+    .form-note { font-size: clamp(12px, 1.2vw, 13px); color: var(--mid-gray); margin-top: clamp(8px, 1.5svh, 12px); text-align: center; }
 
     /* 15. FOOTER */
     .footer { background: var(--navy-dark); color: rgba(255,255,255,0.6); padding: clamp(40px, 7svh, 60px) 0 clamp(20px, 3.5svh, 30px); }
@@ -317,10 +317,9 @@ const {
       .steps-cta { text-align: center; }
       .klima-cta { text-align: center; margin-bottom: clamp(12px, 2svh, 20px); }
       .calc-results { margin: 0 auto; }
-      .btn-cta, .btn-cta-lg { min-width: 0; width: 100%; max-width: 320px; }
+      .btn-cta, .btn-cta-lg { min-width: 0; width: clamp(240px, 60vw, 320px); max-width: 100%; }
       .service-link { align-self: center; }
       .why-cta-row .btn { align-self: center; }
-      .region .btn { display: flex; justify-content: center; margin: 0 auto; width: fit-content; }
       /* Mobile: Hover-Effekte bei Karten entfernen */
       .service-card:hover { transform: none; box-shadow: none; border-color: var(--border); }
       .service-card:hover .service-link { background: transparent; color: var(--navy); }

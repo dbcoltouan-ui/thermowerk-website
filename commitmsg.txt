@@ -1,1 +1,1 @@
-Button-Breiten auf clamp() umgestellt fuer proportionale Skalierung
+Fix: CTA-Buttons zentriert via display flex + margin auto, proportionale Mobile-Breite
