@@ -87,9 +87,10 @@ const {
     .nav > a:hover::after, .nav-dropdown-trigger:hover::after { width: 100%; }
     .nav .btn-primary { color: var(--white) !important; font-size: 14px; padding: 10px 24px; white-space: nowrap; }
     .nav .btn-primary::after { display: none; }
-    .btn-stoerung { display: none; background: transparent; color: var(--red) !important; border: 2px solid var(--red); font-family: var(--font-heading); font-weight: 600; font-size: 14px; padding: 10px 24px; border-radius: 3px; text-align: center; white-space: nowrap; }
+    .mobile-menu-link { display: none; }
+    .mobile-menu-buttons { display: none; }
+    .btn-stoerung { display: none; }
     .btn-stoerung::after { display: none !important; }
-    .btn-stoerung:hover { background: var(--red); color: var(--white) !important; }
     .footer-stoerung { display: inline-flex; align-items: center; gap: 6px; color: var(--red) !important; font-weight: 600; border: 1px solid rgba(217, 48, 37, 0.3); padding: 6px 14px; border-radius: 3px; font-size: 13px; transition: all 0.3s ease; }
     .footer-stoerung:hover { background: var(--red); color: var(--white) !important; border-color: var(--red); }
     /* Dropdown */
@@ -316,19 +317,29 @@ const {
       .step-card:hover { transform: none; box-shadow: none; }
       .about-usp-card:hover { transform: none; box-shadow: none; }
       .klima-type-card:hover { transform: none; box-shadow: none; }
+      /* Mobile: kein Hover auf Buttons */
+      .btn-primary:hover { transform: none; box-shadow: none; }
+      .btn-dark:hover { transform: none; box-shadow: none; }
+      .btn-outline-dark:hover { transform: none; box-shadow: none; }
+      .footer-stoerung:hover { background: transparent; color: var(--red) !important; border-color: rgba(217, 48, 37, 0.3); }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .nav { display: none; }
-      .nav.open { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 8px); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 24px; background: #FFFFFF; z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      .nav.open { display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px)); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 20px; background: #FFFFFF; z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; text-align: center; }
       body.menu-open { overflow: hidden; }
       body.menu-open .header { background: #FFFFFF; }
-      .nav.open .btn { width: 100%; justify-content: center; }
-      .nav.open .btn-stoerung { display: block; width: 100%; text-align: center; }
+      .nav.open > a { font-size: 20px; }
+      .nav.open > a::after { display: none; }
+      .mobile-menu-link { display: block !important; }
+      .mobile-menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; margin-top: 20px; }
+      .mobile-menu-buttons .btn-primary { display: flex; justify-content: center; background: var(--navy); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 3px; white-space: nowrap; }
+      .mobile-menu-buttons .btn-primary::after { display: none; }
+      .mobile-menu-buttons .btn-stoerung { display: flex; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 3px; border: none; white-space: nowrap; }
+      .mobile-menu-buttons .btn-stoerung::after { display: none; }
       .menu-toggle { display: flex; }
-      /* Mobile: kein Dropdown, flache Liste */
-      .nav-dropdown { display: contents; }
+      /* Mobile: kein Dropdown, flache Liste — Unterpunkte ausblenden, "Leistungen" ersetzt sie */
+      .nav-dropdown { display: none; }
       .nav-dropdown-trigger { display: none !important; }
-      .nav-dropdown-menu { position: static; opacity: 1; visibility: visible; transform: none; padding-top: 0; padding-left: 0; display: contents; }
-      .nav-dropdown-menu a { background: none; border: none; padding: 0; font-size: inherit; font-family: 'Montserrat', var(--font-heading); font-weight: 500; color: var(--dark); }
+      .nav-dropdown-menu { display: none; }
       .nav-dropdown-menu a:first-child { border: none; border-radius: 0; }
       .nav-dropdown-menu a:last-child { border-radius: 0; }
       .nav-dropdown-menu a:hover { background: none; }

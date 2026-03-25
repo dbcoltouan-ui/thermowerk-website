@@ -25,11 +25,11 @@ Header → Hero → Services → ManufacturerLogos → Wpsm → Steps → About 
 3. Committen und pushen via **Desktop Commander** (cmd-Shell):
 
 ```
-cd C:\Users\Daniel\Documents\thermowerk-website
-C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A
-echo [nachricht]> commitmsg.txt
-C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt
-C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
+1. Commit-Message schreiben via Desktop Commander write_file:
+   write_file("C:\Users\Daniel\Documents\thermowerk-website\commitmsg.txt", "Nachricht hier")
+
+2. Git-Befehle via Desktop Commander start_process (shell: cmd):
+   cd /d C:\Users\Daniel\Documents\thermowerk-website && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
 ```
 
 Claude macht das **selbstständig und vollständig** – kein manueller Schritt nötig.
@@ -37,7 +37,6 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 ## Wichtige Hinweise
 - Git-Pfad: `C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe`
 - Shell für Git-Befehle: immer **cmd** (nicht PowerShell)
-- Commit-Message immer via `commitmsg.txt` – keine Sonderzeichen/Leerzeichen im `-m` Parameter
+- Commit-Message **immer via `write_file`** schreiben (NICHT echo – Zugriff verweigert)
 - `.env` darf nie in Git landen (in .gitignore)
-- "Zugriff verweigert" beim echo-Befehl ist harmlos – der Push klappt trotzdem
 - Sanity-Packages bereits installiert (`@sanity/client`, `@sanity/image-url`) – Integration noch ausstehend

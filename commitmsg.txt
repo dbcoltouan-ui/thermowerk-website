@@ -1,1 +1,1 @@
-Footer: UID ergaenzt CHE-489.162.528
+Mobile Menu: Leistungen, zentriert, Buttons Navy+Rot, kein Hover, CLAUDE.md aktualisiert
