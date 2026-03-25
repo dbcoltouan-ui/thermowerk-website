@@ -1,1 +1,1 @@
-Mobile Menu: Buttons groesser, svh-basiert, Stoerung am unteren Rand via margin-top auto
+Mobile Menu: Stoerung absolut positioniert am unteren Rand, Menuepunkte zentriert
