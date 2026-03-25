@@ -1,1 +1,1 @@
-Hero Mobile: Bild auf 50% runter, Buttons via margin-top auto ganz unten
+Fix: Stoerung melden nur mobile, Desktop Nav bereinigt
