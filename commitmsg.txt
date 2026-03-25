@@ -1,1 +1,1 @@
-Buttons, Karten, About, Steps: proportional mit svh/vw/clamp
+Hero Mobile: Text oben, Buttons unten, Gesichter frei via flexbox margin-auto
