@@ -17,14 +17,14 @@ heizraum-nach-montage.jpg       → Bildstreifen zwischen Sections           ✅
 inhaber-thermowerk.jpg          → Über Uns: Portrait Inhaber               ✅ vorhanden
 
 
-HERSTELLERLOGOS (PNG oder SVG, transparent)
--------------------------------------------
-logo-oertli.png                 → Oertli                                   ❌ FEHLT
-logo-bosch.png                  → Bosch                                    ❌ FEHLT
-logo-mitsubishi.png             → Mitsubishi Electric                      ❌ FEHLT
-logo-panasonic.png              → Panasonic                                ❌ FEHLT
+HERSTELLERLOGOS (PNG/JPG/SVG, transparent)
+------------------------------------------
+logo-oertli.png                 → Oertli                                   ✅ vorhanden
+logo-bosch.png                  → Bosch                                    ✅ vorhanden
+logo-mitsubishi.png             → Mitsubishi Electric                      ✅ vorhanden
+logo-panasonic.png              → Panasonic                                ✅ vorhanden
 
 
 LOGO
 ----
-logo.png                        → Header + Footer                          ✅ vorhanden
+logo.png                        → Header + Footer                          ✅ vo

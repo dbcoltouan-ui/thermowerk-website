@@ -161,8 +161,8 @@ const {
     /* 9a. HERSTELLERLOGOS */
     .logos-bar { background: var(--white); padding: clamp(24px, 5svh, 40px) 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     .logos-track { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 5vw, 64px); flex-wrap: wrap; }
-    .logos-track img { height: clamp(28px, 3.5vw, 40px); width: auto; filter: grayscale(100%) opacity(0.45); transition: filter 0.3s; }
-    .logos-track img:hover { filter: grayscale(0%) opacity(1); }
+    .logos-track img { height: clamp(40px, 5vw, 56px); width: auto; transition: transform 0.3s ease, filter 0.3s ease; }
+    .logos-track img:hover { transform: scale(1.1); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)); }
 
     /* 10. ABLAUF */
     .steps { background: var(--off-white); }

@@ -1,1 +1,1 @@
-Service-Wartung Platzhalter durch Bild ersetzt, Bilderliste hinzugefuegt
+Herstellerlogos: groesser, Farbe sofort sichtbar, Hover-Effekt, Panasonic auf .png umbenannt
