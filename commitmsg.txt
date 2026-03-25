@@ -1,1 +1,1 @@
-Herstellerlogos: groesser, Farbe sofort sichtbar, Hover-Effekt, Panasonic auf .png umbenannt
+Herstellerlogos alle auf gleiche Groesse (feste Hoehe + Breite mit object-fit contain)
