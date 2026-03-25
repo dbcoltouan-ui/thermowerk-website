@@ -1,1 +1,1 @@
-Mobile Menu: Menuepunkte hoeher und mehr Abstand zueinander (svh-basiert)
+Mobile Menu: Menuepunkte nochmals ca 20px hoeher
