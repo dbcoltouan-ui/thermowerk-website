@@ -1,1 +1,1 @@
-Fix: CTA-Buttons zentriert via display flex + margin auto, proportionale Mobile-Breite
+Section-Subheading naeher an Ueberschrift gerueckt (negativer margin-top)
