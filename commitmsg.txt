@@ -1,1 +1,1 @@
-Section-Subheading naeher an Ueberschrift gerueckt (negativer margin-top)
+Why-CTA Ueberschrift auf Mobile zentriert
