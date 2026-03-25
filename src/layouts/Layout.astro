@@ -330,11 +330,10 @@ const {
       .nav.open > a { font-size: 20px; }
       .nav.open > a::after { display: none; }
       .mobile-menu-link { display: block !important; }
-      .mobile-menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; margin-top: 20px; }
-      .mobile-menu-buttons .btn-primary { display: flex; justify-content: center; background: var(--navy); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 3px; white-space: nowrap; }
-      .mobile-menu-buttons .btn-primary::after { display: none; }
-      .mobile-menu-buttons .btn-stoerung { display: flex; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 3px; border: none; white-space: nowrap; }
-      .mobile-menu-buttons .btn-stoerung::after { display: none; }
+      .nav.open .btn-primary { display: flex; justify-content: center; background: var(--navy); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 3px; white-space: nowrap; width: 100%; max-width: 280px; }
+      .nav.open .btn-primary::after { display: none; }
+      .nav.open .btn-stoerung { display: flex; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: 13px; padding: 10px 20px; border-radius: 3px; border: none; white-space: nowrap; margin-top: 32px; max-width: 200px; }
+      .nav.open .btn-stoerung::after { display: none; }
       .menu-toggle { display: flex; }
       /* Mobile: kein Dropdown, flache Liste — Unterpunkte ausblenden, "Leistungen" ersetzt sie */
       .nav-dropdown { display: none; }
