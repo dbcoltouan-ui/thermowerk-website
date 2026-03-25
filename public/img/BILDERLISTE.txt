@@ -10,11 +10,11 @@ SEITENBILDER
 waermepumpe-beratung.jpg        → Hero (Hauptbild oben)                    ✅ vorhanden
 waermepumpe-installation.jpg    → Services: Wärmepumpen-Karte              ✅ vorhanden
 klimaanlage-montage.jpg         → Services: Klimaanlagen-Karte             ✅ vorhanden
-service-wartung.jpg             → Services: Service & Wartung-Karte        ❌ FEHLT
+service-wartung.jpg             → Services: Service & Wartung-Karte        ✅ vorhanden
 luft-wasser-waermepumpe.jpg     → WhyHeatpump-Section                      ✅ vorhanden (gleich wie Installation – ersetzen)
 klimaanlage-wohnraum.jpg        → Klima-Section                            ✅ vorhanden (gleich wie Montage – ersetzen)
 heizraum-nach-montage.jpg       → Bildstreifen zwischen Sections           ✅ vorhanden
-inhaber-thermowerk.jpg          → Über Uns: Portrait Inhaber               ❌ FEHLT
+inhaber-thermowerk.jpg          → Über Uns: Portrait Inhaber               ✅ vorhanden
 
 
 HERSTELLERLOGOS (PNG oder SVG, transparent)
