@@ -1,1 +1,1 @@
-Gesamte Seite proportional: WPSM, Why, Klima, Calculator, Region, Contact, Footer auf svh/vw/clamp
+Mobile Buttons zentriert, Störung melden im Mobile-Menü wiederhergestellt, 640px clamp-Werte

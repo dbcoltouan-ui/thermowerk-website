@@ -306,9 +306,17 @@ const {
       .services-grid { grid-template-columns: 1fr; }
       .about-usp-grid { grid-template-columns: 1fr 1fr; }
       .about-intro-img { order: -1; }
-      .why-cta-row { flex-direction: column; align-items: stretch; }
-      .why-calc-hint { flex-direction: column; text-align: center; gap: 12px; }
+      .why-cta-row { flex-direction: column; align-items: center; }
+      .why-calc-hint { flex-direction: column; text-align: center; gap: 12px; width: 100%; }
       .why-calc-hint p { white-space: normal; }
+      /* Mobile: Buttons zentrieren (ausser Hero) */
+      .steps-cta { text-align: center; }
+      .klima-cta { text-align: center; margin-bottom: clamp(12px, 2svh, 20px); }
+      .calc-results { margin: 0 auto; }
+      .calc-results .btn { display: flex; justify-content: center; margin: 0 auto; }
+      .service-link { align-self: center; }
+      .why-cta-row .btn { align-self: center; }
+      .region .btn { display: flex; justify-content: center; margin: 0 auto; width: fit-content; }
       /* Mobile: Hover-Effekte bei Karten entfernen */
       .service-card:hover { transform: none; box-shadow: none; border-color: var(--border); }
       .service-card:hover .service-link { background: transparent; color: var(--navy); }
@@ -332,7 +340,7 @@ const {
       .mobile-menu-link { display: block !important; }
       .nav.open .btn-primary { display: flex; justify-content: center; background: var(--navy); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; white-space: nowrap; width: 100%; max-width: 240px; }
       .nav.open .btn-primary::after { display: none; }
-      .nav.open .btn-stoerung { display: flex; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; border: none; white-space: nowrap; position: absolute; bottom: clamp(20px, 4svh, 36px); left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 220px; }
+      .nav.open .btn-stoerung { display: flex !important; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; border: none; white-space: nowrap; position: absolute; bottom: clamp(20px, 4svh, 36px); left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 220px; }
       .nav.open .btn-stoerung::after { display: none; }
       .menu-toggle { display: flex; }
       /* Mobile: kein Dropdown, flache Liste — Unterpunkte ausblenden, "Leistungen" ersetzt sie */
@@ -414,10 +422,10 @@ const {
       .hero-bg img { object-position: 80% top; opacity: 0.7; }
       .hero-bg::after { background: linear-gradient(180deg, var(--navy) 0%, rgba(27, 42, 74, 0.45) 30%, rgba(27, 42, 74, 0.3) 100%); }
       .hero-note { font-size: clamp(11px, 1.8svh, 14px); }
-      .wpsm-badge { padding: 32px; }
-      .wpsm-badge-number { font-size: 56px; }
-      .klima-header-img { height: 200px; }
-      .calc-saving { font-size: 36px; }
+      .wpsm-badge { padding: clamp(24px, 4svh, 32px); }
+      .wpsm-badge-number { font-size: clamp(44px, 7svh, 56px); }
+      .klima-header-img { height: clamp(160px, 26svh, 200px); }
+      .calc-saving { font-size: clamp(30px, 5svh, 36px); }
       .calc-toggle-group { flex-direction: column; }
     }
   </style>
