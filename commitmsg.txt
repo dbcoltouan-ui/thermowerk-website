@@ -1,1 +1,1 @@
-Einheitliche CTA-Button-Breiten (btn-cta/btn-cta-lg), Buttons zentriert in Boxen, Störung-Button gleich breit wie Beratung
+Button-Breiten auf clamp() umgestellt fuer proportionale Skalierung

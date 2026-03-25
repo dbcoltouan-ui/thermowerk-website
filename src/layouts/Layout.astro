@@ -75,8 +75,8 @@ const {
     .btn-outline-dark { background: transparent; color: var(--navy); border: 2px solid var(--navy); }
     .btn-outline-dark:hover { background: var(--navy); color: var(--white); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27, 42, 74, 0.2); }
     /* Einheitliche CTA-Button-Breiten */
-    .btn-cta { min-width: 240px; justify-content: center; text-align: center; }
-    .btn-cta-lg { min-width: 320px; justify-content: center; text-align: center; }
+    .btn-cta { min-width: clamp(200px, 18vw, 240px); justify-content: center; text-align: center; }
+    .btn-cta-lg { min-width: clamp(260px, 24vw, 320px); justify-content: center; text-align: center; }
 
     /* 6. HEADER */
     .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #FFFFFF; border-bottom: 1px solid var(--border); transition: box-shadow 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
