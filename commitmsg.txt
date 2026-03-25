@@ -1,7 +1,1 @@
-Design: Eckige Boxen, sichtbarere Service-Buttons, kein Mobile-Hover
-
-- Border-Radius auf 2px reduziert (Karten, Badges, Bilder, Formulare, Icons)
-- Buttons auf 3px (minimal gerundet)
-- Service-Karten: Button mit Navy-Rand statt unsichtbarem Border
-- Mobile: Hover-Effekte bei allen Karten deaktiviert
-- Region-Subtitle entfernt (einheitlich wie andere Sections)
+Footer: UID ergaenzt CHE-489.162.528
