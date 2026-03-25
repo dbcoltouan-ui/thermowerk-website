@@ -1,1 +1,1 @@
-Herstellerlogos Mobile: 2x2 Grid Layout, proportionale Groesse
+Herstellerlogos 80% groesser, weisser Hintergrund bei Oertli und Panasonic entfernt
