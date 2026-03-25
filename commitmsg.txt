@@ -1,1 +1,1 @@
-Mobile Menu: Menuepunkte nochmals ca 20px hoeher
+Hero: Proportional responsive mit svh/clamp statt fester px
