@@ -1,1 +1,1 @@
-Alle Bilder auf eindeutige deutsche Bezeichnungen umgestellt, Herstellerlogos auf Oertli/Bosch/Mitsubishi/Panasonic aktualisiert
+Bilder in public/img auf deutsche Bezeichnungen umbenannt
