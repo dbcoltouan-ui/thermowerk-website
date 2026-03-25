@@ -1,1 +1,1 @@
-Fix: Stoerung melden nur mobile, Desktop Nav bereinigt
+Fix: Desktop Nav - Stoerung melden und Leistungen-Duplikat per !important versteckt
