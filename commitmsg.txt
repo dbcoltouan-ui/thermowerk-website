@@ -1,1 +1,1 @@
-Fix: Desktop Nav - Stoerung melden und Leistungen-Duplikat per !important versteckt
+Services + Logos: proportional mit svh/vw/clamp, Bildhoehen skalierbar
