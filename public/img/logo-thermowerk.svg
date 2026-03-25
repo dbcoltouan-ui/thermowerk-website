@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 210">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  </defs>
+
+  <!-- Navy pipe frame (complete rectangular path, background layer) -->
+  <path d="M 55,63 A 25,25 0 0,1 80,38 L 540,38 A 25,25 0 0,1 565,63 L 565,111 A 25,25 0 0,1 540,136 L 80,136 A 25,25 0 0,1 55,111 Z"
+        stroke="#1B2A4A" stroke-width="14" fill="none"/>
+
+  <!-- Navy T-piece stem (from bottom pipe down) -->
+  <line x1="310" y1="136" x2="310" y2="176" stroke="#1B2A4A" stroke-width="14"/>
+
+  <!-- Red corner elbows (overlay, slightly wider = fitting/sleeve effect) -->
+  <g stroke="#D93025" stroke-width="16" fill="none">
+    <path d="M 55,63 A 25,25 0 0,1 80,38"/>
+    <path d="M 540,38 A 25,25 0 0,1 565,63"/>
+    <path d="M 565,111 A 25,25 0 0,1 540,136"/>
+    <path d="M 80,136 A 25,25 0 0,1 55,111"/>
+  </g>
+
+  <!-- Red T-piece fitting (uniform width, not narrowing) -->
+  <line x1="290" y1="136" x2="330" y2="136" stroke="#D93025" stroke-width="16"/>
+  <line x1="310" y1="129" x2="310" y2="155" stroke="#D93025" stroke-width="16"/>
+
+  <!-- Red end cap on T-piece stem -->
+  <rect x="298" y="173" width="24" height="7" rx="2" fill="#D93025"/>
+
+  <!-- thermowerk text -->
+  <text x="310" y="98" text-anchor="middle"
+        font-family="'Outfit', sans-serif" font-size="48" font-weight="700"
+        fill="#1B2A4A" letter-spacing="3">thermowerk</text>
+
+  <!-- Tagline -->
+  <text x="310" y="200" text-anchor="middle"
+        font-family="'DM Sans', sans-serif" font-size="12" font-weight="500"
+        fill="#6B7280" letter-spacing="3">WÄRMEPUMPEN UND KLIMAANLAGEN</text>
+</svg>
