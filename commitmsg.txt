@@ -1,1 +1,1 @@
-Services + Logos: proportional mit svh/vw/clamp, Bildhoehen skalierbar
+Gesamte Seite proportional: WPSM, Why, Klima, Calculator, Region, Contact, Footer auf svh/vw/clamp
