@@ -76,7 +76,7 @@ const {
     .btn-outline-dark:hover { background: var(--navy); color: var(--white); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27, 42, 74, 0.2); }
 
     /* 6. HEADER */
-    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); transition: box-shadow 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #FFFFFF; border-bottom: 1px solid var(--border); transition: box-shadow 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
     .header.scrolled { box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); }
     .header-inner { display: flex; align-items: center; justify-content: space-between; height: var(--header-height); max-width: 1120px; margin: 0 auto; padding: 0 24px; }
     .logo-img { height: clamp(34px, 3.5vw, 36px); width: auto; }
@@ -313,9 +313,9 @@ const {
       .klima-type-card:hover { transform: none; box-shadow: none; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .nav { display: none; }
-      .nav.open { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + 8px); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 24px; background: var(--white); z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      .nav.open { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 8px); padding-left: 24px; padding-right: 24px; padding-bottom: 32px; gap: 24px; background: #FFFFFF; z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
       body.menu-open { overflow: hidden; }
-      body.menu-open .header { backdrop-filter: none; -webkit-backdrop-filter: none; }
+      body.menu-open .header { background: #FFFFFF; }
       .nav.open .btn { width: 100%; justify-content: center; }
       .menu-toggle { display: flex; }
       /* Mobile: kein Dropdown, flache Liste */
