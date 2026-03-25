@@ -1,1 +1,1 @@
-Mobile Menu: Stoerung absolut positioniert am unteren Rand, Menuepunkte zentriert
+Mobile Menu: Menuepunkte hoeher und mehr Abstand zueinander (svh-basiert)
