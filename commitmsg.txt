@@ -1,1 +1,1 @@
-Mobile Buttons zentriert, Störung melden im Mobile-Menü wiederhergestellt, 640px clamp-Werte
+Einheitliche CTA-Button-Breiten (btn-cta/btn-cta-lg), Buttons zentriert in Boxen, Störung-Button gleich breit wie Beratung
