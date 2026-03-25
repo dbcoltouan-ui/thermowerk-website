@@ -3,7 +3,8 @@
 ## Stack
 - **Astro 5.5** – statisches Framework
 - **Cloudflare Pages** – Hosting, auto-deploy per GitHub Push (thermowerk-website.pages.dev)
-- Kein CMS, kein Backend – alle Inhalte direkt in den Astro-Komponenten
+- **Sanity CMS** – vorbereitet aber noch nicht aktiv eingebunden (Project ID: `wpbatz1m`, Dataset: `production`)
+- Alle Inhalte aktuell direkt in den Astro-Komponenten – Sanity-Integration ist nächster Schritt
 
 ## Dateipfade
 Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
@@ -12,6 +13,8 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Globales CSS + Layout: `src/layouts/Layout.astro`
 - Seitenaufbau + JS: `src/pages/index.astro`
 - Bilder: `public/img/`
+- Sanity Client (noch zu erstellen): `src/lib/sanity.ts`
+- Umgebungsvariablen (nie in Git!): `.env` → enthält Sanity API Token
 
 ## Aktive Komponenten (Reihenfolge)
 Header → Hero → Services → ManufacturerLogos → Wpsm → Steps → About → WhyHeatpump → Klima → Calculator → Region → Contact → Footer
@@ -37,3 +40,4 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - Commit-Message immer via `commitmsg.txt` – keine Sonderzeichen/Leerzeichen im `-m` Parameter
 - `.env` darf nie in Git landen (in .gitignore)
 - "Zugriff verweigert" beim echo-Befehl ist harmlos – der Push klappt trotzdem
+- Sanity-Packages bereits installiert (`@sanity/client`, `@sanity/image-url`) – Integration noch ausstehend
