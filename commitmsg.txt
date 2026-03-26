@@ -1,1 +1,1 @@
-Logos-Section weiss, off-white Streifen darunter als Trenner zur WPSM-Section
+Logos-Section: Abstand oben reduziert, off-white Streifen darunter gleicher Wert
