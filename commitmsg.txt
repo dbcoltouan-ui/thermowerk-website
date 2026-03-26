@@ -1,1 +1,1 @@
-Logos-Section Abstaende um 38% reduziert (padding, Streifen, WPSM margin)
+Services padding-bottom um 38% reduziert, gleicher Abstand oben wie Streifen unten

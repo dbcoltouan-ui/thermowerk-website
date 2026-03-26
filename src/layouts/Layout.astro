@@ -144,7 +144,7 @@ const {
     .about-closing p { font-size: clamp(14px, 1.6vw, 16px); color: var(--mid-gray); line-height: 1.7; }
 
     /* 9. LEISTUNGEN (Service-Karten – kaeltech-Style mit Bild oben) */
-    .services { background: var(--off-white); }
+    .services { background: var(--off-white); padding-bottom: clamp(37px, 6.2svh, 62px); }
     .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.5vw, 28px); margin-top: clamp(32px, 5svh, 48px); }
     .service-card { display: flex; flex-direction: column; background: var(--white); border-radius: 2px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; text-decoration: none; color: inherit; }
     .service-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); border-color: var(--navy); }
