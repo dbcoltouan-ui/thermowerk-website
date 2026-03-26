@@ -1,1 +1,1 @@
-Desktop Hero: Bild auf rechte 7/8 der Seite, Gradient angepasst
+Hero zurück auf fullwidth (iPad-Kompatibilität), 7/8-Einstellung als Kommentar gemerkt
