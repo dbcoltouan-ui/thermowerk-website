@@ -1,20 +1,29 @@
 ---
-// Hero-Section mit Hintergrundbild und Untertitel
+// Hero-Section im SAS-Stil – grossflächig mit Overlay, Badge & Scroll-Indikator
 ---
 <section class="hero" id="hero">
   <div class="hero-bg">
-    <img src="/img/waermepumpe-beratung.jpg" alt="Wärmepumpe Beratung vor Ort in Neftenbach">
+    <img src="/img/waermepumpe-beratung.jpeg" alt="Wärmepumpe Beratung vor Ort in Neftenbach">
   </div>
+  <div class="hero-overlay"></div>
   <div class="hero-inner">
-    <div class="hero-content fade-up">
-      <h1>Ihre neue Wärmepumpe oder Klimaanlage.</h1>
-      <p class="hero-subtitle">Mit kompletter Förderabwicklung.</p>
-      <p class="hero-text">WPSM-zertifizierter Fachbetrieb aus Neftenbach. Wir planen und installieren Ihr System so, dass Ihre Förderbeiträge gesichert sind und die Anlage nachweisbar effizient läuft.</p>
-      <div class="hero-buttons">
+    <div class="hero-content">
+      <p class="hero-label fade-up">Ihr Fachbetrieb in Neftenbach</p>
+      <h1 class="fade-up">Wärmepumpen &<br>Klimaanlagen.</h1>
+      <p class="hero-subtitle fade-up">Mit kompletter Förderabwicklung.</p>
+      <p class="hero-text fade-up">WPSM-zertifizierter Fachbetrieb – wir planen und installieren Ihr System so, dass Ihre Förderbeiträge gesichert sind und die Anlage nachweisbar effizient läuft.</p>
+      <div class="hero-buttons fade-up">
         <a href="#contact" class="btn btn-primary">Beratung anfragen</a>
         <a href="#steps" class="btn btn-outline">So läuft's ab</a>
       </div>
-      <p class="hero-note">Kostenlose Vor-Ort-Beratung & individuelle Förderberatung.</p>
+      <div class="hero-badge fade-up">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        WPSM-zertifiziert · Kostenlose Vor-Ort-Beratung
+      </div>
     </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scrollen</span>
+    <div class="scroll-line"></div>
   </div>
 </section>
