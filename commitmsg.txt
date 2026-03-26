@@ -1,1 +1,1 @@
-Hero: Desktop Box Padding rechts reduziert, Mobile Textblock tiefer + mehr Abstand Text-Buttons
+Hero: Box inline-flex (schrumpft auf Inhalt), Label 15% groesser, Mobile Buttons 18% weiter runter
