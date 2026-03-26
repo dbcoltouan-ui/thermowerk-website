@@ -1,1 +1,1 @@
-Header: weisser Glaseffekt mit Blur statt dunkel, Original-Logo wiederhergestellt
+Mobile Hero-Bild: object-position angepasst damit beide Techniker und Gerät sichtbar
