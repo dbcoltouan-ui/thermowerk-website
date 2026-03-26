@@ -1,1 +1,1 @@
-Logos-Section: Abstand oben reduziert, off-white Streifen darunter gleicher Wert
+Off-white Streifen gleiche Hoehe wie Abstand Services-Boxen zu Logos

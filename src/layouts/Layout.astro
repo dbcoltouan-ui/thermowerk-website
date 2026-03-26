@@ -159,8 +159,8 @@ const {
     .service-card:hover .service-link { background: var(--navy); color: var(--white); }
 
     /* 9a. HERSTELLERLOGOS */
-    .logos-bar { background: var(--white); padding: clamp(14px, 2.5svh, 20px) 0; position: relative; }
-    .logos-bar::after { content: ''; display: block; height: clamp(14px, 2.5svh, 20px); background: var(--off-white); position: absolute; bottom: 0; left: 0; right: 0; transform: translateY(100%); }
+    .logos-bar { background: var(--white); padding: clamp(10px, 1.5svh, 14px) 0; position: relative; }
+    .logos-bar::after { content: ''; display: block; height: clamp(60px, 10svh, 100px); background: var(--off-white); position: absolute; bottom: 0; left: 0; right: 0; transform: translateY(100%); }
     .logos-track { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 4vw, 48px); flex-wrap: nowrap; }
     .logos-track img { height: clamp(44px, 5.5vw, 64px); width: clamp(140px, 16vw, 220px); object-fit: contain; transition: transform 0.3s ease, filter 0.3s ease; }
     .logos-track img.logo-sm { width: clamp(79px, 9vw, 124px); }
@@ -178,7 +178,7 @@ const {
     .steps-cta { text-align: center; margin-top: clamp(32px, 5svh, 48px); }
 
     /* 11. WPSM */
-    .wpsm { background: var(--white); margin-top: clamp(14px, 2.5svh, 20px); }
+    .wpsm { background: var(--white); margin-top: clamp(60px, 10svh, 100px); }
     .wpsm-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(36px, 5vw, 60px); align-items: center; }
     .wpsm-badge { background: var(--navy); border-radius: 2px; padding: clamp(32px, 5svh, 48px); text-align: center; color: var(--white); position: relative; overflow: hidden; }
     .wpsm-badge::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 70%, rgba(217, 48, 37, 0.15) 0%, transparent 50%); }
