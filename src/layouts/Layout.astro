@@ -115,6 +115,8 @@ const {
     .hero { position: relative; min-height: 100svh; display: flex; align-items: center; background: var(--off-white); overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; z-index: 1; }
     .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 78% center; }
+    .hero-img-mobile { display: none; }
+    .hero-img-desktop { display: block; }
     .hero-overlay { position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 8%, rgba(247,248,250,0.6) 18%, rgba(247,248,250,0.55) 100%); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
     .hero-inner { position: relative; z-index: 3; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px; padding-top: var(--header-height); min-height: 100svh; display: flex; align-items: flex-start; padding-top: calc(var(--header-height) + clamp(40px, 8svh, 100px)); }
     .hero-content { max-width: 660px; }
@@ -406,7 +408,7 @@ const {
 
       /* === MOBILE: Soft Section Transitions (Reihenfolge B) === */
       /* Hero→Services(off-white)→Logos(white)→Wpsm(white)→Steps(off-white)→About(white)→Why(off-white)→Klima(white)→Calc(white)→Region(navy)→Contact(white)→Footer */
-      .services { background: linear-gradient(to bottom, var(--navy) 0%, var(--off-white) 3px, var(--off-white) 100%); }
+      .services { background: var(--off-white); }
       .wpsm { background: linear-gradient(to bottom, var(--white) 0%, var(--white) 100%); }
       .steps { background: linear-gradient(to bottom, var(--white) 0%, var(--off-white) 4px, var(--off-white) 100%); }
       .about { background: linear-gradient(to bottom, var(--off-white) 0%, var(--white) 4px, var(--white) 100%); }
@@ -431,7 +433,8 @@ const {
       .hero-text { font-size: clamp(14px, 2.2svh, 17px); line-height: 1.6; max-width: 100%; font-weight: 600; }
       .hero-buttons { flex-direction: column; align-items: stretch; }
       .hero-buttons .btn { text-align: center; }
-      .hero-bg img { object-position: center 25%; }
+      .hero-img-desktop { display: none !important; }
+      .hero-img-mobile { display: block !important; object-position: center 20%; }
       .hero-overlay { background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 10%, rgba(247,248,250,0.62) 22%, rgba(247,248,250,0.58) 100%); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
       .hero-badge { font-size: clamp(11px, 1.6svh, 13px); }
       .wpsm-badge { padding: clamp(24px, 4svh, 32px); }

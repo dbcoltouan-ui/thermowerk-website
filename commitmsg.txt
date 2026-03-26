@@ -1,1 +1,1 @@
-Rand weg, Scroll entfernt, Hero-Content Desktop weiter oben/links, Mobile scale entfernt
+Separates Mobile-Hero-Bild (Hochformat), dunkler Rand über Leistungen entfernt
