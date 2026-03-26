@@ -1,1 +1,1 @@
-Logo: Neues Logo zugeschnitten, transparent, Groesse fuer Desktop und Mobile angepasst
+Logo: Groesse erhoeht auf 54-66px
