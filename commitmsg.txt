@@ -1,1 +1,1 @@
-Hero: max-width von hero-text entfernt (Box-Rechtsabstand fix), Mobile Buttons 10% weiter runter
+Hero: Box-Breite wird jetzt ausschliesslich vom Subtitle bestimmt, Text/Buttons/Badge passen sich an
