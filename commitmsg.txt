@@ -1,1 +1,1 @@
-Logo: Weissen Hintergrund entfernt (transparent), Groesse erhoeht auf 60-76px
+Header: Menuepunkte enger zusammen, mehr Platz fuer Logo
