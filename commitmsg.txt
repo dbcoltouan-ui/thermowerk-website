@@ -1,1 +1,1 @@
-Mobile: Header und Hero-Overlay gleiche Farbe, kein Gradient, keine Trennlinie
+Mobile: Header transparent, Hero-Bild geht über gesamten Viewport inkl. Header-Bereich
