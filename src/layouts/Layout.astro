@@ -351,7 +351,8 @@ const {
       .nav { display: none; }
       .nav.open { display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) - clamp(48px, 7.5svh, 64px)); padding-left: 24px; padding-right: 24px; padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 16px); gap: clamp(20px, 3.5svh, 32px); background: #FFFFFF; z-index: 999; overflow: hidden; text-align: center; }
       body.menu-open { overflow: hidden; }
-      body.menu-open .header { background: #FFFFFF; }
+      body.menu-open .header { background: #FFFFFF !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-bottom-color: transparent !important; }
+      body.menu-open .menu-toggle span { background: var(--dark); }
       .nav.open > a { font-size: clamp(18px, 2.5svh, 22px); color: var(--dark); }
       .nav.open > a::after { display: none; }
       .mobile-menu-link { display: block !important; }

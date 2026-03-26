@@ -1,1 +1,1 @@
-Header durchsichtiger mit weniger Blur, Hero-Bild auf Mobile rausgezoomt und Overlay leichter
+Fix: Mobile-Menü Header komplett weiss bei offenem Menü, Hamburger-Icon dunkel
