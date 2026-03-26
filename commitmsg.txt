@@ -1,1 +1,1 @@
-Desktop Hero-Bild weiter nach rechts (75%)
+Desktop Hero: Bild auf rechte 2/3 der Seite gelegt, Gradient angepasst, Mobile unverändert
