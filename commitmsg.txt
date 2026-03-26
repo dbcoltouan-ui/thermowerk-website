@@ -1,1 +1,1 @@
-Separates Mobile-Hero-Bild (Hochformat), dunkler Rand über Leistungen entfernt
+Mobile: sanfterer Gradient-Übergang Header zu Hero, keine harte Linie mehr
