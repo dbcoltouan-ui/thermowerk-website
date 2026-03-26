@@ -1,1 +1,1 @@
-Mobile: sanfterer Gradient-Übergang Header zu Hero, keine harte Linie mehr
+Mobile: Header und Hero-Overlay gleiche Farbe, kein Gradient, keine Trennlinie
