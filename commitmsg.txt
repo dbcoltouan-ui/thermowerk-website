@@ -1,1 +1,1 @@
-Störung-Button: roter Rand statt gefüllt, Mobile Hero-Overlay oben aufgehellt passend zum Header
+Hero komplett milchig/frostig mit dunkler Schrift, Techniker darunter sichtbar, Button dunkel
