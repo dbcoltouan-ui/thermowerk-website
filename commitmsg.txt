@@ -1,1 +1,1 @@
-Desktop Hero-Bild max rechts (95%) und max runter (100%)
+Hero-Bild aktualisiert, Desktop-Bild rechts positioniert statt fullwidth
