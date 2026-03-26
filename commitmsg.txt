@@ -1,1 +1,1 @@
-Hero: H1 kleiner (Desktop), Subtitle naeher an H1, Label groesser, Text+Badge in Navy, Overlay weisser, Badge-Text ohne WPSM-dopplung, linkbuendig
+Hero: Content-Box mit eigenem Overlay (Desktop+Mobile), Mobile Block weiter runter, mehr Abstand Text-Buttons
