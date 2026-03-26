@@ -1,1 +1,1 @@
-Desktop Hero-Gradient: links mehr weiss, Übergang weiter nach rechts verschoben
+Fix: Desktop Hero-Bild Dateierweiterung .jpg auf .jpeg korrigiert
