@@ -1,1 +1,1 @@
-Desktop Hero-Bild 15% nach rechts verschoben (object-position 65%)
+Desktop Hero-Bild weiter rechts (75%) und runter (65%)
