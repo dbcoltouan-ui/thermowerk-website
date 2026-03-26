@@ -1,1 +1,1 @@
-Hero: Overlay-Box nur um Subtitle/Text/Buttons (nicht H1), Mobile ohne Box, Mobile Buttons weiter unten
+Hero: Desktop Box Padding rechts reduziert, Mobile Textblock tiefer + mehr Abstand Text-Buttons
