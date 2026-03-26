@@ -1,1 +1,1 @@
-Störung-Button Text auf weiss im Mobile-Menü
+Header weiss mit Gradient in Hero, grössere Schrift Desktop, dickerer Text Mobile, Bild Mobile rausgezoomt
