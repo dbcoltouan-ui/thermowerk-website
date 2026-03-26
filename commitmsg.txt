@@ -1,1 +1,1 @@
-Fix: Desktop Hero-Bild Dateierweiterung .jpg auf .jpeg korrigiert
+Desktop Hero-Bild 15% nach rechts verschoben (object-position 65%)
