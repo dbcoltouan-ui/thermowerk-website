@@ -1,1 +1,1 @@
-Hero: Horizontalen Gradient entfernt, vertikalen Gradient (oben weiss nach unten transparent) eingesetzt
+Hero: Desktop-Bild getauscht (neue Version von waermepumpe-beratung)
