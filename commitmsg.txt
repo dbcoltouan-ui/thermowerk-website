@@ -1,1 +1,1 @@
-Header weiss mit Gradient in Hero, grössere Schrift Desktop, dickerer Text Mobile, Bild Mobile rausgezoomt
+Rand weg, Scroll entfernt, Hero-Content Desktop weiter oben/links, Mobile scale entfernt

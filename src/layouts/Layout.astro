@@ -116,7 +116,7 @@ const {
     .hero-bg { position: absolute; inset: 0; z-index: 1; }
     .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 78% center; }
     .hero-overlay { position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 8%, rgba(247,248,250,0.6) 18%, rgba(247,248,250,0.55) 100%); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
-    .hero-inner { position: relative; z-index: 3; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px; padding-top: calc(var(--header-height) + 40px); min-height: 100svh; display: flex; align-items: center; }
+    .hero-inner { position: relative; z-index: 3; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px; padding-top: var(--header-height); min-height: 100svh; display: flex; align-items: flex-start; padding-top: calc(var(--header-height) + clamp(40px, 8svh, 100px)); }
     .hero-content { max-width: 660px; }
     .hero-label { font-family: var(--font-heading); font-size: clamp(13px, 1.4vw, 15px); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: clamp(12px, 2svh, 20px); }
     .hero h1 { color: var(--navy); margin-bottom: clamp(8px, 1.5svh, 16px); font-weight: 800; font-size: clamp(36px, 5.5vw, 68px); letter-spacing: -0.5px; line-height: 1.08; }
@@ -125,10 +125,8 @@ const {
     .hero-buttons { display: flex; align-items: center; gap: clamp(12px, 1.5vw, 16px); flex-wrap: wrap; margin-bottom: clamp(20px, 3svh, 32px); }
     .hero-badge { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: clamp(12px, 1.3vw, 14px); font-weight: 500; color: rgba(27, 42, 74, 0.5); letter-spacing: 0.5px; }
     .hero-badge svg { color: var(--red); flex-shrink: 0; }
-    .hero-scroll { position: absolute; bottom: clamp(24px, 4svh, 40px); left: 50%; transform: translateX(-50%); z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(27, 42, 74, 0.35); font-size: 11px; font-family: var(--font-heading); letter-spacing: 2px; text-transform: uppercase; }
-    .scroll-line { width: 1px; height: 32px; background: rgba(27, 42, 74, 0.2); position: relative; overflow: hidden; }
-    .scroll-line::after { content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: var(--red); animation: scrollPulse 2s ease-in-out infinite; }
-    @keyframes scrollPulse { 0% { top: -100%; } 50% { top: 100%; } 100% { top: 100%; } }
+    .hero-scroll { display: none; }
+    .scroll-line { display: none; }
 
     /* 8. ÜBER UNS (neues Layout mit Bild rechts) */
     .about { background: var(--white); }
@@ -426,16 +424,15 @@ const {
       .form-row { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
       .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-      .hero-inner { padding-top: calc(var(--header-height) + 20px); padding-bottom: clamp(80px, 12svh, 100px); align-items: flex-end; }
+      .hero-inner { padding-top: calc(var(--header-height) + 16px); padding-bottom: clamp(24px, 4svh, 40px); align-items: flex-start; }
       .hero-content { max-width: 100%; }
       .hero h1 { font-size: clamp(28px, 5svh, 38px); }
       .hero-subtitle { font-size: clamp(18px, 3svh, 24px); }
       .hero-text { font-size: clamp(14px, 2.2svh, 17px); line-height: 1.6; max-width: 100%; font-weight: 600; }
       .hero-buttons { flex-direction: column; align-items: stretch; }
       .hero-buttons .btn { text-align: center; }
-      .hero-bg img { object-position: center 30%; transform: scale(0.85); transform-origin: center 30%; }
+      .hero-bg img { object-position: center 25%; }
       .hero-overlay { background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 10%, rgba(247,248,250,0.62) 22%, rgba(247,248,250,0.58) 100%); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
-      .hero-scroll { bottom: clamp(16px, 3svh, 28px); }
       .hero-badge { font-size: clamp(11px, 1.6svh, 13px); }
       .wpsm-badge { padding: clamp(24px, 4svh, 32px); }
       .wpsm-badge-number { font-size: clamp(44px, 7svh, 56px); }
