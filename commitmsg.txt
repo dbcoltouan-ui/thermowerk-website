@@ -1,1 +1,1 @@
-Logo: Groesse erhoeht auf 54-66px
+Logo: Weissen Hintergrund entfernt (transparent), Groesse erhoeht auf 60-76px
