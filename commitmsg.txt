@@ -1,1 +1,1 @@
-Fix: Mobile-Menü Header komplett weiss bei offenem Menü, Hamburger-Icon dunkel
+Mobile-Menü zurück auf navy dunkel mit weisser Schrift
