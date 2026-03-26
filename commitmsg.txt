@@ -1,1 +1,1 @@
-Desktop: Beratungsbild mit Gradient links weiss nach rechts durchsichtig
+Desktop Hero-Gradient: links mehr weiss, Übergang weiter nach rechts verschoben
