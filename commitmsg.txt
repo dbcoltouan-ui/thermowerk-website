@@ -1,1 +1,1 @@
-Header: milchiger off-white Glaseffekt ohne Trennlinie, Hero-Overlay oben aufgehellt für nahtlosen Übergang
+Störung-Button: roter Rand statt gefüllt, Mobile Hero-Overlay oben aufgehellt passend zum Header

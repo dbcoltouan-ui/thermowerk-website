@@ -358,7 +358,7 @@ const {
       .mobile-menu-link { display: block !important; }
       .nav.open .btn-primary { display: flex; justify-content: center; background: var(--red); border: none; color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; white-space: nowrap; width: 100%; max-width: 240px; }
       .nav.open .btn-primary::after { display: none; }
-      .nav.open .btn-stoerung { display: flex !important; justify-content: center; background: var(--red); color: var(--white) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; border: none; white-space: nowrap; position: absolute; bottom: clamp(20px, 4svh, 36px); left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 240px; }
+      .nav.open .btn-stoerung { display: flex !important; justify-content: center; background: transparent; color: var(--red) !important; font-family: var(--font-heading); font-weight: 600; font-size: clamp(15px, 2svh, 17px); padding: clamp(12px, 1.8svh, 16px) 24px; border-radius: 3px; border: 2px solid var(--red); white-space: nowrap; position: absolute; bottom: clamp(20px, 4svh, 36px); left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 240px; }
       .nav.open .btn-stoerung::after { display: none; }
       .menu-toggle { display: flex; }
       /* Mobile: kein Dropdown, flache Liste — Unterpunkte ausblenden, "Leistungen" ersetzt sie */
@@ -434,7 +434,7 @@ const {
       .hero-buttons { flex-direction: column; align-items: stretch; }
       .hero-buttons .btn { text-align: center; }
       .hero-bg img { object-position: center 20%; }
-      .hero-overlay { background: linear-gradient(180deg, rgba(17, 29, 51, 0.88) 0%, rgba(27, 42, 74, 0.7) 40%, rgba(27, 42, 74, 0.55) 100%); }
+      .hero-overlay { background: linear-gradient(180deg, rgba(240,242,245,0.45) 0%, rgba(240,242,245,0.12) 10%, rgba(17, 29, 51, 0.85) 25%, rgba(27, 42, 74, 0.7) 50%, rgba(27, 42, 74, 0.55) 100%); }
       .hero-scroll { bottom: clamp(16px, 3svh, 28px); }
       .hero-badge { font-size: clamp(11px, 1.6svh, 13px); }
       .wpsm-badge { padding: clamp(24px, 4svh, 32px); }
