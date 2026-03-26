@@ -1,1 +1,1 @@
-Hero: Desktop-Bild weiter nach rechts verschoben (object-position 85%)
+Hero: H1 kleiner (Desktop), Subtitle naeher an H1, Label groesser, Text+Badge in Navy, Overlay weisser, Badge-Text ohne WPSM-dopplung, linkbuendig
