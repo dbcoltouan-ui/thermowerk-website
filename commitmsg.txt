@@ -1,1 +1,1 @@
-Mobile: Header transparent, Hero-Bild geht über gesamten Viewport inkl. Header-Bereich
+Mobile Header leicht weisser (35% Opazität) statt komplett transparent
