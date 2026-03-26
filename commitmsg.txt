@@ -1,1 +1,1 @@
-Mobile-Menü zurück auf navy dunkel mit weisser Schrift
+Header: milchiger off-white Glaseffekt ohne Trennlinie, Hero-Overlay oben aufgehellt für nahtlosen Übergang

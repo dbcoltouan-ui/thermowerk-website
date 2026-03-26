@@ -79,8 +79,8 @@ const {
     .btn-cta-lg { display: flex; width: fit-content; min-width: clamp(260px, 24vw, 320px); justify-content: center; text-align: center; margin-left: auto; margin-right: auto; }
 
     /* 6. HEADER */
-    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.4s ease, box-shadow 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
-    .header.scrolled { background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); }
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(247,248,250,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: none; transition: background 0.4s ease, box-shadow 0.3s ease, backdrop-filter 0.4s ease; padding-top: env(safe-area-inset-top, 0px); }
+    .header.scrolled { background: rgba(247,248,250,0.93); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06); }
     .header-inner { display: flex; align-items: center; justify-content: space-between; height: var(--header-height); max-width: 1120px; margin: 0 auto; padding: 0 24px; }
     .logo-img { height: clamp(34px, 3.5vw, 36px); width: auto; }
     .nav { display: flex; align-items: center; gap: clamp(20px, 3vw, 44px); }
@@ -115,7 +115,7 @@ const {
     .hero { position: relative; min-height: 100svh; display: flex; align-items: center; background: var(--navy); overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; z-index: 1; }
     .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 78% center; }
-    .hero-overlay { position: absolute; inset: 0; z-index: 2; background: linear-gradient(135deg, rgba(17, 29, 51, 0.92) 0%, rgba(27, 42, 74, 0.7) 40%, rgba(27, 42, 74, 0.4) 100%); }
+    .hero-overlay { position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, rgba(240,242,245,0.45) 0%, rgba(240,242,245,0.15) 8%, rgba(17, 29, 51, 0.85) 22%, rgba(27, 42, 74, 0.7) 50%, rgba(27, 42, 74, 0.4) 100%); }
     .hero-inner { position: relative; z-index: 3; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px; padding-top: calc(var(--header-height) + 40px); min-height: 100svh; display: flex; align-items: center; }
     .hero-content { max-width: 660px; }
     .hero-label { font-family: var(--font-heading); font-size: clamp(13px, 1.4vw, 15px); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: clamp(12px, 2svh, 20px); }
