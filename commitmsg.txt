@@ -1,1 +1,1 @@
-Hero: Box-Breite wird jetzt ausschliesslich vom Subtitle bestimmt, Text/Buttons/Badge passen sich an
+Hero: Box top-padding reduziert, text-wrap pretty gegen alleinstehende Woerter
