@@ -1,1 +1,1 @@
-Mobile Header leicht weisser (35% Opazität) statt komplett transparent
+Desktop: Beratungsbild mit Gradient links weiss nach rechts durchsichtig
