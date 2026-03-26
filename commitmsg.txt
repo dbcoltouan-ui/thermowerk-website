@@ -1,1 +1,1 @@
-Hero-Bild aktualisiert, Desktop-Bild rechts positioniert statt fullwidth
+Mobile-Bild wiederhergestellt, Desktop Bild fullwidth mit Gradient und nach unten versetzt (60% 75%)
