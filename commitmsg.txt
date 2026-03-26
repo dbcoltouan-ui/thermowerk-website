@@ -1,1 +1,1 @@
-Off-white Streifen gleiche Hoehe wie Abstand Services-Boxen zu Logos
+Logos-Section Abstaende um 38% reduziert (padding, Streifen, WPSM margin)
