@@ -1,1 +1,1 @@
-Mobile Hero-Bild: object-position angepasst damit beide Techniker und Gerät sichtbar
+Header durchsichtiger mit weniger Blur, Hero-Bild auf Mobile rausgezoomt und Overlay leichter
