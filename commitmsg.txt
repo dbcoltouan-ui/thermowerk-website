@@ -1,1 +1,1 @@
-Hero-Section im SAS-Stil umgebaut: Fullscreen mit Overlay, Label, Badge und Scroll-Indikator
+Header transparent/dunkel im SAS-Stil, weisses SVG-Logo, Mobile-Menü dunkel, Hero-Bild Mask entfernt
