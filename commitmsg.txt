@@ -1,1 +1,1 @@
-About: "Wir messen uns an Ihrem Ergebnis" entfernt
+Hero: Horizontalen Gradient entfernt, vertikalen Gradient (oben weiss nach unten transparent) eingesetzt
