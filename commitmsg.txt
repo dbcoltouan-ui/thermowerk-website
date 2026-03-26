@@ -1,1 +1,1 @@
-Hero: Content-Box mit eigenem Overlay (Desktop+Mobile), Mobile Block weiter runter, mehr Abstand Text-Buttons
+Hero: Overlay-Box nur um Subtitle/Text/Buttons (nicht H1), Mobile ohne Box, Mobile Buttons weiter unten
