@@ -1,1 +1,1 @@
-Hero: Box inline-flex (schrumpft auf Inhalt), Label 15% groesser, Mobile Buttons 18% weiter runter
+Hero: max-width von hero-text entfernt (Box-Rechtsabstand fix), Mobile Buttons 10% weiter runter
