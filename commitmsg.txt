@@ -1,1 +1,1 @@
-Fix: overflow-x hidden auf html/body gegen weissen Rand rechts auf Mobile
+Header: weisser Glaseffekt mit Blur statt dunkel, Original-Logo wiederhergestellt
