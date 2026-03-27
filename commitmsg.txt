@@ -1,1 +1,1 @@
-H1 Unterstrich als SVG Pinselstrich statt CSS underline
+CLAUDE.md aktualisiert mit Fallstricken, Design-Entscheidungen und aktuellem Komponentenstand
