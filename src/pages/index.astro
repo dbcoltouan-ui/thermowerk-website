@@ -34,6 +34,17 @@ import Footer from '../components/Footer.astro';
 
   <!-- Globales JavaScript: Header-Scroll, Mobile-Menü, Fade-Up-Animationen, Smooth Scroll -->
   <script is:inline>
+    /* Topbar: Kontaktinfos bündig mit Nav-Start */
+    function alignTopbar() {
+      var nav = document.querySelector('.nav');
+      if (nav) {
+        var navLeft = nav.getBoundingClientRect().left;
+        document.documentElement.style.setProperty('--nav-left', navLeft + 'px');
+      }
+    }
+    alignTopbar();
+    window.addEventListener('resize', alignTopbar);
+
     /* Header: Schatten beim Scrollen */
     var headerEl = document.getElementById('header');
     window.addEventListener('scroll', function() {
