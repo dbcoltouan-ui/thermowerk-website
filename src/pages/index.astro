@@ -42,8 +42,9 @@ import Footer from '../components/Footer.astro';
         document.documentElement.style.setProperty('--nav-left', navLeft + 'px');
       }
     }
-    alignTopbar();
+    window.addEventListener('load', alignTopbar);
     window.addEventListener('resize', alignTopbar);
+    document.fonts.ready.then(alignTopbar);
 
     /* Header: Schatten beim Scrollen */
     var headerEl = document.getElementById('header');
