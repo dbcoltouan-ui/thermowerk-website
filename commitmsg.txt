@@ -1,1 +1,1 @@
-Topbar Alignment fix - warte auf Font-Load bevor Nav-Position gemessen wird
+X Icon hinzugefuegt, Social Icons gleichmaessig ueber CTA-Button verteilt per JS

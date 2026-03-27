@@ -34,12 +34,16 @@ import Footer from '../components/Footer.astro';
 
   <!-- Globales JavaScript: Header-Scroll, Mobile-Menü, Fade-Up-Animationen, Smooth Scroll -->
   <script is:inline>
-    /* Topbar: Kontaktinfos bündig mit Nav-Start */
+    /* Topbar: Kontaktinfos bündig mit Nav-Start, Socials über CTA-Button */
     function alignTopbar() {
       var nav = document.querySelector('.nav');
+      var ctaBtn = document.querySelector('.nav .btn-primary');
       if (nav) {
         var navLeft = nav.getBoundingClientRect().left;
         document.documentElement.style.setProperty('--nav-left', navLeft + 'px');
+      }
+      if (ctaBtn) {
+        document.documentElement.style.setProperty('--cta-btn-width', ctaBtn.offsetWidth + 'px');
       }
     }
     window.addEventListener('load', alignTopbar);
