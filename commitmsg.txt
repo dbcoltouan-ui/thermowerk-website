@@ -1,1 +1,1 @@
-Header-Button 10x28 + groessere Schrift, H1 20% hoeher, Topbar per JS exakt an Nav-Position ausgerichtet
+H1 deutlich hoeher gesetzt translateY -18vh
