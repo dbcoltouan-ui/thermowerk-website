@@ -1,1 +1,1 @@
-Header-Button dicker + font-weight 500 + 16.5px, roter Unterstrich mit Glow unter Unser Handwerk
+Text-shadow auf allen Hero-Texten verdoppelt zum Testen
