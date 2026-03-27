@@ -1,1 +1,1 @@
-Topbar aligned mit Nav, Nav-Links fetter, H1 line-height fix, Mobile dunkler Overlay + Header dicker + Elemente tiefer
+Hero: H1 nicht fett (700), nach oben verschoben, Nav enger+duenner, Topbar aligned mit Nav, Buttons schmaler, border-bottom entfernt
