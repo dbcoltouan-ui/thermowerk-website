@@ -1,1 +1,1 @@
-CLAUDE.md aktualisiert mit Fallstricken, Design-Entscheidungen und aktuellem Komponentenstand
+Pinselstrich unter Unser Handwerk etwas dicker
