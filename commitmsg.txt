@@ -1,1 +1,1 @@
-Hero: Neuer H1 und Text, Label entfernt
+Komplettes Hero-Redesign: Dunkler Navy-Overlay, Topbar, neues Bild, gestaffelte H1, weisse Texte, Kostenrechner-Button, groesseres Logo
