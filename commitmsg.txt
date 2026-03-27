@@ -1,1 +1,1 @@
-H1 Unterstrich wavy style fuer Stift-Effekt
+H1 Unterstrich als SVG Pinselstrich statt CSS underline
