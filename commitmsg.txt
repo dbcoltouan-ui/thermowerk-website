@@ -1,1 +1,1 @@
-H1 Unterstrich dicker (3.5px) und tiefer (offset 10px)
+Fix mobile H1 - translateY auf none setzen mit korrekter Spezifitaet fuer fade-up.visible
