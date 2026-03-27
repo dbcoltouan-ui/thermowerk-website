@@ -1,1 +1,1 @@
-H1 deutlich hoeher gesetzt translateY -18vh
+Fix H1 Position - fade-up Animation ueberschrieb transform, jetzt korrekt mit spezifischem Selektor
