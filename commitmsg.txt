@@ -1,1 +1,1 @@
-H1 20% runter auf translateY -11.8vh
+H1 18% runter auf translateY -9.7vh
