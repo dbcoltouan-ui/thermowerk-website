@@ -1,1 +1,1 @@
-X Icon hinzugefuegt, Social Icons gleichmaessig ueber CTA-Button verteilt per JS
+Header-Button dicker + font-weight 500 + 16.5px, roter Unterstrich mit Glow unter Unser Handwerk
