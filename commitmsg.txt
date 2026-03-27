@@ -1,1 +1,1 @@
-Hero: H1 nicht fett (700), nach oben verschoben, Nav enger+duenner, Topbar aligned mit Nav, Buttons schmaler, border-bottom entfernt
+Hero 1:1 Preview-Werte (H1 800/1.08, Buttons Preview-Padding), Topbar alle Items ueber Nav verteilt, Mobile mehr Blur + weisse Texte
