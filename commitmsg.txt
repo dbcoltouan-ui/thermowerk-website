@@ -1,1 +1,1 @@
-Fix mobile H1 - translateY auf none setzen mit korrekter Spezifitaet fuer fade-up.visible
+H1 Unterstrich wavy style fuer Stift-Effekt
