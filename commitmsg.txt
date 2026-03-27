@@ -1,1 +1,1 @@
-Text-shadow auf allen Hero-Texten verdoppelt zum Testen
+H1 Unterstrich dicker (3.5px) und tiefer (offset 10px)
