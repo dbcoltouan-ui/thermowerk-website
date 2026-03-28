@@ -2,8 +2,35 @@
 import Layout from '../layouts/Layout.astro';
 import Topbar from '../components/Topbar.astro';
 import Footer from '../components/Footer.astro';
+import { getPage } from '../lib/sanity';
+
+const data = await getPage('impressumPage');
+
+// Fallback-Werte (1:1 aus Original)
+const pageTitle = data?.pageTitle || 'Impressum - Thermowerk';
+const pageDescription = data?.pageDescription || 'Impressum der Gebäudetechnik Coltouan / Thermowerk, Neftenbach.';
+const headline = data?.headline || 'Impressum';
+const companyName = data?.companyName || 'Gebäudetechnik Coltouan';
+const address = data?.address || 'Rankstrasse 18\n8413 Neftenbach\nSchweiz';
+const representativePerson = data?.representativePerson || 'Coltouan Beniamin-Daniel';
+const uid = data?.uid || 'CHE-489.162.528';
+const mwst = data?.mwst || 'CHE-489.162.528 MWST';
+const phone = data?.phone || '+41 76 504 03 68';
+const email = data?.email || 'db.coltouan@gmail.com';
+const web = data?.web || 'thermowerk.ch';
+const sourceText = data?.sourceText || 'Impressum erstellt durch:';
+const sourceLink = data?.sourceLink || 'https://impressum-generator-schweiz.ch/';
+const sourceLinkText = data?.sourceLinkText || 'Impressum Generator Schweiz';
+
+const defaultSections = [
+  { title: '1. Inhalte', content: 'Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen – verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen – sind grundsätzlich ausgeschlossen.' },
+  { title: '2. Externe Links', content: 'Unsere Webseite enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.' },
+  { title: '3. Urheberrecht', content: 'Die durch die Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem schweizerischen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechts bedürfen unserer schriftlichen Zustimmung.' },
+  { title: '4. Änderungen und Irrtümer', content: 'Wir behalten uns ausdrücklich vor, Teile der Seiten oder das gesamte Angebot jederzeit zu ändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen. Sollten einzelne Formulierungen oder Darstellungen dieses Haftungsausschlusses unwirksam sein, bleiben die übrigen Bestimmungen davon unberührt.' },
+];
+const sections = data?.sections && data.sections.length > 0 ? data.sections : defaultSections;
 ---
-<Layout title="Impressum - Thermowerk" description="Impressum der Gebäudetechnik Coltouan / Thermowerk, Neftenbach.">
+<Layout title={pageTitle} description={pageDescription}>
   <Topbar />
   <!-- Header mit Links zur Startseite -->
   <header class="header" id="header">
@@ -47,55 +74,37 @@ import Footer from '../components/Footer.astro';
   <main class="impressum-page">
     <div class="container">
       <div class="impressum-content">
-        <h1>Impressum</h1>
+        <h1>{headline}</h1>
 
-        <address>
-          Gebäudetechnik Coltouan<br />
-          Rankstrasse 18<br />
-          8413 Neftenbach<br />
-          Schweiz
-        </address>
+        <address set:html={companyName + '<br />' + address.replace(/\n/g, '<br />')} />
 
         <h2>Vertretungsberechtigte Personen</h2>
-        <p>Coltouan Beniamin-Daniel</p>
+        <p>{representativePerson}</p>
 
         <h2>Handelsregister</h2>
         <p>
-          UID: CHE-489.162.528<br />
-          MWST-Nummer: CHE-489.162.528 MWST
+          UID: {uid}<br />
+          MWST-Nummer: {mwst}
         </p>
 
         <h2>Kontakt</h2>
         <p>
-          Telefon: <a href="tel:+41765040368">+41 76 504 03 68</a><br />
-          E-Mail: <a href="mailto:db.coltouan@gmail.com">db.coltouan@gmail.com</a><br />
-          Web: <a href="https://thermowerk.ch">thermowerk.ch</a>
+          Telefon: <a href={`tel:${phone.replace(/\s/g, '')}`}>{phone}</a><br />
+          E-Mail: <a href={`mailto:${email}`}>{email}</a><br />
+          Web: <a href={`https://${web}`}>{web}</a>
         </p>
 
         <h2>Haftungsausschluss</h2>
 
-        <div class="legal-item">
-          <h3>1. Inhalte</h3>
-          <p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen – verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen – sind grundsätzlich ausgeschlossen.</p>
-        </div>
-
-        <div class="legal-item">
-          <h3>2. Externe Links</h3>
-          <p>Unsere Webseite enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
-        </div>
-
-        <div class="legal-item">
-          <h3>3. Urheberrecht</h3>
-          <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem schweizerischen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechts bedürfen unserer schriftlichen Zustimmung.</p>
-        </div>
-
-        <div class="legal-item">
-          <h3>4. Änderungen und Irrtümer</h3>
-          <p>Wir behalten uns ausdrücklich vor, Teile der Seiten oder das gesamte Angebot jederzeit zu ändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen. Sollten einzelne Formulierungen oder Darstellungen dieses Haftungsausschlusses unwirksam sein, bleiben die übrigen Bestimmungen davon unberührt.</p>
-        </div>
+        {sections.map((section: any) => (
+          <div class="legal-item">
+            <h3>{section.title}</h3>
+            <p>{section.content}</p>
+          </div>
+        ))}
 
         <p class="impressum-source">
-          Impressum erstellt durch: <a href="https://impressum-generator-schweiz.ch/" target="_blank" rel="noopener">Impressum Generator Schweiz</a>
+          {sourceText} <a href={sourceLink} target="_blank" rel="noopener">{sourceLinkText}</a>
         </p>
       </div>
     </div>

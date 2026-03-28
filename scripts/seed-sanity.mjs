@@ -329,6 +329,63 @@ async function seed() {
   });
   console.log('✓ Footer');
 
+  // ─── 15. Impressum (impressum.astro) ───
+  await client.createOrReplace({
+    _id: 'impressumPage',
+    _type: 'impressumPage',
+    pageTitle: 'Impressum - Thermowerk',
+    pageDescription: 'Impressum der Gebäudetechnik Coltouan / Thermowerk, Neftenbach.',
+    headline: 'Impressum',
+    companyName: 'Gebäudetechnik Coltouan',
+    address: 'Rankstrasse 18\n8413 Neftenbach\nSchweiz',
+    representativePerson: 'Coltouan Beniamin-Daniel',
+    uid: 'CHE-489.162.528',
+    mwst: 'CHE-489.162.528 MWST',
+    phone: '+41 76 504 03 68',
+    email: 'db.coltouan@gmail.com',
+    web: 'thermowerk.ch',
+    sections: [
+      { _key: 'imp1', title: '1. Inhalte', content: 'Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen \u2013 verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen \u2013 sind grundsätzlich ausgeschlossen.' },
+      { _key: 'imp2', title: '2. Externe Links', content: 'Unsere Webseite enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.' },
+      { _key: 'imp3', title: '3. Urheberrecht', content: 'Die durch die Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem schweizerischen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechts bedürfen unserer schriftlichen Zustimmung.' },
+      { _key: 'imp4', title: '4. Änderungen und Irrtümer', content: 'Wir behalten uns ausdrücklich vor, Teile der Seiten oder das gesamte Angebot jederzeit zu ändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen. Sollten einzelne Formulierungen oder Darstellungen dieses Haftungsausschlusses unwirksam sein, bleiben die übrigen Bestimmungen davon unberührt.' },
+    ],
+    sourceText: 'Impressum erstellt durch:',
+    sourceLink: 'https://impressum-generator-schweiz.ch/',
+    sourceLinkText: 'Impressum Generator Schweiz',
+  });
+  console.log('✓ Impressum');
+
+  // ─── 16. Datenschutz (datenschutz.astro) ───
+  await client.createOrReplace({
+    _id: 'datenschutzPage',
+    _type: 'datenschutzPage',
+    pageTitle: 'Datenschutzerklärung - Thermowerk',
+    pageDescription: 'Datenschutzerklärung der Gebäudetechnik Coltouan / Thermowerk, Neftenbach.',
+    headline: 'Datenschutzerklärung',
+    lastUpdated: '28.03.2026',
+    introText: 'Der Schutz Ihrer persönlichen Daten ist uns ein zentrales Anliegen. Wir legen grossen Wert auf Transparenz und Nachvollziehbarkeit hinsichtlich der Erhebung, Verarbeitung und Nutzung Ihrer Personendaten. Mit dieser Datenschutzerklärung möchten wir Sie umfassend darüber informieren, welche Daten wir in welchem Umfang verarbeiten, aus welchen Gründen dies geschieht, an wen Ihre Daten gegebenenfalls weitergegeben werden und welche Rechte Sie als betroffene Person nach dem Bundesgesetz über den Datenschutz haben.',
+    sections: [
+      { _key: 'ds1', title: '1. Verantwortlicher und Kontaktdaten', content: '<p>Verantwortlich für die Erhebung, Verarbeitung und Nutzung Ihrer Personendaten im Sinne des Bundesgesetzes über den Datenschutz ist:</p><p>Gebäudetechnik Coltouan<br>Rankstrasse 18<br>8413 Neftenbach</p><p><strong>Datenschutzverantwortliche Person:</strong><br>Beniamin-Daniel Coltouan<br><a href="mailto:info@thermowerk.ch">info@thermowerk.ch</a></p>' },
+      { _key: 'ds2', title: '2. Anwendungsbereich der Datenschutzerklärung', content: '<p>Diese Datenschutzerklärung gilt für alle Informationen und Daten, die im Rahmen Ihrer Nutzung unserer Webseite thermowerk.ch sowie aller damit verbundenen Online-Dienste erhoben, verarbeitet oder genutzt werden. Sie gilt gleichermassen für alle Technologien und Verfahren, die wir einsetzen, um Ihnen unsere Leistungen bereitzustellen.</p>' },
+      { _key: 'ds3', title: '3. Rechtsgrundlagen der Datenverarbeitung', content: '<p>Grundsätzlich erfolgt jede Verarbeitung personenbezogener Daten nur, wenn eine der folgenden Rechtsgrundlagen gemäss nDSG und allfälliger weiterer anwendbarer Bestimmungen erfüllt ist:</p><ul><li><strong>Einwilligung:</strong> Sofern Sie bewusst eingewilligt haben (z. B. Newsletter-Abonnement oder Einstellungen zur Datenverarbeitung), stützt sich die Verarbeitung auf diese Einwilligung.</li><li><strong>Vertragserfüllung oder vorvertragliche Massnahmen:</strong> Ihre Daten werden bearbeitet, um mit Ihnen einen Vertrag abzuschliessen, einen bestehenden Vertrag zu erfüllen oder Anfragen vor einem Vertragsschluss zu bearbeiten.</li><li><strong>Gesetzliche Verpflichtung:</strong> Wir sind verpflichtet, gewisse Daten zu speichern, zu melden oder offenzulegen, z. B. aufgrund steuerrechtlicher oder handelsrechtlicher Vorschriften.</li><li><strong>Berechtigtes Interesse:</strong> Wir verarbeiten Personendaten zur Wahrung berechtigter Interessen (z. B. IT-Sicherheit, Missbrauchsprävention, Weiterentwicklung unserer Angebote), sofern keine überwiegenden schutzwürdigen Interessen Ihrerseits entgegenstehen.</li></ul>' },
+      { _key: 'ds4', title: '4. Kategorien und Herkunft der verarbeiteten Personendaten', content: '<p>Im Rahmen Ihrer Interaktionen mit uns erheben wir verschiedene Arten von Personendaten, insbesondere:</p><ul><li><strong>Personenstammdaten:</strong> Name, E-Mail-Adresse, Postanschrift, Telefonnummer, Geburtsdatum etc.</li><li><strong>Nutzungsdaten:</strong> IP-Adresse, Browsertyp, Betriebssystem, Gerätetyp, etc.</li><li><strong>Kommunikationsdaten:</strong> Inhalte, die Sie uns per E-Mail, Kontaktformular oder Chat übermitteln.</li><li><strong>Standortdaten:</strong> Grob gespeicherte Standortdaten (Land, Region).</li><li><strong>Besondere Personendaten:</strong> Wir verarbeiten grundsätzlich keine besonderen Kategorien von Personendaten.</li></ul><p>Die Herkunft der Daten kann direkt von Ihnen stammen oder von technischen Systemen automatisch erfasst werden.</p>' },
+      { _key: 'ds5', title: '5. Zwecke der Datenverarbeitung', content: '<p>Wir verarbeiten Ihre Personendaten zu folgenden Zwecken:</p><ul><li><strong>Bereitstellung und Betrieb der Webseite und Online-Dienste</strong></li><li><strong>Kundenverwaltung und -betreuung</strong></li><li><strong>Marketing und Kommunikation</strong></li><li><strong>Analyse des Nutzerverhaltens und Web-Analyse</strong></li><li><strong>IT-Sicherheit und Systemadministration</strong></li></ul><p><strong>Erfüllung gesetzlicher Verpflichtungen</strong><br>Aufbewahrung von geschäftsrelevanten Unterlagen gemäss handels- und steuerrechtlicher Vorschriften.</p>' },
+      { _key: 'ds6', title: '6. Eingesetzte Dienste und Technologien', content: '<h3>6.1 Server-Logfiles</h3><p>Auf unserer Website führen wir Server-Logfiles, in denen beim Aufruf unserer Seiten automatisch technische Verbindungsdaten protokolliert werden.</p><ul><li>IP-Adresse Ihres Endgeräts</li><li>Datum und Uhrzeit der Anfrage</li><li>Aufgerufene URL und Referrer</li><li>Browsertyp, Betriebssystem und Gerätedaten</li><li>Zugriffsstatus bzw. HTTP-Statuscode</li><li>Übertragene Datenmenge</li></ul><h3>6.2 Technisch notwendige Datenverarbeitung</h3><p>Unsere Website nutzt technisch notwendige Verfahren, die für den einwandfreien Betrieb und die Darstellung der Webseite unerlässlich sind.</p>' },
+      { _key: 'ds7', title: '7. Datenempfänger und Kategorien von Empfängern', content: '<p>Eine Weitergabe Ihrer Personendaten erfolgt grundsätzlich nur, soweit dies zur Erreichung der genannten Zwecke erforderlich ist oder Sie hierzu ausdrücklich eingewilligt haben.</p><ul><li><strong>Interne Stellen</strong></li><li><strong>Externe Dienstleister</strong></li><li><strong>Behörden und staatliche Stellen</strong></li></ul>' },
+      { _key: 'ds8', title: '8. Übermittlung in Drittstaaten', content: '<p>Es kann im Rahmen der Auftragsbearbeitung dazu kommen, dass Ihre personenbezogenen Daten an Empfänger im Ausland übermittelt werden.</p><ul><li><strong>Vertragliche Garantien</strong></li><li><strong>Technische und organisatorische Zusatzmassnahmen</strong></li></ul>' },
+      { _key: 'ds9', title: '9. Speicherdauer und Löschung', content: '<p>Personenbezogene Daten behalten wir nur so lange, wie es für den jeweiligen Verarbeitungszweck notwendig ist.</p>' },
+      { _key: 'ds10', title: '10. Rechte der betroffenen Personen', content: '<ul><li><strong>Recht auf Auskunft</strong></li><li><strong>Recht auf Berichtigung und Ergänzung</strong></li><li><strong>Recht auf Löschung und Einschränkung der Verarbeitung</strong></li><li><strong>Recht auf Datenübertragbarkeit</strong></li><li><strong>Widerspruchsrecht</strong></li><li><strong>Widerruf der Einwilligung</strong></li><li><strong>Beschwerderecht</strong></li></ul><p>Kontakt: <a href="mailto:info@thermowerk.ch">info@thermowerk.ch</a></p>' },
+      { _key: 'ds11', title: '11. Information über gesetzliche Pflichten zur Bereitstellung von Daten', content: '<p>Die Bereitstellung bestimmter Daten ist für die Durchführung eines Vertrags oder zur Erfüllung gesetzlicher Verpflichtungen erforderlich.</p>' },
+      { _key: 'ds12', title: '12. Datensicherheit', content: '<p>Wir bewahren Ihre personenbezogenen Daten sicher auf und ergreifen alle angemessenen technischen und organisatorischen Massnahmen.</p>' },
+      { _key: 'ds13', title: '13. Änderungen der Datenschutzerklärung', content: '<p>Wir behalten uns vor, diese Datenschutzerklärung jederzeit und ohne Vorankündigung anzupassen.</p>' },
+    ],
+    sourceText: 'Datenschutzerklärung erstellt durch:',
+    sourceLink: 'https://www.zertifizierte-shops.ch/',
+    sourceLinkText: 'Zertifizierte Shops Schweiz',
+  });
+  console.log('✓ Datenschutz');
+
   console.log('\n✅ Alle Inhalte importiert (1:1 aus Komponenten-Fallbacks)!');
   console.log('Hinweis: Bilder werden NICHT in Sanity gesetzt – die lokalen Fallback-Bilder aus public/img/ greifen automatisch.');
 }

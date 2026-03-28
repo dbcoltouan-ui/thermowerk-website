@@ -24,6 +24,11 @@ export async function getSingleton<T = any>(type: string): Promise<T | null> {
   );
 }
 
+// Einzelne Seite laden (für Impressum, Datenschutz etc.)
+export async function getPage(type: string) {
+  return sanityClient.fetch(`*[_type == $type][0]`, { type });
+}
+
 // Alle Sektionsdaten auf einmal laden (für Startseite)
 export async function getAllSections() {
   const query = `{

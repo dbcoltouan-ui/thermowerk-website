@@ -14,6 +14,8 @@ import calculatorSection from './sanity/schemas/calculatorSection';
 import regionSection from './sanity/schemas/regionSection';
 import contactSection from './sanity/schemas/contactSection';
 import footerSection from './sanity/schemas/footerSection';
+import impressumPage from './sanity/schemas/impressumPage';
+import datenschutzPage from './sanity/schemas/datenschutzPage';
 
 // Sanity Studio Konfiguration
 export default defineConfig({
@@ -43,6 +45,9 @@ export default defineConfig({
             S.listItem().title('Kontakt').child(S.document().schemaType('contactSection').documentId('contactSection')),
             S.divider(),
             S.listItem().title('Footer').child(S.document().schemaType('footerSection').documentId('footerSection')),
+            S.divider(),
+            S.listItem().title('Impressum').child(S.document().schemaType('impressumPage').documentId('impressumPage')),
+            S.listItem().title('Datenschutzerklärung').child(S.document().schemaType('datenschutzPage').documentId('datenschutzPage')),
           ]),
     }),
   ],
@@ -62,6 +67,8 @@ export default defineConfig({
       regionSection,
       contactSection,
       footerSection,
+      impressumPage,
+      datenschutzPage,
     ],
   },
 });
