@@ -1,1 +1,1 @@
-Sync-Scripts und Anleitung hinzugefuegt (pull, push, deploy, sync-all BATs)
+CLAUDE.md aktualisiert mit Sync-Workflows, 16 Schemas, Troubleshooting und Bild-Fallback-Logik

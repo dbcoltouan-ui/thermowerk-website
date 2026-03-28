@@ -6,7 +6,7 @@
 - **Sanity CMS** – vollständig integriert (Project ID: `wpbatz1m`, Dataset: `production`)
   - Studio: https://thermowerk.sanity.studio
   - Sanity Manage: https://www.sanity.io/manage/project/wpbatz1m
-  - Alle 14 Sektionen sind als Singleton-Dokumente im CMS erfasst
+  - 16 Singleton-Dokumente im CMS (14 Sektionen + Impressum + Datenschutz)
   - Webhook eingerichtet: Jede Publish-Aktion in Sanity triggert automatisch einen Cloudflare Pages Build
 
 ## Dateipfade
@@ -15,14 +15,18 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Komponenten: `src/components/`
 - Globales CSS + Layout: `src/layouts/Layout.astro` (ALLES CSS ist hier, keine separaten CSS-Dateien)
 - Seitenaufbau + JS: `src/pages/index.astro`
-- Impressum: `src/pages/impressum.astro` (eigenständige Seite mit eigenem Header/Topbar/Footer inline)
+- Impressum: `src/pages/impressum.astro` (eigenständige Seite mit eigenem Header/Topbar/Footer inline, lädt Sanity-Daten via `getPage()`)
+- Datenschutz: `src/pages/datenschutz.astro` (gleiche Struktur wie Impressum, lädt Sanity-Daten via `getPage()`)
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → enthält `SANITY_API_TOKEN`
-- Sanity-Schemas: `sanity/schemas/` (14 Schema-Dateien)
-- Sanity-Client + Hilfsfunktionen: `src/lib/sanity.ts`
+- Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien)
+- Sanity-Client + Hilfsfunktionen: `src/lib/sanity.ts` (enthält `getAllSections()`, `getSingleton()`, `getPage()`)
 - Sanity Studio Config: `sanity.config.ts`
 - Sanity CLI Config: `sanity.cli.ts`
-- Seed-Script (einmalig): `scripts/seed-sanity.mjs`
+- Seed-Script: `scripts/seed-sanity.mjs` (alle 16 Dokumente)
+- Sync-Scripts: `scripts/pull.bat`, `scripts/push.bat`, `scripts/deploy.bat`, `scripts/sync-all.bat`
+- Pull-Script (Node): `scripts/pull-sanity.mjs` (exportiert Sanity → `sanity-export.json`)
+- Anleitung: `scripts/ANLEITUNG.md`
 
 ## Aktive Komponenten (Reihenfolge)
 Topbar → Header → Hero → Services → ManufacturerLogos → Wpsm → Steps → About → WhyHeatpump → Klima → Calculator → Region → Contact → Footer
@@ -55,7 +59,7 @@ const headline = data?.headline || 'Hardcodierter Fallback-Text';
 ```
 Arrays (z.B. Service-Cards, Steps, Facts) haben komplette `defaultXxx`-Arrays als Fallback.
 
-### 14 Sanity-Schemas (`sanity/schemas/`)
+### 16 Sanity-Schemas (`sanity/schemas/`)
 | Schema-Datei | Singleton-ID | Verwendet von |
 |---|---|---|
 | `siteSettings.ts` | `siteSettings` | Topbar, Contact, Footer (globale Daten: Firma, Farben, Fonts, Social URLs) |
@@ -72,9 +76,11 @@ Arrays (z.B. Service-Cards, Steps, Facts) haben komplette `defaultXxx`-Arrays al
 | `regionSection.ts` | `regionSection` | Region |
 | `contactSection.ts` | `contactSection` | Contact |
 | `footerSection.ts` | `footerSection` | Footer |
+| `impressumPage.ts` | `impressumPage` | Impressum (Seite) |
+| `datenschutzPage.ts` | `datenschutzPage` | Datenschutz (Seite) |
 
 ### Sanity Studio Sidebar-Struktur
-Die `sanity.config.ts` definiert eine benutzerdefinierte Sidebar mit allen 14 Schemas als Singleton-Einträge (feste Document-IDs, kein Erstellen/Löschen möglich).
+Die `sanity.config.ts` definiert eine benutzerdefinierte Sidebar mit allen 16 Schemas als Singleton-Einträge (feste Document-IDs, kein Erstellen/Löschen möglich). Impressum + Datenschutz stehen unter einem separaten Divider nach dem Footer.
 
 ### Webhook: Sanity → Cloudflare
 - Bei jeder Publish-Aktion (Create/Update) im Dataset `production` wird ein POST an den Cloudflare Deploy Hook gesendet
@@ -117,6 +123,50 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 6. Committen + pushen
 7. Sanity Studio neu deployen: `npx sanity deploy` (im Projektordner via cmd)
 
+## Sync-Scripts & Workflows
+
+### Verfügbare BAT-Dateien (`scripts/`)
+| Script | Funktion |
+|---|---|
+| `pull.bat` | Exportiert alle Sanity-Daten → `sanity-export.json` (zum Vergleichen/Nachschauen) |
+| `push.bat` | Schreibt lokale Werte aus `seed-sanity.mjs` → Sanity (via `createOrReplace`) |
+| `deploy.bat` | Git add + commit (fragt nach Message) + push → Cloudflare Rebuild |
+| `sync-all.bat` | push.bat + deploy.bat in einem Schritt |
+
+### Workflow: Sanity-Daten nach lokal ziehen
+1. `pull.bat` ausführen → erzeugt `sanity-export.json` im Projektordner
+2. JSON vergleichen und gewünschte Werte in `seed-sanity.mjs` / Komponenten-Fallbacks übertragen
+3. `sync-all.bat` ausführen
+
+### Workflow: Lokale Änderungen nach Sanity + Live
+1. Code/Seed-Script bearbeiten
+2. `sync-all.bat` ausführen (aktualisiert Sanity + committed + pusht)
+3. Cloudflare baut in 1–3 Min automatisch neu
+
+### Workflow: Nur Sanity-Text ändern (kein Code)
+1. In Sanity Studio bearbeiten + publishen
+2. Webhook triggert Rebuild automatisch – kein Script nötig
+
+### Wie das Seed-Script funktioniert
+- `scripts/seed-sanity.mjs` enthält alle 16 Dokumente mit exakten 1:1-Werten aus den Komponenten-Fallbacks
+- Verwendet `createOrReplace` mit festen `_id`s – jedes Dokument wird komplett überschrieben
+- **Bilder werden bewusst NICHT gesetzt** → Komponenten prüfen auf `image.asset` und fallen auf lokale Dateien aus `public/img/` zurück
+- Token wird aus `.env` geladen (via BAT-Datei) oder manuell per `set SANITY_API_TOKEN=... && node scripts/seed-sanity.mjs`
+- Token muss **Editor**-Berechtigung haben (Viewer reicht nicht für `createOrReplace`)
+
+### Bild-Fallback-Logik (WICHTIG)
+- Komponenten wie `ManufacturerLogos.astro` prüfen: `logo.image && typeof logo.image === 'object' && logo.image.asset`
+- Nur wenn ein gültiges Sanity-Bild mit Asset-Referenz existiert, wird es verwendet
+- Ohne Bild in Sanity → lokale Fallbacks aus `public/img/` greifen automatisch
+- **Bei Problemen**: Bild-Feld in Sanity leeren + publishen → Fallback greift sofort
+
+### Troubleshooting Sync
+- **403 bei Seed-Script**: Token hat nur Viewer-Rechte → neuen Editor-Token in Sanity Manage erstellen
+- **Werte stimmen nicht überein**: `pull.bat` ausführen, `sanity-export.json` mit `seed-sanity.mjs` vergleichen
+- **Bilder fehlen nach Publish**: Komponente prüft `hasValidImages` → wenn Sanity leere Bild-Objekte hat, Feld in Sanity komplett leeren
+- **Hero-Position verschoben**: CSS prüfen in `Layout.astro` – Header/Hero nutzen `padding: 0 5vw 0 11vw` (11vw links!)
+- **Sonderzeichen in Texten**: Bindestriche (-) vs. Gedankenstriche (–) beachten – per `hexdump` verifizieren wenn nötig
+
 ## Wichtige Hinweise
 - Git-Pfad: `C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe`
 - Shell für Git-Befehle: immer **cmd** (nicht PowerShell)
@@ -132,7 +182,7 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - **Topbar-Alignment per JS**: Die Topbar-Kontaktinfos werden per JavaScript an der Nav-Position ausgerichtet. Das Script in `index.astro` liest `nav.getBoundingClientRect().left` und setzt `--nav-left` als CSS-Variable. Ebenso wird `--cta-btn-width` für die Social-Icons gemessen. Beide müssen NACH Font-Load gemessen werden (`document.fonts.ready.then()`), sonst stimmen die Werte nicht.
 - **Google Fonts Timing**: Fonts (Outfit, DM Sans, Montserrat) werden von Google Fonts geladen. Layout-Messungen erst nach `document.fonts.ready` oder `window load` machen.
 - **Responsive Breakpoints**: 968px (Tablet – Topbar verschwindet, Burger-Menü), 640px (Mobile – Hero-Layout ändert sich komplett). Mobile hat eigene Hero-Styles die Desktop-Werte überschreiben müssen.
-- **Impressum-Seite hat eigenen Header/Footer inline**: Die Datei `impressum.astro` hat eine eigene Kopie von Header, Topbar und Footer eingebettet (nicht die Komponenten). Bei Änderungen an diesen Elementen muss auch `impressum.astro` angepasst werden!
+- **Impressum/Datenschutz haben eigenen Header inline**: Beide Seiten (`impressum.astro`, `datenschutz.astro`) haben eine eigene Kopie des Headers eingebettet (nicht die Header-Komponente). Bei Änderungen am Header müssen alle 3 Dateien angepasst werden (Header.astro + impressum.astro + datenschutz.astro)! Topbar und Footer werden als Komponenten importiert.
 - **Astro Scoped Styles erreichen keine Child-Komponenten**: Für komponentenübergreifende Styles `<style is:global>` verwenden (z.B. Footer z-index auf Impressum-Seite).
 - **Sanity Portable Text**: Wird in einigen Feldern (About intro/closing, Wpsm bodyText) als Block-Array gespeichert. Text extrahieren via `block.children.map(span => span.text).join('')`.
 - **SVG-Icons aus Sanity**: Werden als String im Feld `iconSvg` gespeichert und via `set:html` Direktive gerendert: `<div set:html={fact.iconSvg}></div>`.
