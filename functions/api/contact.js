@@ -72,7 +72,11 @@ export async function onRequestPost(context) {
       try {
         const emailResp = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Thermowerk-Website/1.0',
+            'Accept': 'application/json',
+          },
           body: JSON.stringify({
             access_key: web3formsKey,
             subject: `Neue Anfrage: ${interestLabels[interest] || interest || 'Allgemein'} – ${name}`,
