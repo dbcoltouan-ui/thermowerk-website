@@ -1,5 +1,63 @@
 ---
-// Warum Luft-Wasser-Wärmepumpen – aktualisierte Texte
+import { urlFor } from '../lib/sanity';
+
+interface Props {
+  data?: {
+    headline?: string;
+    introText?: string;
+    image?: any;
+    imageAlt?: string;
+    cards?: Array<{
+      title: string;
+      description: string;
+      iconSvg: string;
+    }>;
+    ctaHeadline?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    calcHintText?: string;
+    calcHintButtonText?: string;
+    calcHintButtonLink?: string;
+  };
+}
+
+const { data } = Astro.props as Props;
+
+// Fallback data with original content and SVG paths
+const fallbackCards = [
+  {
+    title: 'Kein Bewilligungsverfahren',
+    description: 'Da keine Erdsondenbohrung erforderlich ist, entfällt das aufwändige Baubewilligungsverfahren. Das verkürzt die Projektlaufzeit um Wochen und umgeht mögliche Einschränkungen im Grundwasserschutz.',
+    iconSvg: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>'
+  },
+  {
+    title: 'Tiefere Investitionskosten',
+    description: 'Ohne Bohrung fallen die Gesamtkosten spürbar tiefer aus. Gleichzeitig arbeiten moderne Luft-Wasser-Wärmepumpen auch bei niedrigen Aussentemperaturen effizient und zuverlässig.',
+    iconSvg: '<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'
+  },
+  {
+    title: 'Optimale Kombination mit Solarstrom',
+    description: 'Luft-Wasser-Wärmepumpen lassen sich ideal mit einer Photovoltaikanlage koppeln. Das steigert den Eigenverbrauch und senkt die laufenden Energiekosten nachhaltig.',
+    iconSvg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+  },
+  {
+    title: 'Kühlung im Sommer inklusive',
+    description: 'Viele Luft-Wasser-Systeme bieten die Möglichkeit, im Sommer aktiv zu kühlen – eine Funktion, die angesichts steigender Temperaturen zunehmend an Bedeutung gewinnt.',
+    iconSvg: '<svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>'
+  }
+];
+
+const cardsToDisplay = data?.cards || fallbackCards;
+const imageUrl = data?.image ? urlFor(data.image).url() : '/img/luft-wasser-waermepumpe.jpg';
+const imageAlt = data?.imageAlt || 'Luft-Wasser-Wärmepumpe Aussengerät';
+const headline = data?.headline || 'Warum wir auf Luft-Wasser-Wärmepumpen setzen';
+const introText = data?.introText || 'Erdsonden-Wärmepumpen haben ihre Berechtigung – für bestimmte Anwendungen sind sie nach wie vor eine solide Wahl. Bei den meisten Heizungssanierungen im Raum Zürich und Winterthur erweist sich die Luft-Wasser-Wärmepumpe jedoch als die pragmatischere und oft auch wirtschaftlichere Lösung.';
+const ctaHeadline = data?.ctaHeadline || 'Welches System passt zu Ihrem Gebäude?';
+const ctaText = data?.ctaText || 'Jetzt beraten lassen';
+const ctaLink = data?.ctaLink || '#contact';
+const calcHintText = data?.calcHintText || 'Wie viel können Sie mit einer Wärmepumpe sparen?';
+const calcHintButtonText = data?.calcHintButtonText || 'Zum Kostenrechner →';
+const calcHintButtonLink = data?.calcHintButtonLink || '#calculator';
 ---
 <section class="why section-padding" id="why">
   <div class="container">
@@ -7,47 +65,36 @@
     <!-- Intro mit Bild -->
     <div class="why-hero fade-up">
       <div>
-        <h2>Warum wir auf Luft-Wasser-Wärmepumpen setzen</h2>
-        <p style="color: var(--mid-gray);">Erdsonden-Wärmepumpen haben ihre Berechtigung – für bestimmte Anwendungen sind sie nach wie vor eine solide Wahl. Bei den meisten Heizungssanierungen im Raum Zürich und Winterthur erweist sich die Luft-Wasser-Wärmepumpe jedoch als die pragmatischere und oft auch wirtschaftlichere Lösung.</p>
+        <h2>{headline}</h2>
+        <p style="color: var(--mid-gray);">{introText}</p>
       </div>
       <div class="why-hero-img">
         <!-- Bildplatzhalter: Moderne Luft-Wasser-Wärmepumpe an Einfamilienhaus -->
-        <img src="/img/luft-wasser-waermepumpe.jpg" alt="Luft-Wasser-Wärmepumpe Aussengerät">
+        <img src={imageUrl} alt={imageAlt}>
       </div>
     </div>
 
     <!-- 4 Karten -->
     <div class="why-grid">
-      <div class="why-card fade-up">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
-        <h4>Kein Bewilligungsverfahren</h4>
-        <p>Da keine Erdsondenbohrung erforderlich ist, entfällt das aufwändige Baubewilligungsverfahren. Das verkürzt die Projektlaufzeit um Wochen und umgeht mögliche Einschränkungen im Grundwasserschutz.</p>
-      </div>
-      <div class="why-card fade-up" style="transition-delay: 0.1s;">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-        <h4>Tiefere Investitionskosten</h4>
-        <p>Ohne Bohrung fallen die Gesamtkosten spürbar tiefer aus. Gleichzeitig arbeiten moderne Luft-Wasser-Wärmepumpen auch bei niedrigen Aussentemperaturen effizient und zuverlässig.</p>
-      </div>
-      <div class="why-card fade-up" style="transition-delay: 0.2s;">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
-        <h4>Optimale Kombination mit Solarstrom</h4>
-        <p>Luft-Wasser-Wärmepumpen lassen sich ideal mit einer Photovoltaikanlage koppeln. Das steigert den Eigenverbrauch und senkt die laufenden Energiekosten nachhaltig.</p>
-      </div>
-      <div class="why-card fade-up" style="transition-delay: 0.3s;">
-        <div class="why-icon"><svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg></div>
-        <h4>Kühlung im Sommer inklusive</h4>
-        <p>Viele Luft-Wasser-Systeme bieten die Möglichkeit, im Sommer aktiv zu kühlen – eine Funktion, die angesichts steigender Temperaturen zunehmend an Bedeutung gewinnt.</p>
-      </div>
+      {cardsToDisplay.map((card, index) => (
+        <div class="why-card fade-up" style={index > 0 ? `transition-delay: ${index * 0.1}s;` : ''}>
+          <div class="why-icon">
+            <svg viewBox="0 0 24 24" set:html={card.iconSvg} />
+          </div>
+          <h4>{card.title}</h4>
+          <p>{card.description}</p>
+        </div>
+      ))}
     </div>
 
     <div class="why-cta-row fade-up">
       <div>
-        <p style="font-size: 18px; font-weight: 600; color: var(--dark); margin-bottom: 16px;">Welches System passt zu Ihrem Gebäude?</p>
-        <a href="#contact" class="btn btn-primary btn-cta">Jetzt beraten lassen</a>
+        <p style="font-size: 18px; font-weight: 600; color: var(--dark); margin-bottom: 16px;">{ctaHeadline}</p>
+        <a href={ctaLink} class="btn btn-primary btn-cta">{ctaText}</a>
       </div>
       <div class="why-calc-hint">
-        <p>Wie viel können Sie mit einer Wärmepumpe sparen?</p>
-        <a href="#calculator" class="btn btn-outline-dark btn-cta">Zum Kostenrechner →</a>
+        <p>{calcHintText}</p>
+        <a href={calcHintButtonLink} class="btn btn-outline-dark btn-cta">{calcHintButtonText}</a>
       </div>
     </div>
 

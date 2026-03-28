@@ -1,12 +1,46 @@
 ---
-// Stromkosten-Rechner – komplett clientseitig
+// Stromkosten-Rechner - komplett clientseitig
+// Props from Sanity CMS calculatorSection
+interface Props {
+  data?: {
+    headline?: string;
+    subheadline?: string;
+    description?: string;
+    savingLabel?: string;
+    disclaimer?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    defaultArea?: number;
+    defaultElecPrice?: number;
+    defaultOilPrice?: number;
+    defaultGasPrice?: number;
+    jaz?: number;
+  };
+}
+
+const {
+  data = {
+    headline: 'Kostenrechner',
+    subheadline: 'Was kostet eine Wärmepumpe im Betrieb?',
+    description: 'Schätzen Sie Ihre jährlichen Heizkosten mit einer Luft-Wasser-Wärmepumpe - und vergleichen Sie mit Ihrer aktuellen Heizung.',
+    savingLabel: 'Ihre geschätzte Einsparung pro Jahr',
+    disclaimer: 'Grobe Schätzung basierend auf Durchschnittswerten. Die tatsächlichen Kosten hängen von Gebäude, Anlage und Nutzungsverhalten ab. Gerne berechnen wir Ihre Situation bei einer Beratung vor Ort.',
+    ctaText: 'Persönliche Berechnung anfragen',
+    ctaLink: '#contact',
+    defaultArea: 160,
+    defaultElecPrice: 27,
+    defaultOilPrice: 120,
+    defaultGasPrice: 13,
+    jaz: 3.2,
+  }
+} = Astro.props;
 ---
 <section class="calculator section-padding" id="calculator">
   <div class="container">
     <div class="text-center fade-up" style="margin-bottom: 48px;">
-      <h2>Kostenrechner</h2>
-      <p class="section-subheading">Was kostet eine Wärmepumpe im Betrieb?</p>
-      <p style="color: var(--mid-gray); max-width: 600px; margin: 0 auto;">Schätzen Sie Ihre jährlichen Heizkosten mit einer Luft-Wasser-Wärmepumpe – und vergleichen Sie mit Ihrer aktuellen Heizung.</p>
+      <h2>{data.headline}</h2>
+      <p class="section-subheading">{data.subheadline}</p>
+      <p style="color: var(--mid-gray); max-width: 600px; margin: 0 auto;">{data.description}</p>
     </div>
 
     <div class="calc-grid fade-up">
@@ -17,8 +51,8 @@
         <div class="calc-field">
           <label for="calc-area">Wohnfläche</label>
           <div class="calc-slider-row">
-            <input type="range" id="calc-area" min="60" max="350" value="160" step="10" class="calc-slider">
-            <span class="calc-value" id="calc-area-val">160 m²</span>
+            <input type="range" id="calc-area" min="60" max="350" value={data.defaultArea} step="10" class="calc-slider">
+            <span class="calc-value" id="calc-area-val">{data.defaultArea} m²</span>
           </div>
         </div>
 
@@ -42,20 +76,20 @@
         <div class="calc-field">
           <label for="calc-elec">Strompreis</label>
           <div class="calc-slider-row">
-            <input type="range" id="calc-elec" min="15" max="45" value="27" step="1" class="calc-slider">
-            <span class="calc-value" id="calc-elec-val">0.27 CHF/kWh</span>
+            <input type="range" id="calc-elec" min="15" max="45" value={data.defaultElecPrice} step="1" class="calc-slider">
+            <span class="calc-value" id="calc-elec-val">{(data.defaultElecPrice / 100).toFixed(2)} CHF/kWh</span>
           </div>
         </div>
 
         <div class="calc-field">
           <label for="calc-oil">Heizölpreis</label>
           <div class="calc-slider-row" id="calc-oil-row">
-            <input type="range" id="calc-oil" min="80" max="180" value="120" step="5" class="calc-slider">
-            <span class="calc-value" id="calc-oil-val">1.20 CHF/l</span>
+            <input type="range" id="calc-oil" min="80" max="180" value={data.defaultOilPrice} step="5" class="calc-slider">
+            <span class="calc-value" id="calc-oil-val">{(data.defaultOilPrice / 100).toFixed(2)} CHF/l</span>
           </div>
           <div class="calc-slider-row" id="calc-gas-row" style="display: none;">
-            <input type="range" id="calc-gas" min="8" max="20" value="13" step="1" class="calc-slider">
-            <span class="calc-value" id="calc-gas-val">0.13 CHF/kWh</span>
+            <input type="range" id="calc-gas" min="8" max="20" value={data.defaultGasPrice} step="1" class="calc-slider">
+            <span class="calc-value" id="calc-gas-val">{(data.defaultGasPrice / 100).toFixed(2)} CHF/kWh</span>
           </div>
         </div>
 
@@ -64,7 +98,7 @@
       <!-- Ergebnisseite -->
       <div class="calc-results">
         <div class="calc-result-card">
-          <div class="calc-result-header">Ihre geschätzte Einsparung pro Jahr</div>
+          <div class="calc-result-header">{data.savingLabel}</div>
           <div class="calc-saving" id="calc-saving">CHF 1'440</div>
         </div>
 
@@ -74,22 +108,22 @@
             <span class="calc-data" id="calc-demand">14'400 kWh/Jahr</span>
           </div>
           <div class="calc-row">
-            <span class="calc-label">Stromverbrauch WP <span class="calc-hint">(JAZ ≈ 3.2)</span></span>
+            <span class="calc-label">Stromverbrauch WP <span class="calc-hint">(JAZ ~ {data.jaz})</span></span>
             <span class="calc-data" id="calc-wp-kwh">4'500 kWh/Jahr</span>
           </div>
           <div class="calc-divider"></div>
           <div class="calc-row calc-row-highlight">
-            <span class="calc-label">Jährl. Kosten Wärmepumpe</span>
+            <span class="calc-label">Jährliche Kosten Wärmepumpe</span>
             <span class="calc-data" id="calc-wp-cost">CHF 1'215</span>
           </div>
           <div class="calc-row calc-row-old">
-            <span class="calc-label">Jährl. Kosten <span id="calc-fuel-label">Ölheizung</span></span>
+            <span class="calc-label">Jährliche Kosten <span id="calc-fuel-label">Ölheizung</span></span>
             <span class="calc-data" id="calc-old-cost">CHF 2'655</span>
           </div>
         </div>
 
-        <p class="calc-disclaimer">Grobe Schätzung basierend auf Durchschnittswerten. Die tatsächlichen Kosten hängen von Gebäude, Anlage und Nutzungsverhalten ab. Gerne berechnen wir Ihre Situation bei einer Beratung vor Ort.</p>
-        <a href="#contact" class="btn btn-primary btn-cta-lg" style="margin-top: 16px;">Persönliche Berechnung anfragen</a>
+        <p class="calc-disclaimer">{data.disclaimer}</p>
+        <a href={data.ctaLink} class="btn btn-primary btn-cta-lg" style="margin-top: 16px;">{data.ctaText}</a>
       </div>
 
     </div>
@@ -97,7 +131,7 @@
 </section>
 
 <script is:inline>
-  /* Stromkosten-Rechner – clientseitige Berechnung */
+  /* Stromkosten-Rechner - clientseitige Berechnung */
   (function () {
     var areaSlider = document.getElementById('calc-area');
     var areaVal = document.getElementById('calc-area-val');

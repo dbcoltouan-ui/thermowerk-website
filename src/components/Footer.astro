@@ -1,43 +1,70 @@
 ---
-// Footer mit Links und Copyright – aktualisierte Navigation
+// Footer mit Links und Copyright – aktualisierte Navigation mit Sanity CMS Integration
+const { data, settings } = Astro.props;
+
+const brandText = data?.brandText || 'Wärmepumpen und Klimaanlagen für die Deutschschweiz. WPSM-zertifizierter Fachbetrieb aus Neftenbach.';
+const phone = settings?.phone || '+41 76 504 03 68';
+const email = settings?.emailPublic || settings?.email || 'info@thermowerk.ch';
+const companyLegal = settings?.companyLegalName || 'Gebäudetechnik Coltouan';
+const address = settings?.address || 'Rankstrasse 18';
+const plzCity = (settings?.plz && settings?.city) ? `${settings.plz} ${settings.city}` : '8413 Neftenbach';
+const serviceArea = settings?.serviceArea || 'ZH, SH, TG, AG, ZG, SZ, LU';
+const serviceAreaFormatted = serviceArea.split(',').map(s => s.trim()).join(' · ');
+const uid = settings?.uid || 'CHE-489.162.528';
+const logoAlt = settings?.logoAlt || 'Thermowerk';
+const copyrightText = data?.copyrightText || `2026 Thermowerk – Gebäudetechnik Coltouan · UID: ${uid}`;
+
+const defaultNavLinks = [
+  { label: 'Wärmepumpen', href: '/#why' },
+  { label: 'Klimaanlagen', href: '/#klima' },
+  { label: 'Über Uns', href: '/#about' },
+  { label: 'Förderung', href: '/#wpsm' },
+  { label: 'Kostenrechner', href: '/#calculator' },
+  { label: 'Kontakt', href: '/#contact' },
+];
+const navLinks = data?.navLinks?.length ? data.navLinks : defaultNavLinks;
+
+const defaultLegalLinks = [
+  { label: 'Impressum', href: '/impressum' },
+  { label: 'Datenschutz', href: '#' },
+];
+const legalLinks = data?.legalLinks?.length ? data.legalLinks : defaultLegalLinks;
 ---
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo">
-          <a href="/"><img src="/img/logo.png" alt="Thermowerk"></a>
+          <a href="/"><img src="/img/logo.png" alt={logoAlt}></a>
         </div>
-        <p>Wärmepumpen und Klimaanlagen für die Deutschschweiz. WPSM-zertifizierter Fachbetrieb aus Neftenbach.</p>
+        <p>{brandText}</p>
       </div>
       <div>
         <h4>Navigation</h4>
         <ul class="footer-links">
-          <li><a href="/#why">Wärmepumpen</a></li>
-          <li><a href="/#klima">Klimaanlagen</a></li>
-          <li><a href="/#about">Über Uns</a></li>
-          <li><a href="/#wpsm">Förderung</a></li>
-          <li><a href="/#calculator">Kostenrechner</a></li>
-          <li><a href="/#contact">Kontakt</a></li>
+          {navLinks.map((link) => (
+            <li><a href={link.href}>{link.label}</a></li>
+          ))}
         </ul>
       </div>
       <div>
         <h4>Kontakt</h4>
         <ul class="footer-links">
-          <li><a href="tel:+41765040368">+41 76 504 03 68</a></li>
-          <li><a href="mailto:info@thermowerk.ch">info@thermowerk.ch</a></li>
-          <li>Gebäudetechnik Coltouan</li>
-          <li>Rankstrasse 18, 8413 Neftenbach</li>
-          <li style="margin-top: 8px;">Einsatzgebiet:<br>ZH · SH · TG · AG · ZG · SZ · LU</li>
-          <li style="margin-top: 12px;"><a href="tel:+41765040368" class="footer-stoerung">Störung melden</a></li>
+          <li><a href={`tel:${phone.replace(/\s/g, '')}`}>{phone}</a></li>
+          <li><a href={`mailto:${email}`}>{email}</a></li>
+          <li>{companyLegal}</li>
+          <li>{address}, {plzCity}</li>
+          <li style="margin-top: 8px;">Einsatzgebiet:<br>{serviceAreaFormatted}</li>
+          <li style="margin-top: 12px;"><a href={`tel:${phone.replace(/\s/g, '')}`} class="footer-stoerung">Störung melden</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; 2026 Thermowerk – Gebäudetechnik Coltouan · UID: CHE-489.162.528</span>
+      <span>&copy; {copyrightText}</span>
       <div class="footer-legal">
-        <a href="/impressum">Impressum</a>
-        <a href="#">Datenschutz</a>
+        {legalLinks.map((link) => (
+          <a href={link.href}>{link.label}</a>
+        ))}
       </div>
     </div>
   </div>

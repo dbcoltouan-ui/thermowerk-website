@@ -1,41 +1,73 @@
 ---
-// 5-Schritte Ablauf – aktualisierte Texte
+interface Props {
+  data?: {
+    headline?: string;
+    steps?: Array<{
+      number?: string;
+      title?: string;
+      description?: string;
+    }>;
+    ctaPreText?: string;
+    ctaText?: string;
+    ctaLink?: string;
+  };
+}
+
+const { data } = Astro.props;
+
+// Fallback values
+const headline = data?.headline || 'Der Weg zu Ihrer geförderten Wärmepumpe';
+const steps = data?.steps || [
+  {
+    number: '01',
+    title: 'Vor-Ort-Beratung',
+    description: 'Wir verschaffen uns direkt bei Ihnen ein Bild: Gebäude, Ist-Zustand, Ihre Anforderungen. Auf dieser Grundlage erhalten Sie eine fundierte Ersteinschätzung, ob und wie sich Ihre bestehende Öl- oder Gasheizung durch eine moderne Wärmepumpe ersetzen lässt.'
+  },
+  {
+    number: '02',
+    title: 'Planung & Offerte',
+    description: 'Auf Basis einer detaillierten Heizlastberechnung und eines hydraulischen Abgleichs erarbeiten wir eine massgeschneiderte Offerte. Das Fördergesuch bereiten wir richtlinienkonform vor Baubeginn für Sie vor, reichen sämtliche Unterlagen ein und halten Sie über den Verlauf auf dem Laufenden.'
+  },
+  {
+    number: '03',
+    title: 'Ausführung & Montage',
+    description: 'Koordination, Organisation und Überwachung der gesamten Installation liegen in unserer Verantwortung – einschliesslich aller beteiligten Nebengewerke. Sie haben eine Ansprechperson für alles.'
+  },
+  {
+    number: '04',
+    title: 'Inbetriebnahme',
+    description: 'Ihre Anlage wird sorgfältig einreguliert, und Sie erhalten eine ausführliche Einweisung in die Bedienung. Gleichzeitig stellen wir den WPSM-Zertifikatsantrag und übergeben Ihnen die vollständige Förderdokumentation.'
+  },
+  {
+    number: '05',
+    title: 'Nachkontrolle & Optimierung',
+    description: 'Nach der ersten Heizperiode werten wir die Betriebsdaten Ihrer Wärmepumpe aus, justieren die Einstellungen und stellen sicher, dass die Anlage mit maximaler Effizienz arbeitet – damit Sie langfristig von tiefen Betriebskosten profitieren.'
+  }
+];
+const ctaPreText = data?.ctaPreText || 'Ihr Projekt beginnt mit einem Gespräch.';
+const ctaText = data?.ctaText || 'Beratung anfragen';
+const ctaLink = data?.ctaLink || '#contact';
 ---
 <section class="steps section-padding" id="steps">
   <div class="container">
     <div class="text-center fade-up">
-      <h2>Der Weg zu Ihrer geförderten Wärmepumpe</h2>
+      <h2>{headline}</h2>
     </div>
     <div class="steps-grid">
-      <div class="step-card fade-up">
-        <div class="step-number">01</div>
-        <h3>Vor-Ort-Beratung</h3>
-        <p>Wir verschaffen uns direkt bei Ihnen ein Bild: Gebäude, Ist-Zustand, Ihre Anforderungen. Auf dieser Grundlage erhalten Sie eine fundierte Ersteinschätzung, ob und wie sich Ihre bestehende Öl- oder Gasheizung durch eine moderne Wärmepumpe ersetzen lässt.</p>
-      </div>
-      <div class="step-card fade-up" style="transition-delay: 0.1s;">
-        <div class="step-number">02</div>
-        <h3>Planung & Offerte</h3>
-        <p>Auf Basis einer detaillierten Heizlastberechnung und eines hydraulischen Abgleichs erarbeiten wir eine massgeschneiderte Offerte. Das Fördergesuch bereiten wir richtlinienkonform vor Baubeginn für Sie vor, reichen sämtliche Unterlagen ein und halten Sie über den Verlauf auf dem Laufenden.</p>
-      </div>
-      <div class="step-card fade-up" style="transition-delay: 0.2s;">
-        <div class="step-number">03</div>
-        <h3>Ausführung & Montage</h3>
-        <p>Koordination, Organisation und Überwachung der gesamten Installation liegen in unserer Verantwortung – einschliesslich aller beteiligten Nebengewerke. Sie haben eine Ansprechperson für alles.</p>
-      </div>
-      <div class="step-card fade-up" style="transition-delay: 0.3s;">
-        <div class="step-number">04</div>
-        <h3>Inbetriebnahme</h3>
-        <p>Ihre Anlage wird sorgfältig einreguliert, und Sie erhalten eine ausführliche Einweisung in die Bedienung. Gleichzeitig stellen wir den WPSM-Zertifikatsantrag und übergeben Ihnen die vollständige Förderdokumentation.</p>
-      </div>
-      <div class="step-card fade-up" style="transition-delay: 0.4s;">
-        <div class="step-number">05</div>
-        <h3>Nachkontrolle & Optimierung</h3>
-        <p>Nach der ersten Heizperiode werten wir die Betriebsdaten Ihrer Wärmepumpe aus, justieren die Einstellungen und stellen sicher, dass die Anlage mit maximaler Effizienz arbeitet – damit Sie langfristig von tiefen Betriebskosten profitieren.</p>
-      </div>
+      {steps.map((step, index) => (
+        <div
+          class="step-card fade-up"
+          style={index > 0 ? `transition-delay: ${index * 0.1}s;` : ''}
+        >
+          <div class="step-number">{step.number || '00'}</div>
+          <h3>{step.title || 'Step'}</h3>
+          <p>{step.description || ''}</p>
+        </div>
+      ))}
     </div>
     <div class="steps-cta fade-up">
-      <p style="color: var(--mid-gray); margin-bottom: 20px;">Ihr Projekt beginnt mit einem Gespräch.</p>
-      <a href="#contact" class="btn btn-primary btn-cta">Beratung anfragen</a>
+      <p style="color: var(--mid-gray); margin-bottom: 20px;">{ctaPreText}</p>
+      <a href={ctaLink} class="btn btn-primary btn-cta">{ctaText}</a>
     </div>
   </div>
 </section>

@@ -1,13 +1,79 @@
 ---
-// Herstellerlogos – schmale Leiste für Autorität
+import { urlFor } from '../lib/sanity';
+
+interface Props {
+  data?: {
+    logos?: Array<{
+      image?: any;
+      alt?: string;
+      size?: string;
+    }>;
+  };
+}
+
+const { data } = Astro.props as Props;
+
+// Fallback logos if no Sanity data provided
+const fallbackLogos = [
+  {
+    image: null,
+    alt: 'Oertli Wärmepumpen',
+    size: 'logo-sm',
+    src: '/img/logo-oertli.png',
+  },
+  {
+    image: null,
+    alt: 'Bosch Heiztechnik',
+    size: '',
+    src: '/img/logo-bosch.png',
+  },
+  {
+    image: null,
+    alt: 'Mitsubishi Electric Klimaanlagen',
+    size: '',
+    src: '/img/logo-mitsubishi.png',
+  },
+  {
+    image: null,
+    alt: 'Panasonic Klimatechnik',
+    size: 'logo-md',
+    src: '/img/logo-panasonic.png',
+  },
+];
+
+// Use Sanity data if available, otherwise use fallback
+const logos = data?.logos && data.logos.length > 0 ? data.logos : fallbackLogos;
+
+// Helper function to get image src
+function getImageSrc(logo: any): string {
+  if (logo.image && typeof logo.image === 'object') {
+    return urlFor(logo.image).url();
+  }
+  return logo.src || '/img/logo-placeholder.png';
+}
+
+// Helper function to get size class
+function getSizeClass(size?: string): string {
+  return size ? size : '';
+}
 ---
 <section class="logos-bar">
   <div class="container">
     <div class="logos-track">
-      <img src="/img/logo-oertli.png" alt="Oertli Wärmepumpen" class="manufacturer-logo logo-sm" loading="lazy">
-      <img src="/img/logo-bosch.png" alt="Bosch Heiztechnik" class="manufacturer-logo" loading="lazy">
-      <img src="/img/logo-mitsubishi.png" alt="Mitsubishi Electric Klimaanlagen" class="manufacturer-logo" loading="lazy">
-      <img src="/img/logo-panasonic.png" alt="Panasonic Klimatechnik" class="manufacturer-logo logo-md" loading="lazy">
+      {logos.map((logo) => {
+        const imageSrc = getImageSrc(logo);
+        const sizeClass = getSizeClass(logo.size);
+        const classString = `manufacturer-logo ${sizeClass}`.trim();
+        
+        return (
+          <img
+            src={imageSrc}
+            alt={logo.alt || 'Manufacturer logo'}
+            class={classString}
+            loading="lazy"
+          />
+        );
+      })}
     </div>
   </div>
 </section>

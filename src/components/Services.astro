@@ -1,48 +1,91 @@
 ---
-// Leistungen im Detail – 3 Karten mit Bild oben (kaeltech-Style)
+import { urlFor } from '../lib/sanity';
+
+interface ServiceItem {
+  title: string;
+  description: string;
+  image: any; // Sanity image object
+  imageAlt: string;
+  link: string;
+  linkText: string;
+}
+
+interface Props {
+  data?: {
+    headline?: string;
+    services?: ServiceItem[];
+  };
+}
+
+const { data } = Astro.props as Props;
+
+// Fallback values
+const headline = data?.headline ?? 'Unsere Leistungen';
+const services = data?.services ?? [
+  {
+    title: 'Wärmepumpen',
+    description: 'Heizungsersatz mit System - von der Beratung über die Förderabwicklung bis zur optimierten Anlage. WPSM-zertifiziert und auf Effizienz ausgelegt.',
+    image: null,
+    imageAlt: 'Wärmepumpe Installation am Einfamilienhaus',
+    link: '#why',
+    linkText: 'Mehr erfahren ',
+  },
+  {
+    title: 'Klimaanlagen',
+    description: 'Split- und Multisplit-Systeme für Wohnräume, Büros und Gewerbe - geplant und installiert mit demselben Fachwissen aus der Kältetechnik.',
+    image: null,
+    imageAlt: 'Klimaanlage Montage im Wohnraum',
+    link: '#klima',
+    linkText: 'Mehr erfahren ',
+  },
+  {
+    title: 'Service & Wartung',
+    description: 'Regelmässige Wartung, Störungsbehebung und Optimierung bestehender Anlagen - damit Ihr System dauerhaft zuverlässig und effizient arbeitet.',
+    image: null,
+    imageAlt: 'Service und Wartung an Wärmepumpe',
+    link: '#contact',
+    linkText: 'Mehr erfahren ',
+  },
+];
+
+// Helper function to get image URL
+const getImageUrl = (service: ServiceItem, index: number) => {
+  if (service.image) {
+    try {
+      return urlFor(service.image).url();
+    } catch (e) {
+      // Fallback to local images if Sanity URL fails
+    }
+  }
+  
+  // Fallback local paths
+  const fallbackImages = [
+    '/img/waermepumpe-installation.jpg',
+    '/img/klimaanlage-montage.jpg',
+    '/img/service-wartung.jpg',
+  ];
+  
+  return fallbackImages[index] || '/img/placeholder.jpg';
+};
 ---
 <section class="services section-padding" id="services">
   <div class="container">
     <div class="text-center fade-up">
-      <h2>Unsere Leistungen</h2>
+      <h2>{headline}</h2>
     </div>
     <div class="services-grid">
-
-      <a href="#why" class="service-card fade-up">
-        <div class="service-card-img">
-          <!-- Bildplatzhalter: Wärmepumpe an Einfamilienhaus, professionelle Installation -->
-          <img src="/img/waermepumpe-installation.jpg" alt="Wärmepumpe Installation am Einfamilienhaus">
-        </div>
-        <div class="service-card-body">
-          <h3>Wärmepumpen</h3>
-          <p>Heizungsersatz mit System – von der Beratung über die Förderabwicklung bis zur optimierten Anlage. WPSM-zertifiziert und auf Effizienz ausgelegt.</p>
-          <span class="service-link">Mehr erfahren →</span>
-        </div>
-      </a>
-
-      <a href="#klima" class="service-card fade-up" style="transition-delay: 0.1s;">
-        <div class="service-card-img">
-          <!-- Bildplatzhalter: Moderne Klimaanlage in Wohnraum -->
-          <img src="/img/klimaanlage-montage.jpg" alt="Klimaanlage Montage im Wohnraum">
-        </div>
-        <div class="service-card-body">
-          <h3>Klimaanlagen</h3>
-          <p>Split- und Multisplit-Systeme für Wohnräume, Büros und Gewerbe – geplant und installiert mit demselben Fachwissen aus der Kältetechnik.</p>
-          <span class="service-link">Mehr erfahren →</span>
-        </div>
-      </a>
-
-      <a href="#contact" class="service-card fade-up" style="transition-delay: 0.2s;">
-        <div class="service-card-img">
-          <img src="/img/service-wartung.jpg" alt="Service und Wartung an Wärmepumpe">
-        </div>
-        <div class="service-card-body">
-          <h3>Service & Wartung</h3>
-          <p>Regelmässige Wartung, Störungsbehebung und Optimierung bestehender Anlagen – damit Ihr System dauerhaft zuverlässig und effizient arbeitet.</p>
-          <span class="service-link">Mehr erfahren →</span>
-        </div>
-      </a>
-
+      {services.map((service, index) => (
+        <a href={service.link} class="service-card fade-up" style={index > 0 ? `transition-delay: ${index * 0.1}s;` : ''}>
+          <div class="service-card-img">
+            <img src={getImageUrl(service, index)} alt={service.imageAlt}>
+          </div>
+          <div class="service-card-body">
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
+            <span class="service-link">{service.linkText}</span>
+          </div>
+        </a>
+      ))}
     </div>
   </div>
 </section>

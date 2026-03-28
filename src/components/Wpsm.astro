@@ -1,5 +1,33 @@
 ---
-// WPSM Qualität & Zertifizierung – aktualisierte Texte
+interface Props {
+  data?: {
+    headline?: string;
+    bodyText?: Array<{ children?: Array<{ text?: string }> }>;
+    ctaText?: string;
+    ctaLink?: string;
+    badgeNumber?: number;
+    badgeText?: string;
+    badgeLabel?: string;
+  };
+}
+
+const {
+  data = {}
+} = Astro.props;
+
+const {
+  headline = 'Ihre Förderbeiträge – gesichert durch das WPSM-Zertifikat',
+  bodyText = [
+    { children: [{ text: 'Das Wärmepumpen-Systemmodul (WPSM) gilt als massgebender Schweizer Qualitätsstandard für Planung und Installation von Wärmepumpenanlagen. Getragen wird das Programm von der Fachvereinigung Wärmepumpen Schweiz (FWS), suissetec, GebäudeKlima Schweiz und EnergieSchweiz.' }] },
+    { children: [{ text: 'Was das für Sie als Eigentümerin oder Eigentümer bedeutet: In den meisten Kantonen – darunter Zürich – ist das WPSM-Anlagezertifikat Voraussetzung für die Auszahlung kantonaler Förderbeiträge. Ohne Zertifikat keine Fördergelder. Je nach Projekt kann es dabei um mehrere tausend Franken gehen.' }] },
+    { children: [{ text: 'Thermowerk ist WPSM-zertifiziert und übernimmt den gesamten Prozess – von der normgerechten Planung über die dokumentierte Inbetriebnahme bis zur Einreichung des Zertifikatsantrags. So stellen wir sicher, dass Ihnen keine Fördermittel entgehen.' }] }
+  ],
+  ctaText = 'Förderberatung anfragen',
+  ctaLink = '#contact',
+  badgeNumber = 26,
+  badgeText = 'Kantone verlangen das WPSM als Voraussetzung für Förderbeiträge',
+  badgeLabel = 'WPSM-zertifizierter Fachbetrieb'
+} = data;
 ---
 <section class="wpsm section-padding" id="wpsm">
   <div class="container">
@@ -7,21 +35,20 @@
 
       <!-- Text -->
       <div class="fade-up">
-        <h2>Ihre Förderbeiträge – gesichert durch das WPSM-Zertifikat</h2>
-        <p>Das Wärmepumpen-Systemmodul (WPSM) gilt als massgebender Schweizer Qualitätsstandard für Planung und Installation von Wärmepumpenanlagen. Getragen wird das Programm von der Fachvereinigung Wärmepumpen Schweiz (FWS), suissetec, GebäudeKlima Schweiz und EnergieSchweiz.</p>
+        <h2>{headline}</h2>
+        {bodyText.map((block) => (
+          <p>{block.children?.map((span) => span.text).join('')}</p>
+        ))}
         <br>
-        <p>Was das für Sie als Eigentümerin oder Eigentümer bedeutet: In den meisten Kantonen – darunter Zürich – ist das WPSM-Anlagezertifikat Voraussetzung für die Auszahlung kantonaler Förderbeiträge. Ohne Zertifikat keine Fördergelder. Je nach Projekt kann es dabei um mehrere tausend Franken gehen.</p>
-        <br>
-        <p>Thermowerk ist WPSM-zertifiziert und übernimmt den gesamten Prozess – von der normgerechten Planung über die dokumentierte Inbetriebnahme bis zur Einreichung des Zertifikatsantrags. So stellen wir sicher, dass Ihnen keine Fördermittel entgehen.</p>
-        <a href="#contact" class="btn btn-primary btn-cta-lg" style="margin-top: 28px;">Förderberatung anfragen</a>
+        <a href={ctaLink} class="btn btn-primary btn-cta-lg" style="margin-top: 28px;">{ctaText}</a>
       </div>
 
       <!-- Badge -->
       <div class="fade-up" style="transition-delay: 0.15s;">
         <div class="wpsm-badge">
-          <div class="wpsm-badge-number" data-count="26">0</div>
-          <div class="wpsm-badge-text">Kantone verlangen das WPSM als Voraussetzung für Förderbeiträge</div>
-          <div class="wpsm-badge-label">WPSM-zertifizierter Fachbetrieb</div>
+          <div class="wpsm-badge-number" data-count={badgeNumber}>0</div>
+          <div class="wpsm-badge-text">{badgeText}</div>
+          <div class="wpsm-badge-label">{badgeLabel}</div>
         </div>
       </div>
 

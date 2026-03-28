@@ -1,21 +1,69 @@
 ---
-// Hero-Section – dunkler Overlay-Stil mit gestaffelter H1
+import { urlFor } from '../lib/sanity';
+
+interface Props {
+  data?: {
+    headlineLine1?: string;
+    headlineLine2?: string;
+    headlineLine3?: string;
+    subtitle?: string;
+    text?: string;
+    badgeText?: string;
+    ctaPrimary?: {
+      text?: string;
+      link?: string;
+    };
+    ctaSecondary?: {
+      text?: string;
+      link?: string;
+    };
+    backgroundDesktop?: any;
+    backgroundMobile?: any;
+    overlayOpacity?: number;
+    overlayColor?: string;
+  };
+}
+
+const { data } = Astro.props as Props;
+
+// Fallback values
+const headlineLine1 = data?.headlineLine1 || 'Ihre Wärmepumpe.';
+const headlineLine2 = data?.headlineLine2 || 'Ihre Klimaanlage.';
+const headlineLine3 = data?.headlineLine3 || 'Unser Handwerk.';
+const subtitle = data?.subtitle || 'Mit kompletter Förderabwicklung.';
+const text = data?.text || 'WPSM-zertifiziert. Von der Beratung bis zur Förderabwicklung – alles aus einer Hand.';
+const ctaPrimaryText = data?.ctaPrimary?.text || 'Beratung anfragen';
+const ctaPrimaryLink = data?.ctaPrimary?.link || '#contact';
+const ctaSecondaryText = data?.ctaSecondary?.text || 'Kostenrechner';
+const ctaSecondaryLink = data?.ctaSecondary?.link || '#calculator';
+
+// Image handling with fallbacks
+const desktopImg = data?.backgroundDesktop 
+  ? urlFor(data.backgroundDesktop).url() 
+  : '/img/hero-desktop.jpeg';
+const mobileImg = data?.backgroundMobile 
+  ? urlFor(data.backgroundMobile).url() 
+  : '/img/hero-mobile.jpeg';
+
+const overlayOpacity = data?.overlayOpacity ?? 0.65;
+const overlayColor = data?.overlayColor || '27, 42, 74';
+const overlayStyle = `rgba(${overlayColor}, ${overlayOpacity})`;
 ---
 <section class="hero" id="hero">
   <div class="hero-bg">
-    <img src="/img/hero-desktop.jpeg" alt="Wärmepumpe Beratung vor Ort" class="hero-img-desktop">
-    <img src="/img/hero-mobile.jpeg" alt="Wärmepumpe Service" class="hero-img-mobile">
+    <img src={desktopImg} alt="Wärmepumpe Beratung vor Ort" class="hero-img-desktop">
+    <img src={mobileImg} alt="Wärmepumpe Service" class="hero-img-mobile">
   </div>
-  <div class="hero-overlay"></div>
+  <div class="hero-overlay" style={`background-color: ${overlayStyle}`}></div>
   <div class="hero-inner">
     <div class="hero-content">
-      <h1 class="fade-up">Ihre Wärmepumpe.<br><span class="h1-step2">Ihre Klimaanlage.</span><br><span class="h1-step3">Unser Handwerk.</span></h1>
+      <h1 class="fade-up">{headlineLine1}<br><span class="h1-step2">{headlineLine2}</span><br><span class="h1-step3">{headlineLine3}</span></h1>
       <div class="hero-box">
-        <p class="hero-subtitle fade-up">Mit kompletter Förderabwicklung.</p>
-        <p class="hero-text fade-up">WPSM-zertifiziert. Von der Beratung bis zur Förderabwicklung — alles aus einer Hand.</p>
+        <p class="hero-subtitle fade-up">{subtitle}</p>
+        <p class="hero-text fade-up">{text}</p>
         <div class="hero-buttons fade-up">
-          <a href="#contact" class="btn btn-primary">Beratung anfragen</a>
-          <a href="#calculator" class="btn btn-outline-dark">Kostenrechner</a>
+          <a href={ctaPrimaryLink} class="btn btn-primary">{ctaPrimaryText}</a>
+          <a href={ctaSecondaryLink} class="btn btn-outline-dark">{ctaSecondaryText}</a>
         </div>
       </div>
     </div>

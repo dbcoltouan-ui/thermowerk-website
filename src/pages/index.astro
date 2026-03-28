@@ -1,5 +1,5 @@
 ---
-// Hauptseite – neue Section-Reihenfolge
+// Hauptseite - Daten aus Sanity CMS
 import Layout from '../layouts/Layout.astro';
 import Topbar from '../components/Topbar.astro';
 import Header from '../components/Header.astro';
@@ -15,22 +15,30 @@ import About from '../components/About.astro';
 import Region from '../components/Region.astro';
 import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
+import { getAllSections } from '../lib/sanity';
+
+let data: any = {};
+try {
+  data = await getAllSections() || {};
+} catch (e) {
+  console.warn('Sanity fetch failed, using fallback content:', e);
+}
 ---
 <Layout>
-  <Topbar />
-  <Header />
-  <Hero />
-  <Services />
-  <ManufacturerLogos />
-  <Wpsm />
-  <Steps />
-  <About />
-  <WhyHeatpump />
-  <Klima />
-  <Calculator />
-  <Region />
-  <Contact />
-  <Footer />
+  <Topbar settings={data.settings} />
+  <Header nav={data.navigation} />
+  <Hero data={data.hero} />
+  <Services data={data.services} />
+  <ManufacturerLogos data={data.logos} />
+  <Wpsm data={data.wpsm} />
+  <Steps data={data.steps} />
+  <About data={data.about} />
+  <WhyHeatpump data={data.why} />
+  <Klima data={data.klima} />
+  <Calculator data={data.calculator} />
+  <Region data={data.region} />
+  <Contact data={data.contact} settings={data.settings} />
+  <Footer data={data.footer} settings={data.settings} />
 
   <!-- Globales JavaScript: Header-Scroll, Mobile-Menü, Fade-Up-Animationen, Smooth Scroll -->
   <script is:inline>

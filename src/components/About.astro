@@ -1,66 +1,74 @@
 ---
-// Über Thermowerk – Bild rechts neben Text (Desktop), Mobile Bild zuerst
+import { urlFor } from '../lib/sanity';
+interface Props { data?: any; }
+const { data } = Astro.props;
+
+const headline = data?.headline || 'Über Thermowerk';
+const subheadline = data?.subheadline || 'Aus Neftenbach, für die ganze Deutschschweiz.';
+const imageUrl = data?.image ? urlFor(data.image).width(600).url() : '/img/inhaber-thermowerk.jpg';
+const imageAlt = data?.imageAlt || 'Daniel Coltouan – Inhaber Thermowerk Neftenbach';
+const uspHeading = data?.uspHeading || 'Was Sie von uns erwarten dürfen:';
+const ctaText = data?.ctaText || 'Beratung vor Ort vereinbaren';
+const ctaLink = data?.ctaLink || '#contact';
+
+const fallbackIntro = [
+  'Hinter Thermowerk steht die Gebäudetechnik Coltouan – ein Unternehmen, das seine Ursprünge in der Kälte- und Klimatechnik hat. Die Energiewende und der wachsende Bedarf an erneuerbaren Lösungen haben uns dazu bewogen, unser Wissen gezielt in die Wärmepumpentechnik einzubringen. Dabei setzen wir konsequent auf ökologische Kältemittel der neuesten Generation, damit unsere Anlagen auch künftige Anforderungen an Nachhaltigkeit und Effizienz übertreffen.',
+  'Unser Anspruch geht über die reine Installation hinaus. Wir begleiten jedes Projekt von der ersten Analyse über die Umsetzung bis zur Feinabstimmung im laufenden Betrieb – so lange, bis Ihre Anlage ihr volles Potenzial ausschöpft. Dabei steht Ihnen von Anfang bis Ende eine feste Ansprechperson zur Seite, die Ihr Vorhaben im Detail kennt. Kein Weiterleiten, kein Wiederholen.',
+];
+const introTexts = data?.introText ? data.introText.map((b: any) => b.children?.map((s: any) => s.text).join('') || '') : fallbackIntro;
+
+const fallbackClosing = [
+  'Wir sind überzeugt, dass gute Gebäudetechnik dort beginnt, wo man genau zuhört. Jedes Gebäude bringt andere Voraussetzungen mit, jeder Auftraggeber andere Erwartungen. Genau das treibt uns an – in den Kantonen Zürich, Aargau, Thurgau, Schaffhausen, Zug, Schwyz und Luzern entwickeln wir Lösungen für Heizung, Kühlung und Lüftung, die auf die jeweilige Situation zugeschnitten sind und ökologisch wie wirtschaftlich überzeugen.',
+  'Unser Ziel ist nicht nur, den heutigen Bedarf zu decken. Wir wollen mit jeder Anlage einen Schritt weiterdenken – hin zu einer Gebäudetechnik, die nachhaltig funktioniert und sich den Anforderungen von morgen gewachsen zeigt.',
+];
+const closingTexts = data?.closingText ? data.closingText.map((b: any) => b.children?.map((s: any) => s.text).join('') || '') : fallbackClosing;
+
+const fallbackUsps = [
+  { title: 'Individuell', description: 'Jedes Konzept wird exakt auf Ihre Gegebenheiten abgestimmt. Denn eine Investition, die langfristig überzeugen soll, verdient eine Lösung, die von Grund auf zu Ihnen passt.', iconSvg: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+  { title: 'Höchste Standards', description: 'Als WPSM-zertifizierter Betrieb arbeiten wir nach den strengsten Schweizer Vorgaben – und setzen diese mit der nötigen Sorgfalt um, damit Effizienz und Betriebssicherheit Ihrer Anlage gewährleistet sind.', iconSvg: '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+  { title: 'Aus einer Hand', description: 'Planung, Koordination und Umsetzung aller Gewerke übernehmen wir vollständig. Sie behalten den Überblick, ohne sich um jedes Detail kümmern zu müssen.', iconSvg: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+  { title: 'Persönlich', description: 'Eine Fachperson, ein Projekt, ein Draht. Sie rufen an, wir wissen Bescheid.', iconSvg: '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/>' },
+];
+const usps = data?.usps || fallbackUsps;
 ---
 <section class="about section-padding" id="about">
   <div class="container">
 
     <div class="about-intro fade-up">
       <div class="about-intro-text">
-        <h2>Über Thermowerk</h2>
-        <p class="section-subheading">Aus Neftenbach, für die ganze Deutschschweiz.</p>
-        <p>Hinter Thermowerk steht die Gebäudetechnik Coltouan – ein Unternehmen, das seine Ursprünge in der Kälte- und Klimatechnik hat. Die Energiewende und der wachsende Bedarf an erneuerbaren Lösungen haben uns dazu bewogen, unser Wissen gezielt in die Wärmepumpentechnik einzubringen. Dabei setzen wir konsequent auf ökologische Kältemittel der neuesten Generation, damit unsere Anlagen auch künftige Anforderungen an Nachhaltigkeit und Effizienz übertreffen.</p>
-        <p style="margin-top: 16px;">Unser Anspruch geht über die reine Installation hinaus. Wir begleiten jedes Projekt von der ersten Analyse über die Umsetzung bis zur Feinabstimmung im laufenden Betrieb – so lange, bis Ihre Anlage ihr volles Potenzial ausschöpft. Dabei steht Ihnen von Anfang bis Ende eine feste Ansprechperson zur Seite, die Ihr Vorhaben im Detail kennt. Kein Weiterleiten, kein Wiederholen.</p>
+        <h2>{headline}</h2>
+        <p class="section-subheading">{subheadline}</p>
+        {introTexts.map((text: string, i: number) => (
+          <p style={i > 0 ? 'margin-top: 16px;' : ''}>{text}</p>
+        ))}
       </div>
       <div class="about-intro-img">
-        <img src="/img/inhaber-thermowerk.jpg" alt="Daniel Coltouan – Inhaber Thermowerk Neftenbach" loading="lazy">
+        <img src={imageUrl} alt={imageAlt} loading="lazy">
       </div>
     </div>
 
     <!-- USP-Karten -->
     <div class="about-usp-heading fade-up">
-      <h3>Was Sie von uns erwarten dürfen:</h3>
+      <h3>{uspHeading}</h3>
     </div>
     <div class="about-usp-grid">
-
-      <div class="about-usp-card fade-up">
-        <div class="about-usp-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      {usps.map((usp: any, i: number) => (
+        <div class="about-usp-card fade-up" style={i > 0 ? `transition-delay: ${i * 0.1}s;` : ''}>
+          <div class="about-usp-icon">
+            <svg viewBox="0 0 24 24" set:html={usp.iconSvg} />
+          </div>
+          <h4>{usp.title}</h4>
+          <p>{usp.description}</p>
         </div>
-        <h4>Individuell</h4>
-        <p>Jedes Konzept wird exakt auf Ihre Gegebenheiten abgestimmt. Denn eine Investition, die langfristig überzeugen soll, verdient eine Lösung, die von Grund auf zu Ihnen passt.</p>
-      </div>
-
-      <div class="about-usp-card fade-up" style="transition-delay: 0.1s;">
-        <div class="about-usp-icon">
-          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <h4>Höchste Standards</h4>
-        <p>Als WPSM-zertifizierter Betrieb arbeiten wir nach den strengsten Schweizer Vorgaben – und setzen diese mit der nötigen Sorgfalt um, damit Effizienz und Betriebssicherheit Ihrer Anlage gewährleistet sind.</p>
-      </div>
-
-      <div class="about-usp-card fade-up" style="transition-delay: 0.2s;">
-        <div class="about-usp-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-        </div>
-        <h4>Aus einer Hand</h4>
-        <p>Planung, Koordination und Umsetzung aller Gewerke übernehmen wir vollständig. Sie behalten den Überblick, ohne sich um jedes Detail kümmern zu müssen.</p>
-      </div>
-
-      <div class="about-usp-card fade-up" style="transition-delay: 0.3s;">
-        <div class="about-usp-icon">
-          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/></svg>
-        </div>
-        <h4>Persönlich</h4>
-        <p>Eine Fachperson, ein Projekt, ein Draht. Sie rufen an, wir wissen Bescheid.</p>
-      </div>
-
+      ))}
     </div>
 
     <!-- Abschlusstext -->
     <div class="about-closing fade-up">
-      <p>Wir sind überzeugt, dass gute Gebäudetechnik dort beginnt, wo man genau zuhört. Jedes Gebäude bringt andere Voraussetzungen mit, jeder Auftraggeber andere Erwartungen. Genau das treibt uns an – in den Kantonen Zürich, Aargau, Thurgau, Schaffhausen, Zug, Schwyz und Luzern entwickeln wir Lösungen für Heizung, Kühlung und Lüftung, die auf die jeweilige Situation zugeschnitten sind und ökologisch wie wirtschaftlich überzeugen.</p>
-      <p style="margin-top: 16px;">Unser Ziel ist nicht nur, den heutigen Bedarf zu decken. Wir wollen mit jeder Anlage einen Schritt weiterdenken – hin zu einer Gebäudetechnik, die nachhaltig funktioniert und sich den Anforderungen von morgen gewachsen zeigt.</p>
-      <a href="#contact" class="btn btn-dark btn-cta-lg" style="margin-top: 28px;">Beratung vor Ort vereinbaren</a>
+      {closingTexts.map((text: string, i: number) => (
+        <p style={i > 0 ? 'margin-top: 16px;' : ''}>{text}</p>
+      ))}
+      <a href={ctaLink} class="btn btn-dark btn-cta-lg" style="margin-top: 28px;">{ctaText}</a>
     </div>
 
   </div>

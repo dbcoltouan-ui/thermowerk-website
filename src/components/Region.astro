@@ -1,38 +1,61 @@
 ---
 // Regionaler Service mit Google Maps
+// Accepts data prop from Sanity CMS with fallback to hardcoded values
+import type { AstroComponentFactory } from 'astro';
+
+const { data } = Astro.props;
+
+// Fallback text content
+const headline = data?.headline || 'Aus Neftenbach – für die ganze Region';
+const bodyText = data?.bodyText || 'Thermowerk hat seinen Sitz in Neftenbach, mitten im Zürcher Weinland. Von hier aus sind wir in Winterthur, Schaffhausen, im Thurgau, im Aargau und in weiteren Kantonen im Einsatz.';
+const ctaText = data?.ctaText || 'Kontakt aufnehmen';
+const ctaLink = data?.ctaLink || '#contact';
+const mapEmbedUrl = data?.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d172637.4!2d8.55!3d47.53!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479a9988e32d27eb%3A0xe0b5b5e4a0010!2s8413%20Neftenbach!5e0!3m2!1sde!2sch!4v1';
+
+// Default facts with SVG icons matching original content
+const defaultFacts = [
+  {
+    title: 'Keine Anfahrtskosten',
+    description: 'im Umkreis von 50 km ab Neftenbach.',
+    iconSvg: '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+  },
+  {
+    title: 'Reaktion innerhalb 24h',
+    description: 'bei Störungen im Servicegebiet.',
+    iconSvg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  },
+  {
+    title: 'Direkt erreichbar',
+    description: '– in der Regel melden wir uns am selben Tag.',
+    iconSvg: '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/></svg>'
+  }
+];
+
+// Use provided facts or fall back to defaults
+const facts = data?.facts?.length ? data.facts : defaultFacts;
 ---
+
 <section class="region section-padding" id="region">
   <div class="container">
     <div class="region-grid">
-
-      <!-- Text -->
       <div class="fade-up">
-        <h2>Aus Neftenbach – für die ganze Region</h2>
-        <p>Thermowerk hat seinen Sitz in Neftenbach, mitten im Zürcher Weinland. Von hier aus sind wir in Winterthur, Schaffhausen, im Thurgau, im Aargau und in weiteren Kantonen im Einsatz.</p>
+        <h2>{headline}</h2>
+        <p>{bodyText}</p>
         <div class="region-facts">
-          <div class="region-fact">
-            <div class="region-fact-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-            <div class="region-fact-text"><strong>Keine Anfahrtskosten</strong> im Umkreis von 50 km ab Neftenbach.</div>
-          </div>
-          <div class="region-fact">
-            <div class="region-fact-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div class="region-fact-text"><strong>Reaktion innerhalb 24h</strong> bei Störungen im Servicegebiet.</div>
-          </div>
-          <div class="region-fact">
-            <div class="region-fact-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/></svg></div>
-            <div class="region-fact-text"><strong>Direkt erreichbar</strong> – in der Regel melden wir uns am selben Tag.</div>
-          </div>
+          {facts.map((fact, index) => (
+            <div class="region-fact">
+              <div class="region-fact-icon" set:html={fact.iconSvg}></div>
+              <div class="region-fact-text"><strong>{fact.title}</strong> {fact.description}</div>
+            </div>
+          ))}
         </div>
-        <a href="#contact" class="btn btn-outline btn-cta">Kontakt aufnehmen</a>
+        <a href={ctaLink} class="btn btn-outline btn-cta">{ctaText}</a>
       </div>
-
-      <!-- Karte -->
       <div class="fade-up" style="transition-delay: 0.15s;">
         <div class="region-map">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d172637.4!2d8.55!3d47.53!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479a9988e32d27eb%3A0xe0b5b5e4a0010!2s8413%20Neftenbach!5e0!3m2!1sde!2sch!4v1" allowfullscreen="" loading="lazy"></iframe>
+          <iframe src={mapEmbedUrl} allowfullscreen="" loading="lazy"></iframe>
         </div>
       </div>
-
     </div>
   </div>
 </section>
