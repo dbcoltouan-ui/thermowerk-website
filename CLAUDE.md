@@ -1,5 +1,7 @@
 # Anweisung für Claude – Thermowerk Website
 
+> **WICHTIG:** Diese Datei ist die zentrale Wissensbasis für Claude. Jede neue Funktion, jedes neue Schema, jeder neue Workflow oder jede architektonische Änderung MUSS hier dokumentiert werden, sobald sie umgesetzt ist. So bleibt Claude in jeder neuen Session sofort auf dem aktuellen Stand.
+
 ## Stack
 - **Astro 5.5** – statisches Framework
 - **Cloudflare Pages** – Hosting, auto-deploy per GitHub Push (thermowerk-website.pages.dev)
@@ -19,7 +21,8 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Datenschutz: `src/pages/datenschutz.astro` (gleiche Struktur wie Impressum, lädt Sanity-Daten via `getPage()`)
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → enthält `SANITY_API_TOKEN`
-- Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien)
+- Cloudflare Pages Function: `functions/api/contact.js` (Kontaktformular → Sanity speichern)
+- Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien + `contactSubmission.ts` für Anfragen)
 - Sanity-Client + Hilfsfunktionen: `src/lib/sanity.ts` (enthält `getAllSections()`, `getSingleton()`, `getPage()`)
 - Sanity Studio Config: `sanity.config.ts`
 - Sanity CLI Config: `sanity.cli.ts`
@@ -91,7 +94,42 @@ Die `sanity.config.ts` definiert eine benutzerdefinierte Sidebar mit allen 16 Sc
 Folgende Variablen sind in Cloudflare Pages (Production) gesetzt:
 - `SANITY_DATASET` = `production`
 - `SANITY_PROJECT_ID` = `wpbatz1m`
-- Ggf. `SANITY_API_TOKEN` (falls private Daten geladen werden müssen)
+- `SANITY_API_TOKEN` = Editor-Token für Sanity-Schreibzugriff (wird von der Contact-Function gebraucht)
+- `WEB3FORMS_KEY` = Access Key für E-Mail-Benachrichtigungen (wird aktuell client-seitig genutzt, siehe CRM-Architektur)
+
+## Kontaktformular CRM
+
+### Architektur (Hybrid-Ansatz)
+Das Kontaktformular nutzt einen Hybrid-Ansatz wegen einer **Cloudflare-zu-Cloudflare Blockade** (Error 1106): Cloudflare Pages Functions können keine HTTP-Requests an andere Cloudflare-geschützte Domains senden (wie api.web3forms.com).
+
+**Ablauf beim Absenden:**
+1. JavaScript in `index.astro` fängt den Form-Submit ab (`e.preventDefault()`)
+2. **Parallel** werden zwei Requests gesendet:
+   - `fetch('/api/contact')` → Cloudflare Function → speichert in Sanity (server-seitig, braucht Token)
+   - `fetch('https://api.web3forms.com/submit')` → direkt vom Browser → sendet E-Mail (umgeht CF-Blockade)
+3. Erfolgsmeldung wird angezeigt, Formular ausgeblendet
+
+### Dateien
+| Datei | Funktion |
+|---|---|
+| `functions/api/contact.js` | Cloudflare Pages Function – nimmt JSON-POST entgegen, speichert in Sanity als `contactSubmission` |
+| `src/components/Contact.astro` | Formular-HTML mit `id="contactForm"`, Erfolgs-/Fehler-Divs |
+| `src/pages/index.astro` | JavaScript für Form-Submit (Sanity + Web3Forms parallel) |
+| `sanity/schemas/contactSubmission.ts` | Sanity-Schema für Anfragen mit Status-Tracking (neu/bearbeitung/erledigt) |
+
+### Sanity Studio: Kontaktanfragen
+- Letzter Eintrag in der Sidebar: **Kontaktanfragen**
+- Kein Singleton – zeigt alle eingegangenen Anfragen als Liste (neueste zuerst)
+- Felder: Name, E-Mail, Telefon, Interesse, Nachricht, Eingegangen am, Status (Radio: Neu/In Bearbeitung/Erledigt), Interne Notizen
+- Preview zeigt Emoji je nach Status: 🔴 Neu, 🟡 In Bearbeitung, ✅ Erledigt
+
+### Web3Forms Access Key
+- Registriert auf `db.coltouan@gmail.com` (private Mail, wird später auf Website-Mail umgestellt)
+- Key ist im Client-JS hardcoded (das ist bei Web3Forms so vorgesehen – Keys sind für client-seitige Nutzung gemacht)
+- E-Mail geht immer an die bei Web3Forms registrierte Adresse, unabhängig vom `email`-Feld im Formular
+
+### Bekannte Einschränkung
+- **Cloudflare Error 1106**: Cloudflare Pages Functions können NICHT an `api.web3forms.com` fetchen (weder JSON noch URL-encoded). Deshalb der Hybrid-Ansatz. Falls Web3Forms ersetzt wird, muss geprüft werden ob der neue Dienst auch hinter Cloudflare liegt.
 
 ## Wie Claude Änderungen macht
 1. Dateien lesen via **Read-Tool** aus dem gemounteten Pfad `/sessions/.../mnt/thermowerk-website/`
@@ -187,6 +225,7 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - **Sanity Portable Text**: Wird in einigen Feldern (About intro/closing, Wpsm bodyText) als Block-Array gespeichert. Text extrahieren via `block.children.map(span => span.text).join('')`.
 - **SVG-Icons aus Sanity**: Werden als String im Feld `iconSvg` gespeichert und via `set:html` Direktive gerendert: `<div set:html={fact.iconSvg}></div>`.
 - **Bilder aus Sanity**: Über `urlFor(image).width(x).url()` aus `src/lib/sanity.ts` laden.
+- **Cloudflare Error 1106**: Cloudflare Pages Functions können keine Requests an andere CF-geschützte Domains senden. Web3Forms wird deshalb client-seitig aufgerufen. Bei neuen externen API-Calls aus Functions immer prüfen ob die Ziel-Domain hinter Cloudflare liegt!
 
 ## Design-Entscheidungen
 - **Hero**: Dunkler Navy-Overlay (rgba 27,42,74, 0.65) über Hintergrundbild, weisser Text

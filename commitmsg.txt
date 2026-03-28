@@ -1,7 +1,4 @@
-Fix Email: Hybrid-Ansatz gegen Cloudflare-zu-Cloudflare Blockade
+Fix broken Klima grid: use explicit SVG closing tags
 
-Web3Forms wird jetzt direkt vom Browser gesendet (funktioniert).
-Cloudflare Function speichert nur noch in Sanity.
-Debug-Endpoint entfernt.
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Astro self-closing svg with set:html breaks HTML structure.
+Changed to explicit closing tags in Klima and Region components.
