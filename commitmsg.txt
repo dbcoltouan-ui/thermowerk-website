@@ -1,1 +1,1 @@
-Box-Transparenz auf 78%, Footer/Header-Links universal mit /, Logo verlinkt
+Fix: Footer sichtbar auf Impressum via is:global Style (z-index greift jetzt)
