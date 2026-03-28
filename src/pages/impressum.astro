@@ -1,0 +1,136 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+<Layout title="Impressum - Thermowerk" description="Impressum der Gebäudetechnik Coltouan / Thermowerk, Neftenbach.">
+  <Header />
+  <main class="impressum-page">
+    <div class="container">
+      <h1 class="fade-up">Impressum</h1>
+
+      <div class="impressum-content fade-up">
+        <address>
+          Gebäudetechnik Coltouan<br />
+          Rankstrasse 18<br />
+          8413 Neftenbach<br />
+          Schweiz
+        </address>
+
+        <h2>Vertretungsberechtigte Personen</h2>
+        <p>Coltouan Beniamin-Daniel</p>
+
+        <h2>Handelsregister</h2>
+        <p>
+          UID: CHE-489.162.528<br />
+          MWST-Nummer: CHE-489.162.528 MWST
+        </p>
+
+        <h2>Kontakt</h2>
+        <p>
+          Telefon: <a href="tel:+41765040368">+41 76 504 03 68</a><br />
+          E-Mail: <a href="mailto:db.coltouan@gmail.com">db.coltouan@gmail.com</a><br />
+          Web: <a href="https://thermowerk.ch">thermowerk.ch</a>
+        </p>
+
+        <h2>Haftungsausschluss</h2>
+
+        <div class="legal-item">
+          <h3>1. Inhalte</h3>
+          <p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen – verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen – sind grundsätzlich ausgeschlossen.</p>
+        </div>
+
+        <div class="legal-item">
+          <h3>2. Externe Links</h3>
+          <p>Unsere Webseite enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
+        </div>
+
+        <div class="legal-item">
+          <h3>3. Urheberrecht</h3>
+          <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem schweizerischen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechts bedürfen unserer schriftlichen Zustimmung.</p>
+        </div>
+
+        <div class="legal-item">
+          <h3>4. Änderungen und Irrtümer</h3>
+          <p>Wir behalten uns ausdrücklich vor, Teile der Seiten oder das gesamte Angebot jederzeit zu ändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen. Sollten einzelne Formulierungen oder Darstellungen dieses Haftungsausschlusses unwirksam sein, bleiben die übrigen Bestimmungen davon unberührt.</p>
+        </div>
+
+        <p class="impressum-source">
+          Impressum erstellt durch: <a href="https://impressum-generator-schweiz.ch/" target="_blank" rel="noopener">Impressum Generator Schweiz</a>
+        </p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+
+  <style>
+    .impressum-page {
+      padding-top: calc(var(--topbar-height) + var(--header-height) + clamp(40px, 6svh, 60px));
+      padding-bottom: clamp(60px, 10svh, 100px);
+      background: var(--white);
+      min-height: 80vh;
+    }
+    .impressum-page h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(32px, 4.5vw, 48px);
+      color: var(--navy);
+      margin-bottom: clamp(32px, 5svh, 48px);
+    }
+    .impressum-content {
+      max-width: 760px;
+    }
+    .impressum-content address {
+      font-style: normal;
+      font-size: clamp(15px, 1.7vw, 17px);
+      line-height: 1.8;
+      color: var(--dark);
+      margin-bottom: clamp(28px, 4svh, 40px);
+    }
+    .impressum-content h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(20px, 2.5vw, 24px);
+      color: var(--navy);
+      margin-top: clamp(28px, 4svh, 40px);
+      margin-bottom: clamp(8px, 1.5svh, 12px);
+      text-align: left;
+    }
+    .impressum-content p {
+      font-size: clamp(14px, 1.6vw, 16px);
+      color: var(--mid-gray);
+      line-height: 1.7;
+    }
+    .impressum-content a {
+      color: var(--navy);
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .impressum-content a:hover {
+      color: var(--red);
+    }
+    .legal-item {
+      margin-top: clamp(20px, 3svh, 28px);
+    }
+    .legal-item h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(16px, 1.8vw, 18px);
+      color: var(--dark);
+      margin-bottom: clamp(6px, 1svh, 8px);
+    }
+    .impressum-source {
+      margin-top: clamp(40px, 6svh, 56px);
+      font-size: clamp(12px, 1.3vw, 13px);
+      color: var(--mid-gray);
+    }
+    .impressum-source a {
+      font-weight: 500;
+    }
+    @media (max-width: 968px) {
+      .impressum-page {
+        padding-top: calc(var(--header-height) + clamp(32px, 5svh, 48px));
+      }
+      .impressum-content h2 {
+        text-align: left;
+      }
+    }
+  </style>
+</Layout>

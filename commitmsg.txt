@@ -1,1 +1,1 @@
-Logo groesser skaliert, Desktop bis 400px, Mobile bis 300px
+Impressum-Seite hinzugefügt und Footer-Link aktualisiert
