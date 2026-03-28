@@ -1,1 +1,1 @@
-Impressum-Seite hinzugefügt und Footer-Link aktualisiert
+Fix: fade-up Klassen entfernt auf Impressum (kein Observer-Script vorhanden)
