@@ -46,7 +46,7 @@ const facts = data?.facts?.length ? data.facts : defaultFacts;
             const iconContent = (fact.iconSvg || defaultFacts[index]?.iconSvg || defaultFacts[0].iconSvg).replace(/<\/?svg[^>]*>/g, '');
             return (
             <div class="region-fact">
-              <div class="region-fact-icon"><svg viewBox="0 0 24 24" set:html={iconContent}></svg></div>
+              <div class="region-fact-icon"><Fragment set:html={`<svg viewBox="0 0 24 24">${iconContent}</svg>`} /></div>
               <div class="region-fact-text"><strong>{fact.title}</strong> {fact.description}</div>
             </div>
           )})}

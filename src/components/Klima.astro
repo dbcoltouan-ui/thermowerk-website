@@ -86,7 +86,7 @@ const imageUrl = data.image
         return (
         <div class="klima-type-card fade-up" style={index > 0 ? `transition-delay: ${index * 0.1}s;` : ''}>
           <div class="klima-type-icon">
-            <svg viewBox="0 0 24 24" set:html={iconContent}></svg>
+            <Fragment set:html={`<svg viewBox="0 0 24 24">${iconContent}</svg>`} />
           </div>
           <h4>{type.title}</h4>
           <p>{type.description}</p>
