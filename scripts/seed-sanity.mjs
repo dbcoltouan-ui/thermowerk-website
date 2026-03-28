@@ -1,4 +1,6 @@
-// Content-Import nach Sanity - befüllt alle Sektionen mit aktuellem Website-Content
+// Content-Import nach Sanity – befüllt alle Sektionen mit exakten 1:1-Werten aus den Komponenten
+// WICHTIG: Jeder Wert hier entspricht EXAKT dem Fallback-Wert in der jeweiligen Astro-Komponente.
+// Bei Bildern: Keine Bild-Referenzen setzen – so greifen die lokalen Fallback-Bilder aus public/img/.
 import { createClient } from '@sanity/client';
 
 const client = createClient({
@@ -10,9 +12,9 @@ const client = createClient({
 });
 
 async function seed() {
-  console.log('Starte Content-Import nach Sanity...\n');
+  console.log('Starte Content-Import nach Sanity (1:1 aus Komponenten-Fallbacks)...\n');
 
-  // 1. Site Settings
+  // ─── 1. Site Settings (Topbar.astro, Contact.astro, Footer.astro) ───
   await client.createOrReplace({
     _id: 'siteSettings',
     _type: 'siteSettings',
@@ -40,32 +42,34 @@ async function seed() {
     fontBody: 'DM Sans',
     fontNav: 'Montserrat',
     instagram: 'https://www.instagram.com/thermowerk.ch/',
-    seoTitle: 'Thermowerk - Wärmepumpen & Klimaanlagen | Neftenbach, Zürich',
+    seoTitle: 'Thermowerk – Wärmepumpen & Klimaanlagen | Neftenbach, Zürich',
     seoDescription: 'WPSM-zertifizierter Fachbetrieb für Luft-Wasser-Wärmepumpen. Persönliche Beratung, fachgerechte Montage und Förderberatung in ZH, SH, TG, AG.',
   });
   console.log('✓ Site Settings');
 
-  // 2. Navigation
+  // ─── 2. Navigation (Header.astro) ───
+  // WICHTIG: Header-Fallback verwendet #anchor OHNE Slash-Prefix
   await client.createOrReplace({
     _id: 'navigation',
     _type: 'navigation',
     ctaButtonText: 'Beratung anfragen',
-    ctaButtonLink: '/#contact',
+    ctaButtonLink: '#contact',
     stoerungText: 'Störung melden',
     stoerungLink: 'tel:+41765040368',
     items: [
-      { _key: 'nav1', label: 'Leistungen', href: '/#services', mobileOnly: false, children: [
-        { _key: 'sub1', label: 'Wärmepumpen', href: '/#why' },
-        { _key: 'sub2', label: 'Klimaanlagen', href: '/#klima' },
+      { _key: 'nav1', label: 'Leistungen', href: '#services', mobileOnly: false, children: [
+        { _key: 'sub1', label: 'Wärmepumpen', href: '#why' },
+        { _key: 'sub2', label: 'Klimaanlagen', href: '#klima' },
       ]},
-      { _key: 'nav2', label: 'Über Uns', href: '/#about', mobileOnly: false },
-      { _key: 'nav3', label: 'Förderung', href: '/#wpsm', mobileOnly: false },
-      { _key: 'nav4', label: 'Kostenrechner', href: '/#calculator', mobileOnly: false },
+      { _key: 'nav2', label: 'Über Uns', href: '#about', mobileOnly: false },
+      { _key: 'nav3', label: 'Förderung', href: '#wpsm', mobileOnly: false },
+      { _key: 'nav4', label: 'Kostenrechner', href: '#calculator', mobileOnly: false },
     ],
   });
   console.log('✓ Navigation');
 
-  // 3. Hero
+  // ─── 3. Hero (Hero.astro) ───
+  // WICHTIG: ctaSecondary ist "Kostenrechner" / "#calculator" – NICHT "Leistungen ansehen"
   await client.createOrReplace({
     _id: 'heroSection',
     _type: 'heroSection',
@@ -76,26 +80,64 @@ async function seed() {
     text: 'WPSM-zertifiziert. Von der Beratung bis zur Förderabwicklung – alles aus einer Hand.',
     badgeText: 'WPSM-zertifizierter Fachbetrieb aus Neftenbach',
     ctaPrimary: { text: 'Beratung anfragen', link: '#contact' },
-    ctaSecondary: { text: 'Leistungen ansehen', link: '#services' },
+    ctaSecondary: { text: 'Kostenrechner', link: '#calculator' },
     overlayOpacity: 0.65,
     overlayColor: '27, 42, 74',
   });
   console.log('✓ Hero');
 
-  // 4. Services
+  // ─── 4. Services (Services.astro) ───
+  // WICHTIG: Beschreibungen verwenden BINDESTRICHE (-) nicht Gedankenstriche (–)
+  // WICHTIG: linkText hat trailing Space: 'Mehr erfahren '
+  // WICHTIG: Keine Bild-Referenzen – Fallback-Bilder aus public/img/ werden verwendet
   await client.createOrReplace({
     _id: 'servicesSection',
     _type: 'servicesSection',
     headline: 'Unsere Leistungen',
     services: [
-      { _key: 's1', title: 'Wärmepumpen', description: 'Heizungsersatz mit System – von der Beratung über die Förderabwicklung bis zur optimierten Anlage. WPSM-zertifiziert und auf Effizienz ausgelegt.', link: '#why', linkText: 'Mehr erfahren', imageAlt: 'Wärmepumpe Installation am Einfamilienhaus' },
-      { _key: 's2', title: 'Klimaanlagen', description: 'Split- und Multisplit-Systeme für Wohnräume, Büros und Gewerbe – geplant und installiert mit demselben Fachwissen aus der Kältetechnik.', link: '#klima', linkText: 'Mehr erfahren', imageAlt: 'Klimaanlage Montage im Wohnraum' },
-      { _key: 's3', title: 'Service & Wartung', description: 'Regelmässige Wartung, Störungsbehebung und Optimierung bestehender Anlagen – damit Ihr System dauerhaft zuverlässig und effizient arbeitet.', link: '#contact', linkText: 'Mehr erfahren', imageAlt: 'Service und Wartung an Wärmepumpe' },
+      {
+        _key: 's1',
+        title: 'Wärmepumpen',
+        description: 'Heizungsersatz mit System - von der Beratung über die Förderabwicklung bis zur optimierten Anlage. WPSM-zertifiziert und auf Effizienz ausgelegt.',
+        link: '#why',
+        linkText: 'Mehr erfahren ',
+        imageAlt: 'Wärmepumpe Installation am Einfamilienhaus',
+      },
+      {
+        _key: 's2',
+        title: 'Klimaanlagen',
+        description: 'Split- und Multisplit-Systeme für Wohnräume, Büros und Gewerbe - geplant und installiert mit demselben Fachwissen aus der Kältetechnik.',
+        link: '#klima',
+        linkText: 'Mehr erfahren ',
+        imageAlt: 'Klimaanlage Montage im Wohnraum',
+      },
+      {
+        _key: 's3',
+        title: 'Service & Wartung',
+        description: 'Regelmässige Wartung, Störungsbehebung und Optimierung bestehender Anlagen - damit Ihr System dauerhaft zuverlässig und effizient arbeitet.',
+        link: '#contact',
+        linkText: 'Mehr erfahren ',
+        imageAlt: 'Service und Wartung an Wärmepumpe',
+      },
     ],
   });
   console.log('✓ Services');
 
-  // 5. WPSM
+  // ─── 5. Manufacturer Logos (ManufacturerLogos.astro) ───
+  // KEINE Bild-Referenzen setzen! Komponente prüft auf gültige Bilder und fällt auf lokale Dateien zurück.
+  await client.createOrReplace({
+    _id: 'manufacturerLogos',
+    _type: 'manufacturerLogos',
+    logos: [
+      { _key: 'l1', alt: 'Oertli Wärmepumpen', size: 'logo-sm' },
+      { _key: 'l2', alt: 'Bosch Heiztechnik', size: '' },
+      { _key: 'l3', alt: 'Mitsubishi Electric Klimaanlagen', size: '' },
+      { _key: 'l4', alt: 'Panasonic Klimatechnik', size: 'logo-md' },
+    ],
+  });
+  console.log('✓ Manufacturer Logos');
+
+  // ─── 6. WPSM (Wpsm.astro) ───
   await client.createOrReplace({
     _id: 'wpsmSection',
     _type: 'wpsmSection',
@@ -113,7 +155,7 @@ async function seed() {
   });
   console.log('✓ WPSM');
 
-  // 6. Steps
+  // ─── 7. Steps (Steps.astro) ───
   await client.createOrReplace({
     _id: 'stepsSection',
     _type: 'stepsSection',
@@ -131,7 +173,7 @@ async function seed() {
   });
   console.log('✓ Steps');
 
-  // 7. About
+  // ─── 8. About (About.astro) ───
   await client.createOrReplace({
     _id: 'aboutSection',
     _type: 'aboutSection',
@@ -158,7 +200,7 @@ async function seed() {
   });
   console.log('✓ About');
 
-  // 8. Why Heatpump
+  // ─── 9. Why Heatpump (WhyHeatpump.astro) ───
   await client.createOrReplace({
     _id: 'whySection',
     _type: 'whySection',
@@ -180,7 +222,7 @@ async function seed() {
   });
   console.log('✓ Why Heatpump');
 
-  // 9. Klima
+  // ─── 10. Klima (Klima.astro) ───
   await client.createOrReplace({
     _id: 'klimaSection',
     _type: 'klimaSection',
@@ -200,7 +242,7 @@ async function seed() {
   });
   console.log('✓ Klima');
 
-  // 10. Calculator
+  // ─── 11. Calculator (Calculator.astro) ───
   await client.createOrReplace({
     _id: 'calculatorSection',
     _type: 'calculatorSection',
@@ -219,7 +261,7 @@ async function seed() {
   });
   console.log('✓ Calculator');
 
-  // 11. Region
+  // ─── 12. Region (Region.astro) ───
   await client.createOrReplace({
     _id: 'regionSection',
     _type: 'regionSection',
@@ -236,14 +278,15 @@ async function seed() {
   });
   console.log('✓ Region');
 
-  // 12. Contact
+  // ─── 13. Contact (Contact.astro) ───
+  // WICHTIG: phoneHours verwendet EN-DASHES (–): 'Mo–Fr, 07:00–18:00 Uhr'
   await client.createOrReplace({
     _id: 'contactSection',
     _type: 'contactSection',
     subtitle: 'Kontakt',
     headline: 'Sprechen wir über Ihr Projekt',
     phoneLabel: 'Telefon',
-    phoneHours: 'Mo-Fr, 07:00-18:00 Uhr',
+    phoneHours: 'Mo\u2013Fr, 07:00\u201318:00 Uhr',
     emailLabel: 'E-Mail',
     locationLabel: 'Standort',
     locationText: 'Neftenbach, Kanton Zürich',
@@ -257,18 +300,20 @@ async function seed() {
       { _key: 'i3', label: 'Förderberatung', value: 'foerderberatung' },
       { _key: 'i4', label: 'Sonstiges', value: 'sonstiges' },
     ],
-    formPlaceholderMessage: 'Beschreiben Sie kurz Ihr Anliegen – z.B. Art der aktuellen Heizung, Baujahr, Gebäudetyp.',
+    formPlaceholderMessage: 'Beschreiben Sie kurz Ihr Anliegen \u2013 z.B. Art der aktuellen Heizung, Baujahr, Gebäudetyp.',
     formButtonText: 'Anfrage senden',
     formNote: 'Wir melden uns in der Regel innerhalb eines Arbeitstages.',
   });
   console.log('✓ Contact');
 
-  // 13. Footer
+  // ─── 14. Footer (Footer.astro) ───
+  // WICHTIG: navLinks verwenden /#anchor (MIT Slash) – weil Footer auch auf Unterseiten (Impressum, Datenschutz) verwendet wird
+  // WICHTIG: Datenschutz-Link ist /datenschutz (NICHT #)
   await client.createOrReplace({
     _id: 'footerSection',
     _type: 'footerSection',
     brandText: 'Wärmepumpen und Klimaanlagen für die Deutschschweiz. WPSM-zertifizierter Fachbetrieb aus Neftenbach.',
-    copyrightText: '2026 Thermowerk – Gebäudetechnik Coltouan · UID: CHE-489.162.528',
+    copyrightText: '2026 Thermowerk \u2013 Gebäudetechnik Coltouan \u00b7 UID: CHE-489.162.528',
     navLinks: [
       { _key: 'fn1', label: 'Wärmepumpen', href: '/#why' },
       { _key: 'fn2', label: 'Klimaanlagen', href: '/#klima' },
@@ -279,26 +324,13 @@ async function seed() {
     ],
     legalLinks: [
       { _key: 'fl1', label: 'Impressum', href: '/impressum' },
-      { _key: 'fl2', label: 'Datenschutz', href: '#' },
+      { _key: 'fl2', label: 'Datenschutz', href: '/datenschutz' },
     ],
   });
   console.log('✓ Footer');
 
-  // 14. Manufacturer Logos (ohne Bilder - die müssen manuell hochgeladen werden)
-  await client.createOrReplace({
-    _id: 'manufacturerLogos',
-    _type: 'manufacturerLogos',
-    logos: [
-      { _key: 'l1', alt: 'Oertli Wärmepumpen', size: 'logo-sm' },
-      { _key: 'l2', alt: 'Bosch Heiztechnik', size: '' },
-      { _key: 'l3', alt: 'Mitsubishi Electric Klimaanlagen', size: '' },
-      { _key: 'l4', alt: 'Panasonic Klimatechnik', size: 'logo-md' },
-    ],
-  });
-  console.log('✓ Manufacturer Logos (Bilder müssen manuell hochgeladen werden)');
-
-  console.log('\n✅ Alle Inhalte importiert!');
-  console.log('Bilder (Hero, Services, About, Why, Klima, Logos) müssen im Sanity Studio manuell hochgeladen werden.');
+  console.log('\n✅ Alle Inhalte importiert (1:1 aus Komponenten-Fallbacks)!');
+  console.log('Hinweis: Bilder werden NICHT in Sanity gesetzt – die lokalen Fallback-Bilder aus public/img/ greifen automatisch.');
 }
 
 seed().catch((err) => {
