@@ -1,1 +1,1 @@
-Fix: Footer sichtbar auf Impressum via is:global Style (z-index greift jetzt)
+Fix: Topbar-Alignment Script auf Impressum-Seite hinzugefügt
