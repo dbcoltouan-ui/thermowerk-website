@@ -1,1 +1,1 @@
-Pinselstrich unter Unser Handwerk etwas dicker
+Neues breites Logo eingebaut, Header/Hero Padding auf 5vw angepasst, Logo-Skalierung width-basiert
