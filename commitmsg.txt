@@ -1,1 +1,1 @@
-Fix: fade-up Klassen entfernt auf Impressum (kein Observer-Script vorhanden)
+Impressum: Topbar, korrekte Nav-Links, Header-Fix, Hero-Hintergrundbild mit Glaseffekt
