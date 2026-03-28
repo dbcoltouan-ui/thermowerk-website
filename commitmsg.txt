@@ -1,1 +1,1 @@
-Fix: Topbar-Alignment Script auf Impressum-Seite hinzugefügt
+Sanity CMS komplett: 14 Schemas, Studio-Struktur, Seed-Script, Client mit Hilfsfunktionen
