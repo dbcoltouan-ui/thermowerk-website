@@ -1,1 +1,1 @@
-Impressum: Topbar, korrekte Nav-Links, Header-Fix, Hero-Hintergrundbild mit Glaseffekt
+Box-Transparenz auf 78%, Footer/Header-Links universal mit /, Logo verlinkt
