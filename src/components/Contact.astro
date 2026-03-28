@@ -69,8 +69,8 @@ const interests = data?.formInterests?.length ? data.formInterests : defaultInte
         </div>
       </div>
       <div class="fade-up" style="transition-delay: 0.15s;">
-        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-          <input type="hidden" name="access_key" value={formAccessKey}>
+        <form class="contact-form" action="/api/contact" method="POST">
+          <input type="hidden" name="botcheck" style="display:none">
           <input type="hidden" name="subject" value={formSubject}>
           <div class="form-row">
             <div class="form-group">

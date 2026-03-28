@@ -147,6 +147,32 @@ try {
       countObserver.observe(countEl);
     })();
 
+    /* Formular-Erfolgsmeldung */
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('anfrage') === 'gesendet') {
+        var form = document.querySelector('.contact-form');
+        if (form) {
+          var msg = document.createElement('div');
+          msg.className = 'form-success';
+          msg.innerHTML = '<strong>Vielen Dank!</strong> Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns in der Regel innerhalb eines Arbeitstages.';
+          form.parentNode.insertBefore(msg, form);
+          form.style.display = 'none';
+          // URL aufräumen
+          history.replaceState(null, '', window.location.pathname + '#contact');
+        }
+      } else if (params.get('anfrage') === 'fehler') {
+        var form = document.querySelector('.contact-form');
+        if (form) {
+          var msg = document.createElement('div');
+          msg.className = 'form-error';
+          msg.innerHTML = '<strong>Leider ist ein Fehler aufgetreten.</strong> Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.';
+          form.parentNode.insertBefore(msg, form);
+          history.replaceState(null, '', window.location.pathname + '#contact');
+        }
+      }
+    })();
+
     /* Smooth Scroll mit Header-Offset */
     document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
       anchor.addEventListener('click', function(e) {
