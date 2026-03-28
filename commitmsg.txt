@@ -1,7 +1,1 @@
-Impressum + Datenschutz Sanity-Schemas, Hero/Header Padding zurueck auf 11vw
-
-- 2 neue Sanity-Schemas (impressumPage, datenschutzPage) mit Sidebar-Eintraegen
-- impressum.astro und datenschutz.astro laden jetzt Daten aus Sanity mit Fallbacks
-- sanity.ts: getPage() Helper fuer Einzelseiten-Abfragen
-- seed-sanity.mjs: Impressum + Datenschutz Seed-Daten ergaenzt
-- Layout.astro: Header + Hero padding-left zurueck auf 11vw (war vor Logo-Wechsel so)
+Sync-Scripts und Anleitung hinzugefuegt (pull, push, deploy, sync-all BATs)
