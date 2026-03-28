@@ -17,17 +17,17 @@ const defaultFacts = [
   {
     title: 'Keine Anfahrtskosten',
     description: 'im Umkreis von 50 km ab Neftenbach.',
-    iconSvg: '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+    iconSvg: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>'
   },
   {
     title: 'Reaktion innerhalb 24h',
     description: 'bei Störungen im Servicegebiet.',
-    iconSvg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+    iconSvg: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
   },
   {
     title: 'Direkt erreichbar',
     description: '– in der Regel melden wir uns am selben Tag.',
-    iconSvg: '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/></svg>'
+    iconSvg: '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.7 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0122 16.92z"/>'
   }
 ];
 
@@ -43,10 +43,10 @@ const facts = data?.facts?.length ? data.facts : defaultFacts;
         <p>{bodyText}</p>
         <div class="region-facts">
           {facts.map((fact, index) => {
-            const icon = fact.iconSvg || defaultFacts[index]?.iconSvg || defaultFacts[0].iconSvg;
+            const iconContent = (fact.iconSvg || defaultFacts[index]?.iconSvg || defaultFacts[0].iconSvg).replace(/<\/?svg[^>]*>/g, '');
             return (
             <div class="region-fact">
-              <div class="region-fact-icon" set:html={icon}></div>
+              <div class="region-fact-icon"><svg viewBox="0 0 24 24" set:html={iconContent} /></div>
               <div class="region-fact-text"><strong>{fact.title}</strong> {fact.description}</div>
             </div>
           )})}

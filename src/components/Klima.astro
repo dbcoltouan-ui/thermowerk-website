@@ -31,22 +31,22 @@ const {
       {
         title: 'Split-Systeme',
         description: 'Die klassische Lösung für einzelne Räume: Ein Aussen- und ein Innengerät, schnell installiert und ideal für Schlafzimmer, Büros oder Behandlungsräume. Leiser Betrieb und hohe Energieeffizienz sind bei aktuellen Geräten Standard.',
-        iconSvg: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+        iconSvg: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
       },
       {
         title: 'Multisplit-Systeme',
         description: 'Ein einzelnes Aussengerät versorgt mehrere Innengeräte in verschiedenen Räumen - unabhängig voneinander regelbar. Die wirtschaftliche Lösung, wenn mehrere Zonen klimatisiert werden sollen, ohne die Fassade mit mehreren Ausseneinheiten zu belasten.',
-        iconSvg: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="3" x2="12" y2="17"/></svg>',
+        iconSvg: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="3" x2="12" y2="17"/>',
       },
       {
         title: 'Deckenkassetten',
         description: 'Wo Wandgeräte nicht in Frage kommen - etwa in Praxisräumen, offenen Büros oder repräsentativen Bereichen - bieten Deckenkassetten eine dezente Alternative. Die Luftverteilung erfolgt gleichmässig von oben, das Gerät fügt sich unauffällig in die Decke ein.',
-        iconSvg: '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+        iconSvg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
       },
       {
         title: 'Wartung & Instandhaltung',
         description: 'Eine Klimaanlage arbeitet nur so gut, wie sie gewartet wird. Regelmässige Filterreinigung, Kältemittelkontrolle und Funktionsprüfung sichern die Effizienz und verlängern die Lebensdauer Ihrer Anlage. Wir übernehmen das für Sie - zuverlässig und zu festen Konditionen.',
-        iconSvg: '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+        iconSvg: '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
       },
     ],
     ctaText: 'Beratung, Planung, Montage und Service - aus einer Hand. Sie haben eine Ansprechperson, die Ihr Projekt von der ersten Frage bis zum laufenden Betrieb begleitet.',
@@ -77,15 +77,16 @@ const imageUrl = data.image
     <div class="klima-types-grid">
       {data.types?.map((type, index) => {
         const defaultIcons = [
-          '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
-          '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="3" x2="12" y2="17"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+          '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+          '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="12" y1="3" x2="12" y2="17"/>',
+          '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+          '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
         ];
+        const iconContent = (type.iconSvg || defaultIcons[index] || defaultIcons[0]).replace(/<\/?svg[^>]*>/g, '');
         return (
         <div class="klima-type-card fade-up" style={index > 0 ? `transition-delay: ${index * 0.1}s;` : ''}>
           <div class="klima-type-icon">
-            <Fragment set:html={type.iconSvg || defaultIcons[index] || defaultIcons[0]} />
+            <svg viewBox="0 0 24 24" set:html={iconContent} />
           </div>
           <h4>{type.title}</h4>
           <p>{type.description}</p>
