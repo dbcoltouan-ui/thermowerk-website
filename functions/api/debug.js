@@ -1,44 +1,35 @@
-// Temporärer Debug-Endpoint – zeigt ob Env-Vars geladen sind und testet Web3Forms
+// Temporärer Debug-Endpoint
 export async function onRequestGet(context) {
   const web3formsKey = context.env.WEB3FORMS_KEY;
+  const result = {};
 
-  const result = {
-    envVarsLoaded: {
-      SANITY_API_TOKEN: context.env.SANITY_API_TOKEN ? 'YES' : 'NOT SET',
-      WEB3FORMS_KEY: web3formsKey ? 'YES' : 'NOT SET',
-      SANITY_PROJECT_ID: context.env.SANITY_PROJECT_ID || 'NOT SET',
-    },
-  };
-
-  // Test Web3Forms with proper headers
   if (web3formsKey) {
     try {
+      const params = new URLSearchParams();
+      params.append('access_key', web3formsKey);
+      params.append('subject', 'Debug-Test URL-encoded');
+      params.append('from_name', 'Thermowerk Debug');
+      params.append('name', 'Function Debug');
+      params.append('email', 'debug@test.com');
+      params.append('message', 'URL-encoded Test aus Cloudflare Function');
+
       const emailResp = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Thermowerk-Website/1.0',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          access_key: web3formsKey,
-          subject: 'Debug-Test Thermowerk Function',
-          from_name: 'Thermowerk Debug',
-          name: 'Function Debug',
-          email: 'debug@test.com',
-          message: 'Gesendet aus Cloudflare Function mit User-Agent Header',
-        }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
       });
       const respText = await emailResp.text();
+      result.status = emailResp.status;
       try {
-        result.web3formsResponse = JSON.parse(respText);
+        result.response = JSON.parse(respText);
       } catch {
-        result.web3formsRawResponse = respText.substring(0, 500);
-        result.web3formsStatus = emailResp.status;
+        result.rawResponse = respText.substring(0, 500);
       }
     } catch (err) {
-      result.web3formsError = err.message;
+      result.error = err.message;
     }
+  } else {
+    result.error = 'WEB3FORMS_KEY not set';
   }
 
   return new Response(JSON.stringify(result, null, 2), {

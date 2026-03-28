@@ -70,26 +70,29 @@ export async function onRequestPost(context) {
     let emailResult = { skipped: true, reason: 'Kein WEB3FORMS_KEY gesetzt' };
     if (web3formsKey) {
       try {
+        // URL-encoded statt JSON – umgeht Cloudflare-zu-Cloudflare Blockade (Error 1106)
+        const emailParams = new URLSearchParams();
+        emailParams.append('access_key', web3formsKey);
+        emailParams.append('subject', `Neue Anfrage: ${interestLabels[interest] || interest || 'Allgemein'} – ${name}`);
+        emailParams.append('from_name', 'Thermowerk Website');
+        emailParams.append('name', name);
+        emailParams.append('email', email);
+        emailParams.append('phone', phone || '–');
+        emailParams.append('interesse', interestLabels[interest] || interest || '–');
+        emailParams.append('nachricht', message || '–');
+        emailParams.append('eingegangen', new Date(submittedAt).toLocaleString('de-CH', { timeZone: 'Europe/Zurich' }));
+
         const emailResp = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Thermowerk-Website/1.0',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: web3formsKey,
-            subject: `Neue Anfrage: ${interestLabels[interest] || interest || 'Allgemein'} – ${name}`,
-            from_name: 'Thermowerk Website',
-            name,
-            email,
-            phone: phone || '–',
-            interesse: interestLabels[interest] || interest || '–',
-            nachricht: message || '–',
-            eingegangen: new Date(submittedAt).toLocaleString('de-CH', { timeZone: 'Europe/Zurich' }),
-          }),
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: emailParams.toString(),
         });
-        emailResult = await emailResp.json();
+        const emailText = await emailResp.text();
+        try {
+          emailResult = JSON.parse(emailText);
+        } catch {
+          emailResult = { status: emailResp.status, raw: emailText.substring(0, 200) };
+        }
       } catch (emailErr) {
         console.error('Email-Fehler:', emailErr);
         emailResult = { error: emailErr.message };
