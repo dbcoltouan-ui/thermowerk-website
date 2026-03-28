@@ -1,5 +1,6 @@
 ---
 // Footer mit Links und Copyright – aktualisierte Navigation mit Sanity CMS Integration
+import { urlFor } from '../lib/sanity';
 const { data, settings } = Astro.props;
 
 const brandText = data?.brandText || 'Wärmepumpen und Klimaanlagen für die Deutschschweiz. WPSM-zertifizierter Fachbetrieb aus Neftenbach.';
@@ -12,6 +13,7 @@ const serviceArea = settings?.serviceArea || 'ZH, SH, TG, AG, ZG, SZ, LU';
 const serviceAreaFormatted = serviceArea.split(',').map(s => s.trim()).join(' · ');
 const uid = settings?.uid || 'CHE-489.162.528';
 const logoAlt = settings?.logoAlt || 'Thermowerk';
+const logoUrl = settings?.logo?.asset ? urlFor(settings.logo).url() : '/img/logo.png';
 const copyrightText = data?.copyrightText || `2026 Thermowerk – Gebäudetechnik Coltouan · UID: ${uid}`;
 
 const defaultNavLinks = [
@@ -35,7 +37,7 @@ const legalLinks = data?.legalLinks?.length ? data.legalLinks : defaultLegalLink
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo">
-          <a href="/"><img src="/img/logo.png" alt={logoAlt}></a>
+          <a href="/"><img src={logoUrl} alt={logoAlt}></a>
         </div>
         <p>{brandText}</p>
       </div>

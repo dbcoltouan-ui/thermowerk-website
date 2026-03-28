@@ -2,9 +2,12 @@
 import Layout from '../layouts/Layout.astro';
 import Topbar from '../components/Topbar.astro';
 import Footer from '../components/Footer.astro';
-import { getPage } from '../lib/sanity';
+import { getPage, getSingleton, urlFor } from '../lib/sanity';
 
 const data = await getPage('datenschutzPage');
+const siteSettings = await getSingleton('siteSettings');
+const logoUrl = siteSettings?.logo?.asset ? urlFor(siteSettings.logo).url() : '/img/logo.png';
+const logoAlt = siteSettings?.logoAlt || 'Thermowerk';
 
 // Fallback-Werte (1:1 aus Original)
 const pageTitle = data?.pageTitle || 'Datenschutzerklärung - Thermowerk';
@@ -39,7 +42,7 @@ const sections = data?.sections && data.sections.length > 0 ? data.sections : de
   <header class="header" id="header">
     <div class="header-inner">
       <a href="/">
-        <img src="/img/logo.png" alt="Thermowerk" class="logo-img">
+        <img src={logoUrl} alt={logoAlt} class="logo-img">
       </a>
       <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen">
         <span></span>

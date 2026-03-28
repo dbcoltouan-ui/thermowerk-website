@@ -1,4 +1,1 @@
-Fix SVG rendering: use Fragment set:html instead of svg set:html
-
-Astro mangles SVG path data when using set:html directly on svg elements.
-Using Fragment with full SVG string bypasses Astro's SVG serializer.
+Logo aus Sanity CMS laden statt hardcoded - Header, Footer, Impressum, Datenschutz

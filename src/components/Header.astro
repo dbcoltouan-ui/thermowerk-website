@@ -1,12 +1,18 @@
 ---
 // Header mit Navigation und Mobile-Menü – aktualisierte Links
 
-const { nav } = Astro.props;
+import { urlFor } from '../lib/sanity';
+
+const { nav, settings } = Astro.props;
 
 const ctaText = nav?.ctaButtonText || 'Beratung anfragen';
 const ctaLink = nav?.ctaButtonLink || '#contact';
 const stoerungText = nav?.stoerungText || 'Störung melden';
 const stoerungLink = nav?.stoerungLink || 'tel:+41765040368';
+
+// Logo aus Sanity mit Fallback
+const logoUrl = settings?.logo?.asset ? urlFor(settings.logo).url() : '/img/logo.png';
+const logoAlt = settings?.logoAlt || 'Thermowerk';
 
 const defaultItems = [
   { label: 'Leistungen', href: '#services', mobileOnly: false, children: [
@@ -22,7 +28,7 @@ const items = nav?.items?.length ? nav.items : defaultItems;
 <header class="header" id="header">
   <div class="header-inner">
     <a href="/#hero">
-      <img src="/img/logo.png" alt="Thermowerk" class="logo-img">
+      <img src={logoUrl} alt={logoAlt} class="logo-img">
     </a>
     <button class="menu-toggle" id="menuToggle" aria-label="Menü öffnen">
       <span></span>
