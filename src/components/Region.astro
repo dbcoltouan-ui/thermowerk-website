@@ -42,12 +42,14 @@ const facts = data?.facts?.length ? data.facts : defaultFacts;
         <h2>{headline}</h2>
         <p>{bodyText}</p>
         <div class="region-facts">
-          {facts.map((fact, index) => (
+          {facts.map((fact, index) => {
+            const icon = fact.iconSvg || defaultFacts[index]?.iconSvg || defaultFacts[0].iconSvg;
+            return (
             <div class="region-fact">
-              <div class="region-fact-icon" set:html={fact.iconSvg}></div>
+              <div class="region-fact-icon" set:html={icon}></div>
               <div class="region-fact-text"><strong>{fact.title}</strong> {fact.description}</div>
             </div>
-          ))}
+          )})}
         </div>
         <a href={ctaLink} class="btn btn-outline btn-cta">{ctaText}</a>
       </div>
