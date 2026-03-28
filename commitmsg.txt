@@ -1,7 +1,7 @@
-Kontaktformular-CRM: Anfragen in Sanity speichern + E-Mail-Benachrichtigung
+Fix Email: Hybrid-Ansatz gegen Cloudflare-zu-Cloudflare Blockade
 
-- Neues Schema contactSubmission mit Status-Tracking (neu/bearbeitung/erledigt)
-- Cloudflare Pages Function /api/contact verarbeitet Formular-POST
-- Speichert in Sanity + sendet E-Mail via Web3Forms
-- Erfolgsmeldung nach Absenden anzeigen
-- Spam-Schutz per Honeypot-Feld
+Web3Forms wird jetzt direkt vom Browser gesendet (funktioniert).
+Cloudflare Function speichert nur noch in Sanity.
+Debug-Endpoint entfernt.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>

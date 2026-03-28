@@ -1,39 +1,28 @@
-// Cloudflare Pages Function: Kontaktformular verarbeiten
-// Speichert in Sanity + sendet E-Mail-Benachrichtigung via Web3Forms
+// Cloudflare Pages Function: Kontaktformular → Sanity speichern
+// E-Mail wird client-seitig direkt an Web3Forms gesendet (Cloudflare-zu-Cloudflare Blockade umgehen)
 export async function onRequestPost(context) {
   try {
-    const formData = await context.request.formData();
+    const body = await context.request.json();
 
-    // Honeypot-Check (Spam-Schutz)
-    if (formData.get('botcheck')) {
-      return new Response('Spam erkannt', { status: 403 });
+    // Honeypot-Check
+    if (body.botcheck) {
+      return new Response(JSON.stringify({ success: false, error: 'Spam' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Felder extrahieren
-    const name = formData.get('name') || '';
-    const email = formData.get('email') || '';
-    const phone = formData.get('phone') || '';
-    const interest = formData.get('interest') || '';
-    const message = formData.get('message') || '';
+    const { name, email, phone, interest, message } = body;
     const submittedAt = new Date().toISOString();
 
-    // Umgebungsvariablen
     const sanityToken = context.env.SANITY_API_TOKEN;
-    const web3formsKey = context.env.WEB3FORMS_KEY;
     const sanityProjectId = context.env.SANITY_PROJECT_ID || 'wpbatz1m';
 
-    const interestLabels = {
-      waermepumpe: 'Wärmepumpe (Heizungsersatz)',
-      klimaanlage: 'Klimaanlage',
-      foerderberatung: 'Förderberatung',
-      sonstiges: 'Sonstiges',
-    };
+    let sanityResult = { success: false, error: 'Kein SANITY_API_TOKEN' };
 
-    // 1. In Sanity speichern (nur wenn Token vorhanden)
-    let sanityResult = { skipped: true, reason: 'Kein SANITY_API_TOKEN gesetzt' };
     if (sanityToken) {
       try {
-        const sanityResp = await fetch(
+        const resp = await fetch(
           `https://${sanityProjectId}.api.sanity.io/v2024-03-01/data/mutate/production`,
           {
             method: 'POST',
@@ -46,11 +35,11 @@ export async function onRequestPost(context) {
                 {
                   create: {
                     _type: 'contactSubmission',
-                    name,
-                    email,
-                    phone,
-                    interest,
-                    message,
+                    name: name || '',
+                    email: email || '',
+                    phone: phone || '',
+                    interest: interest || '',
+                    message: message || '',
                     submittedAt,
                     status: 'neu',
                   },
@@ -59,55 +48,34 @@ export async function onRequestPost(context) {
             }),
           }
         );
-        sanityResult = await sanityResp.json();
-      } catch (sanityErr) {
-        console.error('Sanity-Fehler:', sanityErr);
-        sanityResult = { error: sanityErr.message };
+        const data = await resp.json();
+        sanityResult = { success: !data.error, data };
+      } catch (err) {
+        sanityResult = { success: false, error: err.message };
       }
     }
 
-    // 2. E-Mail-Benachrichtigung via Web3Forms (unabhängig von Sanity)
-    let emailResult = { skipped: true, reason: 'Kein WEB3FORMS_KEY gesetzt' };
-    if (web3formsKey) {
-      try {
-        // URL-encoded statt JSON – umgeht Cloudflare-zu-Cloudflare Blockade (Error 1106)
-        const emailParams = new URLSearchParams();
-        emailParams.append('access_key', web3formsKey);
-        emailParams.append('subject', `Neue Anfrage: ${interestLabels[interest] || interest || 'Allgemein'} – ${name}`);
-        emailParams.append('from_name', 'Thermowerk Website');
-        emailParams.append('name', name);
-        emailParams.append('email', email);
-        emailParams.append('phone', phone || '–');
-        emailParams.append('interesse', interestLabels[interest] || interest || '–');
-        emailParams.append('nachricht', message || '–');
-        emailParams.append('eingegangen', new Date(submittedAt).toLocaleString('de-CH', { timeZone: 'Europe/Zurich' }));
-
-        const emailResp = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: emailParams.toString(),
-        });
-        const emailText = await emailResp.text();
-        try {
-          emailResult = JSON.parse(emailText);
-        } catch {
-          emailResult = { status: emailResp.status, raw: emailText.substring(0, 200) };
-        }
-      } catch (emailErr) {
-        console.error('Email-Fehler:', emailErr);
-        emailResult = { error: emailErr.message };
-      }
-    }
-
-    console.log('Sanity:', JSON.stringify(sanityResult));
-    console.log('Email:', JSON.stringify(emailResult));
-
-    // Erfolgsseite – Redirect zurück mit Query-Parameter
-    const origin = new URL(context.request.url).origin;
-    return Response.redirect(`${origin}/?anfrage=gesendet#contact`, 303);
+    return new Response(JSON.stringify(sanityResult), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   } catch (err) {
-    console.error('Fehler:', err);
-    const origin = new URL(context.request.url).origin;
-    return Response.redirect(`${origin}/?anfrage=fehler#contact`, 303);
+    return new Response(JSON.stringify({ success: false, error: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
+}
+
+// CORS Preflight
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

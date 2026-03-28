@@ -147,30 +147,66 @@ try {
       countObserver.observe(countEl);
     })();
 
-    /* Formular-Erfolgsmeldung */
+    /* Kontaktformular: JS-Submit → Sanity (via Function) + Web3Forms (direkt vom Browser) */
     (function() {
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('anfrage') === 'gesendet') {
-        var form = document.querySelector('.contact-form');
-        if (form) {
-          var msg = document.createElement('div');
-          msg.className = 'form-success';
-          msg.innerHTML = '<strong>Vielen Dank!</strong> Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns in der Regel innerhalb eines Arbeitstages.';
-          form.parentNode.insertBefore(msg, form);
+      var form = document.getElementById('contactForm');
+      if (!form) return;
+
+      var WEB3FORMS_KEY = '4a784c79-a3b6-430e-9d53-d2d77bd9a5f7';
+      var interestLabels = {
+        waermepumpe: 'Wärmepumpe (Heizungsersatz)',
+        klimaanlage: 'Klimaanlage',
+        foerderberatung: 'Förderberatung',
+        sonstiges: 'Sonstiges'
+      };
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        var origText = btn.textContent;
+        btn.textContent = 'Wird gesendet...';
+        btn.disabled = true;
+
+        var data = {
+          name: form.querySelector('#name').value,
+          email: form.querySelector('#email').value,
+          phone: form.querySelector('#phone').value,
+          interest: form.querySelector('#interest').value,
+          message: form.querySelector('#message').value
+        };
+
+        // 1. Sanity speichern (via Cloudflare Function)
+        var sanityPromise = fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).then(function(r) { return r.json(); }).catch(function() { return { success: false }; });
+
+        // 2. E-Mail via Web3Forms (direkt vom Browser – umgeht CF-Blockade)
+        var emailPromise = fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: 'Neue Anfrage: ' + (interestLabels[data.interest] || data.interest || 'Allgemein') + ' – ' + data.name,
+            from_name: 'Thermowerk Website',
+            name: data.name,
+            email: data.email,
+            phone: data.phone || '–',
+            interesse: interestLabels[data.interest] || data.interest || '–',
+            nachricht: data.message || '–'
+          })
+        }).then(function(r) { return r.json(); }).catch(function() { return { success: false }; });
+
+        Promise.all([sanityPromise, emailPromise]).then(function(results) {
           form.style.display = 'none';
-          // URL aufräumen
-          history.replaceState(null, '', window.location.pathname + '#contact');
-        }
-      } else if (params.get('anfrage') === 'fehler') {
-        var form = document.querySelector('.contact-form');
-        if (form) {
-          var msg = document.createElement('div');
-          msg.className = 'form-error';
-          msg.innerHTML = '<strong>Leider ist ein Fehler aufgetreten.</strong> Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.';
-          form.parentNode.insertBefore(msg, form);
-          history.replaceState(null, '', window.location.pathname + '#contact');
-        }
-      }
+          document.getElementById('formSuccess').style.display = 'block';
+        }).catch(function() {
+          document.getElementById('formError').style.display = 'block';
+          btn.textContent = origText;
+          btn.disabled = false;
+        });
+      });
     })();
 
     /* Smooth Scroll mit Header-Offset */
