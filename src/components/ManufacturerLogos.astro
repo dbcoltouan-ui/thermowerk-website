@@ -41,12 +41,14 @@ const fallbackLogos = [
   },
 ];
 
-// Use Sanity data if available, otherwise use fallback
-const logos = data?.logos && data.logos.length > 0 ? data.logos : fallbackLogos;
+// Use Sanity data only if logos have actual images, otherwise use fallback
+const sanityLogos = data?.logos && data.logos.length > 0 ? data.logos : null;
+const hasValidImages = sanityLogos?.some((l: any) => l.image && typeof l.image === 'object' && l.image.asset);
+const logos = hasValidImages ? sanityLogos : fallbackLogos;
 
 // Helper function to get image src
 function getImageSrc(logo: any): string {
-  if (logo.image && typeof logo.image === 'object') {
+  if (logo.image && typeof logo.image === 'object' && logo.image.asset) {
     return urlFor(logo.image).url();
   }
   return logo.src || '/img/logo-placeholder.png';
