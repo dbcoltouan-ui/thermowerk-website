@@ -1,1 +1,1 @@
-Sanity CMS komplett: 14 Schemas, Studio-Struktur, Seed-Script, Client mit Hilfsfunktionen
+Sanity Studio deployed auf thermowerk.sanity.studio, CLI config + Dependencies
