@@ -1,1 +1,1 @@
-Bilder fuer WPSM und Klima Sektionen hinzugefuegt
+WPSM-Bild Dimensionen setzen fuer Lazy Loading, temp Dateien entfernen
