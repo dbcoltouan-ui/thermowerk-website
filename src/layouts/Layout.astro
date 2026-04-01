@@ -203,6 +203,8 @@ const {
     /* 11. WPSM */
     .wpsm { background: var(--white); margin-top: clamp(37px, 6.2svh, 62px); }
     .wpsm-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(36px, 5vw, 60px); align-items: center; }
+    .wpsm-image { margin-bottom: clamp(20px, 3svh, 28px); border-radius: 2px; overflow: hidden; }
+    .wpsm-image img { width: 100%; height: auto; display: block; border-radius: 2px; }
     .wpsm-badge { background: var(--navy); border-radius: 2px; padding: clamp(32px, 5svh, 48px); text-align: center; color: var(--white); position: relative; overflow: hidden; }
     .wpsm-badge::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 70%, rgba(217, 48, 37, 0.15) 0%, transparent 50%); }
     .wpsm-badge-number { font-family: var(--font-heading); font-size: clamp(48px, 7vw, 72px); font-weight: 800; line-height: 1; margin-bottom: clamp(4px, 1svh, 8px); position: relative; }

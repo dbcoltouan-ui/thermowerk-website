@@ -1,1 +1,1 @@
-Logo aus Sanity CMS laden statt hardcoded - Header, Footer, Impressum, Datenschutz
+Bilder fuer WPSM und Klima Sektionen hinzugefuegt
