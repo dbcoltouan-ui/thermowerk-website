@@ -229,7 +229,7 @@ const {
     .klima-header { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(32px, 4vw, 48px); align-items: center; margin-bottom: clamp(32px, 5svh, 48px); }
     .klima-header-text p { font-size: clamp(14px, 1.6vw, 16px); color: var(--mid-gray); line-height: 1.7; margin-top: clamp(12px, 2svh, 16px); }
     .klima-header-img { border-radius: 2px; overflow: hidden; height: clamp(240px, 32svh, 320px); background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); }
-    .klima-header-img img { width: 100%; height: 100%; object-fit: cover; }
+    .klima-header-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
     .klima-types-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2.5vw, 24px); margin-bottom: clamp(28px, 5svh, 40px); }
     .klima-type-card { background: var(--off-white); border-radius: 2px; padding: clamp(20px, 3svh, 28px) clamp(18px, 2.5vw, 24px); border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
     .klima-type-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); }
@@ -313,7 +313,7 @@ const {
     .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: clamp(32px, 4vw, 48px); margin-bottom: clamp(32px, 5svh, 48px); }
     .footer-brand { font-size: clamp(13px, 1.4vw, 14px); line-height: 1.7; }
     .footer-logo { margin-bottom: clamp(12px, 2svh, 16px); }
-    .footer-logo img { height: clamp(28px, 3.5vw, 36px); width: auto; filter: brightness(0) invert(1); opacity: 0.85; }
+    .footer-logo img { height: clamp(32px, 4vw, 44px); width: auto; opacity: 0.9; }
     .footer h4 { color: var(--white); font-size: clamp(12px, 1.4vw, 14px); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: clamp(12px, 2svh, 16px); }
     .footer-links { list-style: none; display: flex; flex-direction: column; gap: clamp(8px, 1.2svh, 10px); }
     .footer-links a { font-size: clamp(13px, 1.4vw, 14px); transition: color 0.2s; }

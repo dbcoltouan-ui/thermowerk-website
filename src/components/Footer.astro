@@ -13,7 +13,7 @@ const serviceArea = settings?.serviceArea || 'ZH, SH, TG, AG, ZG, SZ, LU';
 const serviceAreaFormatted = serviceArea.split(',').map(s => s.trim()).join(' · ');
 const uid = settings?.uid || 'CHE-489.162.528';
 const logoAlt = settings?.logoAlt || 'Thermowerk';
-const logoUrl = settings?.logo?.asset ? urlFor(settings.logo).url() : '/img/logo.png';
+const logoUrl = settings?.logo?.asset ? urlFor(settings.logo).url() : '/img/logo-thermowerk-footer.png';
 const copyrightText = data?.copyrightText || `2026 Thermowerk – Gebäudetechnik Coltouan · UID: ${uid}`;
 
 const defaultNavLinks = [

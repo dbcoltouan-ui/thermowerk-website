@@ -1,1 +1,1 @@
-Klimaanlage-Bild fuer Klima-Sektion hinzugefuegt
+Parallax auf Desktop aktivieren, Klima-Bild oben positionieren, Footer-Logo ersetzen
