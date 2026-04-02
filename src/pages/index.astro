@@ -98,8 +98,9 @@ try {
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
 
-    /* Parallax – Mobile + Desktop */
+    /* Parallax – Nur Mobile */
     (function() {
+      if (window.innerWidth > 968) return;
       var imgs = document.querySelectorAll('.why-hero-img img, .klima-header-img img, .service-card-img img');
       var ticking = false;
       function update() {

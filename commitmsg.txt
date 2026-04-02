@@ -1,1 +1,1 @@
-Parallax auf Desktop aktivieren, Klima-Bild oben positionieren, Footer-Logo ersetzen
+Parallax zurueck auf Mobile only, Footer-Logo fix auf silbernes Logo setzen
