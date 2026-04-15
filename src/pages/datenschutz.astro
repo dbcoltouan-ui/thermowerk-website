@@ -15,10 +15,6 @@ const pageDescription = data?.pageDescription || 'Datenschutzerklärung der Geb�
 const headline = data?.headline || 'Datenschutzerklärung';
 const lastUpdated = data?.lastUpdated || '28.03.2026';
 const introText = data?.introText || 'Der Schutz Ihrer persönlichen Daten ist uns ein zentrales Anliegen. Wir legen grossen Wert auf Transparenz und Nachvollziehbarkeit hinsichtlich der Erhebung, Verarbeitung und Nutzung Ihrer Personendaten. Mit dieser Datenschutzerklärung möchten wir Sie umfassend darüber informieren, welche Daten wir in welchem Umfang verarbeiten, aus welchen Gründen dies geschieht, an wen Ihre Daten gegebenenfalls weitergegeben werden und welche Rechte Sie als betroffene Person nach dem Bundesgesetz über den Datenschutz haben.';
-const sourceText = data?.sourceText || 'Datenschutzerklärung erstellt durch:';
-const sourceLink = data?.sourceLink || 'https://www.zertifizierte-shops.ch/';
-const sourceLinkText = data?.sourceLinkText || 'Zertifizierte Shops Schweiz';
-
 const defaultSections = [
   { title: '1. Verantwortlicher und Kontaktdaten', content: '<p>Verantwortlich für die Erhebung, Verarbeitung und Nutzung Ihrer Personendaten im Sinne des Bundesgesetzes über den Datenschutz ist:</p><p>Gebäudetechnik Coltouan<br>Rankstrasse 18<br>8413 Neftenbach</p><p><strong>Datenschutzverantwortliche Person:</strong><br>Beniamin-Daniel Coltouan<br><a href="mailto:info@thermowerk.ch">info@thermowerk.ch</a></p>' },
   { title: '2. Anwendungsbereich der Datenschutzerklärung', content: '<p>Diese Datenschutzerklärung gilt für alle Informationen und Daten, die im Rahmen Ihrer Nutzung unserer Webseite thermowerk.ch sowie aller damit verbundenen Online-Dienste erhoben, verarbeitet oder genutzt werden. Sie gilt gleichermassen für alle Technologien und Verfahren, die wir einsetzen, um Ihnen unsere Leistungen bereitzustellen.</p>' },
@@ -99,9 +95,6 @@ const sections = data?.sections && data.sections.length > 0 ? data.sections : de
           </div>
         ))}
 
-        <p class="impressum-source">
-          {sourceText} <a href={sourceLink} target="_blank" rel="noopener">{sourceLinkText}</a>
-        </p>
       </div>
     </div>
   </main>

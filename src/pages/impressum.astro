@@ -21,10 +21,6 @@ const mwst = data?.mwst || 'CHE-489.162.528 MWST';
 const phone = data?.phone || '+41 76 504 03 68';
 const email = data?.email || 'db.coltouan@gmail.com';
 const web = data?.web || 'thermowerk.ch';
-const sourceText = data?.sourceText || 'Impressum erstellt durch:';
-const sourceLink = data?.sourceLink || 'https://impressum-generator-schweiz.ch/';
-const sourceLinkText = data?.sourceLinkText || 'Impressum Generator Schweiz';
-
 const defaultSections = [
   { title: '1. Inhalte', content: 'Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen – verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen – sind grundsätzlich ausgeschlossen.' },
   { title: '2. Externe Links', content: 'Unsere Webseite enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.' },
@@ -106,9 +102,6 @@ const sections = data?.sections && data.sections.length > 0 ? data.sections : de
           </div>
         ))}
 
-        <p class="impressum-source">
-          {sourceText} <a href={sourceLink} target="_blank" rel="noopener">{sourceLinkText}</a>
-        </p>
       </div>
     </div>
   </main>

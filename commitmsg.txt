@@ -1,1 +1,1 @@
-Parallax zurueck auf Mobile only, Footer-Logo fix auf silbernes Logo setzen
+Quellenhinweis und Link aus Impressum und Datenschutz entfernt
