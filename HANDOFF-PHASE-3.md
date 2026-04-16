@@ -2,6 +2,38 @@
 
 > **Für die neue Claude-Session:** Phasen 1 (Rechenkern, 49 Tests grün) und 2 (UI-Grundlagen) sind abgeschlossen und committed. Dieses Dokument übergibt den Stand und definiert den Auftrag für Phase 3.
 
+## Copy-Paste-Prompt für den neuen Chat
+
+```
+Hallo Claude.
+Wir arbeiten am Heizlastrechner-Redesign fuer thermowerk.ch/heizlast.
+Phase 1 (Rechenkern) und Phase 2 (UI-Primitives) sind fertig,
+auf GitHub, 49 Tests gruen.
+Jetzt starten wir Phase 3: State-Management und Persistierung.
+
+Lies bitte in dieser Reihenfolge:
+  1. HANDOFF-PHASE-3.md            (genaue Uebergabe und Scope fuer Phase 3)
+  2. CLAUDE.md                     (Projekt-Architektur, aktueller Stand)
+  3. HANDOFF-HEIZLAST-REDESIGN.md  (Gesamt-Vision)
+  4. HANDOFF-PHASE-2.md            (was in Phase 2 gebaut wurde)
+
+Verifiziere dann den Rechenkern:
+  node --experimental-strip-types scripts/test-heizlast.ts
+Erwartet: 49 Tests gruen.
+
+Oeffne danach die Sandbox (npm run dev, /heizlast-sandbox),
+damit du die Primitives im Browser siehst.
+
+Stell mir die offenen Entscheidungsfragen aus HANDOFF-PHASE-3.md
+via AskUserQuestion (State-Library, Projekt-Ladezustand, Projekt-
+Switcher, LocalStorage-Migration). Noch nichts bauen vor Sign-Off.
+
+Alle Aktionen (Git, Commits, Pushes) bitte selbststaendig via
+Desktop Commander ausfuehren. Ich tippe nichts in der Konsole.
+Antworte knapp. Keine Task-Aufzaehlungen nach Erledigung.
+Danke.
+```
+
 ## Was bereits gebaut ist
 
 ### Phase 1 — Rechenkern

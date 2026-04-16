@@ -1,13 +1,1 @@
-Heizlast Phase 2: UI-Grundlagen und wiederverwendbare Primitives
-
-- HeizlastLayout.astro: schlanker Header (Logo + Login-Trigger), minimaler Footer, eigene CSS-Tokens mit hz-Prefix, isolierter .hz-scope
-- SectionWrapper.astro: Standard-Sektionsrahmen mit Kicker, Titel, Subline, optionalem Aside-Slot, tone white/off
-- InfoBox.astro: aufklappbare Blue-tint-Box via details, Icon-Varianten info/book/help, Grid fuer Abkuerzungen
-- KpiCard.astro: Default- und Hero-Variante mit Delta-Badge und Caption, Grid-Utilities
-- OverrideField.astro: Input mit Stift-Icon, Reset-Pfeil nach Override, delegierter Handler
-- Toggle.astro: Pill-Chip mit Plus-Minus-Indikator fuer optionale Module, aria-expanded korrekt, delegierter Handler
-- heizlast-sandbox.astro: interne Vorschau-Seite mit realistischen Kombinationen (wird in Phase 4 entfernt)
-- CLAUDE.md um Phase-2-Dokumentation ergaenzt
-- HANDOFF-PHASE-3.md angelegt (State + Storage)
-
-Tests: 49 Assertions im Rechenkern weiterhin gruen (FWS-Aufgabe 2 -> Qhl = 12.55 kW bestaetigt).
+HANDOFF-PHASE-3: Copy-Paste-Prompt fuer neuen Chat ergaenzt
