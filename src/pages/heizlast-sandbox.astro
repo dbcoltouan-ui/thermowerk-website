@@ -180,4 +180,156 @@ import Toggle from '../components/heizlast/Toggle.astro';
     </div>
   </SectionWrapper>
 
+  <SectionWrapper
+    kicker="07 / Phase 3 — State live"
+    title="State-Demo: Eingaben steuern das Ergebnis"
+    subline="Der Verbrauch (Oel, l/a) ist an den Nano-Store gebunden. Eingabe aendert automatisch Qhl. localStorage speichert im Hintergrund; Reload erhaelt den Wert."
+  >
+    <InfoBox title="Was zeigt diese Sektion?" icon="info">
+      <p>
+        Der Input ist direkt mit <code>heizlastState.heizlast.verbrauch.ba</code> verknuepft. Jede Tastatureingabe loest die Cascade (M1 -&gt; M2 -&gt; M3 -&gt; M5 -&gt; M6 -&gt; M7 -&gt; M8) neu aus und aktualisiert alle Kennzahlen unten.
+      </p>
+      <p>
+        Die Werte werden debounced in <code>localStorage</code> gespeichert (Key <code>thermowerk.heizlast.state.v1</code>). Nach einem Reload ist der zuletzt eingegebene Wert automatisch wieder da.
+      </p>
+    </InfoBox>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 24px; max-width: 760px;">
+      <label class="hz-demo-field">
+        <span class="hz-demo-field__label">Oel-Verbrauch Ba</span>
+        <span class="hz-demo-field__input-wrap">
+          <input id="demo-ba" type="number" min="0" max="20000" step="10" class="hz-demo-field__input" />
+          <span class="hz-demo-field__unit">l/a</span>
+        </span>
+        <span class="hz-muted" style="font-size: 12.5px;">η = 0.80, inkl. WW (160 l/d Abzug), FWS-Aufgabe 2</span>
+      </label>
+    </div>
+
+    <div class="hz-kpi-grid" style="margin-top: 24px;">
+      <KpiCard label="Heizlast Qhl" value="--" unit="kW" caption="live aus Store" />
+      <KpiCard label="Spez. Heizleistung" value="--" unit="W/m&sup2;" />
+      <KpiCard label="Qh gesamt" value="--" unit="kW" caption="Qhl + Qw + Qoff" />
+      <KpiCard label="WW-Speicher" value="--" unit="L" caption="gerundet 10-L" />
+    </div>
+
+    <p id="demo-status" class="hz-muted" style="margin-top: 16px; font-size: 13px;"></p>
+  </SectionWrapper>
+
 </HeizlastLayout>
+
+<script>
+  // Sandbox-Demo: bindet ein einzelnes Input an den heizlastState und rendert
+  // die Compute-Ergebnisse in die vier KPI-Kacheln. In Phase 4 wird das
+  // generisch ueber eigene Binding-Komponenten erledigt — hier nur als
+  // Machbarkeits-Nachweis.
+  import { heizlastState, createDefaultState, replaceState } from '../lib/heizlast/state.ts';
+  import { heizlastCompute } from '../lib/heizlast/compute.ts';
+  import { bootFromStorage, subscribeAutoSave } from '../lib/heizlast/storage.ts';
+
+  // FWS-Aufgabe-2-Eingabewerte als Demo-Default, damit die Qhl sichtbar ~12.55 ist.
+  const boot = createDefaultState();
+  boot.gebaeude.ebf = 270;
+  boot.gebaeude.tvollOverride = 2000;
+  boot.heizlast.verbrauch.ba = 3500;
+  boot.heizlast.verbrauch.etaOverride = 0.80;
+  boot.heizlast.verbrauch.etaWirkungsgradId = null;
+  boot.heizlast.verbrauch.vwuAbzug = 160;
+  boot.warmwasser.deltaTOverride = 50;
+  boot.warmwasser.speicherProzent = 10;
+  boot.warmwasser.zirkProzent = 0;
+  boot.warmwasser.ausstossProzent = 15;
+
+  // Wenn localStorage etwas hat, wird das verwendet; sonst Demo-Default setzen.
+  if (!bootFromStorage()) {
+    replaceState(boot);
+  }
+
+  subscribeAutoSave();
+
+  // Input <-> Store
+  const input = document.getElementById('demo-ba') as HTMLInputElement | null;
+  const status = document.getElementById('demo-status');
+
+  if (input) {
+    input.value = String(heizlastState.get().heizlast.verbrauch.ba ?? 0);
+    input.addEventListener('input', (e) => {
+      const v = Number((e.target as HTMLInputElement).value);
+      const s = heizlastState.get();
+      heizlastState.setKey('heizlast', {
+        ...s.heizlast,
+        verbrauch: { ...s.heizlast.verbrauch, ba: v },
+      });
+    });
+  }
+
+  // KPI-Kacheln per Positions-Index ansprechen (Sandbox-Quickshot)
+  const kpis = document.querySelectorAll('.hz-kpi');
+  // Die ersten drei Blocks (01, 02 ergeben 8 Default + 4 Hero + 4 Kombi = 16 Kacheln)
+  // Die letzten 4 in dieser Section sind unsere Live-Kacheln:
+  const liveKpis = Array.from(kpis).slice(-4);
+
+  function fmt(n: number | null | undefined, d = 2): string {
+    if (n == null || !isFinite(n)) return '—';
+    return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function render() {
+    const r = heizlastCompute.get();
+    const vals = [
+      { v: r.qhlKorr?.value, unit: 'kW' },
+      { v: r.plausi?.value, unit: 'W/m²', d: 1 },
+      { v: r.qh?.value, unit: 'kW' },
+      { v: r.wwSpeicherGerundet, unit: 'L', d: 0 },
+    ];
+    liveKpis.forEach((el, i) => {
+      const valEl = el.querySelector('.hz-kpi__value');
+      if (valEl) valEl.textContent = fmt(vals[i].v, vals[i].d ?? 2);
+    });
+    if (status) {
+      status.textContent = `Qhl = ${fmt(r.qhlRaw?.value, 2)} kW  ·  tvoll = ${r.tvoll} h  ·  Qh = ${fmt(r.qh?.value, 2)} kW`;
+    }
+  }
+
+  render();
+  heizlastCompute.subscribe(() => render());
+</script>
+
+<style>
+  .hz-demo-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hz-demo-field__label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--hz-navy);
+  }
+  .hz-demo-field__input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+    padding: 8px 12px;
+    background: var(--hz-white);
+  }
+  .hz-demo-field__input-wrap:focus-within {
+    border-color: var(--hz-navy);
+  }
+  .hz-demo-field__input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--hz-navy);
+  }
+  .hz-demo-field__unit {
+    color: var(--hz-mid-gray);
+    font-size: 14px;
+  }
+</style>

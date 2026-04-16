@@ -1,1 +1,28 @@
-CLAUDE.md: Handoff-Konvention ergaenzt (Copy-Paste-Prompt oben in jeder HANDOFF-PHASE-N.md)
+Heizlast Phase 3: State + Storage + Compute (Nano Stores)
+
+- nanostores@^1.2 als Dependency hinzu, @nanostores/persistent als Reserve
+- src/lib/heizlast/state.ts: zentraler map-Store heizlastState mit typisiertem
+  HeizlastState (Projekt-Metadata + gebaeude + heizlast + warmwasser +
+  zuschlaege + speicher). Nebenstores uiState, projectList, isDirty.
+  Setter updateSection / setField / replaceState / resetState. STATE_VERSION=1.
+- src/lib/heizlast/storage.ts: localStorage-Key thermowerk.heizlast.state.v1
+  mit Versionierung + Migrations-Hook. bootFromStorage + subscribeAutoSave
+  (debounced 500 ms). Legacy-Keys werden beim Boot entfernt (neuer Key,
+  alter Rechner ignoriert). SSR-safe.
+- src/lib/heizlast/projects.ts: Wrapper fuer /api/heizlast-projects.
+  listProjects / loadProject / saveProject / deleteProject / probeAuth.
+  Haelt projectList + uiState.syncInFlight/lastError/lastCloudSave live.
+- src/lib/heizlast/compute.ts: runCascade(state) laeuft M1->M2->M4->M3->M5
+  ->M6->M7->M8->M9 durch. Derived Store heizlastCompute triggert automatisch.
+  WW-Abzug bei Verbrauchsmethode via qnwwJahr() inkl. Verlust-Faktoren
+  aus state.warmwasser (wichtig fuer FWS-Konformitaet).
+- scripts/test-heizlast-state.ts: 16 Integrations-Tests, alle gruen.
+  FWS-Aufgabe 2 via State + Cascade -> Qhl = 12.55 kW (Regression-Anker).
+  Serialisierung round-trip, Versionsmigration, SSR-Safety, WW-Rundung.
+- heizlast-sandbox.astro: neue Sektion "07 / Phase 3 - State live".
+  Input Ba an heizlastState gebunden, vier KPI-Kacheln rendern live aus
+  heizlastCompute, debounced localStorage-Save.
+- CLAUDE.md Phase-3-Eintrag + HANDOFF-PHASE-4.md fuer naechsten Chat.
+
+Phase-1-Tests weiterhin 49 gruen. Phase 3 insgesamt 16 Integrations-Tests
+gruen. Nichts am Rechenkern geaendert.
