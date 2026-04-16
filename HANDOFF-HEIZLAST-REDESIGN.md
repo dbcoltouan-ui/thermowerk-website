@@ -321,25 +321,41 @@ public/tools/heizlast/img/logo.png          ← kopie für Print
 
 ## 12. Berechnungs-Logik: Referenz-Quellen
 
-Die Rechenfunktionen müssen aus dem originalen Tool portiert werden. Quelldateien liegen unter:
+**Alle relevanten Dateien liegen im Projekt selbst** unter `reference/old-calculator/` — der neue Claude muss nicht auf den Desktop zugreifen.
 
 ```
-C:\Users\Daniel\Desktop\thermowerk-heizlast\
-├── js/heizlast.js          ← qhlAusQn, qwuTag, speichervolumen, puffer_abtau, …
-├── js/constants.js         ← FWS-Tabellen (Vollbetriebsstunden, Bauperioden, …)
-├── js/modules/m1–m9.js     ← Modul-Logik mit DOM-Binding (nur die Logik extrahieren, UI neu!)
-├── js/storage.js           ← localStorage-Pattern (Referenz)
-└── js/app.js               ← Orchestrator + Cascade-Reihenfolge
+reference/old-calculator/
+├── CLAUDE-HANDOFF.md             ← KRITISCH: Domäne-Wissen, Bug-Fixes, tvoll-Logik, WW-Abzug
+├── index-reference.html          ← Original-HTML-Gerüst (nur als DOM-Struktur-Referenz)
+├── style-reference.css           ← Original-CSS (NICHT als Designvorlage — nur Inspiration für Print-CSS)
+└── js/
+    ├── heizlast.js               ← REINE RECHENFUNKTIONEN: qhlAusQn, qwuTag, speichervolumen,
+    │                                puffer_abtau, etc. → nach `src/lib/heizlast/calculations.ts` portieren
+    ├── constants.js              ← FWS-Tabellen (Vollbetriebsstunden, Bauperioden-Kennwerte,
+    │                                WW-Standards, fsto, Heizpuffer) → nach `src/lib/heizlast/constants.ts`
+    ├── app.js                    ← Orchestrator: Cascade-Reihenfolge, Projekt-Management, Print-Logik
+    ├── ui.js                     ← DOM-Helper (el, $, $$, toast) — im neuen Design nicht nötig
+    ├── storage.js                ← localStorage-Pattern (Referenz, nicht 1:1 übernehmen)
+    ├── tests.js                  ← vorhandene Tests — als Basis für neue Tests nutzen
+    └── modules/
+        ├── m1-stammdaten.js      ← M1: Gebäude & Standort (Logik extrahieren, UI neu)
+        ├── m2-heizlast.js        ← M2: 5 Methoden-Tabs, Energieträger-Abzug
+        ├── m3-plausibilitaet.js  ← M3: W/m²-Plausibilitätsband
+        ├── m4-sanierung.js       ← M4: Multiplikativer Sanierungs-Delta
+        ├── m5-warmwasser.js      ← M5: WW-Berechnung (Personen/direkt/Messung)
+        ├── m6-zuschlaege.js      ← M6: Sperrzeit-Zuschlag, Qas
+        ├── m7-wp-auslegung.js    ← M7: Qh = Qhl + Qw + Qoff + Qas
+        ├── m8-speicher.js        ← M8: WW-Speicher nach FWS §10/§11
+        └── m9-heizpuffer.js      ← M9: Heizpuffer (SWKI BT 102-01, VDI 4645)
 ```
 
-Und im Projekt:
-```
-C:\Users\Daniel\Documents\thermowerk-website\public\tools\heizlast\
-├── bundle.js               ← IIFE-Bundle der obigen Files (Referenz-Lookup einfacher)
-└── CLAUDE-HANDOFF.md       ← enthält wichtige Domäne-Hinweise (tvoll-Logik, WW-Abzug, etc.)
-```
+**Nochmals wichtig:** `reference/old-calculator/CLAUDE-HANDOFF.md` enthält kritisches Domäne-Wissen zu Bugs und Fallstricken (z.B. tvoll-Entkopplung von der WP-macht-WW-Frage, WW-Abzug bei Öl-Kessel mit Durchlauferhitzer) — **zwingend lesen** bevor die Rechenlogik portiert wird.
 
-**Nochmals wichtig:** `CLAUDE-HANDOFF.md` im Desktop-Projekt enthält kritische Domäne-Wissen zu Bugs und Fallstricken — **zwingend lesen** bevor die Rechenlogik portiert wird.
+**Wichtig zur Porting-Strategie:**
+- Die Dateien in `js/modules/` enthalten **UI-Logik und Berechnungs-Logik vermischt**. Nur die Rechenteile extrahieren, die UI komplett neu bauen.
+- Die Datei `js/heizlast.js` ist bereits nahe an pure Functions — einfacher Port nach TypeScript.
+- `js/constants.js` ist eine reine Datensammlung — direktes Port möglich.
+- Der Original-Ordner auf dem Desktop (`C:\Users\Daniel\Desktop\thermowerk-heizlast\`) ist der **Ground Truth** falls es Unstimmigkeiten gibt, aber für den Redesign nicht zwingend nötig.
 
 ### Regressions-Test (Pflicht!)
 
@@ -399,10 +415,10 @@ Cloudflare-Env-Vars (schon gesetzt, Production):
 ## 16. Erste Aktionen für neuen Claude
 
 1. **Dieses Dokument vollständig lesen.**
-2. `CLAUDE.md` im Projekt-Root lesen.
-3. `C:\Users\Daniel\Desktop\thermowerk-heizlast\CLAUDE-HANDOFF.md` lesen (Domäne-Wissen).
+2. `CLAUDE.md` im Projekt-Root lesen (allgemeine Website-Architektur).
+3. `reference/old-calculator/CLAUDE-HANDOFF.md` lesen (Domäne-Wissen, FWS-Regeln, Bug-Historie).
 4. Den bestehenden Thermowerk-Website-Code sichten: `src/layouts/Layout.astro`, `src/components/Calculator.astro`, `src/components/Services.astro`, `src/pages/index.astro`. So wird klar wie die CI-Sprache aussieht.
-5. Den alten Rechner einmal aufrufen (`C:\Users\Daniel\Desktop\thermowerk-heizlast\Thermowerk-Heizlast.html` im Browser) um zu sehen was er inhaltlich leistet.
+5. `reference/old-calculator/index-reference.html` und eine Modul-Datei (z.B. `js/modules/m2-heizlast.js`) überfliegen — genug um zu verstehen was der Rechner inhaltlich leistet.
 6. **Plan vorschlagen**, bevor mit der Umsetzung begonnen wird. Nicht in die Implementierung stürzen ohne Sign-Off vom User.
 7. Bei Design-Entscheidungen: niemals alleine entscheiden, immer `AskUserQuestion` mit 2–3 Vorschlägen (inkl. Preview-Beschreibungen).
 8. Antworten knapp halten.

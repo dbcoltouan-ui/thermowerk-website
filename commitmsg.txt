@@ -1,5 +1,5 @@
-Handoff fuer Heizlast-Redesign erstellt
+Heizlast-Referenzquellen ins Projekt kopiert
 
-- HANDOFF-HEIZLAST-REDESIGN.md im Projekt-Root mit komplettem Kontext
-- CLAUDE.md-Verweis auf das Handoff
-- Backend bleibt unveraendert, Frontend wird in neuer Session komplett neu gebaut
+- reference/old-calculator/ mit allen JS-Modulen, CLAUDE-HANDOFF und CSS-Referenz
+- Handoff-Dokument auf die neuen lokalen Pfade aktualisiert
+- Damit hat die neue Session alles an einem Ort ohne Desktop-Zugriff noetig
