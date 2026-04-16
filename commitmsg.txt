@@ -1,8 +1,5 @@
-Heizlast: oeffentlicher + interner Bereich auf einer Seite
+Handoff fuer Heizlast-Redesign erstellt
 
-- Seite laedt jetzt ohne Blockierung - Login nur on-demand als Modal
-- Oeffentliche Buttons: lokal speichern/laden, Neu, JSON Ex/Im, PDF Export (vereinfacht)
-- Auth-only Buttons: PDF Kunde, PDF Intern, Cloud-Projekte, Cloud speichern, Logo, Abmelden
-- Login-Modal mit Logo-Fix (max-width 75%, object-fit contain)
-- Vereinfachter PDF-Export: Rechenwege zu, Module auf, dann window.print()
-- body.is-auth Klasse steuert Sichtbarkeit aller auth-only Elemente
+- HANDOFF-HEIZLAST-REDESIGN.md im Projekt-Root mit komplettem Kontext
+- CLAUDE.md-Verweis auf das Handoff
+- Backend bleibt unveraendert, Frontend wird in neuer Session komplett neu gebaut
