@@ -53,13 +53,14 @@ const email = settings?.email || '';
   <link rel="icon" type="image/svg+xml" href="/tools/heizlast/img/favicon.svg" />
 </head>
 <body>
-  <!-- ═══ PASSWORT-GATE ═══ -->
-  <div id="gate-overlay">
-    <form class="gate-box" id="gate-form">
+  <!-- ═══ LOGIN-MODAL (nur on-demand, nicht blockierend) ═══ -->
+  <div id="login-modal">
+    <form class="gate-box" id="gate-form" style="position:relative">
+      <button type="button" class="gate-close-x" id="gate-close" aria-label="Schliessen">×</button>
       <img src="/img/logo.png" alt="Thermowerk" />
-      <h2>Interner Bereich</h2>
-      <p>Dieser Heizlastrechner ist nur für autorisierte Planer zugänglich. Bitte Passwort eingeben.</p>
-      <input type="password" id="gate-password" autocomplete="current-password" placeholder="Passwort" autofocus required />
+      <h2>Login</h2>
+      <p>Interner Zugang für den Thermowerk-Planer – zusätzliche Funktionen wie Cloud-Projekte und Angebots-PDF.</p>
+      <input type="password" id="gate-password" autocomplete="current-password" placeholder="Passwort" required />
       <button type="submit">Anmelden</button>
       <div class="gate-error" id="gate-error"></div>
     </form>
@@ -71,7 +72,7 @@ const email = settings?.email || '';
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       <span>Thermowerk Website</span>
     </a>
-    <div class="tw-topbar-right">Internes Planungstool · FWS Modul 3</div>
+    <div class="tw-topbar-right">Heizlastrechner · FWS Modul 3</div>
   </div>
 
   <!-- ═══ APP-HEADER ═══ -->
@@ -84,6 +85,7 @@ const email = settings?.email || '';
       </div>
     </div>
     <div class="header-actions">
+      <!-- Öffentlich sichtbare Buttons -->
       <select id="project-select" title="Gespeichertes Projekt laden">
         <option value="">— Projekt laden —</option>
       </select>
@@ -92,9 +94,17 @@ const email = settings?.email || '';
       <button id="btn-neu" title="Neues Projekt">Neu</button>
       <button id="btn-export-json" title="Als JSON exportieren">JSON ↓</button>
       <button id="btn-import-json" title="JSON importieren">JSON ↑</button>
-      <button id="btn-logo-upload" title="Firmenlogo setzen">Logo</button>
-      <button id="btn-print-kunde" title="Kundenfreundlicher PDF-Export">PDF Kunde</button>
-      <button id="btn-print-full" class="primary" title="Vollständiger Export inkl. Rechenwege">PDF intern</button>
+      <button id="btn-print-simple" class="primary" title="Projekt als PDF speichern (vereinfachte Ansicht)">PDF Export</button>
+
+      <!-- Nur für eingeloggte Nutzer sichtbar -->
+      <button id="btn-logo-upload"   class="auth-only" title="Firmenlogo setzen">Logo</button>
+      <button id="btn-print-kunde"   class="auth-only" title="Kundenfreundlicher PDF-Export (Angebots-Template)">PDF Kunde</button>
+      <button id="btn-print-full"    class="auth-only" title="Vollständiger Export inkl. Rechenwege">PDF intern</button>
+
+      <!-- Login / Logout (spiegeln sich über CSS) -->
+      <button id="btn-login" title="Internen Bereich öffnen">🔒 Login</button>
+      <button id="btn-logout" class="auth-only danger" title="Abmelden">⎋ Abmelden</button>
+
       <input type="file" id="file-import" accept="application/json" style="display:none" />
       <input type="file" id="file-logo" accept="image/*" style="display:none" />
     </div>
@@ -146,13 +156,19 @@ const email = settings?.email || '';
   <!-- Modul M10 (Leistungsdiagramm) -->
   <script is:inline src="/tools/heizlast/heizlast-chart.js"></script>
 
-  <!-- Passwort-Gate-Logik -->
+  <!-- Auth-State + Login-Modal + vereinfachter PDF-Export -->
   <script is:inline>
     (function () {
-      const overlay = document.getElementById('gate-overlay');
-      const form    = document.getElementById('gate-form');
-      const pwd     = document.getElementById('gate-password');
-      const err     = document.getElementById('gate-error');
+      const modal    = document.getElementById('login-modal');
+      const form     = document.getElementById('gate-form');
+      const pwd      = document.getElementById('gate-password');
+      const err      = document.getElementById('gate-error');
+      const closeBtn = document.getElementById('gate-close');
+      const loginBtn = document.getElementById('btn-login');
+      const logoutBtn= document.getElementById('btn-logout');
+
+      function openModal()  { modal.classList.add('visible'); setTimeout(() => pwd.focus(), 50); }
+      function closeModal() { modal.classList.remove('visible'); err.textContent = ''; pwd.value = ''; }
 
       async function checkAuth() {
         try {
@@ -160,6 +176,13 @@ const email = settings?.email || '';
           const d = await r.json();
           return !!d.authed;
         } catch { return false; }
+      }
+
+      function setAuthState(authed) {
+        document.body.classList.toggle('is-auth', authed);
+        window.__heizlastAuth = authed;
+        // Benachrichtige Cloud-Script falls vorhanden
+        if (typeof window.__onAuthChange === 'function') window.__onAuthChange(authed);
       }
 
       async function submitPassword(ev) {
@@ -176,7 +199,8 @@ const email = settings?.email || '';
           });
           const d = await r.json();
           if (d.success) {
-            overlay.classList.add('hidden');
+            setAuthState(true);
+            closeModal();
           } else {
             err.textContent = d.error || 'Passwort falsch';
             pwd.select();
@@ -185,11 +209,39 @@ const email = settings?.email || '';
           err.textContent = 'Netzwerk-Fehler';
         }
       }
-      form.addEventListener('submit', submitPassword);
 
-      // Beim Laden: prüfen ob bereits authentifiziert
-      checkAuth().then(authed => {
-        if (authed) overlay.classList.add('hidden');
+      async function doLogout() {
+        if (!confirm('Abmelden?')) return;
+        try {
+          await fetch('/api/heizlast-auth', { method: 'DELETE', credentials: 'same-origin' });
+        } catch {}
+        setAuthState(false);
+      }
+
+      form.addEventListener('submit', submitPassword);
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      loginBtn.addEventListener('click', openModal);
+      logoutBtn.addEventListener('click', doLogout);
+
+      // Auto-auth beim Laden
+      checkAuth().then(setAuthState);
+
+      // ─── Vereinfachter PDF-Export (öffentlich) ───
+      // Schliesst alle Rechenwege, ruft dann Browser-Print auf.
+      // Keine Kunden-Template-Umschaltung, keine details.steps geöffnet.
+      document.getElementById('btn-print-simple')?.addEventListener('click', () => {
+        // Alle details in den Modulen schliessen
+        document.querySelectorAll('details.steps').forEach(d => { d.open = false; });
+        // Alle Module aufklappen (damit Inhalt sichtbar ist)
+        document.querySelectorAll('.module.collapsed').forEach(m => m.classList.remove('collapsed'));
+        // Print-Meta aktualisieren (Datum etc.)
+        const meta = document.getElementById('print-meta');
+        if (meta) {
+          const d = new Date().toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric' });
+          meta.innerHTML = `Datum: ${d}`;
+        }
+        setTimeout(() => window.print(), 180);
       });
     })();
   </script>

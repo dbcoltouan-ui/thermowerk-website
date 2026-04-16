@@ -268,40 +268,43 @@
     location.reload();
   }
 
-  // ─── UI: Cloud-Buttons in Header einhängen ───
+  // ─── UI: Cloud-Buttons in Header einhängen (nur einmal, als auth-only) ───
+  let uiInstalled = false;
   function installUI() {
+    if (uiInstalled) return;
     const actions = $('.header-actions');
     if (!actions) return;
 
-    const btnCloudSave = document.createElement('button');
-    btnCloudSave.id = 'btn-cloud-save';
-    btnCloudSave.className = 'dark';
-    btnCloudSave.title = 'Aktuelles (lokales) Projekt in Sanity-Cloud speichern';
-    btnCloudSave.innerHTML = '☁ Cloud speichern';
-    btnCloudSave.addEventListener('click', saveToCloud);
-
     const btnCloudList = document.createElement('button');
     btnCloudList.id = 'btn-cloud-list';
+    btnCloudList.className = 'auth-only';
     btnCloudList.title = 'Cloud-Projekte anzeigen';
     btnCloudList.innerHTML = '☁ Cloud-Projekte';
     btnCloudList.addEventListener('click', showModal);
 
-    const btnLogout = document.createElement('button');
-    btnLogout.id = 'btn-logout';
-    btnLogout.className = 'danger';
-    btnLogout.title = 'Abmelden';
-    btnLogout.innerHTML = '⎋';
-    btnLogout.addEventListener('click', doLogout);
+    const btnCloudSave = document.createElement('button');
+    btnCloudSave.id = 'btn-cloud-save';
+    btnCloudSave.className = 'auth-only dark';
+    btnCloudSave.title = 'Aktuelles (lokales) Projekt in Sanity-Cloud speichern';
+    btnCloudSave.innerHTML = '☁ Cloud speichern';
+    btnCloudSave.addEventListener('click', saveToCloud);
 
-    actions.appendChild(btnCloudList);
-    actions.appendChild(btnCloudSave);
-    actions.appendChild(btnLogout);
+    // Vor dem Login/Logout-Block einfügen (also vor #btn-login)
+    const loginBtn = document.getElementById('btn-login');
+    if (loginBtn) {
+      actions.insertBefore(btnCloudList, loginBtn);
+      actions.insertBefore(btnCloudSave, loginBtn);
+    } else {
+      actions.appendChild(btnCloudList);
+      actions.appendChild(btnCloudSave);
+    }
+    uiInstalled = true;
   }
 
-  // Tool-Init läuft auf DOMContentLoaded – wir hängen uns etwas später ran
+  // Cloud-UI immer im DOM, aber sichtbar nur via .auth-only + body.is-auth
   if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', () => setTimeout(installUI, 50));
+    window.addEventListener('DOMContentLoaded', () => setTimeout(installUI, 60));
   } else {
-    setTimeout(installUI, 50);
+    setTimeout(installUI, 60);
   }
 })();

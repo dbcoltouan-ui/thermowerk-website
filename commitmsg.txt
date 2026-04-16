@@ -1,10 +1,8 @@
-Heizlastrechner unter /heizlast integriert
+Heizlast: oeffentlicher + interner Bereich auf einer Seite
 
-- Passwortgeschuetzte Seite (HEIZLAST_PASSWORD env var + HttpOnly-Cookie)
-- Original-Tool-Bundle in public/tools/heizlast kopiert (bundle.js + style.css + Logo)
-- CI-Anpassung via heizlast-tw.css (DM Sans, Outfit, Website-Farben, mehr Sektion-Abstand, Mobile)
-- Cloud-Sync mit Sanity via /api/heizlast-projects (GET/POST/DELETE) + heizlastProject-Schema
-- Modul M10: Leistungsdiagramm mit Bivalenzpunkt (Chart.js, kundentaugliche KPIs)
-- /api/heizlast-auth fuer Passwort-Gate mit Cookie-Session
-- Sanity Studio: neuer Eintrag "Heizlast-Projekte" in der Sidebar
-- robots=noindex,nofollow, Seite ist nicht im Menue verlinkt
+- Seite laedt jetzt ohne Blockierung - Login nur on-demand als Modal
+- Oeffentliche Buttons: lokal speichern/laden, Neu, JSON Ex/Im, PDF Export (vereinfacht)
+- Auth-only Buttons: PDF Kunde, PDF Intern, Cloud-Projekte, Cloud speichern, Logo, Abmelden
+- Login-Modal mit Logo-Fix (max-width 75%, object-fit contain)
+- Vereinfachter PDF-Export: Rechenwege zu, Module auf, dann window.print()
+- body.is-auth Klasse steuert Sichtbarkeit aller auth-only Elemente

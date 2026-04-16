@@ -273,19 +273,20 @@ label.field > span {
   .module-body { padding: 15px; }
 }
 
-/* ═══ Passwort-Gate-Overlay ═══ */
-#gate-overlay {
+/* ═══ Login-Modal (nicht mehr blocking beim Page-Load) ═══ */
+#login-modal {
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, var(--navy, #1B2A4A) 0%, var(--navy-dark, #111D33) 100%);
+  background: rgba(17,29,51,0.55);
+  backdrop-filter: blur(3px);
   z-index: 99999;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
-#gate-overlay.hidden {
-  display: none !important;
+#login-modal.visible {
+  display: flex;
 }
 .gate-box {
   background: #fff;
@@ -295,12 +296,36 @@ label.field > span {
   max-width: 400px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   text-align: center;
+  animation: loginPop 0.18s ease-out;
+}
+@keyframes loginPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .gate-box img {
-  height: 52px;
+  max-width: 75%;
+  max-height: 52px;
   width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
   margin: 0 auto 18px;
 }
+.gate-close-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+  color: var(--mid-gray);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all .15s;
+}
+.gate-close-x:hover { background: var(--light-gray); color: var(--dark); }
 .gate-box h2 {
   font-family: 'Outfit', sans-serif;
   font-size: 22px;
@@ -549,9 +574,28 @@ label.field > span {
   text-align: center;
 }
 
+/* ═══ Auth-Gate: auth-only Buttons nur bei eingeloggtem State zeigen ═══ */
+.auth-only { display: none !important; }
+body.is-auth .auth-only { display: inline-flex !important; }
+
+body.is-auth #btn-login { display: none !important; }
+body:not(.is-auth) #btn-logout { display: none !important; }
+
+/* Login-Button: sichtbar, dezent */
+#btn-login {
+  background: var(--navy) !important;
+  color: #fff !important;
+  border-color: var(--navy) !important;
+  font-weight: 600 !important;
+}
+#btn-login:hover {
+  background: var(--navy-light, #243658) !important;
+  border-color: var(--navy-light, #243658) !important;
+}
+
 /* ═══ Bei Druck: Topbar, Footer, Cloud-UI ausblenden ═══ */
 @media print {
-  .tw-topbar, .tw-footer, #cloud-modal, #gate-overlay { display: none !important; }
+  .tw-topbar, .tw-footer, #cloud-modal, #login-modal { display: none !important; }
   .app-header { position: static; box-shadow: none; border-bottom: 1px solid #999; }
   .header-actions { display: none !important; }
 }
