@@ -1,1 +1,10 @@
-Quellenhinweis und Link aus Impressum und Datenschutz entfernt
+Heizlastrechner unter /heizlast integriert
+
+- Passwortgeschuetzte Seite (HEIZLAST_PASSWORD env var + HttpOnly-Cookie)
+- Original-Tool-Bundle in public/tools/heizlast kopiert (bundle.js + style.css + Logo)
+- CI-Anpassung via heizlast-tw.css (DM Sans, Outfit, Website-Farben, mehr Sektion-Abstand, Mobile)
+- Cloud-Sync mit Sanity via /api/heizlast-projects (GET/POST/DELETE) + heizlastProject-Schema
+- Modul M10: Leistungsdiagramm mit Bivalenzpunkt (Chart.js, kundentaugliche KPIs)
+- /api/heizlast-auth fuer Passwort-Gate mit Cookie-Session
+- Sanity Studio: neuer Eintrag "Heizlast-Projekte" in der Sidebar
+- robots=noindex,nofollow, Seite ist nicht im Menue verlinkt

@@ -1,0 +1,197 @@
+---
+// Heizlast-Berechnungstool (intern, passwortgeschützt)
+// URL: /heizlast  – nicht im Menü verlinkt, robots=noindex
+import { getSingleton } from '../lib/sanity.ts';
+const settings: any = await getSingleton('siteSettings') || {};
+const companyName = settings?.companyName || 'Thermowerk';
+const address = settings?.address || '';
+const phone = settings?.phone || '';
+const email = settings?.email || '';
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1B2A4A" />
+  <title>Heizlastrechner · Thermowerk</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Basis-CSS-Variablen (passend zur Hauptwebsite, damit die Tool-CSS-Variablen vorhanden sind) -->
+  <style is:global>
+    :root {
+      --navy: #1B2A4A;
+      --navy-light: #243658;
+      --navy-dark: #111D33;
+      --red: #D93025;
+      --red-hover: #B71C1C;
+      --white: #FFFFFF;
+      --off-white: #F7F8FA;
+      --light-gray: #EEF0F4;
+      --mid-gray: #6B7280;
+      --dark: #1A1A1A;
+      --border: #E2E5EB;
+      --blue-tint: #E8EDF5;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(27,42,74,.06), 0 1px 2px rgba(27,42,74,.04);
+      --shadow-lg: 0 10px 25px rgba(27,42,74,.08), 0 4px 10px rgba(27,42,74,.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+  </style>
+
+  <!-- Tool-eigenes CSS -->
+  <link rel="stylesheet" href="/tools/heizlast/style.css" />
+  <!-- CI-Override + Layout-Verbesserungen -->
+  <link rel="stylesheet" href="/tools/heizlast/heizlast-tw.css" />
+
+  <link rel="icon" type="image/svg+xml" href="/tools/heizlast/img/favicon.svg" />
+</head>
+<body>
+  <!-- ═══ PASSWORT-GATE ═══ -->
+  <div id="gate-overlay">
+    <form class="gate-box" id="gate-form">
+      <img src="/img/logo.png" alt="Thermowerk" />
+      <h2>Interner Bereich</h2>
+      <p>Dieser Heizlastrechner ist nur für autorisierte Planer zugänglich. Bitte Passwort eingeben.</p>
+      <input type="password" id="gate-password" autocomplete="current-password" placeholder="Passwort" autofocus required />
+      <button type="submit">Anmelden</button>
+      <div class="gate-error" id="gate-error"></div>
+    </form>
+  </div>
+
+  <!-- ═══ TOPBAR (dezent, Rück-Link) ═══ -->
+  <div class="tw-topbar">
+    <a href="/" aria-label="Zurück zur Website">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span>Thermowerk Website</span>
+    </a>
+    <div class="tw-topbar-right">Internes Planungstool · FWS Modul 3</div>
+  </div>
+
+  <!-- ═══ APP-HEADER ═══ -->
+  <header class="app-header">
+    <div class="app-header-left">
+      <img src="/img/logo.png" alt={companyName} class="tw-logo" />
+      <div class="tw-title-wrap">
+        <h1>Heizlastrechner</h1>
+        <div class="sub">{companyName} · nach FWS Modul 3 · Ausgabe 1-2025</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <select id="project-select" title="Gespeichertes Projekt laden">
+        <option value="">— Projekt laden —</option>
+      </select>
+      <button id="btn-save" title="Lokal speichern">Speichern</button>
+      <button id="btn-delete" class="danger" title="Lokales Projekt löschen">×</button>
+      <button id="btn-neu" title="Neues Projekt">Neu</button>
+      <button id="btn-export-json" title="Als JSON exportieren">JSON ↓</button>
+      <button id="btn-import-json" title="JSON importieren">JSON ↑</button>
+      <button id="btn-logo-upload" title="Firmenlogo setzen">Logo</button>
+      <button id="btn-print-kunde" title="Kundenfreundlicher PDF-Export">PDF Kunde</button>
+      <button id="btn-print-full" class="primary" title="Vollständiger Export inkl. Rechenwege">PDF intern</button>
+      <input type="file" id="file-import" accept="application/json" style="display:none" />
+      <input type="file" id="file-logo" accept="image/*" style="display:none" />
+    </div>
+  </header>
+
+  <!-- ═══ DRUCK-KOPF (nur im Print sichtbar) ═══ -->
+  <div class="print-header" id="print-header">
+    <div class="print-logo-wrap"><img id="print-logo" alt="" src="/img/logo.png" data-default="/img/logo.png" /></div>
+    <div class="print-title">
+      <div class="print-title-main">Heizlastberechnung</div>
+      <div class="print-title-sub">nach FWS Modul 3</div>
+    </div>
+    <div class="print-meta" id="print-meta"></div>
+  </div>
+
+  <!-- ═══ TOOL-CONTAINER (Module werden per JS injiziert) ═══ -->
+  <main class="app" id="app"></main>
+
+  <!-- ═══ DRUCK-FUSSZEILE ═══ -->
+  <div class="print-footer">
+    Berechnung nach FWS Modul 3 (Ausgabe 1-2025) · SIA 384/1:2022 · SIA 385/1:2020.
+    Die ausgewiesenen Leistungen sind nach anerkannten Regeln der Technik ermittelt.
+  </div>
+
+  <!-- ═══ SITE-FOOTER ═══ -->
+  <footer class="tw-footer">
+    <div class="tw-footer-row">
+      {address && <span>{address}</span>}
+      {phone && <a href={`tel:${phone.replace(/\s/g, '')}`}>{phone}</a>}
+      {email && <a href={`mailto:${email}`}>{email}</a>}
+    </div>
+    <div class="tw-footer-row">
+      <a href="/">Zur Website</a>
+      <a href="/impressum">Impressum</a>
+      <a href="/datenschutz">Datenschutz</a>
+    </div>
+    <div class="tw-footer-copyright">
+      © {new Date().getFullYear()} {companyName} · Internes Planungstool
+    </div>
+  </footer>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <!-- Chart.js CDN (für M10) -->
+  <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Tool-Bundle (Original) -->
+  <script is:inline src="/tools/heizlast/bundle.js"></script>
+  <!-- Cloud-Sync (Overlay) -->
+  <script is:inline src="/tools/heizlast/heizlast-cloud.js"></script>
+  <!-- Modul M10 (Leistungsdiagramm) -->
+  <script is:inline src="/tools/heizlast/heizlast-chart.js"></script>
+
+  <!-- Passwort-Gate-Logik -->
+  <script is:inline>
+    (function () {
+      const overlay = document.getElementById('gate-overlay');
+      const form    = document.getElementById('gate-form');
+      const pwd     = document.getElementById('gate-password');
+      const err     = document.getElementById('gate-error');
+
+      async function checkAuth() {
+        try {
+          const r = await fetch('/api/heizlast-auth', { credentials: 'same-origin' });
+          const d = await r.json();
+          return !!d.authed;
+        } catch { return false; }
+      }
+
+      async function submitPassword(ev) {
+        ev.preventDefault();
+        err.textContent = '';
+        const password = pwd.value;
+        if (!password) return;
+        try {
+          const r = await fetch('/api/heizlast-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ password }),
+          });
+          const d = await r.json();
+          if (d.success) {
+            overlay.classList.add('hidden');
+          } else {
+            err.textContent = d.error || 'Passwort falsch';
+            pwd.select();
+          }
+        } catch (e) {
+          err.textContent = 'Netzwerk-Fehler';
+        }
+      }
+      form.addEventListener('submit', submitPassword);
+
+      // Beim Laden: prüfen ob bereits authentifiziert
+      checkAuth().then(authed => {
+        if (authed) overlay.classList.add('hidden');
+      });
+    })();
+  </script>
+</body>
+</html>

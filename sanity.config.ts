@@ -17,6 +17,7 @@ import footerSection from './sanity/schemas/footerSection';
 import impressumPage from './sanity/schemas/impressumPage';
 import datenschutzPage from './sanity/schemas/datenschutzPage';
 import contactSubmission from './sanity/schemas/contactSubmission';
+import heizlastProject from './sanity/schemas/heizlastProject';
 
 // Sanity Studio Konfiguration
 export default defineConfig({
@@ -53,6 +54,10 @@ export default defineConfig({
             S.listItem().title('Kontaktanfragen').child(
               S.documentTypeList('contactSubmission').title('Kontaktanfragen').defaultOrdering([{ field: 'submittedAt', direction: 'desc' }])
             ),
+            S.divider(),
+            S.listItem().title('Heizlast-Projekte').child(
+              S.documentTypeList('heizlastProject').title('Heizlast-Projekte').defaultOrdering([{ field: 'updatedAt', direction: 'desc' }])
+            ),
           ]),
     }),
   ],
@@ -75,6 +80,7 @@ export default defineConfig({
       impressumPage,
       datenschutzPage,
       contactSubmission,
+      heizlastProject,
     ],
   },
 });
