@@ -564,4 +564,9 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
     setStatus('idle', 'Neues Projekt.');
   });
 
-  // 
+  // Login-Trigger im Header
+  const loginHeader = document.getElementById('hz-login-trigger');
+  if (loginHeader && loginBtn) {
+    loginHeader.addEventListener('click', () => loginBtn.click());
+  }
+</script>

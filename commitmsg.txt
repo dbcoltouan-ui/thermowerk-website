@@ -1,3 +1,8 @@
-Heizlast Phase 5: Executive Summary + Leistungsdiagramm
+Phase 5 hotfix: state.ts und heizlast.astro korrigiert
 
-- ExecutiveSummary.astro: sticky Stat-Row oben mit Qh (hero) / Qhl / W/m2-Ampel / WW-Speiche
+Der vorherige Phase-5-Commit (Linux-Sandbox) hatte versehentlich
+eine aeltere state.ts-Fassung ohne RaumInput/SectionNote/Notizen-Helfer
+und einen abgeschnittenen heizlast.astro ohne Login-Trigger-Wiring
+eingecheckt. Dieser Commit setzt beide Dateien auf die korrekte
+Phase-4-Baseline zurueck plus die Phase-5-Ergaenzungen (Importe von
+ExecutiveSummary und LeistungsDiagramm).

@@ -376,3 +376,112 @@ export function resetState(): void {
   heizlastState.set(createDefaultState());
   isDirty.set(false);
 }
+
+// ---------------------------------------------------------------
+// Projektliste (nur im Speicher, wird bei Bedarf geladen)
+// ---------------------------------------------------------------
+
+export interface ProjectListItem {
+  _id: string;
+  projectName: string;
+  customerName?: string;
+  address?: string;
+  qhl?: number | null;
+  qh?: number | null;
+  ebf?: number | null;
+  status?: ProjektStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  notes?: string;
+}
+
+/** Cloud-Projektliste (nach Login geladen). Leer = noch nicht geladen oder keine Projekte. */
+export const projectList = atom<ProjectListItem[]>([]);
+export const projectListLoaded = atom<boolean>(false);
+
+// ---------------------------------------------------------------
+// Abgeleitete Kennzahlen (werden von compute.ts gesetzt)
+// ---------------------------------------------------------------
+
+/** Tvoll-Effektivwert = Override falls gesetzt, sonst Richtwert. */
+export const tvollEffektiv = computed(heizlastState, (s) => {
+  if (s.gebaeude.tvollOverride != null) return s.gebaeude.tvollOverride;
+  // Lazy import, damit state.ts keine Abhängigkeit zu constants im Browser-Bundle hat
+  // (wird nur evaluiert wenn benötigt):
+  return tvollLookup(s.gebaeude.tvollProfil, s.gebaeude.lage);
+});
+
+// lokale Lookup-Funktion (spiegelt calculations.tvollRichtwert, aber synchron)
+import { VOLLASTSTUNDEN } from './constants.ts';
+function tvollLookup(profil: TvollProfil, lage: Lage): number {
+  const row = VOLLASTSTUNDEN.find((r) => r.gebaeudetyp === profil && r.lage === lage);
+  return row ? row.tvoll : 2000;
+}
+
+// ---------------------------------------------------------------
+// Helper: Notizen
+// ---------------------------------------------------------------
+
+/** Setzt Text einer Sektions-Notiz. */
+export function setNoteText(key: NotizenKey, text: string): void {
+  const current = heizlastState.get().notizen;
+  heizlastState.setKey('notizen', {
+    ...current,
+    [key]: { ...current[key], text },
+  });
+  isDirty.set(true);
+}
+
+/** Schaltet Export-Flag einer Sektions-Notiz. */
+export function setNoteExport(key: NotizenKey, include: boolean): void {
+  const current = heizlastState.get().notizen;
+  heizlastState.setKey('notizen', {
+    ...current,
+    [key]: { ...current[key], includeInExport: include },
+  });
+  isDirty.set(true);
+}
+
+// ---------------------------------------------------------------
+// Helper: EBF-Zimmer-Liste
+// ---------------------------------------------------------------
+
+/** Anhängen eines neuen Zimmers. */
+export function addRaum(name = ''): void {
+  const g = heizlastState.get().gebaeude;
+  const nextId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+  const raeume: RaumInput[] = [
+    ...g.raeume,
+    { id: nextId, name, laenge: 0, breite: 0, flaecheOverride: null },
+  ];
+  heizlastState.setKey('gebaeude', { ...g, raeume });
+  isDirty.set(true);
+}
+
+/** Zimmer entfernen. */
+export function removeRaum(id: string): void {
+  const g = heizlastState.get().gebaeude;
+  heizlastState.setKey('gebaeude', { ...g, raeume: g.raeume.filter((r) => r.id !== id) });
+  isDirty.set(true);
+}
+
+/** Zimmer aktualisieren. */
+export function updateRaum(id: string, patch: Partial<RaumInput>): void {
+  const g = heizlastState.get().gebaeude;
+  const raeume = g.raeume.map((r) => (r.id === id ? { ...r, ...patch } : r));
+  heizlastState.setKey('gebaeude', { ...g, raeume });
+  isDirty.set(true);
+}
+
+/** Summiert Flächen aller Zimmer. flaecheOverride hat Vorrang, sonst laenge·breite. */
+export function sumRaumFlaechen(raeume: RaumInput[]): number {
+  let sum = 0;
+  for (const r of raeume) {
+    if (r.flaecheOverride != null && r.flaecheOverride > 0) {
+      sum += r.flaecheOverride;
+    } else if (r.laenge > 0 && r.breite > 0) {
+      sum += r.laenge * r.breite;
+    }
+  }
+  return Math.round(sum * 10) / 10;
+}
