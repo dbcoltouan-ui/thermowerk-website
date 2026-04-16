@@ -1,16 +1,13 @@
-Heizlast-Redesign Phase 1: Rechenkern als TypeScript portiert
+Heizlast Phase 2: UI-Grundlagen und wiederverwendbare Primitives
 
-- src/lib/heizlast/{types,constants,calculations}.ts
-  Pure Rechenfunktionen aus reference/old-calculator nach TypeScript,
-  FWS Modul 3 (1-2025), SIA 385/2, mit voller Typ-Safety.
-- scripts/test-heizlast.ts: 49 Regressions-Tests
-  * FWS-Aufgaben 1A, 1B, 2, 3, 4 (kritischer Referenzwert Qhl=12.55 kW)
-  * Eigenes Beispiel "Referenzhaus Moosseedorf" vorwaerts
-  * Rueckrechnung aus Ergebnissen zurueck zu Eingaben
-  Alle Tests gruen.
-- reference/BEISPIELRECHNUNG.md: Schritt-fuer-Schritt-Dokumentation
-- tsconfig.json: allowImportingTsExtensions + noEmit
-- HANDOFF-PHASE-2.md: Uebergabe an naechsten Chat (UI-Grundlagen)
-- CLAUDE.md: Status Phase 1 dokumentiert
+- HeizlastLayout.astro: schlanker Header (Logo + Login-Trigger), minimaler Footer, eigene CSS-Tokens mit hz-Prefix, isolierter .hz-scope
+- SectionWrapper.astro: Standard-Sektionsrahmen mit Kicker, Titel, Subline, optionalem Aside-Slot, tone white/off
+- InfoBox.astro: aufklappbare Blue-tint-Box via details, Icon-Varianten info/book/help, Grid fuer Abkuerzungen
+- KpiCard.astro: Default- und Hero-Variante mit Delta-Badge und Caption, Grid-Utilities
+- OverrideField.astro: Input mit Stift-Icon, Reset-Pfeil nach Override, delegierter Handler
+- Toggle.astro: Pill-Chip mit Plus-Minus-Indikator fuer optionale Module, aria-expanded korrekt, delegierter Handler
+- heizlast-sandbox.astro: interne Vorschau-Seite mit realistischen Kombinationen (wird in Phase 4 entfernt)
+- CLAUDE.md um Phase-2-Dokumentation ergaenzt
+- HANDOFF-PHASE-3.md angelegt (State + Storage)
 
-Test-Command: node --experimental-strip-types scripts/test-heizlast.ts
+Tests: 49 Assertions im Rechenkern weiterhin gruen (FWS-Aufgabe 2 -> Qhl = 12.55 kW bestaetigt).

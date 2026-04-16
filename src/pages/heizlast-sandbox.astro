@@ -1,0 +1,183 @@
+---
+// Temporaere Sandbox-Seite, um die Phase-2-Primitives visuell zu pruefen.
+// Wird am Ende von Phase 4 wieder entfernt.
+// Nicht in der Navigation verlinkt — nur ueber direktes URL-Aufrufen erreichbar.
+import HeizlastLayout from '../layouts/HeizlastLayout.astro';
+import SectionWrapper from '../components/heizlast/SectionWrapper.astro';
+import InfoBox from '../components/heizlast/InfoBox.astro';
+import KpiCard from '../components/heizlast/KpiCard.astro';
+import OverrideField from '../components/heizlast/OverrideField.astro';
+import Toggle from '../components/heizlast/Toggle.astro';
+---
+<HeizlastLayout
+  title="Sandbox — Heizlast-UI-Primitives"
+  description="Interne Vorschau-Seite fuer die Heizlast-UI-Primitives. Wird spaeter entfernt."
+>
+
+  <SectionWrapper
+    first
+    kicker="01 / Vorschau"
+    title="UI-Primitives fuer den neuen Heizlast-Rechner"
+    subline="Diese Seite dient ausschliesslich zur visuellen Abnahme der Grundbausteine aus Phase 2. Sie enthaelt keine Rechenlogik und wird spaeter wieder entfernt."
+  >
+    <div class="hz-stack">
+      <p>Stack: <code>HeizlastLayout</code> + <code>SectionWrapper</code> + die vier Primitives. Alle Werte unten sind Demonstrationsdaten.</p>
+    </div>
+  </SectionWrapper>
+
+  <SectionWrapper
+    tone="off"
+    kicker="02 / InfoBox"
+    title="Aufklappbare Info-Panels"
+    subline="Pro Sektion eine oder zwei dezente Boxen fuer Hintergrundwissen und Abkuerzungen."
+  >
+    <InfoBox title="Was ist die EBF?" subtitle="Energiebezugsflaeche nach SIA 416/1" icon="help">
+      <p>
+        Die <strong>Energiebezugsflaeche (EBF)</strong> ist die Summe aller beheizten
+        Geschossflaechen inkl. Raumtrennungen. Sie ist die Bezugsgroesse fuer
+        spezifische Kennwerte wie W/m&sup2;.
+      </p>
+      <p>
+        Abweichungen zur Nettowohnflaeche entstehen durch Treppenhaus, Innenwaende und
+        Installationsschaechte.
+      </p>
+    </InfoBox>
+
+    <InfoBox title="Abkuerzungen in dieser Sektion" icon="book">
+      <dl class="hz-info__grid">
+        <dt>EBF</dt><dd>Energiebezugsflaeche [m&sup2;]</dd>
+        <dt>tvoll</dt><dd>Vollbetriebsstunden [h/a]</dd>
+        <dt>Qhl</dt><dd>Heizlast [kW]</dd>
+        <dt>Qw</dt><dd>Warmwasser-Leistung [kW]</dd>
+        <dt>Qoff</dt><dd>Sperrzeit-Zuschlag [kW]</dd>
+        <dt>Qas</dt><dd>Abtau-/Sonderzuschlag [kW]</dd>
+      </dl>
+    </InfoBox>
+  </SectionWrapper>
+
+  <SectionWrapper
+    kicker="03 / KpiCard"
+    title="Kennzahlen-Kacheln in zwei Abstufungen"
+    subline="Default-Variante fuer dezente Zwischenergebnisse, Hero-Variante fuer die Executive Summary."
+  >
+    <h3 style="margin-top: 8px; margin-bottom: 12px;">Default &middot; Zwischenergebnisse</h3>
+    <div class="hz-kpi-grid">
+      <KpiCard label="Heizlast Qhl" value="8.43" unit="kW" caption="nach Sanierung" />
+      <KpiCard label="Spez. Bedarf" value="65" unit="W/m&sup2;" delta="im Plausi-Band (gruen)" deltaTone="positive" />
+      <KpiCard label="tvoll" value="2000" unit="h/a" caption="Standard Mittelland" />
+      <KpiCard label="Qw" value="0.59" unit="kW" />
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 12px;">Hero &middot; Executive Summary</h3>
+    <div class="hz-kpi-grid hz-kpi-grid--hero">
+      <KpiCard variant="hero" label="Heizlast" value="8.43" unit="kW" caption="Qhl nach M4" />
+      <KpiCard variant="hero" label="WP-Auslegung" value="9.50" unit="kW" caption="Qh gesamt" />
+      <KpiCard variant="hero" label="WW-Speicher" value="300" unit="L" caption="gerundet 10-L-Schritt" />
+      <KpiCard variant="hero" label="Pufferspeicher" value="190" unit="L" caption="SWKI BT 102-01" />
+    </div>
+  </SectionWrapper>
+
+  <SectionWrapper
+    tone="off"
+    kicker="04 / OverrideField"
+    title="Vordefinierte Werte ueberschreiben"
+    subline="Defaults aus FWS-Tabellen sind sichtbar und gegraut. Klick auf das Stift-Icon setzt den Wert manuell."
+  >
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 760px;">
+      <OverrideField
+        id="sbx-tvoll"
+        label="Vollbetriebsstunden tvoll"
+        defaultValue="2000"
+        unit="h/a"
+        hint="Standard Mittelland bei 2000 m.u.M. Ueberschreiben nur mit Begruendung."
+        source="FWS"
+        min={500}
+        max={3500}
+        step={50}
+      />
+      <OverrideField
+        id="sbx-dt"
+        label="Warmwasser &Delta;T"
+        defaultValue="45"
+        unit="K"
+        hint="Temperaturdifferenz Kaltwasser zu Warmwasser-Solltemperatur."
+        source="SIA 385/1"
+        min={20}
+        max={60}
+        step={1}
+      />
+      <OverrideField
+        id="sbx-eta"
+        label="Wirkungsgrad Oelkessel &eta;"
+        defaultValue="0.80"
+        unit=""
+        hint="Nutzungsgrad Bestandskessel (Jahresmittel). Fuer Kondensation 0.85-0.95."
+        source="FWS"
+        min={0.5}
+        max={1}
+        step={0.01}
+      />
+    </div>
+  </SectionWrapper>
+
+  <SectionWrapper
+    kicker="05 / Toggle"
+    title="Optionale Module zu- und wegschalten"
+    subline="Kein Feld bleibt offen und leer. Chips zeigen, was zusaetzlich beruecksichtigt werden kann."
+  >
+    <div class="hz-stack">
+      <Toggle id="sbx-tog-m4" label="Sanierungs-Delta beruecksichtigen" caption="M4">
+        <p class="hz-muted" style="margin-bottom: 12px;">Platzhalter-Inhalt: Multiplikativer Faktor (z.B. 0.90 bei einfacher Fensterdaemmung). Wird in Phase 4 mit echten Eingabefeldern bestueckt.</p>
+        <OverrideField
+          id="sbx-m4-faktor"
+          label="Sanierungsfaktor"
+          defaultValue="1.00"
+          unit=""
+          source="manuell"
+          min={0.5}
+          max={1}
+          step={0.01}
+        />
+      </Toggle>
+
+      <Toggle id="sbx-tog-m3" label="Plausibilitaets-Check anzeigen" caption="M3">
+        <p class="hz-muted">
+          Platzhalter: Anzeige der spezifischen Heizlast in W/m&sup2; mit Farbband
+          gruen/gelb/rot gemaess FWS-Referenzbereich fuer die gewaehlte Bauperiode.
+        </p>
+      </Toggle>
+
+      <Toggle id="sbx-tog-qas" label="Abtau-Zuschlag Qas erfassen" caption="M6">
+        <p class="hz-muted">
+          Platzhalter: Direkteingabe oder Auswahl des Abtau-Zuschlags (Luft-Wasser-WP, &lt;= 0.2 kW bei EFH).
+        </p>
+      </Toggle>
+    </div>
+  </SectionWrapper>
+
+  <SectionWrapper
+    tone="off"
+    kicker="06 / Kombi"
+    title="So fuehlt sich eine Sektion an"
+    subline="Beispielhafte Kombination von InfoBox, Eingabefeldern und dezenten Zwischenergebnissen."
+  >
+    <InfoBox title="Was passiert in dieser Sektion?" icon="info">
+      <p>
+        Hier werden die fuer die Heizlast relevanten Gebaeudedaten erfasst. Die Standardwerte stammen aus den FWS-Tabellen und duerfen mit Begruendung abgewichen werden.
+      </p>
+    </InfoBox>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 24px;">
+      <OverrideField id="sbx-ebf" label="Energiebezugsflaeche" defaultValue="180" unit="m&sup2;" source="Projekt" />
+      <OverrideField id="sbx-wohneinheiten" label="Wohneinheiten" defaultValue="1" unit="" source="Projekt" />
+      <OverrideField id="sbx-tvoll2" label="Vollbetriebsstunden" defaultValue="2000" unit="h/a" source="FWS" />
+    </div>
+
+    <div class="hz-kpi-grid" style="margin-top: 24px;">
+      <KpiCard label="Heizlast Qhl" value="9.28" unit="kW" />
+      <KpiCard label="Spez. Bedarf" value="62" unit="W/m&sup2;" delta="im Plausi-Band" deltaTone="positive" />
+      <KpiCard label="Waermebedarf" value="18.5" unit="MWh/a" />
+    </div>
+  </SectionWrapper>
+
+</HeizlastLayout>

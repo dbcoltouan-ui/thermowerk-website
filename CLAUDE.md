@@ -4,7 +4,9 @@
 
 > **AKTUELLES OFFENES PROJEKT: Heizlastrechner-Redesign** — Siehe `HANDOFF-HEIZLAST-REDESIGN.md` im Projekt-Root. Das Backend steht (Sanity-Schema, Cloudflare Functions, Auth, Env-Vars), aber der Frontend-Teil unter `/heizlast` wird komplett neu aufgebaut. Bei neuer Session zu diesem Thema zuerst `HANDOFF-HEIZLAST-REDESIGN.md` lesen.
 >
-> **Phase 1 abgeschlossen (2026-04-16):** Rechenkern als TypeScript portiert in `src/lib/heizlast/{types,constants,calculations}.ts`. 49 Regressions-Tests (FWS-Aufgaben 1–4 + eigenes Beispiel + Rückrechnung) laufen grün via `node --experimental-strip-types scripts/test-heizlast.ts`. Die Beispielrechnung ist dokumentiert in `reference/BEISPIELRECHNUNG.md`. **Für Phase 2 (UI-Grundlagen) neuer Chat — siehe `HANDOFF-PHASE-2.md`.**
+> **Phase 1 abgeschlossen (2026-04-16):** Rechenkern als TypeScript portiert in `src/lib/heizlast/{types,constants,calculations}.ts`. 49 Regressions-Tests (FWS-Aufgaben 1–4 + eigenes Beispiel + Rückrechnung) laufen grün via `node --experimental-strip-types scripts/test-heizlast.ts`. Die Beispielrechnung ist dokumentiert in `reference/BEISPIELRECHNUNG.md`.
+>
+> **Phase 2 abgeschlossen (2026-04-16):** UI-Grundlagen und wiederverwendbare Primitives gebaut. `src/layouts/HeizlastLayout.astro` (schlanker Header mit Logo + Login-Button, minimaler Footer, eigene CSS-Tokens mit `--hz-*` Prefix, `.hz-scope` isoliert vom Marketing-Layout). `src/components/heizlast/` enthält `SectionWrapper`, `InfoBox` (Accordion mit Blue-tint, Icon-Varianten info/book/help), `KpiCard` (default + hero Variante), `OverrideField` (Stift-Icon zum Überschreiben, Delegated-Click-Handler per inline JS), `Toggle` (Pill-Chip +/− für optionale Module, kein offener leerer Content). Visuelle Abnahme über `src/pages/heizlast-sandbox.astro` (wird in Phase 4 entfernt). Design-Entscheidungen: OverrideField = Stift-Icon (User-Wahl A); InfoBox/KpiCard/Toggle = Claude-Empfehlung (best practices, Navy/Rot als Akzent, Off-White/White als Flächenfarbe). Tests weiterhin 49 grün. **Für Phase 3 (State + Storage) neuer Chat — siehe `HANDOFF-PHASE-3.md`.**
 
 ## Stack
 - **Astro 5.5** – statisches Framework
@@ -245,8 +247,20 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - **Testlauf:** `node --experimental-strip-types scripts/test-heizlast.ts` (Node 22.6+)
 - **tsconfig.json** ergänzt um `allowImportingTsExtensions: true` + `noEmit: true` (damit `.ts`-Extensions in Imports auch von Astro akzeptiert werden).
 
-### Phasen 2–7 (offen)
-Phase 2 (UI-Grundlagen: Layout, CSS-Tokens, InfoBox, KpiCard), Phase 3 (State + Storage), Phase 4 (Sektionen 1–7), Phase 5 (Executive Summary + Diagramm), Phase 6 (Login + Export), Phase 7 (Testing + Deploy) — siehe `HANDOFF-PHASE-2.md`.
+### Phase 2: UI-Grundlagen (abgeschlossen 2026-04-16)
+- **Layout:** `src/layouts/HeizlastLayout.astro` — eigener Scope `.hz-scope` mit `--hz-*`-Token-Set, schlanker Header (Logo + Login-Trigger), minimaler Footer, keine Site-Navigation. Nutzt denselben Farb- und Font-Kanon wie das Marketing-Layout, aber isoliert vom globalen CSS.
+- **Primitives unter `src/components/heizlast/`:**
+  - `SectionWrapper.astro` — Standard-Sektion mit Kicker (rot caps), Titel, Subline, optionalem `slot="aside"` für Live-KPIs und abwechselndem Hintergrund (`tone="white"|"off"`).
+  - `InfoBox.astro` — Aufklappbare `<details>`-Box in Blue-tint (#E8EDF5), Icon-Varianten `info`/`book`/`help`, optionaler Subtitle, `.hz-info__grid` für Abkürzungslisten, zugänglich ohne JS.
+  - `KpiCard.astro` — Zwei Varianten: `default` (Off-White-Block, 28-px-Zahl, Label rot caps) und `hero` (weisser Block mit rot oben, grosse Zahl, Shadow, für Executive Summary). Optional: `delta` + `deltaTone`, `caption`, Link-Version via `href`. Utility-Klassen `.hz-kpi-grid` und `.hz-kpi-grid--hero` für Kachel-Reihen.
+  - `OverrideField.astro` — Input mit sichtbarem Default, Stift-Icon rechts. Klick → Feld editierbar (`.is-overridden`), Icon wird zu Reset-Pfeil, Default wird beim Zurücksetzen wiederhergestellt. Click-Handler ist delegiert und bindet sich nur einmal (`window.__hzOvrBound`). Wrapper trägt `data-default` für Rücksetzung.
+  - `Toggle.astro` — Pill-Chip mit Plus/Minus-Kreis; öffnet darunter einen Inhalt mit linker Navy-Akzentleiste. `aria-expanded` + `aria-controls` korrekt gesetzt, Inhalt initial `hidden`. Delegierter Click-Handler (`window.__hzToggleBound`).
+- **Sandbox:** `src/pages/heizlast-sandbox.astro` — interne Vorschau-Seite, die alle Primitives in realistischen Kombinationen zeigt. Wird in Phase 4 entfernt.
+- **Design-Prinzipien:** Navy/Rot werden als Akzentfarben verwendet, nicht als grossflächige Hintergründe (User-Wunsch). Hero-KPIs haben eine 3px rote Oberkante statt kompletten Navy-Fonds.
+- **Bekannt:** `npx astro check` läuft in der Linux-Sandbox nicht (rollup-native für Windows installiert). Auf Cloudflare funktioniert der Build. TypeScript-Check für die neuen Komponenten ist fehlerfrei.
+
+### Phasen 3–7 (offen)
+Phase 3 (State + Storage via Nano Stores + localStorage + Sanity-Sync), Phase 4 (Sektionen 1–7 auf Basis der Primitives), Phase 5 (Executive Summary + Chart.js-Diagramm), Phase 6 (Login-Modal + PDF-Export), Phase 7 (Testing + Deploy) — siehe `HANDOFF-PHASE-3.md`.
 
 ## Design-Entscheidungen
 - **Hero**: Dunkler Navy-Overlay (rgba 27,42,74, 0.65) über Hintergrundbild, weisser Text

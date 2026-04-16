@@ -1,0 +1,89 @@
+---
+// Standard-Sektionsrahmen fuer den Heizlast-Rechner.
+// Struktur: Label (rot caps) -> Ueberschrift -> optionale Subline -> Inhalt (Slot).
+// Abwechselnder Hintergrund wird per `tone="white"|"off"` gesteuert.
+// Optionaler <slot name="aside" /> fuer kleine Live-Werte rechts oben.
+
+interface Props {
+  /** Sektions-Nummer / Kicker-Text (z.B. "01", "Sektion 1", "Ueberblick") */
+  kicker?: string;
+  /** Hauptueberschrift */
+  title: string;
+  /** Optionale erklaerende Unterzeile */
+  subline?: string;
+  /** Hintergrundton */
+  tone?: 'white' | 'off';
+  /** HTML-Id fuer Anchor-Links */
+  id?: string;
+  /** Erste Sektion? Bekommt mehr Abstand oben. */
+  first?: boolean;
+}
+
+const {
+  kicker,
+  title,
+  subline,
+  tone = 'white',
+  id,
+  first = false,
+} = Astro.props;
+---
+<section
+  id={id}
+  class={`hz-section${tone === 'off' ? ' hz-section--off' : ''}${first ? ' hz-section--first' : ''}`}
+>
+  <div class="hz-container">
+    <header class="hz-section__head">
+      <div class="hz-section__heading">
+        {kicker ? <span class="hz-kicker">{kicker}</span> : null}
+        <h2 class="hz-section__title">{title}</h2>
+        {subline ? <p class="hz-section__subline">{subline}</p> : null}
+      </div>
+      {Astro.slots.has('aside') ? (
+        <aside class="hz-section__aside">
+          <slot name="aside" />
+        </aside>
+      ) : null}
+    </header>
+
+    <div class="hz-section__body">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .hz-section {
+    padding: clamp(56px, 8svh, 88px) 0;
+    background: var(--hz-white);
+    border-top: 1px solid var(--hz-border);
+  }
+  .hz-section--first { border-top: 0; padding-top: clamp(40px, 6svh, 64px); }
+  .hz-section--off { background: var(--hz-off-white); }
+
+  .hz-section__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+    margin-bottom: clamp(24px, 4svh, 36px);
+  }
+  .hz-section__heading { max-width: 720px; }
+  .hz-section__title {
+    margin-top: 8px;
+  }
+  .hz-section__subline {
+    margin-top: 10px;
+    font-family: var(--hz-font-heading);
+    font-weight: 500;
+    font-size: clamp(16px, 1.8vw, 19px);
+    color: var(--hz-mid-gray);
+    line-height: 1.5;
+  }
+  .hz-section__aside {
+    flex-shrink: 0;
+  }
+  .hz-section__body { }
+
+  @media (max-width: 720px) {
+    .hz-section__head { flex-direction: column; }
+    .hz-section__aside { width: 100%; }
+  }
+</style>

@@ -1,0 +1,161 @@
+---
+// Toggle — Pill-Chip mit Plus/Minus fuer optionale Module.
+// Zustaende:
+//   - geschlossen (Startzustand): Chip zeigt "+ {label}" (Label = Aktionstext, z.B. "Sanierung beruecksichtigen").
+//   - offen: Chip zeigt "- {label}", Inhalt erscheint unterhalb in einem Container mit sanfter Fade/Slide-Animation.
+// Kein Content wird gerendert wenn Modul aus (progressive disclosure).
+// Aria: button steuert aria-expanded, Content hat aria-hidden.
+
+interface Props {
+  /** Aktion / Modulname (wird im Chip angezeigt) */
+  label: string;
+  /** Kurze Begruendung/Referenz, z.B. "M4 — Sanierungsdelta (optional)" */
+  caption?: string;
+  /** HTML-Id des Content-Bereichs (fuer aria-controls) */
+  id: string;
+  /** Standardmaessig geschlossen; true = initial offen */
+  open?: boolean;
+  /** Stil: 'default' mit Border, 'ghost' nur Text + Plus */
+  variant?: 'default' | 'ghost';
+}
+
+const { label, caption, id, open = false, variant = 'default' } = Astro.props;
+---
+<div class={`hz-toggle${open ? ' is-open' : ''}`} data-toggle>
+  <button
+    type="button"
+    class={`hz-toggle__btn hz-toggle__btn--${variant}`}
+    aria-expanded={open ? 'true' : 'false'}
+    aria-controls={id}
+    data-action="toggle-module"
+  >
+    <span class="hz-toggle__sign" aria-hidden="true">
+      <svg class="hz-toggle__sign-plus" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <svg class="hz-toggle__sign-minus" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </span>
+    <span class="hz-toggle__label">{label}</span>
+    {caption ? <span class="hz-toggle__caption">{caption}</span> : null}
+  </button>
+
+  <div
+    id={id}
+    class="hz-toggle__content"
+    aria-hidden={open ? 'false' : 'true'}
+    hidden={!open}
+  >
+    <div class="hz-toggle__inner">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .hz-toggle { display: block; }
+  .hz-toggle + .hz-toggle { margin-top: 10px; }
+
+  .hz-toggle__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 10px;
+    border-radius: 999px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    color: var(--hz-navy);
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all var(--hz-transition);
+  }
+  .hz-toggle__btn:hover {
+    border-color: var(--hz-navy);
+    background: var(--hz-off-white);
+  }
+  .hz-toggle__btn:focus-visible {
+    outline: 2px solid var(--hz-navy);
+    outline-offset: 2px;
+  }
+  .hz-toggle__btn--ghost {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 4px;
+  }
+  .hz-toggle__btn--ghost:hover {
+    background: var(--hz-off-white);
+    border-color: var(--hz-border);
+  }
+
+  .hz-toggle__sign {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--hz-blue-tint);
+    color: var(--hz-navy);
+    transition: background var(--hz-transition), color var(--hz-transition);
+  }
+  .hz-toggle__sign-minus { display: none; }
+  .hz-toggle.is-open .hz-toggle__sign { background: var(--hz-navy); color: var(--hz-white); }
+  .hz-toggle.is-open .hz-toggle__sign-plus { display: none; }
+  .hz-toggle.is-open .hz-toggle__sign-minus { display: inline-flex; }
+
+  .hz-toggle__label { line-height: 1; }
+  .hz-toggle__caption {
+    font-weight: 500;
+    font-size: 12.5px;
+    color: var(--hz-mid-gray);
+    padding-left: 6px;
+    margin-left: 2px;
+    border-left: 1px solid var(--hz-border);
+    line-height: 1.2;
+  }
+
+  .hz-toggle__content {
+    overflow: hidden;
+    transition: opacity var(--hz-transition);
+  }
+  .hz-toggle__content[aria-hidden="true"] { opacity: 0; }
+  .hz-toggle__content[aria-hidden="false"] { opacity: 1; }
+
+  .hz-toggle__inner {
+    margin-top: 14px;
+    padding: 18px 20px;
+    background: var(--hz-off-white);
+    border: 1px solid var(--hz-border);
+    border-left: 3px solid var(--hz-navy);
+    border-radius: var(--hz-radius-md);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    if (window.__hzToggleBound) return;
+    window.__hzToggleBound = true;
+    document.addEventListener('click', function (ev) {
+      const btn = ev.target instanceof Element ? ev.target.closest('[data-action="toggle-module"]') : null;
+      if (!btn) return;
+      const wrap = btn.closest('[data-toggle]');
+      if (!wrap) return;
+      const contentId = btn.getAttribute('aria-controls');
+      const content = contentId ? document.getElementById(contentId) : wrap.querySelector('.hz-toggle__content');
+      if (!content) return;
+
+      const willOpen = !wrap.classList.contains('is-open');
+      wrap.classList.toggle('is-open', willOpen);
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      content.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+      if (willOpen) {
+        content.removeAttribute('hidden');
+      } else {
+        content.setAttribute('hidden', '');
+      }
+    });
+  })();
+</script>

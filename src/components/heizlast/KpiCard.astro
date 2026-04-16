@@ -1,0 +1,145 @@
+---
+// KpiCard — wiederverwendbare Kennzahlen-Kachel.
+// Zwei Varianten via `variant`:
+//   - "default": dezent, Off-White-Block, mittelgrosse Zahl (fuer Zwischenergebnisse in Sektionen)
+//   - "hero":    grosser Akzent, Navy-Rahmen + heller Hintergrund, grosse Zahl (fuer Executive Summary)
+// Optional: `delta` fuer Zusatz-Information (z.B. "-0.37 kW durch Sanierung")
+// Optional: `tone` fuer Delta-Semantik (positive/negative/neutral)
+
+interface Props {
+  /** Kurz-Label oben (wird gross-kapitalisiert nur stilistisch im CSS) */
+  label: string;
+  /** Hauptwert als String (z.B. "12.55" oder "300"). Formatierung passiert im Caller. */
+  value: string;
+  /** Einheit rechts neben dem Wert (z.B. "kW", "L", "kWh/d") */
+  unit?: string;
+  /** Optional: kurze erklaerende Fussnote unter dem Wert */
+  caption?: string;
+  /** Optional: Delta-Indikator ("-0.37 kW durch Sanierung", "+5 %") */
+  delta?: string;
+  /** Delta-Farbe */
+  deltaTone?: 'positive' | 'negative' | 'neutral';
+  /** Variante */
+  variant?: 'default' | 'hero';
+  /** Optionaler Link (z.B. Sprung zur Erklaerung in der InfoBox) */
+  href?: string;
+}
+
+const {
+  label,
+  value,
+  unit,
+  caption,
+  delta,
+  deltaTone = 'neutral',
+  variant = 'default',
+  href,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'div';
+---
+<Tag
+  class={`hz-kpi hz-kpi--${variant}${href ? ' hz-kpi--link' : ''}`}
+  href={href}
+>
+  <span class="hz-kpi__label">{label}</span>
+  <span class="hz-kpi__value-row">
+    <span class="hz-kpi__value">{value}</span>
+    {unit ? <span class="hz-kpi__unit">{unit}</span> : null}
+  </span>
+  {delta ? <span class={`hz-kpi__delta hz-kpi__delta--${deltaTone}`}>{delta}</span> : null}
+  {caption ? <span class="hz-kpi__caption">{caption}</span> : null}
+</Tag>
+
+<style is:global>
+  .hz-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border-radius: var(--hz-radius-md);
+    border: 1px solid var(--hz-border);
+    background: var(--hz-off-white);
+    transition: border-color var(--hz-transition), box-shadow var(--hz-transition), transform var(--hz-transition);
+  }
+  .hz-kpi--link { cursor: pointer; text-decoration: none; }
+  .hz-kpi--link:hover { border-color: var(--hz-navy-light); box-shadow: var(--hz-shadow-sm); }
+
+  .hz-kpi__label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hz-mid-gray);
+  }
+  .hz-kpi__value-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--hz-navy);
+  }
+  .hz-kpi__value {
+    font-family: var(--hz-font-heading);
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .hz-kpi__unit {
+    font-family: var(--hz-font-heading);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--hz-mid-gray);
+  }
+  .hz-kpi__delta {
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--hz-font-heading);
+    margin-top: 2px;
+  }
+  .hz-kpi__delta--positive { color: var(--hz-success); }
+  .hz-kpi__delta--negative { color: var(--hz-red); }
+  .hz-kpi__delta--neutral  { color: var(--hz-mid-gray); }
+  .hz-kpi__caption {
+    font-size: 12.5px;
+    color: var(--hz-mid-gray);
+    margin-top: 2px;
+  }
+
+  /* Hero-Variante — fuer Executive Summary */
+  .hz-kpi--hero {
+    padding: clamp(22px, 3vw, 30px);
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-top: 3px solid var(--hz-red);
+    box-shadow: var(--hz-shadow-md);
+    border-radius: var(--hz-radius-lg);
+  }
+  .hz-kpi--hero .hz-kpi__label {
+    font-size: 13px;
+    color: var(--hz-red);
+  }
+  .hz-kpi--hero .hz-kpi__value {
+    font-size: clamp(34px, 4.8vw, 52px);
+    color: var(--hz-navy);
+  }
+  .hz-kpi--hero .hz-kpi__unit {
+    font-size: clamp(16px, 1.8vw, 20px);
+  }
+  .hz-kpi--hero .hz-kpi__caption,
+  .hz-kpi--hero .hz-kpi__delta {
+    font-size: 13.5px;
+  }
+
+  /* Grid-Utility fuer Kachel-Gruppen */
+  .hz-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .hz-kpi-grid--hero {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+</style>

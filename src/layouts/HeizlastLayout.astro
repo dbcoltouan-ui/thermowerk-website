@@ -1,0 +1,209 @@
+---
+// Eigenes Layout fuer den Heizlast-Rechner
+// Schlanker Header (Logo + Login), minimaler Footer, keine Site-Navigation.
+// CSS-Tokens sind konsistent zu src/layouts/Layout.astro, aber gekapselt
+// damit diese Seite unabhaengig vom Marketing-Layout gepflegt werden kann.
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Heizlast-Rechner | Thermowerk',
+  description = 'Professionelle Heizlast- und Waermepumpen-Auslegung nach FWS, SIA und VDI fuer Thermowerk.',
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="icon" type="image/png" href="/img/favicon.png" />
+  <style is:global>
+    /* =========================================================
+       THERMOWERK HEIZLAST — DESIGN-TOKENS (gekapselt per :where)
+       ========================================================= */
+    :root {
+      --hz-navy: #1B2A4A;
+      --hz-navy-light: #243658;
+      --hz-navy-dark: #111D33;
+      --hz-red: #D93025;
+      --hz-red-soft: #FBEAE8;
+      --hz-white: #FFFFFF;
+      --hz-off-white: #F7F8FA;
+      --hz-light-gray: #EEF0F4;
+      --hz-mid-gray: #6B7280;
+      --hz-dark: #1A1A1A;
+      --hz-border: #E2E5EB;
+      --hz-blue-tint: #E8EDF5;
+      --hz-blue-tint-strong: #D8E0EE;
+      --hz-success: #1F8A4C;
+      --hz-warn: #B7791F;
+
+      --hz-font-heading: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+      --hz-font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+      --hz-font-mono: 'DM Sans', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+      --hz-radius-sm: 6px;
+      --hz-radius-md: 10px;
+      --hz-radius-lg: 14px;
+
+      --hz-shadow-sm: 0 1px 2px rgba(17, 29, 51, 0.05);
+      --hz-shadow-md: 0 8px 24px rgba(17, 29, 51, 0.08);
+      --hz-shadow-hero: 0 24px 60px rgba(17, 29, 51, 0.18);
+
+      --hz-transition: 180ms ease;
+      --hz-header-height: 72px;
+    }
+
+    /* Reset, nur fuer den Heizlast-Scope aktiv */
+    .hz-scope, .hz-scope *, .hz-scope *::before, .hz-scope *::after {
+      box-sizing: border-box;
+    }
+
+    .hz-scope {
+      font-family: var(--hz-font-body);
+      color: var(--hz-dark);
+      background: var(--hz-white);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hz-scope a { color: inherit; text-decoration: none; }
+    .hz-scope img { max-width: 100%; display: block; }
+    .hz-scope button { font: inherit; cursor: pointer; }
+    .hz-scope input, .hz-scope select, .hz-scope textarea { font: inherit; color: inherit; }
+
+    /* Typografie */
+    .hz-scope h1, .hz-scope h2, .hz-scope h3, .hz-scope h4 {
+      font-family: var(--hz-font-heading);
+      color: var(--hz-navy);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    .hz-scope h1 { font-size: clamp(32px, 4.4vw, 46px); letter-spacing: -0.01em; }
+    .hz-scope h2 { font-size: clamp(24px, 3vw, 34px); letter-spacing: -0.005em; }
+    .hz-scope h3 { font-size: clamp(18px, 2vw, 22px); font-weight: 600; }
+    .hz-scope h4 { font-size: 17px; font-weight: 600; }
+    .hz-scope p  { font-size: 16px; line-height: 1.65; color: var(--hz-dark); }
+
+    /* Utility */
+    .hz-container { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 24px); width: 100%; }
+    .hz-stack > * + * { margin-top: 12px; }
+    .hz-muted { color: var(--hz-mid-gray); }
+    .hz-kicker {
+      font-family: var(--hz-font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--hz-red);
+    }
+
+    /* Buttons */
+    .hz-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: var(--hz-font-heading); font-weight: 600; font-size: 15px;
+      padding: 10px 20px; border-radius: var(--hz-radius-sm); border: 2px solid transparent;
+      transition: all var(--hz-transition); line-height: 1; white-space: nowrap;
+    }
+    .hz-btn-primary { background: var(--hz-red); color: var(--hz-white); border-color: var(--hz-red); }
+    .hz-btn-primary:hover { background: #B71C1C; border-color: #B71C1C; }
+    .hz-btn-ghost { background: transparent; color: var(--hz-navy); border-color: var(--hz-border); }
+    .hz-btn-ghost:hover { border-color: var(--hz-navy); background: var(--hz-off-white); }
+    .hz-btn-dark { background: var(--hz-navy); color: var(--hz-white); border-color: var(--hz-navy); }
+    .hz-btn-dark:hover { background: var(--hz-navy-light); border-color: var(--hz-navy-light); }
+
+    /* Header */
+    .hz-topbar {
+      position: sticky; top: 0; z-index: 40;
+      height: var(--hz-header-height);
+      background: var(--hz-white);
+      border-bottom: 1px solid var(--hz-border);
+      display: flex; align-items: center;
+    }
+    .hz-topbar__inner {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 24px);
+    }
+    .hz-brand { display: flex; align-items: center; gap: 12px; }
+    .hz-brand__logo { height: 32px; width: auto; }
+    .hz-brand__text {
+      font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
+      font-size: 18px; letter-spacing: -0.005em;
+    }
+    .hz-brand__sub {
+      font-family: var(--hz-font-heading); font-weight: 500; color: var(--hz-mid-gray);
+      font-size: 13px; margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--hz-border);
+    }
+    .hz-topbar__actions { display: flex; align-items: center; gap: 10px; }
+
+    /* Footer */
+    .hz-footer {
+      margin-top: auto;
+      background: var(--hz-navy);
+      color: rgba(255,255,255,0.78);
+      font-size: 13.5px;
+      padding: 24px 0;
+    }
+    .hz-footer__inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hz-footer a { color: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.25); }
+    .hz-footer a:hover { color: var(--hz-white); border-bottom-color: var(--hz-white); }
+
+    /* Main */
+    .hz-main { flex: 1 1 auto; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hz-brand__sub { display: none; }
+      .hz-topbar { height: 60px; }
+      :root { --hz-header-height: 60px; }
+    }
+  </style>
+</head>
+<body class="hz-scope">
+  <header class="hz-topbar">
+    <div class="hz-topbar__inner">
+      <a href="/" class="hz-brand" aria-label="Zur Thermowerk-Startseite">
+        <img src="/img/logo.png" alt="Thermowerk" class="hz-brand__logo" />
+        <span class="hz-brand__text">Thermowerk</span>
+        <span class="hz-brand__sub">Heizlast-Rechner</span>
+      </a>
+      <div class="hz-topbar__actions">
+        <button type="button" class="hz-btn hz-btn-ghost" id="hz-login-trigger" aria-label="Anmelden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Anmelden</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="hz-main">
+    <slot />
+  </main>
+
+  <footer class="hz-footer">
+    <div class="hz-container hz-footer__inner">
+      <span>&copy; {new Date().getFullYear()} Thermowerk &middot; Heizlast-Rechner</span>
+      <span>
+        <a href="/impressum">Impressum</a> &middot; <a href="/datenschutz">Datenschutz</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>
