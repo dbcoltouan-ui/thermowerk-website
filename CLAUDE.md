@@ -3,6 +3,8 @@
 > **WICHTIG:** Diese Datei ist die zentrale Wissensbasis für Claude. Jede neue Funktion, jedes neue Schema, jeder neue Workflow oder jede architektonische Änderung MUSS hier dokumentiert werden, sobald sie umgesetzt ist. So bleibt Claude in jeder neuen Session sofort auf dem aktuellen Stand.
 
 > **AKTUELLES OFFENES PROJEKT: Heizlastrechner-Redesign** — Siehe `HANDOFF-HEIZLAST-REDESIGN.md` im Projekt-Root. Das Backend steht (Sanity-Schema, Cloudflare Functions, Auth, Env-Vars), aber der Frontend-Teil unter `/heizlast` wird komplett neu aufgebaut. Bei neuer Session zu diesem Thema zuerst `HANDOFF-HEIZLAST-REDESIGN.md` lesen.
+>
+> **Phase 1 abgeschlossen (2026-04-16):** Rechenkern als TypeScript portiert in `src/lib/heizlast/{types,constants,calculations}.ts`. 49 Regressions-Tests (FWS-Aufgaben 1–4 + eigenes Beispiel + Rückrechnung) laufen grün via `node --experimental-strip-types scripts/test-heizlast.ts`. Die Beispielrechnung ist dokumentiert in `reference/BEISPIELRECHNUNG.md`. **Für Phase 2 (UI-Grundlagen) neuer Chat — siehe `HANDOFF-PHASE-2.md`.**
 
 ## Stack
 - **Astro 5.5** – statisches Framework
@@ -228,6 +230,23 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - **SVG-Icons aus Sanity**: Werden als String im Feld `iconSvg` gespeichert und via `set:html` Direktive gerendert: `<div set:html={fact.iconSvg}></div>`.
 - **Bilder aus Sanity**: Über `urlFor(image).width(x).url()` aus `src/lib/sanity.ts` laden.
 - **Cloudflare Error 1106**: Cloudflare Pages Functions können keine Requests an andere CF-geschützte Domains senden. Web3Forms wird deshalb client-seitig aufgerufen. Bei neuen externen API-Calls aus Functions immer prüfen ob die Ziel-Domain hinter Cloudflare liegt!
+
+## Heizlast-Rechner — Status
+
+### Phase 1: Rechenkern (abgeschlossen 2026-04-16)
+- **Quelle:** `reference/old-calculator/js/heizlast.js` + `js/constants.js`
+- **Ziel:** `src/lib/heizlast/types.ts`, `constants.ts`, `calculations.ts` (TypeScript strict)
+- **Tests:** `scripts/test-heizlast.ts` — 49 Assertions, alle grün
+  - FWS-Aufgaben 1A, 1B, 2, 3, 4 (Regression, Referenzwerte aus FWS-Lösung)
+  - Eigenes Beispiel „Referenzhaus Moosseedorf" (Vorwärtsrechnung, Hand-nachrechenbar)
+  - Rückrechnung aus den Ergebnissen zurück zu den Eingaben (Invertierbarkeits-Check)
+- **Doku:** `reference/BEISPIELRECHNUNG.md` — Schritt-für-Schritt-Protokoll des eigenen Beispiels
+- **Kritischer Regressions-Wert:** FWS-Aufgabe 2 → Qhl = 12.55 kW (Toleranz 0.02)
+- **Testlauf:** `node --experimental-strip-types scripts/test-heizlast.ts` (Node 22.6+)
+- **tsconfig.json** ergänzt um `allowImportingTsExtensions: true` + `noEmit: true` (damit `.ts`-Extensions in Imports auch von Astro akzeptiert werden).
+
+### Phasen 2–7 (offen)
+Phase 2 (UI-Grundlagen: Layout, CSS-Tokens, InfoBox, KpiCard), Phase 3 (State + Storage), Phase 4 (Sektionen 1–7), Phase 5 (Executive Summary + Diagramm), Phase 6 (Login + Export), Phase 7 (Testing + Deploy) — siehe `HANDOFF-PHASE-2.md`.
 
 ## Design-Entscheidungen
 - **Hero**: Dunkler Navy-Overlay (rgba 27,42,74, 0.65) über Hintergrundbild, weisser Text
