@@ -1,0 +1,224 @@
+---
+// Section 3 — Warmwasser (M5)
+// - Toggle-Hauptschalter "WW ber\u00fccksichtigen"
+// - Methode w\u00e4hlen: personen | direkt | messung
+// - Verluste: Speicher / Zirkulation / Ausstoss (Prozentzuschl\u00e4ge)
+// - Live-KPIs: Vw,u, Qw (kW), QwwTag (kWh/d)
+
+import SectionWrapper from '../SectionWrapper.astro';
+import InfoBox from '../InfoBox.astro';
+import KpiCard from '../KpiCard.astro';
+import Toggle from '../Toggle.astro';
+import SectionNotes from '../SectionNotes.astro';
+import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
+---
+<SectionWrapper
+  id="sektion-3"
+  kicker="03 - Warmwasser"
+  title="Warmwasser (WW)"
+  subline="Zusatzleistung f\u00fcr Trinkwarmwasser nach SIA 385/1 und FWS \u00a78."
+>
+  <slot name="aside" slot="aside">
+    <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
+      <KpiCard label="Qw" value="\u2014" unit="kW" data-kpi="qw" />
+      <KpiCard label="Qww / Tag" value="\u2014" unit="kWh/d" data-kpi="qwwTag" />
+      <KpiCard label="Vw,u" value="\u2014" unit="l/d" data-kpi="vwu" />
+    </div>
+  </slot>
+
+  <label class="hz-switch hz-ww-main" style="margin-bottom: 16px;">
+    <input type="checkbox" data-hz-bind="warmwasser.active" data-hz-type="boolean" />
+    <span>Warmwasser-Bereitung einbeziehen</span>
+  </label>
+
+  <div class="hz-block">
+    <h3 class="hz-block__heading">Methode</h3>
+    <div class="hz-ww-methods">
+      <label class="hz-ww-method">
+        <input type="radio" name="ww-method" value="personen" data-hz-bind="warmwasser.method" data-hz-type="string" />
+        <span>Pro Personeneinheit</span>
+        <small>SIA 385/1 / 385/2 Richtwerte</small>
+      </label>
+      <label class="hz-ww-method">
+        <input type="radio" name="ww-method" value="direkt" data-hz-bind="warmwasser.method" data-hz-type="string" />
+        <span>Direkt l/d eingeben</span>
+        <small>wenn Gesamt-Vw,u bekannt</small>
+      </label>
+      <label class="hz-ww-method">
+        <input type="radio" name="ww-method" value="messung" data-hz-bind="warmwasser.method" data-hz-type="string" />
+        <span>Messwert kWh/Tag</span>
+        <small>direkt gemessener Qww</small>
+      </label>
+    </div>
+  </div>
+
+  <!-- Personen-Einheiten -->
+  <div class="hz-ww-pane" data-ww-pane="personen">
+    <h4 class="hz-ww-pane__title">Personen-Einheiten</h4>
+    <p class="hz-muted" style="margin-bottom: 10px;">
+      Pro Wohneinheit: ANF (anrechenbare Netto-Fl\u00e4che) und Vw,u (Liter pro Person und Tag).
+      Richtwerte f\u00fcr EFH: 40&ndash;55&nbsp;l/P/d.
+    </p>
+    <div class="hz-pe-header">
+      <span>Bezeichnung</span>
+      <span>ANF</span>
+      <span>Vw,u</span>
+      <span></span>
+    </div>
+    <div id="hz-pe-list" class="hz-pe-list" aria-live="polite">
+      <p class="hz-muted hz-pe-empty">Noch keine Einheit erfasst.</p>
+    </div>
+    <div class="hz-pe-actions">
+      <button type="button" class="hz-btn hz-btn-ghost" id="hz-pe-add">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Einheit hinzuf\u00fcgen
+      </button>
+      <span class="hz-muted" style="font-size: 13px;">
+        Standard-Richtwerte: {WW_STANDARDS.slice(0, 3).map((w) => `${w.vwu} l/P/d ${w.label.includes('gehoben') ? '(gehoben)' : w.label.includes('mittel') ? '(mittel)' : '(einfach)'}`).join(' \u00b7 ')}
+      </span>
+    </div>
+  </div>
+
+  <!-- Direkt -->
+  <div class="hz-ww-pane" data-ww-pane="direkt">
+    <h4 class="hz-ww-pane__title">Direkt-Eingabe</h4>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Gesamt Vw,u</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="1" min="0"
+            data-hz-bind="warmwasser.direkt.vwuPerTag" data-hz-type="number" />
+          <span class="hz-field__unit">l/d</span>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Messung -->
+  <div class="hz-ww-pane" data-ww-pane="messung">
+    <h4 class="hz-ww-pane__title">Messwert</h4>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Qww pro Tag</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="0.1" min="0"
+            data-hz-bind="warmwasser.messung.qwwTagKWh" data-hz-type="number" />
+          <span class="hz-field__unit">kWh/d</span>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Verluste -->
+  <div class="hz-block" style="margin-top: 22px;">
+    <h3 class="hz-block__heading">Verluste (optional)</h3>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Speicher-Verlust</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="1" min="0" max="50"
+            placeholder="0"
+            data-hz-bind="warmwasser.speicherProzent" data-hz-type="number" />
+          <span class="hz-field__unit">%</span>
+        </div>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Zirkulations-Verlust</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="1" min="0" max="50"
+            placeholder="0"
+            data-hz-bind="warmwasser.zirkProzent" data-hz-type="number" />
+          <span class="hz-field__unit">%</span>
+        </div>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Ausstoss-Verlust</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="1" min="0" max="50"
+            placeholder="0"
+            data-hz-bind="warmwasser.ausstossProzent" data-hz-type="number" />
+          <span class="hz-field__unit">%</span>
+        </div>
+      </label>
+    </div>
+
+    <label class="hz-field" style="margin-top: 14px; max-width: 280px;">
+      <span class="hz-field__label">\u0394T Kaltwasser \u2192 WW (optional)</span>
+      <div class="hz-field__input-with-unit">
+        <input class="hz-field__input" type="number" step="1" min="20" max="70"
+          placeholder="50 K (Default)"
+          data-hz-bind="warmwasser.deltaTOverride" data-hz-type="number" />
+        <span class="hz-field__unit">K</span>
+      </div>
+    </label>
+  </div>
+
+  <InfoBox title="Grundlage SIA 385/1" icon="book">
+    <p>Der Kaltwasser-Referenzwert liegt bei 10&nbsp;\u00b0C, die Zielzapftemperatur bei 60&nbsp;\u00b0C \u2192 \u0394T&nbsp;=&nbsp;50&nbsp;K.
+       Der Verbrauch pro Person h\u00e4ngt vom Standard der Armaturen ab:</p>
+    <dl class="hz-info__grid">
+      {WW_STANDARDS.map((w) => (
+        <div><dt>{w.vwu} l/P/d</dt><dd>{w.label}</dd></div>
+      ))}
+    </dl>
+  </InfoBox>
+
+  <SectionNotes sectionKey="sektion3" sectionLabel="Sektion 3 (Warmwasser)" />
+</SectionWrapper>
+
+<style is:global>
+  .hz-ww-methods {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .hz-ww-method {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; border: 1px solid var(--hz-border); border-radius: var(--hz-radius-md);
+    background: var(--hz-white); cursor: pointer;
+    transition: border-color var(--hz-transition), background var(--hz-transition);
+  }
+  .hz-ww-method:hover { border-color: var(--hz-navy-light); }
+  .hz-ww-method input[type="radio"] { margin-top: 3px; accent-color: var(--hz-navy); }
+  .hz-ww-method span { font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); display: block; }
+  .hz-ww-method small { color: var(--hz-mid-gray); font-size: 12.5px; display: block; margin-top: 2px; }
+  .hz-ww-method:has(input[type="radio"]:checked) {
+    border-color: var(--hz-navy); background: var(--hz-blue-tint);
+  }
+
+  .hz-ww-pane {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border: 1px solid var(--hz-border); border-left: 3px solid var(--hz-navy);
+    border-radius: var(--hz-radius-md);
+    background: var(--hz-off-white);
+    display: none;
+  }
+  .hz-ww-pane.is-active { display: block; }
+  .hz-ww-pane__title {
+    font-family: var(--hz-font-heading); font-weight: 600; font-size: 15px;
+    color: var(--hz-navy); margin: 0 0 8px;
+  }
+
+  /* Personen-Einheiten-Tabelle */
+  .hz-pe-header, .hz-pe-row {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 44px; gap: 10px; align-items: center;
+  }
+  .hz-pe-header {
+    padding: 0 4px 8px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--hz-mid-gray); font-weight: 600; border-bottom: 1px solid var(--hz-border);
+  }
+  .hz-pe-row { padding: 8px 4px; border-bottom: 1px dashed var(--hz-border); }
+  .hz-pe-row input {
+    padding: 8px 10px; border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
+    background: var(--hz-white);
+  }
+  .hz-pe-row input:focus { outline: 0; border-color: var(--hz-navy); box-shadow: 0 0 0 3px rgba(27,42,74,0.08); }
+  .hz-pe-remove { border: 0; background: transparent; padding: 6px; color: var(--hz-mid-gray); border-radius: var(--hz-radius-sm); }
+  .hz-pe-remove:hover { color: var(--hz-red); background: var(--hz-red-soft); }
+  .hz-pe-empty { padding: 16px 0; font-style: italic; }
+  .hz-pe-actions { display: flex; align-items: center; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+
+  .hz-ww-main[disabled], .hz-ww-main.is-disabled { opacity: 0.6; }
+  .hz-ww.is-inactive .hz-ww-methods,
+  .hz-ww.is-inactive .hz-ww-pane { opacity: 0.5; pointer-events: none; }
+</style>

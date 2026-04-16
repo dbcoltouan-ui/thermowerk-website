@@ -1,0 +1,187 @@
+---
+// Section 7 — Projekt (Abschluss)
+// Kompakte Gebäude-/Ergebnis-Zusammenfassung + Speichern/Laden-Buttons.
+// Die eigentliche Anzeige wird per JS (Subscribe auf heizlastState + heizlastCompute)
+// in die `data-hz-sum`-Slots geschrieben (siehe src/pages/heizlast.astro).
+
+import SectionWrapper from '../SectionWrapper.astro';
+import InfoBox from '../InfoBox.astro';
+import SectionNotes from '../SectionNotes.astro';
+---
+<SectionWrapper
+  id="sektion-7"
+  kicker="07 - Projekt"
+  title="Zusammenfassung & Projekt speichern"
+  subline="Kurzübersicht aller Eingaben und Ergebnisse. Speicherung lokal (Auto-Save) und optional in der Cloud."
+>
+  <!-- Zusammenfassung: Gebäude -->
+  <div class="hz-sum-card">
+    <h3 class="hz-sum-card__title">Gebäude &amp; Projekt</h3>
+    <dl class="hz-sum-grid">
+      <div><dt>Projekt</dt><dd data-hz-sum="projectName">&mdash;</dd></div>
+      <div><dt>Kunde</dt><dd data-hz-sum="customerName">&mdash;</dd></div>
+      <div><dt>Anschrift</dt><dd data-hz-sum="address">&mdash;</dd></div>
+      <div><dt>Status</dt><dd data-hz-sum="status">&mdash;</dd></div>
+      <div><dt>Gebäudetyp</dt><dd data-hz-sum="typ">&mdash;</dd></div>
+      <div><dt>Lage</dt><dd data-hz-sum="lage">&mdash;</dd></div>
+      <div><dt>Bauperiode</dt><dd data-hz-sum="bauperiode">&mdash;</dd></div>
+      <div><dt>EBF</dt><dd><span data-hz-sum="ebf">&mdash;</span> m²</dd></div>
+      <div><dt>Wohneinheiten</dt><dd data-hz-sum="wohneinheiten">&mdash;</dd></div>
+      <div><dt>tvoll</dt><dd><span data-hz-sum="tvoll">&mdash;</span> h/a</dd></div>
+    </dl>
+  </div>
+
+  <!-- Zusammenfassung: Ergebnis -->
+  <div class="hz-sum-card hz-sum-card--accent">
+    <h3 class="hz-sum-card__title">Ergebnis</h3>
+    <dl class="hz-sum-grid">
+      <div><dt>Qhl (Heizlast)</dt><dd><span data-hz-sum="qhl">&mdash;</span> kW</dd></div>
+      <div><dt>Qw (Warmwasser)</dt><dd><span data-hz-sum="qw">&mdash;</span> kW</dd></div>
+      <div><dt>Qoff (Sperrzeit)</dt><dd><span data-hz-sum="qoff">&mdash;</span> kW</dd></div>
+      <div><dt>Qas (Sonder)</dt><dd><span data-hz-sum="qas">&mdash;</span> kW</dd></div>
+      <div class="hz-sum-grid__hero"><dt>Qh Auslegung</dt><dd><span data-hz-sum="qh">&mdash;</span> kW</dd></div>
+      <div><dt>WW-Speicher</dt><dd><span data-hz-sum="wwSpeicher">&mdash;</span> L</dd></div>
+      <div><dt>Puffer</dt><dd><span data-hz-sum="puffer">&mdash;</span> L</dd></div>
+    </dl>
+  </div>
+
+  <!-- Speichern / Laden -->
+  <div class="hz-save-block">
+    <header class="hz-save-block__head">
+      <div>
+        <h3 class="hz-save-block__title">Projekt speichern</h3>
+        <p class="hz-muted" style="margin: 0;">
+          Alle Eingaben werden lokal automatisch gespeichert.
+          Angemeldete Benutzer können Projekte zusätzlich in der Cloud ablegen.
+        </p>
+      </div>
+      <span class="hz-save-status" data-hz-save-status>
+        <span class="hz-save-status__dot" aria-hidden="true"></span>
+        <span class="hz-save-status__text" data-hz-save-status-text>Bereit.</span>
+      </span>
+    </header>
+
+    <div class="hz-save-actions">
+      <button type="button" class="hz-btn hz-btn-primary" data-hz-action="save-cloud" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        In Cloud speichern
+      </button>
+      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="save-cloud-new" disabled>
+        Als neues Projekt speichern
+      </button>
+      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="open-projects" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Projekte öffnen
+      </button>
+      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="login">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span data-hz-login-label>Anmelden</span>
+      </button>
+      <button type="button" class="hz-btn hz-btn-danger-soft" data-hz-action="new-project">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>
+        Neues Projekt
+      </button>
+    </div>
+
+    <p class="hz-save-hint hz-muted">
+      Letzte lokale Speicherung: <span data-hz-save-local>&mdash;</span> &middot;
+      Letzte Cloud-Speicherung: <span data-hz-save-cloud>&mdash;</span>
+    </p>
+  </div>
+
+  <InfoBox title="Wie werden Projekte gespeichert?" icon="info">
+    <p>
+      <strong>Lokal</strong>: Alle Eingaben werden automatisch in deinem Browser zwischengespeichert
+      (localStorage, Debounce 500&nbsp;ms). So geht nichts verloren, wenn du den Tab schliesst.
+    </p>
+    <p>
+      <strong>Cloud</strong>: Nach der Anmeldung können Projekte namentlich in der Cloud abgelegt,
+      wieder geladen und gelöscht werden. Der Status (Arbeit, Offeriert, Bestellt, Abgeschlossen,
+      Archiv) hilft beim Überblick über laufende Anfragen.
+    </p>
+  </InfoBox>
+
+  <SectionNotes sectionKey="sektion7" sectionLabel="Sektion 7 (Projekt)" />
+</SectionWrapper>
+
+<style is:global>
+  .hz-sum-card {
+    padding: 18px 22px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-top: 3px solid var(--hz-navy);
+    border-radius: var(--hz-radius-lg);
+    box-shadow: var(--hz-shadow-sm);
+    margin-bottom: 16px;
+  }
+  .hz-sum-card--accent { border-top-color: var(--hz-red); }
+  .hz-sum-card__title {
+    font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
+    margin: 0 0 12px; font-size: 17px;
+  }
+  .hz-sum-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px 22px;
+    margin: 0;
+  }
+  .hz-sum-grid > div {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 6px 0; border-bottom: 1px dashed var(--hz-border);
+  }
+  .hz-sum-grid dt {
+    font-family: var(--hz-font-heading); font-weight: 600; font-size: 11.5px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--hz-mid-gray);
+  }
+  .hz-sum-grid dd {
+    margin: 0; font-size: 15px; color: var(--hz-dark); font-weight: 500;
+  }
+  .hz-sum-grid__hero { grid-column: 1 / -1; }
+  .hz-sum-grid__hero dt { color: var(--hz-red); }
+  .hz-sum-grid__hero dd {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: clamp(26px, 3.5vw, 34px); color: var(--hz-navy); line-height: 1.1;
+  }
+
+  .hz-save-block {
+    margin-top: 8px;
+    padding: 20px 22px;
+    background: var(--hz-off-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-lg);
+  }
+  .hz-save-block__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .hz-save-block__title {
+    font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
+    margin: 0 0 4px; font-size: 16px;
+  }
+  .hz-save-status {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--hz-white); border: 1px solid var(--hz-border);
+    font-size: 12.5px; color: var(--hz-mid-gray);
+  }
+  .hz-save-status__dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--hz-mid-gray);
+  }
+  .hz-save-status[data-tone="ok"] .hz-save-status__dot { background: #2e7d32; }
+  .hz-save-status[data-tone="busy"] .hz-save-status__dot { background: #f9a825; animation: hz-pulse 1.2s infinite; }
+  .hz-save-status[data-tone="err"] .hz-save-status__dot { background: var(--hz-red); }
+  @keyframes hz-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .hz-save-actions {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .hz-btn-danger-soft {
+    background: transparent; color: var(--hz-red);
+    border: 1px solid var(--hz-red-soft);
+  }
+  .hz-btn-danger-soft:hover:not([disabled]) {
+    background: var(--hz-red-soft);
+  }
+  .hz-btn[disabled] { opacity: 0.5; pointer-events: none; }
+  .hz-save-hint { margin-top: 14px; font-size: 12.5px; }
+</style>

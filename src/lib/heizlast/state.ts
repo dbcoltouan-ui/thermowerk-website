@@ -55,6 +55,16 @@ export interface PersonenEinheitInput {
   vwui: number; // l/P/d
 }
 
+/** Einzelnes Zimmer im EBF-Helper. Fläche wird aus Länge × Breite berechnet
+ *  (oder, wenn eingeschaltet, manuell gesetzt — flaecheOverride != null). */
+export interface RaumInput {
+  id: string;
+  name: string;
+  laenge: number; // m
+  breite: number; // m
+  flaecheOverride: number | null; // m² — falls gesetzt, wird laenge×breite ignoriert
+}
+
 export interface GebaeudeState {
   typ: Gebaeudetyp;
   lage: Lage;
@@ -64,6 +74,10 @@ export interface GebaeudeState {
   tvollProfil: TvollProfil;
   /** Override der Vollbetriebsstunden. null = Richtwert aus tvollRichtwert verwenden. */
   tvollOverride: number | null;
+  /** EBF-Helper: Zimmer-Liste. Summe der Flächen kann in `ebf` übernommen werden. */
+  raeume: RaumInput[];
+  /** True, wenn EBF automatisch aus der Zimmer-Liste gespeist wird (live Summe). */
+  raeumeAktiv: boolean;
 }
 
 export interface VerbrauchState {
@@ -140,6 +154,24 @@ export interface SpeicherState {
   pufferRundungLiter: 5 | 10;
 }
 
+/** Sektions-spezifische Notizen. Jede Notiz kann beim Export ein-/abgewählt werden. */
+export interface SectionNote {
+  /** Freitext */
+  text: string;
+  /** Ob die Notiz beim PDF-/JSON-Export mit ausgegeben wird. */
+  includeInExport: boolean;
+}
+
+export interface NotizenState {
+  sektion1: SectionNote;
+  sektion2: SectionNote;
+  sektion3: SectionNote;
+  sektion4: SectionNote;
+  sektion5: SectionNote;
+  sektion6: SectionNote;
+  sektion7: SectionNote;
+}
+
 export interface HeizlastState {
   version: typeof STATE_VERSION;
 
@@ -158,7 +190,28 @@ export interface HeizlastState {
   warmwasser: WarmwasserState;
   zuschlaege: ZuschlaegeState;
   speicher: SpeicherState;
+
+  /** Sektions-Notizen (pro Sektion ein Feld, inkl. Export-Flag). */
+  notizen: NotizenState;
 }
+
+function emptyNote(): SectionNote {
+  return { text: '', includeInExport: true };
+}
+
+function defaultNotizen(): NotizenState {
+  return {
+    sektion1: emptyNote(),
+    sektion2: emptyNote(),
+    sektion3: emptyNote(),
+    sektion4: emptyNote(),
+    sektion5: emptyNote(),
+    sektion6: emptyNote(),
+    sektion7: emptyNote(),
+  };
+}
+
+export type NotizenKey = keyof NotizenState;
 
 // ---------------------------------------------------------------
 // Default-State — „leerer" neuer Rechner
@@ -185,6 +238,8 @@ export function createDefaultState(): HeizlastState {
       wohneinheiten: 1,
       tvollProfil: 'wohnen_mitWW',
       tvollOverride: null,
+      raeume: [],
+      raeumeAktiv: false,
     },
 
     heizlast: {
@@ -239,6 +294,8 @@ export function createDefaultState(): HeizlastState {
       pufferErrBand: [15, 25],
       pufferRundungLiter: 10,
     },
+
+    notizen: defaultNotizen(),
   };
 }
 
@@ -359,4 +416,72 @@ import { VOLLASTSTUNDEN } from './constants.ts';
 function tvollLookup(profil: TvollProfil, lage: Lage): number {
   const row = VOLLASTSTUNDEN.find((r) => r.gebaeudetyp === profil && r.lage === lage);
   return row ? row.tvoll : 2000;
+}
+
+// ---------------------------------------------------------------
+// Helper: Notizen
+// ---------------------------------------------------------------
+
+/** Setzt Text einer Sektions-Notiz. */
+export function setNoteText(key: NotizenKey, text: string): void {
+  const current = heizlastState.get().notizen;
+  heizlastState.setKey('notizen', {
+    ...current,
+    [key]: { ...current[key], text },
+  });
+  isDirty.set(true);
+}
+
+/** Schaltet Export-Flag einer Sektions-Notiz. */
+export function setNoteExport(key: NotizenKey, include: boolean): void {
+  const current = heizlastState.get().notizen;
+  heizlastState.setKey('notizen', {
+    ...current,
+    [key]: { ...current[key], includeInExport: include },
+  });
+  isDirty.set(true);
+}
+
+// ---------------------------------------------------------------
+// Helper: EBF-Zimmer-Liste
+// ---------------------------------------------------------------
+
+/** Anhängen eines neuen Zimmers. */
+export function addRaum(name = ''): void {
+  const g = heizlastState.get().gebaeude;
+  const nextId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+  const raeume: RaumInput[] = [
+    ...g.raeume,
+    { id: nextId, name, laenge: 0, breite: 0, flaecheOverride: null },
+  ];
+  heizlastState.setKey('gebaeude', { ...g, raeume });
+  isDirty.set(true);
+}
+
+/** Zimmer entfernen. */
+export function removeRaum(id: string): void {
+  const g = heizlastState.get().gebaeude;
+  heizlastState.setKey('gebaeude', { ...g, raeume: g.raeume.filter((r) => r.id !== id) });
+  isDirty.set(true);
+}
+
+/** Zimmer aktualisieren. */
+export function updateRaum(id: string, patch: Partial<RaumInput>): void {
+  const g = heizlastState.get().gebaeude;
+  const raeume = g.raeume.map((r) => (r.id === id ? { ...r, ...patch } : r));
+  heizlastState.setKey('gebaeude', { ...g, raeume });
+  isDirty.set(true);
+}
+
+/** Summiert Flächen aller Zimmer. flaecheOverride hat Vorrang, sonst laenge·breite. */
+export function sumRaumFlaechen(raeume: RaumInput[]): number {
+  let sum = 0;
+  for (const r of raeume) {
+    if (r.flaecheOverride != null && r.flaecheOverride > 0) {
+      sum += r.flaecheOverride;
+    } else if (r.laenge > 0 && r.breite > 0) {
+      sum += r.laenge * r.breite;
+    }
+  }
+  return Math.round(sum * 10) / 10;
 }

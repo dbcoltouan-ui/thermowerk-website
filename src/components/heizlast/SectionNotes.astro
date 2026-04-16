@@ -1,0 +1,181 @@
+---
+// SectionNotes — aufklappbarer Notiz-Toggle pro Sektion.
+// - Dezent als ghost-Toggle mit Notizblock-Icon.
+// - Beim Aufklappen: Textarea + Checkbox "beim Export einbeziehen".
+// - Bindings via data-hz-bind -> state.notizen.<key>.text / .includeInExport.
+
+interface Props {
+  /** Schlüssel in state.notizen (z. B. "sektion1", "sektion2") */
+  sectionKey: 'sektion1' | 'sektion2' | 'sektion3' | 'sektion4' | 'sektion5' | 'sektion6' | 'sektion7';
+  /** Sichtbares Sektions-Kürzel für den Button-Text */
+  sectionLabel?: string;
+}
+
+const { sectionKey, sectionLabel } = Astro.props;
+const label = sectionLabel ? `Notizen zu ${sectionLabel}` : 'Notizen zu dieser Sektion';
+const contentId = `hz-notes-${sectionKey}`;
+const textareaId = `hz-notes-${sectionKey}-text`;
+const checkboxId = `hz-notes-${sectionKey}-export`;
+---
+<div class="hz-notes" data-toggle>
+  <button
+    type="button"
+    class="hz-notes__btn"
+    aria-expanded="false"
+    aria-controls={contentId}
+    data-action="toggle-module"
+  >
+    <span class="hz-notes__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="9" y1="13" x2="15" y2="13"></line>
+        <line x1="9" y1="17" x2="13" y2="17"></line>
+      </svg>
+    </span>
+    <span class="hz-notes__label">{label}</span>
+    <span class="hz-notes__badge" data-hz-notes-badge hidden>ausgefüllt</span>
+  </button>
+
+  <div id={contentId} class="hz-notes__content" aria-hidden="true" hidden>
+    <label class="hz-notes__field-label" for={textareaId}>Freitext</label>
+    <textarea
+      id={textareaId}
+      class="hz-notes__textarea"
+      rows="3"
+      placeholder="Bemerkungen, Sonderf\u00e4lle, Abweichungen von den Defaults \u2026"
+      data-hz-bind={`notizen.${sectionKey}.text`}
+      data-hz-type="string"
+    ></textarea>
+    <label class="hz-notes__export-row" for={checkboxId}>
+      <input
+        id={checkboxId}
+        type="checkbox"
+        data-hz-bind={`notizen.${sectionKey}.includeInExport`}
+        data-hz-type="boolean"
+      />
+      <span>Beim Export einbeziehen</span>
+    </label>
+  </div>
+</div>
+
+<style is:global>
+  .hz-notes {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--hz-border);
+  }
+  .hz-notes__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 4px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--hz-mid-gray);
+    font-family: var(--hz-font-heading);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    transition: color var(--hz-transition);
+  }
+  .hz-notes__btn:hover { color: var(--hz-navy); }
+  .hz-notes__btn:focus-visible { outline: 2px solid var(--hz-navy); outline-offset: 2px; }
+  .hz-notes__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--hz-off-white);
+    border: 1px solid var(--hz-border);
+    color: var(--hz-mid-gray);
+  }
+  .hz-notes.is-open .hz-notes__icon {
+    background: var(--hz-navy);
+    border-color: var(--hz-navy);
+    color: var(--hz-white);
+  }
+  .hz-notes__badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--hz-blue-tint);
+    color: var(--hz-navy);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .hz-notes__content {
+    margin-top: 12px;
+    padding: 14px 16px;
+    background: var(--hz-off-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+  }
+  .hz-notes__field-label {
+    display: block;
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hz-mid-gray);
+    margin-bottom: 6px;
+  }
+  .hz-notes__textarea {
+    width: 100%;
+    min-height: 72px;
+    resize: vertical;
+    padding: 10px 12px;
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-sm);
+    background: var(--hz-white);
+    font-family: var(--hz-font-body);
+    font-size: 14.5px;
+    color: var(--hz-dark);
+  }
+  .hz-notes__textarea:focus {
+    outline: 0;
+    border-color: var(--hz-navy);
+    box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.08);
+  }
+  .hz-notes__export-row {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--hz-mid-gray);
+    cursor: pointer;
+  }
+  .hz-notes__export-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--hz-navy);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    if (window.__hzNotesBadgeBound) return;
+    window.__hzNotesBadgeBound = true;
+    function refresh() {
+      document.querySelectorAll('.hz-notes').forEach(function (wrap) {
+        var ta = wrap.querySelector('textarea.hz-notes__textarea');
+        var badge = wrap.querySelector('[data-hz-notes-badge]');
+        if (!ta || !badge) return;
+        var has = ta.value && ta.value.trim().length > 0;
+        badge.hidden = !has;
+      });
+    }
+    document.addEventListener('input', function (ev) {
+      var t = ev.target;
+      if (t && t.classList && t.classList.contains('hz-notes__textarea')) refresh();
+    });
+    // Nach dem Rehydrieren aus localStorage (Store-Broadcast) ebenfalls refreshen:
+    setTimeout(refresh, 100);
+    setTimeout(refresh, 800);
+  })();
+</script>

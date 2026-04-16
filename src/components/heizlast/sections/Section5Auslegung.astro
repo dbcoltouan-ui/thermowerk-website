@@ -1,0 +1,92 @@
+---
+// Section 5 — WP-Auslegung (M7)
+// Grosser Ergebnis-Block: Qh = Qhl + Qw + Qoff + Qas.
+// Zeigt alle Summanden als kleine KPI-Reihe plus ein hervorgehobenes Qh.
+
+import SectionWrapper from '../SectionWrapper.astro';
+import InfoBox from '../InfoBox.astro';
+import KpiCard from '../KpiCard.astro';
+import SectionNotes from '../SectionNotes.astro';
+---
+<SectionWrapper
+  id="sektion-5"
+  kicker="05 - WP-Auslegung"
+  title="Dimensionierung Qh"
+  subline="Qh = Qhl + Qw + Qoff + Qas \u2014 das ist die Zielleistung der W\u00e4rmepumpe."
+>
+  <div class="hz-qh-result">
+    <div class="hz-qh-summands">
+      <KpiCard label="Qhl" value="\u2014" unit="kW" caption="Heizlast" data-kpi="qhlKorr" />
+      <span class="hz-qh-sign">+</span>
+      <KpiCard label="Qw" value="\u2014" unit="kW" caption="Warmwasser" data-kpi="qw" />
+      <span class="hz-qh-sign">+</span>
+      <KpiCard label="Qoff" value="\u2014" unit="kW" caption="Sperrzeit" data-kpi="qoff" />
+      <span class="hz-qh-sign">+</span>
+      <KpiCard label="Qas" value="\u2014" unit="kW" caption="Sonderzuschlag" data-kpi="qas" />
+    </div>
+
+    <div class="hz-qh-total">
+      <span class="hz-qh-total__label">Qh \u2014 Auslegungsleistung</span>
+      <span class="hz-qh-total__value" data-kpi="qh">&mdash;</span>
+      <span class="hz-qh-total__unit">kW</span>
+    </div>
+  </div>
+
+  <InfoBox title="Was ist Qh?" icon="info">
+    <p>
+      <strong>Qh</strong> ist die Summe aller Leistungs-Anteile, die die W\u00e4rmepumpe am k\u00e4ltesten
+      Auslegungstag bereitstellen muss. Diese Zahl wird f\u00fcr die Ger\u00e4teauswahl verwendet.
+      Zus\u00e4tzliche Sicherheiten (z. B. Bivalenz, Abtaureserve) werden im Ger\u00e4teblatt bzw. im
+      Leistungsdiagramm ber\u00fccksichtigt.
+    </p>
+  </InfoBox>
+
+  <SectionNotes sectionKey="sektion5" sectionLabel="Sektion 5 (WP-Auslegung)" />
+</SectionWrapper>
+
+<style is:global>
+  .hz-qh-result {
+    margin-bottom: 22px;
+  }
+  .hz-qh-summands {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    align-items: stretch;
+    gap: 10px;
+    position: relative;
+  }
+  .hz-qh-sign {
+    display: none;
+  }
+  .hz-qh-total {
+    margin-top: 18px;
+    padding: clamp(22px, 3vw, 30px);
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-top: 4px solid var(--hz-red);
+    border-radius: var(--hz-radius-lg);
+    box-shadow: var(--hz-shadow-md);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .hz-qh-total__label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--hz-red);
+  }
+  .hz-qh-total__value {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: clamp(42px, 6vw, 64px); color: var(--hz-navy);
+    letter-spacing: -0.01em; line-height: 1;
+  }
+  .hz-qh-total__unit {
+    font-family: var(--hz-font-heading); font-weight: 500; font-size: 20px;
+    color: var(--hz-mid-gray);
+  }
+
+  @media (max-width: 720px) {
+    .hz-qh-summands { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

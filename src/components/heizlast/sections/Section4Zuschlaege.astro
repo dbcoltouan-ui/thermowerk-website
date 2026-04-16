@@ -1,0 +1,82 @@
+---
+// Section 4 — Zuschlaege (M6)
+// - toff: Sperrzeit in Stunden
+// - Qas: optionaler Sonder-/Abtauzuschlag
+
+import SectionWrapper from '../SectionWrapper.astro';
+import InfoBox from '../InfoBox.astro';
+import KpiCard from '../KpiCard.astro';
+import Toggle from '../Toggle.astro';
+import SectionNotes from '../SectionNotes.astro';
+import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
+---
+<SectionWrapper
+  id="sektion-4"
+  kicker="04 - Zuschl\u00e4ge"
+  title="Zuschl\u00e4ge"
+  subline="Sperrzeit-Aufschlag und optionale Sonderzuschl\u00e4ge (z. B. Abtau-Reserve)."
+  tone="off"
+>
+  <slot name="aside" slot="aside">
+    <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
+      <KpiCard label="Qoff" value="\u2014" unit="kW" caption="Sperrzeit-Zuschlag" data-kpi="qoff" />
+    </div>
+  </slot>
+
+  <div class="hz-block">
+    <h3 class="hz-block__heading">Sperrzeit (EVU)</h3>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">toff \u2014 Sperrstunden pro Tag</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="1" min="0" max="8"
+            data-hz-bind="zuschlaege.toff" data-hz-type="number" />
+          <span class="hz-field__unit">h/d</span>
+        </div>
+        <small class="hz-muted">0 = keine Sperre. Typisch: 2&ndash;4 h (EVU).</small>
+      </label>
+    </div>
+
+    <p class="hz-muted" style="margin-top: 8px; font-size: 13.5px;">
+      Korrekturfaktor je Sperrzeit (FWS):
+      {Object.entries(SPERRZEIT_FAKTOREN).map(([h, f]) => (
+        <span class="hz-sperrzeit-chip">{h}&nbsp;h \u2192 &times;{f.toFixed(2)}</span>
+      ))}
+    </p>
+  </div>
+
+  <Toggle label="Zus\u00e4tzlicher Sonder-/Abtauzuschlag (Qas)" caption="optional" id="hz-m6-qas">
+    <label class="hz-field" style="max-width: 280px;">
+      <span class="hz-field__label">Qas</span>
+      <div class="hz-field__input-with-unit">
+        <input class="hz-field__input" type="number" step="0.1" min="0"
+          data-hz-bind="zuschlaege.qas" data-hz-type="number" />
+        <span class="hz-field__unit">kW</span>
+      </div>
+      <small class="hz-muted">Wird direkt zu Qh addiert.</small>
+    </label>
+    <label class="hz-switch" style="margin-top: 10px;">
+      <input type="checkbox" data-hz-bind="zuschlaege.qasActive" data-hz-type="boolean" />
+      <span>Qas aktiv</span>
+    </label>
+  </Toggle>
+
+  <InfoBox title="Warum ein Sperrzeit-Zuschlag?" icon="help">
+    <p>
+      EVU k\u00f6nnen W\u00e4rmepumpen stundenweise abschalten (Lastmanagement).
+      In dieser Zeit fehlt Heizleistung \u2014 sie muss in den restlichen Stunden nachgeholt werden.
+      Der Zuschlag wird als Faktor auf Qhl aufgeschlagen (FWS \u00a74).
+    </p>
+  </InfoBox>
+
+  <SectionNotes sectionKey="sektion4" sectionLabel="Sektion 4 (Zuschl\u00e4ge)" />
+</SectionWrapper>
+
+<style is:global>
+  .hz-sperrzeit-chip {
+    display: inline-block; margin: 4px 6px 0 0;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--hz-blue-tint); color: var(--hz-navy);
+    font-size: 12px; font-family: var(--hz-font-heading); font-weight: 600;
+  }
+</style>

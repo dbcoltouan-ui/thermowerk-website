@@ -1,249 +1,568 @@
 ---
-// Heizlast-Berechnungstool (intern, passwortgeschützt)
-// URL: /heizlast  – nicht im Menü verlinkt, robots=noindex
-import { getSingleton } from '../lib/sanity.ts';
-const settings: any = await getSingleton('siteSettings') || {};
-const companyName = settings?.companyName || 'Thermowerk';
-const address = settings?.address || '';
-const phone = settings?.phone || '';
-const email = settings?.email || '';
+// Heizlast-Rechner — Hauptseite (Phase 4)
+// Long-Scroll mit sieben Sektionen. State wird clientseitig via Nano Stores
+// verwaltet (src/lib/heizlast/state.ts) und automatisch in localStorage
+// zwischengespeichert.
+import HeizlastLayout from '../layouts/HeizlastLayout.astro';
+import Section1Gebaeude from '../components/heizlast/sections/Section1Gebaeude.astro';
+import Section2Heizlast from '../components/heizlast/sections/Section2Heizlast.astro';
+import Section3Warmwasser from '../components/heizlast/sections/Section3Warmwasser.astro';
+import Section4Zuschlaege from '../components/heizlast/sections/Section4Zuschlaege.astro';
+import Section5Auslegung from '../components/heizlast/sections/Section5Auslegung.astro';
+import Section6Speicher from '../components/heizlast/sections/Section6Speicher.astro';
+import Section7Projekt from '../components/heizlast/sections/Section7Projekt.astro';
 ---
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#1B2A4A" />
-  <title>Heizlastrechner · Thermowerk</title>
+<HeizlastLayout
+  title="Heizlast-Rechner | Thermowerk"
+  description="Professionelle Heizlast- und W\u00e4rmepumpen-Auslegung nach FWS, SIA und VDI."
+>
+  <Section1Gebaeude />
+  <Section2Heizlast />
+  <Section3Warmwasser />
+  <Section4Zuschlaege />
+  <Section5Auslegung />
+  <Section6Speicher />
+  <Section7Projekt />
+</HeizlastLayout>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script>
+  // ============================================================
+  // Heizlast-Rechner — Glue-JS
+  // ------------------------------------------------------------
+  // 1. bootFromStorage() + subscribeAutoSave() + bootBindings()
+  // 2. Render dynamischer Listen (Zimmer, Sanierung, Personen-Einheiten)
+  // 3. Wire Toggle-Aktivierung (M2-Methoden + WW-Pane-Umschaltung)
+  // 4. Compute-Subscriber -> [data-kpi] + [data-hz-sum] + Ampel + Status
+  // 5. Speichern/Laden-Buttons
+  // ============================================================
+  import {
+    heizlastState,
+    uiState,
+    isDirty,
+    addRaum,
+    removeRaum,
+    updateRaum,
+    sumRaumFlaechen,
+  } from '../lib/heizlast/state.ts';
+  import { heizlastCompute } from '../lib/heizlast/compute.ts';
+  import {
+    bootFromStorage,
+    subscribeAutoSave,
+    hardReset,
+  } from '../lib/heizlast/storage.ts';
+  import { bootBindings, syncDomFromState } from '../lib/heizlast/bindings.ts';
+  import {
+    SANIERUNGS_MASSNAHMEN,
+    BAUPERIODEN,
+  } from '../lib/heizlast/constants.ts';
+  import {
+    listProjects,
+    saveProject,
+    probeAuth,
+  } from '../lib/heizlast/projects.ts';
 
-  <!-- Basis-CSS-Variablen (passend zur Hauptwebsite, damit die Tool-CSS-Variablen vorhanden sind) -->
-  <style is:global>
-    :root {
-      --navy: #1B2A4A;
-      --navy-light: #243658;
-      --navy-dark: #111D33;
-      --red: #D93025;
-      --red-hover: #B71C1C;
-      --white: #FFFFFF;
-      --off-white: #F7F8FA;
-      --light-gray: #EEF0F4;
-      --mid-gray: #6B7280;
-      --dark: #1A1A1A;
-      --border: #E2E5EB;
-      --blue-tint: #E8EDF5;
-      --radius: 10px;
-      --radius-sm: 6px;
-      --shadow: 0 1px 3px rgba(27,42,74,.06), 0 1px 2px rgba(27,42,74,.04);
-      --shadow-lg: 0 10px 25px rgba(27,42,74,.08), 0 4px 10px rgba(27,42,74,.04);
+  // ------------------------------------------------------------
+  // 1. Boot-Reihenfolge
+  // ------------------------------------------------------------
+  bootFromStorage();           // localStorage -> Store
+  subscribeAutoSave();         // Store -> localStorage (debounced)
+  bootBindings();              // DOM <-> Store
+  syncDomFromState();          // Initial-Sync falls Boot ohne Store-Change
+
+  // Auth-Status pruefen (setzt uiState.isAuthenticated).
+  probeAuth().then((ok) => { uiState.setKey('isAuthenticated', ok); }).catch(() => {});
+
+  // ------------------------------------------------------------
+  // 2. Helpers
+  // ------------------------------------------------------------
+  function fmt(n: number | null | undefined, d = 2): string {
+    if (n == null || !isFinite(n)) return '—';
+    return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+  function fmtInt(n: number | null | undefined): string {
+    if (n == null || !isFinite(n)) return '—';
+    return Math.round(n).toLocaleString('de-CH');
+  }
+  function escapeHtml(s: string): string {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => (({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    } as any)[c] as string));
+  }
+
+  // ------------------------------------------------------------
+  // 3. Zimmer-Liste (EBF-Helper)
+  // ------------------------------------------------------------
+  const raumList = document.getElementById('hz-raum-list');
+  const raumSumEl = document.getElementById('hz-raum-sum-value');
+  const raumAddBtn = document.getElementById('hz-raum-add');
+  const raumApplyBtn = document.getElementById('hz-raum-apply');
+
+  function renderRaumList() {
+    if (!raumList) return;
+    const s = heizlastState.get();
+    const raeume = s.gebaeude.raeume || [];
+    if (raeume.length === 0) {
+      raumList.innerHTML = '<p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>';
+    } else {
+      raumList.innerHTML = raeume.map((r) => {
+        const auto = r.flaecheOverride == null
+          ? (r.laenge * r.breite)
+          : r.flaecheOverride;
+        return `
+          <div class="hz-raum-row" data-raum-id="${r.id}">
+            <input type="text" placeholder="z. B. Wohnzimmer" data-raum-field="name" value="${escapeHtml(r.name)}" />
+            <input type="number" step="0.1" min="0" data-raum-field="laenge" value="${r.laenge || ''}" />
+            <input type="number" step="0.1" min="0" data-raum-field="breite" value="${r.breite || ''}" />
+            <span class="hz-raum-flaeche">${fmt(auto, 2)} m²</span>
+            <button type="button" class="hz-raum-remove" aria-label="Entfernen" data-raum-remove>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
     }
-    *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; }
-  </style>
+    const sum = sumRaumFlaechen(raeume);
+    if (raumSumEl) raumSumEl.textContent = fmt(sum, 1);
+    // Live-Modus: Summe direkt in EBF schreiben.
+    if (s.gebaeude.raeumeAktiv && sum > 0) {
+      const rounded = Math.round(sum * 10) / 10;
+      if (Math.abs(s.gebaeude.ebf - rounded) > 0.05) {
+        heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: rounded });
+      }
+    }
+  }
 
-  <!-- Tool-eigenes CSS -->
-  <link rel="stylesheet" href="/tools/heizlast/style.css" />
-  <!-- CI-Override + Layout-Verbesserungen -->
-  <link rel="stylesheet" href="/tools/heizlast/heizlast-tw.css" />
+  if (raumAddBtn) raumAddBtn.addEventListener('click', () => addRaum(''));
+  if (raumApplyBtn) raumApplyBtn.addEventListener('click', () => {
+    const s = heizlastState.get();
+    const sum = sumRaumFlaechen(s.gebaeude.raeume);
+    if (sum > 0) {
+      const rounded = Math.round(sum * 10) / 10;
+      heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: rounded });
+      isDirty.set(true);
+    }
+  });
 
-  <link rel="icon" type="image/svg+xml" href="/tools/heizlast/img/favicon.svg" />
-</head>
-<body>
-  <!-- ═══ LOGIN-MODAL (nur on-demand, nicht blockierend) ═══ -->
-  <div id="login-modal">
-    <form class="gate-box" id="gate-form" style="position:relative">
-      <button type="button" class="gate-close-x" id="gate-close" aria-label="Schliessen">×</button>
-      <img src="/img/logo.png" alt="Thermowerk" />
-      <h2>Login</h2>
-      <p>Interner Zugang für den Thermowerk-Planer – zusätzliche Funktionen wie Cloud-Projekte und Angebots-PDF.</p>
-      <input type="password" id="gate-password" autocomplete="current-password" placeholder="Passwort" required />
-      <button type="submit">Anmelden</button>
-      <div class="gate-error" id="gate-error"></div>
-    </form>
-  </div>
+  // Event-Delegation fuer Raum-Inputs
+  document.addEventListener('input', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const row = t.closest('.hz-raum-row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-raum-id');
+    const field = t.getAttribute('data-raum-field');
+    if (!id || !field) return;
+    const value = (t as HTMLInputElement).value;
+    if (field === 'name') updateRaum(id, { name: value });
+    else if (field === 'laenge') updateRaum(id, { laenge: Number(value) || 0 });
+    else if (field === 'breite') updateRaum(id, { breite: Number(value) || 0 });
+  });
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const btn = t.closest('[data-raum-remove]') as HTMLElement | null;
+    if (!btn) return;
+    const row = btn.closest('.hz-raum-row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-raum-id');
+    if (id) removeRaum(id);
+  });
 
-  <!-- ═══ TOPBAR (dezent, Rück-Link) ═══ -->
-  <div class="tw-topbar">
-    <a href="/" aria-label="Zurück zur Website">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      <span>Thermowerk Website</span>
-    </a>
-    <div class="tw-topbar-right">Heizlastrechner · FWS Modul 3</div>
-  </div>
+  // ------------------------------------------------------------
+  // 4. Sanierungs-Liste
+  // ------------------------------------------------------------
+  const sanList = document.getElementById('hz-san-list');
+  const sanSelect = document.getElementById('hz-san-select') as HTMLSelectElement | null;
+  const sanAddBtn = document.getElementById('hz-san-add');
 
-  <!-- ═══ APP-HEADER ═══ -->
-  <header class="app-header">
-    <div class="app-header-left">
-      <img src="/img/logo.png" alt={companyName} class="tw-logo" />
-      <div class="tw-title-wrap">
-        <h1>Heizlastrechner</h1>
-        <div class="sub">{companyName} · nach FWS Modul 3 · Ausgabe 1-2025</div>
+  function renderSanList() {
+    if (!sanList) return;
+    const s = heizlastState.get();
+    const items = s.heizlast.sanierungMassnahmen || [];
+    if (items.length === 0) {
+      sanList.innerHTML = '<p class="hz-muted hz-san__empty">Noch keine Massnahme gew\u00e4hlt.</p>';
+      return;
+    }
+    sanList.innerHTML = items.map((m) => `
+      <div class="hz-san__row" data-san-id="${m.id}">
+        <span class="hz-san__row-label">${escapeHtml(m.label)}</span>
+        <div class="hz-field__input-with-unit" style="max-width: 140px;">
+          <input type="number" step="1" min="0" max="100" data-san-field="einsparungProzent" value="${m.einsparungProzent}" />
+          <span class="hz-field__unit">%</span>
+        </div>
+        <button type="button" class="hz-san__remove" aria-label="Entfernen" data-san-remove>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
       </div>
-    </div>
-    <div class="header-actions">
-      <!-- Öffentlich sichtbare Buttons -->
-      <select id="project-select" title="Gespeichertes Projekt laden">
-        <option value="">— Projekt laden —</option>
-      </select>
-      <button id="btn-save" title="Lokal speichern">Speichern</button>
-      <button id="btn-delete" class="danger" title="Lokales Projekt löschen">×</button>
-      <button id="btn-neu" title="Neues Projekt">Neu</button>
-      <button id="btn-export-json" title="Als JSON exportieren">JSON ↓</button>
-      <button id="btn-import-json" title="JSON importieren">JSON ↑</button>
-      <button id="btn-print-simple" class="primary" title="Projekt als PDF speichern (vereinfachte Ansicht)">PDF Export</button>
+    `).join('');
+  }
 
-      <!-- Nur für eingeloggte Nutzer sichtbar -->
-      <button id="btn-logo-upload"   class="auth-only" title="Firmenlogo setzen">Logo</button>
-      <button id="btn-print-kunde"   class="auth-only" title="Kundenfreundlicher PDF-Export (Angebots-Template)">PDF Kunde</button>
-      <button id="btn-print-full"    class="auth-only" title="Vollständiger Export inkl. Rechenwege">PDF intern</button>
+  if (sanAddBtn && sanSelect) {
+    sanAddBtn.addEventListener('click', () => {
+      const val = sanSelect.value;
+      if (!val) return;
+      const preset = SANIERUNGS_MASSNAHMEN.find((m) => m.id === val);
+      if (!preset) return;
+      const s = heizlastState.get();
+      if (s.heizlast.sanierungMassnahmen.some((m) => m.id === preset.id)) return;
+      const next = [...s.heizlast.sanierungMassnahmen, {
+        id: preset.id,
+        label: preset.label,
+        einsparungProzent: preset.default,
+      }];
+      heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next, sanierungActive: true });
+      isDirty.set(true);
+      sanSelect.value = '';
+    });
+  }
 
-      <!-- Login / Logout (spiegeln sich über CSS) -->
-      <button id="btn-login" title="Internen Bereich öffnen">🔒 Login</button>
-      <button id="btn-logout" class="auth-only danger" title="Abmelden">⎋ Abmelden</button>
+  document.addEventListener('input', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const row = t.closest('.hz-san__row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-san-id');
+    const field = t.getAttribute('data-san-field');
+    if (!id || field !== 'einsparungProzent') return;
+    const value = Number((t as HTMLInputElement).value) || 0;
+    const s = heizlastState.get();
+    const next = s.heizlast.sanierungMassnahmen.map((m) =>
+      m.id === id ? { ...m, einsparungProzent: value } : m,
+    );
+    heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
+    isDirty.set(true);
+  });
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const btn = t.closest('[data-san-remove]') as HTMLElement | null;
+    if (!btn) return;
+    const row = btn.closest('.hz-san__row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-san-id');
+    if (!id) return;
+    const s = heizlastState.get();
+    const next = s.heizlast.sanierungMassnahmen.filter((m) => m.id !== id);
+    heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
+    isDirty.set(true);
+  });
 
-      <input type="file" id="file-import" accept="application/json" style="display:none" />
-      <input type="file" id="file-logo" accept="image/*" style="display:none" />
-    </div>
-  </header>
+  // ------------------------------------------------------------
+  // 5. Personen-Einheiten (WW-Methode "personen")
+  // ------------------------------------------------------------
+  const peList = document.getElementById('hz-pe-list');
+  const peAddBtn = document.getElementById('hz-pe-add');
 
-  <!-- ═══ DRUCK-KOPF (nur im Print sichtbar) ═══ -->
-  <div class="print-header" id="print-header">
-    <div class="print-logo-wrap"><img id="print-logo" alt="" src="/img/logo.png" data-default="/img/logo.png" /></div>
-    <div class="print-title">
-      <div class="print-title-main">Heizlastberechnung</div>
-      <div class="print-title-sub">nach FWS Modul 3</div>
-    </div>
-    <div class="print-meta" id="print-meta"></div>
-  </div>
+  function renderPeList() {
+    if (!peList) return;
+    const s = heizlastState.get();
+    const items = s.warmwasser.personen || [];
+    if (items.length === 0) {
+      peList.innerHTML = '<p class="hz-muted hz-pe-empty">Noch keine Einheit erfasst.</p>';
+      return;
+    }
+    peList.innerHTML = items.map((p, idx) => `
+      <div class="hz-pe-row" data-pe-idx="${idx}">
+        <input type="text" placeholder="z. B. Wohnung 1" data-pe-field="label" value="" />
+        <div class="hz-field__input-with-unit">
+          <input type="number" step="1" min="0" data-pe-field="anf" value="${p.anf || ''}" />
+          <span class="hz-field__unit">m²</span>
+        </div>
+        <div class="hz-field__input-with-unit">
+          <input type="number" step="1" min="0" data-pe-field="vwui" value="${p.vwui || ''}" />
+          <span class="hz-field__unit">l/P/d</span>
+        </div>
+        <button type="button" class="hz-pe-remove" aria-label="Entfernen" data-pe-remove>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    `).join('');
+  }
 
-  <!-- ═══ TOOL-CONTAINER (Module werden per JS injiziert) ═══ -->
-  <main class="app" id="app"></main>
+  if (peAddBtn) {
+    peAddBtn.addEventListener('click', () => {
+      const s = heizlastState.get();
+      const next = [...s.warmwasser.personen, { anf: 120, vwui: 40 }];
+      heizlastState.setKey('warmwasser', { ...s.warmwasser, personen: next });
+      isDirty.set(true);
+    });
+  }
 
-  <!-- ═══ DRUCK-FUSSZEILE ═══ -->
-  <div class="print-footer">
-    Berechnung nach FWS Modul 3 (Ausgabe 1-2025) · SIA 384/1:2022 · SIA 385/1:2020.
-    Die ausgewiesenen Leistungen sind nach anerkannten Regeln der Technik ermittelt.
-  </div>
+  document.addEventListener('input', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const row = t.closest('.hz-pe-row') as HTMLElement | null;
+    if (!row) return;
+    const idxRaw = row.getAttribute('data-pe-idx');
+    const field = t.getAttribute('data-pe-field');
+    if (idxRaw == null) return;
+    const idx = Number(idxRaw);
+    const value = (t as HTMLInputElement).value;
+    const s = heizlastState.get();
+    const next = s.warmwasser.personen.map((p, i) => {
+      if (i !== idx) return p;
+      if (field === 'anf') return { ...p, anf: Number(value) || 0 };
+      if (field === 'vwui') return { ...p, vwui: Number(value) || 0 };
+      return p;
+    });
+    heizlastState.setKey('warmwasser', { ...s.warmwasser, personen: next });
+    isDirty.set(true);
+  });
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const btn = t.closest('[data-pe-remove]') as HTMLElement | null;
+    if (!btn) return;
+    const row = btn.closest('.hz-pe-row') as HTMLElement | null;
+    if (!row) return;
+    const idxRaw = row.getAttribute('data-pe-idx');
+    if (idxRaw == null) return;
+    const idx = Number(idxRaw);
+    const s = heizlastState.get();
+    const next = s.warmwasser.personen.filter((_, i) => i !== idx);
+    heizlastState.setKey('warmwasser', { ...s.warmwasser, personen: next });
+    isDirty.set(true);
+  });
 
-  <!-- ═══ SITE-FOOTER ═══ -->
-  <footer class="tw-footer">
-    <div class="tw-footer-row">
-      {address && <span>{address}</span>}
-      {phone && <a href={`tel:${phone.replace(/\s/g, '')}`}>{phone}</a>}
-      {email && <a href={`mailto:${email}`}>{email}</a>}
-    </div>
-    <div class="tw-footer-row">
-      <a href="/">Zur Website</a>
-      <a href="/impressum">Impressum</a>
-      <a href="/datenschutz">Datenschutz</a>
-    </div>
-    <div class="tw-footer-copyright">
-      © {new Date().getFullYear()} {companyName} · Internes Planungstool
-    </div>
-  </footer>
-
-  <!-- ═══ SCRIPTS ═══ -->
-  <!-- Chart.js CDN (für M10) -->
-  <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <!-- Tool-Bundle (Original) -->
-  <script is:inline src="/tools/heizlast/bundle.js"></script>
-  <!-- Cloud-Sync (Overlay) -->
-  <script is:inline src="/tools/heizlast/heizlast-cloud.js"></script>
-  <!-- Modul M10 (Leistungsdiagramm) -->
-  <script is:inline src="/tools/heizlast/heizlast-chart.js"></script>
-
-  <!-- Auth-State + Login-Modal + vereinfachter PDF-Export -->
-  <script is:inline>
-    (function () {
-      const modal    = document.getElementById('login-modal');
-      const form     = document.getElementById('gate-form');
-      const pwd      = document.getElementById('gate-password');
-      const err      = document.getElementById('gate-error');
-      const closeBtn = document.getElementById('gate-close');
-      const loginBtn = document.getElementById('btn-login');
-      const logoutBtn= document.getElementById('btn-logout');
-
-      function openModal()  { modal.classList.add('visible'); setTimeout(() => pwd.focus(), 50); }
-      function closeModal() { modal.classList.remove('visible'); err.textContent = ''; pwd.value = ''; }
-
-      async function checkAuth() {
-        try {
-          const r = await fetch('/api/heizlast-auth', { credentials: 'same-origin' });
-          const d = await r.json();
-          return !!d.authed;
-        } catch { return false; }
+  // ------------------------------------------------------------
+  // 6. M2-Methoden-Aktivierung
+  //    Jeder Toggle in Section2 traegt die Methode im Kind-Element
+  //    `.hz-method[data-method="..."]`. Wenn der User einen Toggle
+  //    aufklappt, wird diese Methode als aktive gesetzt.
+  // ------------------------------------------------------------
+  function syncMethodToggles() {
+    const s = heizlastState.get();
+    const active = s.heizlast.method;
+    document.querySelectorAll('.hz-toggle').forEach((tog) => {
+      const methodEl = tog.querySelector('.hz-method');
+      if (!methodEl) return;
+      const method = methodEl.getAttribute('data-method');
+      const isActive = method === active;
+      tog.setAttribute('data-active', isActive ? 'true' : 'false');
+      methodEl.classList.toggle('is-active', isActive);
+      // Aktive Methode automatisch aufklappen
+      if (isActive && !tog.classList.contains('is-open')) {
+        const btn = tog.querySelector('[data-action="toggle-module"]') as HTMLButtonElement | null;
+        if (btn) btn.click();
       }
+    });
+  }
 
-      function setAuthState(authed) {
-        document.body.classList.toggle('is-auth', authed);
-        window.__heizlastAuth = authed;
-        // Benachrichtige Cloud-Script falls vorhanden
-        if (typeof window.__onAuthChange === 'function') window.__onAuthChange(authed);
-      }
-
-      async function submitPassword(ev) {
-        ev.preventDefault();
-        err.textContent = '';
-        const password = pwd.value;
-        if (!password) return;
-        try {
-          const r = await fetch('/api/heizlast-auth', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ password }),
-          });
-          const d = await r.json();
-          if (d.success) {
-            setAuthState(true);
-            closeModal();
-          } else {
-            err.textContent = d.error || 'Passwort falsch';
-            pwd.select();
+  // Klick auf einen Methoden-Toggle setzt die Methode (beim Oeffnen)
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const btn = t.closest('[data-action="toggle-module"]') as HTMLElement | null;
+    if (!btn) return;
+    const tog = btn.closest('.hz-toggle') as HTMLElement | null;
+    if (!tog) return;
+    const methodEl = tog.querySelector('.hz-method') as HTMLElement | null;
+    if (!methodEl) return;
+    setTimeout(() => {
+      if (tog.classList.contains('is-open')) {
+        const method = methodEl.getAttribute('data-method');
+        if (method) {
+          const s = heizlastState.get();
+          if (s.heizlast.method !== method) {
+            heizlastState.setKey('heizlast', { ...s.heizlast, method: method as any });
           }
-        } catch (e) {
-          err.textContent = 'Netzwerk-Fehler';
         }
       }
+    }, 0);
+  });
 
-      async function doLogout() {
-        if (!confirm('Abmelden?')) return;
-        try {
-          await fetch('/api/heizlast-auth', { method: 'DELETE', credentials: 'same-origin' });
-        } catch {}
-        setAuthState(false);
+  // ------------------------------------------------------------
+  // 7. WW-Panes (nur aktive Methode sichtbar)
+  // ------------------------------------------------------------
+  function syncWwPanes() {
+    const s = heizlastState.get();
+    const method = s.warmwasser.method;
+    const active = Boolean(s.warmwasser.active);
+    document.querySelectorAll('[data-ww-pane]').forEach((el) => {
+      const isActive = el.getAttribute('data-ww-pane') === method;
+      el.classList.toggle('is-active', isActive);
+    });
+    document.querySelectorAll('#sektion-3').forEach((sec) => {
+      sec.classList.toggle('hz-ww-off', !active);
+    });
+  }
+
+  // ------------------------------------------------------------
+  // 8. Compute-Subscriber -> KPIs + Zusammenfassung
+  // ------------------------------------------------------------
+  function ampelFromPlausi(wm2: number | null): 'gruen' | 'gelb' | 'rot' {
+    if (wm2 == null) return 'gelb';
+    if (wm2 < 25 || wm2 > 180) return 'rot';
+    if (wm2 < 40 || wm2 > 140) return 'gelb';
+    return 'gruen';
+  }
+  function labelBauperiode(id: string): string {
+    const p = BAUPERIODEN.find((b) => b.id === id);
+    return p ? p.label : id;
+  }
+  function labelTyp(id: string): string {
+    return (({ efh: 'Einfamilienhaus', mfh: 'Mehrfamilienhaus', buero: 'B\u00fcro / Gewerbe' } as any)[id]) || id;
+  }
+  function labelLage(id: string): string {
+    return (({ mittelland: 'Mittelland (<800 m)', hoehe: 'ab 800 m \u00fc. M.' } as any)[id]) || id;
+  }
+  function labelStatus(id: string): string {
+    return (({
+      arbeit: 'In Arbeit',
+      offeriert: 'Offeriert',
+      bestellt: 'Bestellt',
+      abgeschlossen: 'Abgeschlossen',
+      archiv: 'Archiv',
+    } as any)[id]) || id;
+  }
+
+  function setKpi(key: string, value: string, attrs?: Record<string, string>) {
+    document.querySelectorAll(`[data-kpi="${key}"]`).forEach((el) => {
+      const valEl = el.querySelector('.hz-kpi__value') || el;
+      valEl.textContent = value;
+      if (attrs) {
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
       }
+    });
+  }
+  function setSum(key: string, value: string) {
+    document.querySelectorAll(`[data-hz-sum="${key}"]`).forEach((el) => {
+      el.textContent = value;
+    });
+  }
 
-      form.addEventListener('submit', submitPassword);
-      closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-      loginBtn.addEventListener('click', openModal);
-      logoutBtn.addEventListener('click', doLogout);
+  function renderAll() {
+    const s = heizlastState.get();
+    const r = heizlastCompute.get();
 
-      // Auto-auth beim Laden
-      checkAuth().then(setAuthState);
+    // KPI-Kacheln
+    setKpi('tvoll', fmtInt(r.tvoll));
+    setKpi('qhlRaw', fmt(r.qhlRaw?.value));
+    setKpi('qhlKorr', fmt(r.qhlKorr?.value));
+    setKpi('plausi', fmt(r.plausi?.value, 1), { 'data-ampel': ampelFromPlausi(r.plausi?.value ?? null) });
+    setKpi('qw', fmt(r.qw?.value));
+    setKpi('qwwTag', fmt(r.qwwTagVal?.value));
+    setKpi('vwu', fmtInt(r.vwu?.value));
+    setKpi('qoff', fmt(r.qoff?.value));
+    setKpi('qas', fmt(s.zuschlaege.qasActive ? s.zuschlaege.qas : 0));
+    setKpi('qh', fmt(r.qh?.value));
+    setKpi('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
+    setKpi('puffer', fmtInt(r.pufferGerundet));
 
-      // ─── Vereinfachter PDF-Export (öffentlich) ───
-      // Schliesst alle Rechenwege, ruft dann Browser-Print auf.
-      // Keine Kunden-Template-Umschaltung, keine details.steps geöffnet.
-      document.getElementById('btn-print-simple')?.addEventListener('click', () => {
-        // Alle details in den Modulen schliessen
-        document.querySelectorAll('details.steps').forEach(d => { d.open = false; });
-        // Alle Module aufklappen (damit Inhalt sichtbar ist)
-        document.querySelectorAll('.module.collapsed').forEach(m => m.classList.remove('collapsed'));
-        // Print-Meta aktualisieren (Datum etc.)
-        const meta = document.getElementById('print-meta');
-        if (meta) {
-          const d = new Date().toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric' });
-          meta.innerHTML = `Datum: ${d}`;
-        }
-        setTimeout(() => window.print(), 180);
-      });
-    })();
-  </script>
-</body>
-</html>
+    // Zusammenfassung (Section 7)
+    setSum('projectName', s.projectName || '—');
+    setSum('customerName', s.customerName || '—');
+    setSum('address', s.address || '—');
+    setSum('status', labelStatus(s.status));
+    setSum('typ', labelTyp(s.gebaeude.typ));
+    setSum('lage', labelLage(s.gebaeude.lage));
+    setSum('bauperiode', labelBauperiode(s.gebaeude.bauperiode));
+    setSum('ebf', fmt(s.gebaeude.ebf, 0));
+    setSum('wohneinheiten', String(s.gebaeude.wohneinheiten || 1));
+    setSum('tvoll', fmtInt(r.tvoll));
+    setSum('qhl', fmt(r.qhlKorr?.value));
+    setSum('qw', fmt(r.qw?.value));
+    setSum('qoff', fmt(r.qoff?.value));
+    setSum('qas', fmt(s.zuschlaege.qasActive ? s.zuschlaege.qas : 0));
+    setSum('qh', fmt(r.qh?.value));
+    setSum('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
+    setSum('puffer', fmtInt(r.pufferGerundet));
+
+    // Listen
+    renderRaumList();
+    renderSanList();
+    renderPeList();
+
+    // Panes / Methoden
+    syncWwPanes();
+    syncMethodToggles();
+  }
+
+  renderAll();
+  heizlastCompute.subscribe(() => renderAll());
+  heizlastState.subscribe(() => renderAll());
+
+  // ------------------------------------------------------------
+  // 9. Speichern/Laden-Buttons
+  // ------------------------------------------------------------
+  const saveCloudBtn = document.querySelector('[data-hz-action="save-cloud"]') as HTMLButtonElement | null;
+  const saveCloudNewBtn = document.querySelector('[data-hz-action="save-cloud-new"]') as HTMLButtonElement | null;
+  const openProjectsBtn = document.querySelector('[data-hz-action="open-projects"]') as HTMLButtonElement | null;
+  const loginBtn = document.querySelector('[data-hz-action="login"]') as HTMLButtonElement | null;
+  const newProjectBtn = document.querySelector('[data-hz-action="new-project"]') as HTMLButtonElement | null;
+  const statusEl = document.querySelector('[data-hz-save-status]') as HTMLElement | null;
+  const statusText = document.querySelector('[data-hz-save-status-text]') as HTMLElement | null;
+  const saveLocalEl = document.querySelector('[data-hz-save-local]') as HTMLElement | null;
+  const saveCloudEl = document.querySelector('[data-hz-save-cloud]') as HTMLElement | null;
+
+  function setStatus(tone: 'ok' | 'busy' | 'err' | 'idle', text: string) {
+    if (statusEl) {
+      if (tone === 'idle') statusEl.removeAttribute('data-tone');
+      else statusEl.setAttribute('data-tone', tone);
+    }
+    if (statusText) statusText.textContent = text;
+  }
+  function fmtTime(ms: number | null): string {
+    if (!ms) return '—';
+    const d = new Date(ms);
+    return d.toLocaleString('de-CH', { dateStyle: 'short', timeStyle: 'short' });
+  }
+  function refreshCloudButtons(auth: boolean) {
+    if (saveCloudBtn) saveCloudBtn.disabled = !auth;
+    if (saveCloudNewBtn) saveCloudNewBtn.disabled = !auth;
+    if (openProjectsBtn) openProjectsBtn.disabled = !auth;
+    const loginLabel = document.querySelector('[data-hz-login-label]') as HTMLElement | null;
+    if (loginLabel) loginLabel.textContent = auth ? 'Abmelden' : 'Anmelden';
+  }
+
+  uiState.subscribe((u) => {
+    refreshCloudButtons(u.isAuthenticated);
+    if (u.syncInFlight) setStatus('busy', 'Synchronisiere \u2026');
+    else if (u.lastError) setStatus('err', u.lastError);
+    else if (u.lastCloudSave) setStatus('ok', 'In Cloud gespeichert.');
+    else setStatus('idle', 'Bereit.');
+    if (saveLocalEl) saveLocalEl.textContent = fmtTime(u.lastLocalSave);
+    if (saveCloudEl) saveCloudEl.textContent = fmtTime(u.lastCloudSave);
+  });
+
+  // Nach jeder Aenderung: Timestamp "zuletzt lokal gespeichert" aktualisieren (analog zum Debounce in storage.ts).
+  isDirty.subscribe((dirty) => {
+    if (dirty) {
+      setTimeout(() => {
+        uiState.setKey('lastLocalSave', Date.now());
+        isDirty.set(false);
+      }, 600);
+    }
+  });
+
+  if (saveCloudBtn) saveCloudBtn.addEventListener('click', async () => {
+    try { await saveProject({ asNew: false, computed: heizlastCompute.get().summary }); }
+    catch (err) { console.warn('save failed:', err); }
+  });
+  if (saveCloudNewBtn) saveCloudNewBtn.addEventListener('click', async () => {
+    try { await saveProject({ asNew: true, computed: heizlastCompute.get().summary }); }
+    catch (err) { console.warn('save-as-new failed:', err); }
+  });
+  if (openProjectsBtn) openProjectsBtn.addEventListener('click', async () => {
+    try {
+      await listProjects();
+      uiState.setKey('projectsModalOpen', true);
+      alert('Projekte-Modal wird in Phase 6 implementiert.');
+    } catch (err) { console.warn('list failed:', err); }
+  });
+  if (loginBtn) loginBtn.addEventListener('click', () => {
+    uiState.setKey('authModalOpen', true);
+    alert('Login-Modal wird in Phase 6 implementiert.');
+  });
+  if (newProjectBtn) newProjectBtn.addEventListener('click', () => {
+    if (!confirm('Aktuelles Projekt verwerfen und neues starten?')) return;
+    hardReset();
+    setStatus('idle', 'Neues Projekt.');
+  });
+
+  // Login-Trigger im Header
+  const loginHeader = document.getElementById('hz-login-trigger');
+  if (loginHeader && loginBtn) {
+    loginHeader.addEventListener('click', () => loginBtn.click());
+  }
+</script>

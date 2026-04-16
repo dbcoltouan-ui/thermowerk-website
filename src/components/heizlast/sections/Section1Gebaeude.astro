@@ -1,0 +1,362 @@
+---
+// Section 1 — Projekt-Kopf + Gebaeude & Standort (M1)
+// - Oben ein schmaler Projekt-Block (Name, Anschrift, Kunde) damit sofort
+//   klar ist, um welches Projekt es geht.
+// - Darunter die eigentlichen Gebaeudedaten (Typ, Lage, Bauperiode, EBF,
+//   Wohneinheiten, tvoll-Profil, tvoll-Override).
+// - Aufklappbarer EBF-Helper: Zimmerliste mit Laenge x Breite -> Summe.
+// - Info-Box: Abkuerzungen erklaert.
+// - Zwischenergebnis: tvoll-Wert als KpiCard.
+
+import SectionWrapper from '../SectionWrapper.astro';
+import InfoBox from '../InfoBox.astro';
+import Toggle from '../Toggle.astro';
+import KpiCard from '../KpiCard.astro';
+import SectionNotes from '../SectionNotes.astro';
+import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts';
+---
+<SectionWrapper
+  id="sektion-1"
+  kicker="01 - Projekt & Gebaeude"
+  title="Projekt & Geb\u00e4udedaten"
+  subline="Projekt-Eckdaten und Stammdaten des Geb\u00e4udes als Grundlage der Berechnung."
+  first
+>
+  <slot name="aside" slot="aside">
+    <div class="hz-kpi-grid" style="min-width: 220px; grid-template-columns: 1fr;">
+      <KpiCard label="tvoll (Vollbetriebsstd.)" value="2300" unit="h/a" caption="aus Profil + Lage" data-kpi="tvoll" />
+    </div>
+  </slot>
+
+  <!-- Projekt-Block -->
+  <div class="hz-proj">
+    <div class="hz-proj__title-row">
+      <h3 class="hz-proj__heading">Projekt</h3>
+      <p class="hz-proj__hint hz-muted">Projekt-Bezeichnung und Anschrift. Weitere Angaben (Kunde, Notizen) im Abschlussblock.</p>
+    </div>
+    <div class="hz-grid-2">
+      <label class="hz-field">
+        <span class="hz-field__label">Projektname</span>
+        <input
+          class="hz-field__input"
+          type="text"
+          placeholder="z. B. EFH Meier Moosseedorf"
+          data-hz-bind="projectName"
+          data-hz-type="string"
+        />
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Anschrift</span>
+        <input
+          class="hz-field__input"
+          type="text"
+          placeholder="Strasse, PLZ Ort"
+          data-hz-bind="address"
+          data-hz-type="string"
+        />
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Kunde</span>
+        <input
+          class="hz-field__input"
+          type="text"
+          placeholder="Name der Bauherrschaft"
+          data-hz-bind="customerName"
+          data-hz-type="string"
+        />
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Projektstatus</span>
+        <select class="hz-field__input" data-hz-bind="status" data-hz-type="string">
+          <option value="arbeit">In Arbeit</option>
+          <option value="offeriert">Offeriert</option>
+          <option value="bestellt">Bestellt</option>
+          <option value="abgeschlossen">Abgeschlossen</option>
+          <option value="archiv">Archiv</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- Gebaeudedaten -->
+  <div class="hz-block">
+    <h3 class="hz-block__heading">Geb\u00e4ude &amp; Standort</h3>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Geb\u00e4udetyp</span>
+        <select class="hz-field__input" data-hz-bind="gebaeude.typ" data-hz-type="string">
+          <option value="efh">Einfamilienhaus (EFH)</option>
+          <option value="mfh">Mehrfamilienhaus (MFH)</option>
+          <option value="buero">B\u00fcro / Gewerbe</option>
+        </select>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Lage</span>
+        <select class="hz-field__input" data-hz-bind="gebaeude.lage" data-hz-type="string">
+          <option value="mittelland">Mittelland (unter 800 m \u00fc.\u00a0M.)</option>
+          <option value="hoehe">Ab 800 m \u00fc.\u00a0M.</option>
+        </select>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Bauperiode</span>
+        <select class="hz-field__input" data-hz-bind="gebaeude.bauperiode" data-hz-type="string">
+          {BAUPERIODEN.map((b) => (
+            <option value={b.id}>{b.label}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Energiebezugsfl\u00e4che EBF</span>
+        <div class="hz-field__input-with-unit">
+          <input
+            class="hz-field__input"
+            type="number"
+            step="1"
+            min="10"
+            data-hz-bind="gebaeude.ebf"
+            data-hz-type="number"
+          />
+          <span class="hz-field__unit">m\u00b2</span>
+        </div>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Wohneinheiten</span>
+        <input
+          class="hz-field__input"
+          type="number"
+          step="1"
+          min="1"
+          data-hz-bind="gebaeude.wohneinheiten"
+          data-hz-type="number"
+        />
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Nutzungsprofil (tvoll)</span>
+        <select class="hz-field__input" data-hz-bind="gebaeude.tvollProfil" data-hz-type="string">
+          {VOLLASTSTUNDEN.filter((r) => r.lage === 'mittelland').map((r) => (
+            <option value={r.gebaeudetyp}>{
+              r.gebaeudetyp === 'wohnen_mitWW' ? 'Wohngeb\u00e4ude mit WW'
+              : r.gebaeudetyp === 'wohnen_ohneWW' ? 'Wohngeb\u00e4ude ohne WW'
+              : 'Gewerbe / Wochenend-Absenkung'
+            }</option>
+          ))}
+        </select>
+      </label>
+    </div>
+
+    <!-- tvoll-Override -->
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">tvoll manuell setzen (optional)</span>
+        <div class="hz-field__input-with-unit">
+          <input
+            class="hz-field__input"
+            type="number"
+            step="50"
+            min="1000"
+            max="3500"
+            placeholder="Leer = aus Profil + Lage"
+            data-hz-bind="gebaeude.tvollOverride"
+            data-hz-type="number"
+          />
+          <span class="hz-field__unit">h/a</span>
+        </div>
+        <small class="hz-muted">Leer lassen heisst: Richtwert aus Profil + Lage verwenden.</small>
+      </label>
+    </div>
+  </div>
+
+  <!-- EBF aus Zimmermassen berechnen -->
+  <Toggle label="EBF aus Zimmermassen berechnen" caption="Helfer" id="hz-ebf-helper">
+    <p class="hz-muted" style="margin-bottom: 10px;">
+      Zimmer einzeln eintragen, die Summe der Fl\u00e4chen wird live berechnet.
+      Mit <strong>\u00dcbernehmen</strong> wird der Wert in die EBF-Eingabe geschrieben.
+      Mit <strong>Live</strong>-Modus wird die EBF bei jeder \u00c4nderung aktualisiert.
+    </p>
+
+    <div class="hz-raum-header">
+      <span>Bezeichnung</span>
+      <span>L\u00e4nge</span>
+      <span>Breite</span>
+      <span>Fl\u00e4che</span>
+      <span></span>
+    </div>
+    <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
+      <p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>
+    </div>
+
+    <div class="hz-raum-actions">
+      <button type="button" class="hz-btn hz-btn-ghost" id="hz-raum-add">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Zimmer hinzuf\u00fcgen
+      </button>
+      <div class="hz-raum-actions__right">
+        <label class="hz-raum-live">
+          <input type="checkbox" data-hz-bind="gebaeude.raeumeAktiv" data-hz-type="boolean" />
+          <span>Live-Modus (EBF automatisch \u00fcbernehmen)</span>
+        </label>
+        <div class="hz-raum-sum">
+          Summe: <strong id="hz-raum-sum-value">0.0</strong> m\u00b2
+        </div>
+        <button type="button" class="hz-btn hz-btn-dark" id="hz-raum-apply">
+          In EBF \u00fcbernehmen
+        </button>
+      </div>
+    </div>
+  </Toggle>
+
+  <!-- Info-Box -->
+  <InfoBox title="Abk\u00fcrzungen erkl\u00e4rt" icon="help" subtitle="Begriffe dieser Sektion">
+    <dl class="hz-info__grid">
+      <div><dt>EBF</dt><dd>Energiebezugsfl\u00e4che \u2014 beheizte Nutzfl\u00e4che des Geb\u00e4udes (SIA&nbsp;380/1).</dd></div>
+      <div><dt>tvoll</dt><dd>Vollbetriebsstunden pro Jahr, aus FWS-Tabelle. Wird als Default-Nenner f\u00fcr Qhl genutzt.</dd></div>
+      <div><dt>Bauperiode</dt><dd>Liefert Default-Kennwerte (kWh/m\u00b2\u00b7a, W/m\u00b2) falls keine Verbrauchsdaten vorliegen.</dd></div>
+      <div><dt>Mittelland / H\u00f6he</dt><dd>\u00a0&lt;800\u00a0m\u00a0\u00fc.\u00a0M. bzw. \u2265\u00a0800\u00a0m \u2014 beeinflusst tvoll.</dd></div>
+    </dl>
+  </InfoBox>
+
+  <SectionNotes sectionKey="sektion1" sectionLabel="Sektion 1 (Projekt &amp; Geb\u00e4ude)" />
+</SectionWrapper>
+
+<style is:global>
+  /* Projekt-Block */
+  .hz-proj {
+    margin-bottom: clamp(28px, 4vh, 40px);
+    padding: 20px 22px;
+    background: var(--hz-navy);
+    color: var(--hz-white);
+    border-radius: var(--hz-radius-lg);
+    box-shadow: var(--hz-shadow-md);
+  }
+  .hz-proj__title-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .hz-proj__heading {
+    font-family: var(--hz-font-heading);
+    font-weight: 600; font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 0;
+  }
+  .hz-proj__hint { color: rgba(255,255,255,0.6); font-size: 13px; }
+  .hz-proj .hz-field__label { color: rgba(255,255,255,0.82); }
+  .hz-proj .hz-field__input {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.18);
+    color: var(--hz-white);
+  }
+  .hz-proj .hz-field__input::placeholder { color: rgba(255,255,255,0.45); }
+  .hz-proj .hz-field__input:focus {
+    background: rgba(255,255,255,0.12);
+    border-color: var(--hz-white);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+  }
+  .hz-proj select.hz-field__input option { color: var(--hz-dark); }
+
+  /* Gebaeude-Block */
+  .hz-block { margin-top: clamp(18px, 3vh, 26px); }
+  .hz-block__heading {
+    font-family: var(--hz-font-heading);
+    font-weight: 600; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--hz-navy); margin: 0 0 14px;
+  }
+
+  /* Input-Felder (generisch) */
+  .hz-grid-2 {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px 18px;
+  }
+  .hz-grid-3 {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px 18px;
+  }
+  .hz-grid-3 + .hz-grid-3 { margin-top: 14px; }
+
+  .hz-field { display: flex; flex-direction: column; gap: 6px; }
+  .hz-field__label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600; font-size: 14px; color: var(--hz-navy);
+  }
+  .hz-field__input {
+    padding: 10px 14px;
+    border: 1px solid var(--hz-border); background: var(--hz-white);
+    border-radius: var(--hz-radius-sm);
+    font-family: var(--hz-font-body); font-size: 15.5px; color: var(--hz-dark);
+    transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
+  }
+  .hz-field__input:focus {
+    outline: 0; border-color: var(--hz-navy);
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.08);
+  }
+  .hz-field__input-with-unit {
+    display: flex; align-items: stretch;
+    border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
+    background: var(--hz-white);
+    overflow: hidden;
+  }
+  .hz-field__input-with-unit:focus-within {
+    border-color: var(--hz-navy); box-shadow: 0 0 0 3px rgba(27,42,74,0.08);
+  }
+  .hz-field__input-with-unit .hz-field__input {
+    border: 0; border-radius: 0; flex: 1 1 auto;
+  }
+  .hz-field__input-with-unit .hz-field__input:focus { box-shadow: none; }
+  .hz-field__unit {
+    display: inline-flex; align-items: center; padding: 0 12px;
+    border-left: 1px solid var(--hz-border);
+    font-family: var(--hz-font-heading); font-size: 13px; color: var(--hz-mid-gray);
+    background: var(--hz-off-white);
+  }
+
+  /* Zimmer-Helper */
+  .hz-raum-header, .hz-raum-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 44px;
+    gap: 10px;
+    align-items: center;
+  }
+  .hz-raum-header {
+    padding: 0 4px 8px;
+    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--hz-mid-gray); font-weight: 600;
+    border-bottom: 1px solid var(--hz-border);
+  }
+  .hz-raum-row {
+    padding: 8px 4px;
+    border-bottom: 1px dashed var(--hz-border);
+  }
+  .hz-raum-row input {
+    padding: 8px 10px;
+    border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
+    background: var(--hz-white);
+    font-family: var(--hz-font-body); font-size: 14.5px;
+  }
+  .hz-raum-row input:focus { outline: 0; border-color: var(--hz-navy); box-shadow: 0 0 0 3px rgba(27,42,74,0.08); }
+  .hz-raum-flaeche { font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); }
+  .hz-raum-remove {
+    border: 0; background: transparent; padding: 6px;
+    color: var(--hz-mid-gray); border-radius: var(--hz-radius-sm);
+  }
+  .hz-raum-remove:hover { color: var(--hz-red); background: var(--hz-red-soft); }
+  .hz-raum-empty { padding: 16px 0; font-style: italic; }
+  .hz-raum-list { margin: 6px 0; }
+  .hz-raum-actions {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    margin-top: 14px; flex-wrap: wrap;
+  }
+  .hz-raum-actions__right { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .hz-raum-live { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--hz-mid-gray); }
+  .hz-raum-live input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--hz-navy); }
+  .hz-raum-sum { font-size: 14px; color: var(--hz-navy); }
+  .hz-raum-sum strong { font-family: var(--hz-font-heading); font-size: 16px; }
+
+  @media (max-width: 640px) {
+    .hz-raum-header { display: none; }
+    .hz-raum-row { grid-template-columns: 1fr 44px; gap: 8px; }
+    .hz-raum-row > .hz-raum-dim-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  }
+</style>

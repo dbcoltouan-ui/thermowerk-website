@@ -1,0 +1,204 @@
+// Thermowerk Heizlast — Two-Way-Binding zwischen DOM und heizlastState
+// --------------------------------------------------------------
+// Erlaubt deklaratives Anbinden von Inputs / Selects / Textareas / Checkboxes
+// an den Nano Stores Store mittels data-hz-bind="path.to.field" Attributen.
+//
+// Supportet:
+//   - <input type="number|text|date">  → number | string
+//   - <input type="checkbox">          → boolean
+//   - <input type="radio" name="...">  → string (aktive Option)
+//   - <select>                         → string
+//   - <textarea>                       → string
+//
+// Datentyp wird aus data-hz-type="number|string|boolean" abgeleitet,
+// fallback = automatisch aus element.type.
+//
+// Pfad-Konventionen:
+//   - "gebaeude.ebf"            → state.gebaeude.ebf
+//   - "projectName"             → state.projectName
+//   - "notizen.sektion1.text"   → state.notizen.sektion1.text
+//
+// Einmal pro Seite bootBindings() aufrufen. Dann:
+//   1. initial: liest den State und setzt die Input-Werte.
+//   2. abonniert change/input-Events → schreibt zurück in den Store.
+//   3. abonniert Store-Änderungen → schreibt Werte in andere DOM-Elemente
+//      mit gleichem data-hz-bind (Broadcast).
+//
+// Der OverrideField-Flow (readonly bis Klick aufs Stift-Icon) bleibt intakt —
+// wir triggern bei Reset einfach ein 'input'-Event, das hier aufgefangen wird.
+
+import { heizlastState, isDirty } from './state.ts';
+import type { HeizlastState } from './state.ts';
+
+type BindType = 'number' | 'string' | 'boolean';
+
+interface BindingMeta {
+  path: string;
+  type: BindType;
+}
+
+/** Liest verschachtelten Pfad aus Objekt. Gibt undefined wenn unvollständig. */
+export function getPath(obj: any, path: string): unknown {
+  const parts = path.split('.');
+  let cur: any = obj;
+  for (const p of parts) {
+    if (cur == null) return undefined;
+    cur = cur[p];
+  }
+  return cur;
+}
+
+/** Schreibt Wert in verschachtelten Pfad. Erzeugt ein neues Top-Level-Objekt,
+ *  damit Nano Stores die Änderung registriert. */
+export function setPath(state: HeizlastState, path: string, value: unknown): HeizlastState {
+  const parts = path.split('.');
+  if (parts.length === 0) return state;
+  const [head, ...rest] = parts;
+  const next: any = { ...state };
+  if (rest.length === 0) {
+    next[head] = value;
+  } else {
+    next[head] = setPathObj((state as any)[head], rest, value);
+  }
+  return next as HeizlastState;
+}
+
+function setPathObj(obj: any, parts: string[], value: unknown): any {
+  const [head, ...rest] = parts;
+  const clone = obj != null && typeof obj === 'object' && !Array.isArray(obj)
+    ? { ...obj }
+    : {};
+  if (rest.length === 0) {
+    clone[head] = value;
+  } else {
+    clone[head] = setPathObj(clone[head], rest, value);
+  }
+  return clone;
+}
+
+function coerce(rawValue: string | boolean, type: BindType): unknown {
+  if (type === 'boolean') {
+    return typeof rawValue === 'boolean' ? rawValue : rawValue === 'true' || rawValue === 'on' || rawValue === '1';
+  }
+  if (type === 'number') {
+    if (typeof rawValue === 'boolean') return rawValue ? 1 : 0;
+    if (rawValue === '' || rawValue == null) return 0;
+    const n = Number(String(rawValue).replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  }
+  return String(rawValue ?? '');
+}
+
+function meta(el: HTMLElement): BindingMeta | null {
+  const path = el.getAttribute('data-hz-bind');
+  if (!path) return null;
+  const declared = el.getAttribute('data-hz-type') as BindType | null;
+  let type: BindType = declared ?? 'string';
+  if (!declared) {
+    if (el instanceof HTMLInputElement) {
+      if (el.type === 'checkbox' || el.type === 'radio') type = el.type === 'checkbox' ? 'boolean' : 'string';
+      else if (el.type === 'number') type = 'number';
+    }
+  }
+  return { path, type };
+}
+
+function readDom(el: HTMLElement): string | boolean {
+  if (el instanceof HTMLInputElement) {
+    if (el.type === 'checkbox') return el.checked;
+    if (el.type === 'radio') return el.checked ? el.value : '';
+    return el.value;
+  }
+  if (el instanceof HTMLSelectElement) return el.value;
+  if (el instanceof HTMLTextAreaElement) return el.value;
+  return (el as any).value ?? '';
+}
+
+function writeDom(el: HTMLElement, value: unknown): void {
+  if (el instanceof HTMLInputElement) {
+    if (el.type === 'checkbox') {
+      el.checked = Boolean(value);
+      return;
+    }
+    if (el.type === 'radio') {
+      el.checked = String(value) === el.value;
+      return;
+    }
+    const next = value == null ? '' : String(value);
+    if (el.value !== next) el.value = next;
+    return;
+  }
+  if (el instanceof HTMLSelectElement) {
+    const next = value == null ? '' : String(value);
+    if (el.value !== next) el.value = next;
+    return;
+  }
+  if (el instanceof HTMLTextAreaElement) {
+    const next = value == null ? '' : String(value);
+    if (el.value !== next) el.value = next;
+    return;
+  }
+}
+
+/** Initialisiert alle gefundenen Bindings einmalig und meldet Event-Listener an.
+ *  Gibt eine Unsubscribe-Funktion zurück. Mehrmals aufrufen ist safe (guard). */
+export function bootBindings(root: ParentNode = document): () => void {
+  if (typeof window === 'undefined') return () => {};
+  if ((window as any).__hzBindingsBound) return () => {};
+  (window as any).__hzBindingsBound = true;
+
+  // 1) Beim Laden: DOM aus State füllen.
+  syncDomFromState(root);
+
+  // 2) DOM-Events → Store
+  const handler = (ev: Event) => {
+    const target = ev.target as HTMLElement | null;
+    if (!target || !target.hasAttribute || !target.hasAttribute('data-hz-bind')) return;
+    const m = meta(target);
+    if (!m) return;
+    let raw: string | boolean;
+    if (target instanceof HTMLInputElement && target.type === 'radio') {
+      if (!target.checked) return; // nur aktives Radio berücksichtigen
+      raw = target.value;
+    } else {
+      raw = readDom(target);
+    }
+    const coerced = coerce(raw, m.type);
+    const state = heizlastState.get();
+    const current = getPath(state, m.path);
+    if (current === coerced) return;
+    heizlastState.set(setPath(state, m.path, coerced));
+    isDirty.set(true);
+  };
+  document.addEventListener('input', handler);
+  document.addEventListener('change', handler);
+
+  // 3) Store-Änderungen → alle DOM-Elemente broadcasten.
+  const unsub = heizlastState.subscribe(() => {
+    syncDomFromState(root);
+  });
+
+  return () => {
+    document.removeEventListener('input', handler);
+    document.removeEventListener('change', handler);
+    unsub();
+  };
+}
+
+/** Liest aktuelle State-Werte und schreibt sie in alle data-hz-bind-Elemente. */
+export function syncDomFromState(root: ParentNode = document): void {
+  if (typeof window === 'undefined') return;
+  const state = heizlastState.get();
+  const nodes = root.querySelectorAll<HTMLElement>('[data-hz-bind]');
+  nodes.forEach((el) => {
+    const m = meta(el);
+    if (!m) return;
+    const value = getPath(state, m.path);
+    if (value === undefined) return;
+    if (el instanceof HTMLInputElement && el.type === 'radio') {
+      el.checked = String(value) === el.value;
+      return;
+    }
+    writeDom(el, value);
+  });
+}
