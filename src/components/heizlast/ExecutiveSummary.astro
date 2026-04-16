@@ -1,0 +1,172 @@
+---
+// Executive Summary — Sticky Stat-Row oben auf der Heizlast-Seite.
+// Zeigt die wichtigsten Kennzahlen permanent, auch beim Scrollen durch die Sektionen.
+// Befüllt wird sie über das bestehende `[data-kpi="…"]`-System in heizlast.astro
+// (setKpi schreibt in alle Elemente mit passendem data-kpi, unabhängig von Variante).
+//
+// Struktur:
+//   Qh (gross, rot akzentuiert) · Qhl · W/m² (mit Ampel) · WW-Speicher · Puffer
+// Eine Zeile auf Desktop, umbrechend auf Tablet, Stack auf Mobile.
+---
+<section
+  class="hz-exec"
+  id="hz-exec-summary"
+  aria-label="Executive Summary — aktuelle Kennzahlen"
+>
+  <div class="hz-container hz-exec__inner">
+    <div class="hz-exec__stat hz-exec__stat--hero" data-kpi="qh" aria-label="Auslegungsleistung Qh">
+      <span class="hz-exec__label">Qh · Auslegung</span>
+      <span class="hz-exec__value-row">
+        <span class="hz-kpi__value">&mdash;</span>
+        <span class="hz-exec__unit">kW</span>
+      </span>
+    </div>
+
+    <div class="hz-exec__stat" data-kpi="qhlKorr" aria-label="Heizlast Qhl">
+      <span class="hz-exec__label">Qhl · Heizlast</span>
+      <span class="hz-exec__value-row">
+        <span class="hz-kpi__value">&mdash;</span>
+        <span class="hz-exec__unit">kW</span>
+      </span>
+    </div>
+
+    <div class="hz-exec__stat hz-exec__stat--ampel" data-kpi="plausi" data-ampel="gelb" aria-label="Spezifische Heizleistung in Watt pro Quadratmeter">
+      <span class="hz-exec__label">W/m² · Plausi</span>
+      <span class="hz-exec__value-row">
+        <span class="hz-kpi__value">&mdash;</span>
+        <span class="hz-exec__unit">W/m²</span>
+        <span class="hz-exec__ampel" aria-hidden="true"></span>
+      </span>
+    </div>
+
+    <div class="hz-exec__stat" data-kpi="wwSpeicher" aria-label="Warmwasser-Speichervolumen">
+      <span class="hz-exec__label">WW-Speicher</span>
+      <span class="hz-exec__value-row">
+        <span class="hz-kpi__value">&mdash;</span>
+        <span class="hz-exec__unit">L</span>
+      </span>
+    </div>
+
+    <div class="hz-exec__stat" data-kpi="puffer" aria-label="Heizungs-Pufferspeicher">
+      <span class="hz-exec__label">Puffer</span>
+      <span class="hz-exec__value-row">
+        <span class="hz-kpi__value">&mdash;</span>
+        <span class="hz-exec__unit">L</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ----- Executive Summary (Sticky-Row) ----- */
+  .hz-exec {
+    position: sticky;
+    top: var(--hz-header-height);
+    z-index: 30;
+    background: var(--hz-white);
+    border-bottom: 1px solid var(--hz-border);
+    box-shadow: 0 1px 0 rgba(17, 29, 51, 0.04), 0 4px 14px rgba(17, 29, 51, 0.05);
+  }
+  .hz-exec__inner {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .hz-exec__stat {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 18px;
+    border-right: 1px solid var(--hz-border);
+    min-width: 0; /* erlaubt Ellipsis */
+  }
+  .hz-exec__stat:last-child { border-right: none; }
+  .hz-exec__stat--hero {
+    background: linear-gradient(180deg, var(--hz-white) 0%, var(--hz-off-white) 100%);
+    border-top: 3px solid var(--hz-red);
+    margin-top: -10px;
+    padding-top: 10px;
+  }
+  .hz-exec__label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hz-mid-gray);
+    white-space: nowrap;
+  }
+  .hz-exec__stat--hero .hz-exec__label { color: var(--hz-red); }
+
+  .hz-exec__value-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--hz-navy);
+  }
+  .hz-exec__stat .hz-kpi__value {
+    font-family: var(--hz-font-heading);
+    font-weight: 700;
+    font-size: clamp(20px, 2.4vw, 26px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--hz-navy);
+  }
+  .hz-exec__stat--hero .hz-kpi__value {
+    font-size: clamp(26px, 3.2vw, 34px);
+  }
+  .hz-exec__unit {
+    font-family: var(--hz-font-heading);
+    font-weight: 500;
+    font-size: 12.5px;
+    color: var(--hz-mid-gray);
+  }
+
+  /* Ampel-Punkt für W/m² */
+  .hz-exec__ampel {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 6px;
+    background: var(--hz-mid-gray);
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 2px rgba(17, 29, 51, 0.05);
+  }
+  .hz-exec__stat--ampel[data-ampel="gruen"] .hz-exec__ampel { background: var(--hz-success); }
+  .hz-exec__stat--ampel[data-ampel="gelb"]  .hz-exec__ampel { background: var(--hz-warn); }
+  .hz-exec__stat--ampel[data-ampel="rot"]   .hz-exec__ampel { background: var(--hz-red); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .hz-exec__inner {
+      flex-wrap: wrap;
+      gap: 6px 0;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .hz-exec__stat {
+      flex: 1 1 33%;
+      border-right: 1px solid var(--hz-border);
+      padding: 4px 12px;
+    }
+    .hz-exec__stat:nth-child(3n) { border-right: none; }
+    .hz-exec__stat--hero {
+      flex-basis: 100%;
+      border-right: none;
+      margin-top: -8px;
+    }
+  }
+  @media (max-width: 560px) {
+    .hz-exec__stat { flex-basis: 50%; padding: 4px 10px; }
+    .hz-exec__stat:nth-child(3n) { border-right: 1px solid var(--hz-border); }
+    .hz-exec__stat:nth-child(2n) { border-right: none; }
+    .hz-exec__label { font-size: 10px; }
+    .hz-exec__stat .hz-kpi__value { font-size: 18px; }
+    .hz-exec__stat--hero .hz-kpi__value { font-size: 24px; }
+  }
+</style>

@@ -4,6 +4,8 @@
 // verwaltet (src/lib/heizlast/state.ts) und automatisch in localStorage
 // zwischengespeichert.
 import HeizlastLayout from '../layouts/HeizlastLayout.astro';
+import ExecutiveSummary from '../components/heizlast/ExecutiveSummary.astro';
+import LeistungsDiagramm from '../components/heizlast/LeistungsDiagramm.astro';
 import Section1Gebaeude from '../components/heizlast/sections/Section1Gebaeude.astro';
 import Section2Heizlast from '../components/heizlast/sections/Section2Heizlast.astro';
 import Section3Warmwasser from '../components/heizlast/sections/Section3Warmwasser.astro';
@@ -16,11 +18,13 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
   title="Heizlast-Rechner | Thermowerk"
   description="Professionelle Heizlast- und W\u00e4rmepumpen-Auslegung nach FWS, SIA und VDI."
 >
+  <ExecutiveSummary />
   <Section1Gebaeude />
   <Section2Heizlast />
   <Section3Warmwasser />
   <Section4Zuschlaege />
   <Section5Auslegung />
+  <LeistungsDiagramm />
   <Section6Speicher />
   <Section7Projekt />
 </HeizlastLayout>
@@ -560,9 +564,4 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
     setStatus('idle', 'Neues Projekt.');
   });
 
-  // Login-Trigger im Header
-  const loginHeader = document.getElementById('hz-login-trigger');
-  if (loginHeader && loginBtn) {
-    loginHeader.addEventListener('click', () => loginBtn.click());
-  }
-</script>
+  // 

@@ -1,1 +1,3 @@
-Heizlast Phase 4 abgeschlossen: Sektionen 1-7, Hauptseite + Glue-JS, Bindings, Sandbox entfernt. CLAUDE.md aktualisiert, HANDOFF-PHASE-5.md angelegt.
+Heizlast Phase 5: Executive Summary + Leistungsdiagramm
+
+- ExecutiveSummary.astro: sticky Stat-Row oben mit Qh (hero) / Qhl / W/m2-Ampel / WW-Speiche

@@ -1,0 +1,595 @@
+---
+// Leistungsdiagramm (M10) — Chart.js-basierte Visualisierung.
+// Zeigt:
+//   - Gebaeude-Heizkennlinie: linear von (theta_ne, Qhl) bis (theta_gt, 0)
+//   - WP-Kennlinie(n): ein waehlbares Modell, dessen Stuetzpunkte bei Bedarf
+//     einzeln ueberschrieben werden koennen
+//   - Auslegungspunkt (theta_ne | Qh) als Marker
+//   - Bivalenzpunkt (Schnittpunkt) automatisch berechnet und markiert
+//
+// Datenquelle: `heizlastCompute` (Qhl, Qh) + lokaler Modell-State im <script>.
+
+import SectionWrapper from './SectionWrapper.astro';
+import InfoBox from './InfoBox.astro';
+import SectionNotes from './SectionNotes.astro';
+---
+<SectionWrapper
+  id="sektion-diagramm"
+  kicker="05a - Leistungsdiagramm"
+  title="WP-Kennlinie vs. Gebaeudelast"
+  subline="Vergleich der Waermepumpen-Leistung mit dem Waermebedarf des Gebaeudes. Der Schnittpunkt markiert den Bivalenzpunkt."
+  tone="off"
+>
+  <div class="hz-diag">
+    <div class="hz-diag__controls">
+      <label class="hz-diag__field">
+        <span class="hz-diag__field-label">Modell-Variante</span>
+        <select id="hz-diag-model" class="hz-field__select">
+          <option value="klein">Klein (~6 kW bei A2/W35)</option>
+          <option value="mittel" selected>Mittel (~9 kW bei A2/W35)</option>
+          <option value="gross">Gross (~12 kW bei A2/W35)</option>
+          <option value="custom">Eigene Werte</option>
+        </select>
+      </label>
+
+      <label class="hz-diag__field">
+        <span class="hz-diag__field-label">Heizgrenztemperatur θGT</span>
+        <div class="hz-field__input-with-unit">
+          <input type="number" id="hz-diag-tgt" step="0.5" min="0" max="20" value="12" />
+          <span class="hz-field__unit">°C</span>
+        </div>
+      </label>
+
+      <label class="hz-diag__field">
+        <span class="hz-diag__field-label">Normaussentemperatur θne</span>
+        <div class="hz-field__input-with-unit">
+          <input type="number" id="hz-diag-tne" step="0.5" min="-25" max="0" value="-8" />
+          <span class="hz-field__unit">°C</span>
+        </div>
+      </label>
+
+      <button type="button" class="hz-btn hz-btn-ghost" id="hz-diag-reset" aria-label="Modell-Werte zuruecksetzen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 4 3 10 9 10"></polyline></svg>
+        Zuruecksetzen
+      </button>
+    </div>
+
+    <div class="hz-diag__canvas-wrap">
+      <canvas id="hz-diag-canvas" aria-label="Leistungsdiagramm" role="img"></canvas>
+    </div>
+
+    <div class="hz-diag__meta" id="hz-diag-meta">
+      <div class="hz-diag__meta-cell" data-diag-cell="qhl">
+        <span class="hz-diag__meta-label">Qhl bei θne</span>
+        <span class="hz-diag__meta-value">&mdash;</span>
+      </div>
+      <div class="hz-diag__meta-cell" data-diag-cell="qh">
+        <span class="hz-diag__meta-label">Qh Auslegung</span>
+        <span class="hz-diag__meta-value">&mdash;</span>
+      </div>
+      <div class="hz-diag__meta-cell" data-diag-cell="biv">
+        <span class="hz-diag__meta-label">Bivalenzpunkt</span>
+        <span class="hz-diag__meta-value">&mdash;</span>
+      </div>
+    </div>
+
+    <details class="hz-diag__points">
+      <summary>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Stuetzpunkte anpassen
+      </summary>
+      <div class="hz-diag__points-grid" id="hz-diag-points">
+        <!-- wird per JS befuellt -->
+      </div>
+      <p class="hz-muted hz-diag__points-hint">
+        Werte aus Hersteller-Datenblatt (A-Wert = Lufttemperatur, Leistung in kW bei Vorlauf 35 °C).
+        Bei manueller Aenderung schaltet die Variante auf „Eigene Werte".
+      </p>
+    </details>
+
+    <InfoBox title="Wie lese ich das Diagramm?" icon="help">
+      <p>
+        Die <strong>blaue Linie</strong> ist die Waermepumpen-Kennlinie: Sie zeigt, wie viel Heizleistung die
+        WP bei welcher Aussentemperatur liefert. Luft/Wasser-WP liefern bei tiefen Temperaturen weniger Leistung
+        als bei milden.
+      </p>
+      <p>
+        Die <strong>rote Linie</strong> ist die Gebaeude-Heizkennlinie: bei Heizgrenztemperatur (θGT) ist der
+        Bedarf 0, bei Normaussentemperatur (θne) erreicht er die volle Heizlast Qhl.
+      </p>
+      <p>
+        Der <strong>Schnittpunkt</strong> beider Linien ist der <strong>Bivalenzpunkt</strong>: bis dort reicht
+        die WP allein, darunter benoetigt es einen Zusatz (Heizstab, bestehender Kessel).
+        Fuer Luft/Wasser-WP wird meist ein Bivalenzpunkt zwischen −5 °C und −3 °C angestrebt.
+      </p>
+    </InfoBox>
+
+    <SectionNotes sectionKey="sektion5" sectionLabel="Leistungsdiagramm" />
+  </div>
+</SectionWrapper>
+
+<style is:global>
+  .hz-diag {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .hz-diag__controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+  }
+  .hz-diag__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hz-diag__field-label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hz-mid-gray);
+  }
+  .hz-diag__controls .hz-btn {
+    align-self: end;
+    justify-self: start;
+  }
+  .hz-field__select,
+  .hz-diag__field input[type="number"] {
+    padding: 10px 12px;
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-sm);
+    background: var(--hz-white);
+    color: var(--hz-dark);
+    font-family: var(--hz-font-body);
+    font-size: 15px;
+    width: 100%;
+  }
+  .hz-field__select:focus,
+  .hz-diag__field input[type="number"]:focus {
+    outline: none;
+    border-color: var(--hz-navy);
+    box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.12);
+  }
+
+  .hz-diag__canvas-wrap {
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+    padding: 16px;
+    position: relative;
+    min-height: 320px;
+  }
+  #hz-diag-canvas {
+    width: 100% !important;
+    max-height: 420px;
+  }
+
+  .hz-diag__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .hz-diag__meta-cell {
+    padding: 12px 16px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hz-diag__meta-label {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hz-mid-gray);
+  }
+  .hz-diag__meta-value {
+    font-family: var(--hz-font-heading);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--hz-navy);
+  }
+
+  .hz-diag__points {
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+    padding: 0;
+  }
+  .hz-diag__points > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--hz-navy);
+  }
+  .hz-diag__points > summary::-webkit-details-marker { display: none; }
+  .hz-diag__points[open] > summary {
+    border-bottom: 1px solid var(--hz-border);
+  }
+  .hz-diag__points-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px 14px;
+    padding: 14px 16px 4px;
+  }
+  .hz-diag__point-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+  }
+  .hz-diag__point-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--hz-mid-gray);
+  }
+  .hz-diag__point-row input {
+    padding: 7px 10px;
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-sm);
+    font-size: 14px;
+    background: var(--hz-white);
+  }
+  .hz-diag__points-hint {
+    padding: 4px 16px 14px;
+    font-size: 12.5px;
+    margin: 0;
+  }
+</style>
+
+<script>
+  // ============================================================
+  // Leistungsdiagramm — Chart.js Binding
+  // ============================================================
+  import { Chart, registerables } from 'chart.js';
+  import { heizlastState } from '../../lib/heizlast/state.ts';
+  import { heizlastCompute } from '../../lib/heizlast/compute.ts';
+
+  Chart.register(...registerables);
+
+  // ---- Standard-Modelle (A-Wert in °C, Heizleistung in kW bei W35) ----
+  type Point = { theta: number; kw: number };
+  const MODELS: Record<string, Point[]> = {
+    klein: [
+      { theta: -15, kw: 3.6 },
+      { theta: -7, kw: 4.8 },
+      { theta: 2, kw: 5.9 },
+      { theta: 7, kw: 7.0 },
+      { theta: 12, kw: 7.8 },
+    ],
+    mittel: [
+      { theta: -15, kw: 5.4 },
+      { theta: -7, kw: 7.2 },
+      { theta: 2, kw: 9.0 },
+      { theta: 7, kw: 10.5 },
+      { theta: 12, kw: 11.7 },
+    ],
+    gross: [
+      { theta: -15, kw: 7.2 },
+      { theta: -7, kw: 9.6 },
+      { theta: 2, kw: 12.0 },
+      { theta: 7, kw: 14.0 },
+      { theta: 12, kw: 15.6 },
+    ],
+  };
+
+  // ---- State fuer das Diagramm ----
+  let currentModel: keyof typeof MODELS | 'custom' = 'mittel';
+  let currentPoints: Point[] = MODELS.mittel.map((p) => ({ ...p }));
+  let chart: Chart | null = null;
+
+  const canvas = document.getElementById('hz-diag-canvas') as HTMLCanvasElement | null;
+  const modelSelect = document.getElementById('hz-diag-model') as HTMLSelectElement | null;
+  const tgtInput = document.getElementById('hz-diag-tgt') as HTMLInputElement | null;
+  const tneInput = document.getElementById('hz-diag-tne') as HTMLInputElement | null;
+  const resetBtn = document.getElementById('hz-diag-reset') as HTMLButtonElement | null;
+  const pointsEl = document.getElementById('hz-diag-points') as HTMLElement | null;
+  const metaEl = document.getElementById('hz-diag-meta') as HTMLElement | null;
+
+  if (!canvas) {
+    // Diagramm ist nicht im DOM (z. B. auf anderer Seite eingebunden).
+  } else {
+    initChart();
+    renderPointsForm();
+    wireEvents();
+    // Reagieren auf State/Compute-Aenderungen
+    heizlastCompute.subscribe(() => updateChart());
+    heizlastState.subscribe(() => updateChart());
+  }
+
+  // ------------------------------------------------------------
+  // Helpers
+  // ------------------------------------------------------------
+  function fmt(n: number | null | undefined, d = 2): string {
+    if (n == null || !isFinite(n)) return '—';
+    return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function getTgt(): number { return Number(tgtInput?.value ?? 12) || 12; }
+  function getTne(): number { return Number(tneInput?.value ?? -8) || -8; }
+
+  /** Lineare Interpolation durch die Stuetzpunkte (sortiert nach theta). */
+  function wpAt(theta: number, pts: Point[]): number {
+    const sorted = [...pts].sort((a, b) => a.theta - b.theta);
+    if (sorted.length === 0) return 0;
+    if (theta <= sorted[0].theta) {
+      const a = sorted[0], b = sorted[1] ?? sorted[0];
+      if (b.theta === a.theta) return a.kw;
+      return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+    }
+    if (theta >= sorted[sorted.length - 1].theta) {
+      const b = sorted[sorted.length - 1], a = sorted[sorted.length - 2] ?? b;
+      if (b.theta === a.theta) return b.kw;
+      return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+    }
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const a = sorted[i], b = sorted[i + 1];
+      if (theta >= a.theta && theta <= b.theta) {
+        if (b.theta === a.theta) return a.kw;
+        return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+      }
+    }
+    return 0;
+  }
+
+  /** Gebaeude-Heizkennlinie: linear von (theta_gt, 0) bis (theta_ne, qhl). */
+  function buildingAt(theta: number, qhl: number, tne: number, tgt: number): number {
+    if (tgt === tne) return qhl;
+    const slope = qhl / (tne - tgt); // negativer Wert, weil tne < tgt
+    return Math.max(0, slope * (theta - tgt));
+  }
+
+  /** Findet Schnittpunkt zwischen WP- und Gebaeude-Kennlinie via Bisektion. */
+  function bivalenzpunkt(qhl: number, tne: number, tgt: number, pts: Point[]): { theta: number; kw: number } | null {
+    if (!qhl || qhl <= 0) return null;
+    // f(theta) = gebaeude(theta) - wp(theta); Nullstelle suchen
+    const f = (theta: number) => buildingAt(theta, qhl, tne, tgt) - wpAt(theta, pts);
+    let lo = tne, hi = tgt;
+    let flo = f(lo), fhi = f(hi);
+    if (flo === 0) return { theta: lo, kw: buildingAt(lo, qhl, tne, tgt) };
+    if (fhi === 0) return { theta: hi, kw: buildingAt(hi, qhl, tne, tgt) };
+    if (flo * fhi > 0) return null; // kein Schnittpunkt im Intervall
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      const fmid = f(mid);
+      if (Math.abs(fmid) < 1e-4) return { theta: mid, kw: buildingAt(mid, qhl, tne, tgt) };
+      if (flo * fmid < 0) { hi = mid; fhi = fmid; }
+      else { lo = mid; flo = fmid; }
+    }
+    const mid = (lo + hi) / 2;
+    return { theta: mid, kw: buildingAt(mid, qhl, tne, tgt) };
+  }
+
+  // ------------------------------------------------------------
+  // Rendering
+  // ------------------------------------------------------------
+  function initChart() {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Gebaeude-Heizkennlinie',
+            borderColor: '#D93025',
+            backgroundColor: 'rgba(217, 48, 37, 0.08)',
+            borderWidth: 2.5,
+            pointRadius: 0,
+            tension: 0,
+            data: [],
+          },
+          {
+            label: 'WP-Kennlinie (bei W35)',
+            borderColor: '#1B2A4A',
+            backgroundColor: 'rgba(27, 42, 74, 0.08)',
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointBackgroundColor: '#1B2A4A',
+            tension: 0.25,
+            data: [],
+          },
+          {
+            label: 'Auslegungspunkt',
+            borderColor: '#D93025',
+            backgroundColor: '#D93025',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointStyle: 'rectRot',
+            showLine: false,
+            data: [],
+          },
+          {
+            label: 'Bivalenzpunkt',
+            borderColor: '#1F8A4C',
+            backgroundColor: '#1F8A4C',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointStyle: 'circle',
+            showLine: false,
+            data: [],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 2,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { family: 'Outfit, sans-serif', size: 12, weight: 500 },
+              color: '#1B2A4A',
+              boxWidth: 18,
+              padding: 14,
+            },
+          },
+          tooltip: {
+            backgroundColor: '#1B2A4A',
+            titleFont: { family: 'Outfit, sans-serif', weight: 600 },
+            bodyFont: { family: 'DM Sans, sans-serif' },
+            padding: 10,
+            callbacks: {
+              label: (ctx) => {
+                const p = ctx.parsed as { x: number; y: number };
+                return `${ctx.dataset.label}: ${p.y.toFixed(2)} kW bei ${p.x.toFixed(1)} °C`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Aussentemperatur θ (°C)', font: { family: 'Outfit, sans-serif', size: 13, weight: 600 }, color: '#1B2A4A' },
+            grid: { color: 'rgba(27, 42, 74, 0.06)' },
+            ticks: { color: '#6B7280', font: { family: 'DM Sans, sans-serif' } },
+          },
+          y: {
+            title: { display: true, text: 'Leistung (kW)', font: { family: 'Outfit, sans-serif', size: 13, weight: 600 }, color: '#1B2A4A' },
+            grid: { color: 'rgba(27, 42, 74, 0.06)' },
+            ticks: { color: '#6B7280', font: { family: 'DM Sans, sans-serif' } },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+    updateChart();
+  }
+
+  function renderPointsForm() {
+    if (!pointsEl) return;
+    pointsEl.innerHTML = currentPoints.map((p, idx) => `
+      <div class="hz-diag__point-row" data-diag-idx="${idx}">
+        <label>
+          <span>A (°C)</span>
+          <input type="number" step="0.5" data-diag-field="theta" value="${p.theta}" />
+        </label>
+        <label>
+          <span>kW (W35)</span>
+          <input type="number" step="0.1" min="0" data-diag-field="kw" value="${p.kw}" />
+        </label>
+      </div>
+    `).join('');
+  }
+
+  function updateChart() {
+    if (!chart) return;
+    const compute = heizlastCompute.get();
+    const qhl = compute.qhlKorr?.value ?? null;
+    const qh = compute.qh?.value ?? null;
+
+    const tgt = getTgt();
+    const tne = getTne();
+    const xMin = Math.min(tne - 2, -15);
+    const xMax = Math.max(tgt + 3, 15);
+
+    // Gebaeude-Linie: 2 Punkte reichen (linear)
+    const gebaeude = qhl != null
+      ? [{ x: tne, y: qhl }, { x: tgt, y: 0 }]
+      : [];
+
+    // WP-Linie: alle Stuetzpunkte (sortiert)
+    const wp = [...currentPoints].sort((a, b) => a.theta - b.theta).map((p) => ({ x: p.theta, y: p.kw }));
+
+    // Auslegungspunkt (θne | Qh)
+    const auslegung = qh != null ? [{ x: tne, y: qh }] : [];
+
+    // Bivalenz
+    const biv = qhl != null ? bivalenzpunkt(qhl, tne, tgt, currentPoints) : null;
+    const bivData = biv ? [{ x: biv.theta, y: biv.kw }] : [];
+
+    chart.data.datasets[0].data = gebaeude as any;
+    chart.data.datasets[1].data = wp as any;
+    chart.data.datasets[2].data = auslegung as any;
+    chart.data.datasets[3].data = bivData as any;
+
+    (chart.options.scales as any).x.min = xMin;
+    (chart.options.scales as any).x.max = xMax;
+
+    chart.update('none');
+
+    // Meta-Anzeige
+    if (metaEl) {
+      const cellQhl = metaEl.querySelector('[data-diag-cell="qhl"] .hz-diag__meta-value');
+      const cellQh = metaEl.querySelector('[data-diag-cell="qh"] .hz-diag__meta-value');
+      const cellBiv = metaEl.querySelector('[data-diag-cell="biv"] .hz-diag__meta-value');
+      if (cellQhl) cellQhl.textContent = qhl != null ? `${fmt(qhl)} kW` : '—';
+      if (cellQh) cellQh.textContent = qh != null ? `${fmt(qh)} kW` : '—';
+      if (cellBiv) cellBiv.textContent = biv ? `${fmt(biv.theta, 1)} °C (${fmt(biv.kw)} kW)` : 'nicht im Bereich';
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Events
+  // ------------------------------------------------------------
+  function wireEvents() {
+    if (modelSelect) {
+      modelSelect.addEventListener('change', () => {
+        const val = modelSelect.value as keyof typeof MODELS | 'custom';
+        if (val === 'custom') {
+          currentModel = 'custom';
+        } else if (val in MODELS) {
+          currentModel = val;
+          currentPoints = MODELS[val].map((p) => ({ ...p }));
+          renderPointsForm();
+        }
+        updateChart();
+      });
+    }
+    if (tgtInput) tgtInput.addEventListener('input', () => updateChart());
+    if (tneInput) tneInput.addEventListener('input', () => updateChart());
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        currentModel = 'mittel';
+        currentPoints = MODELS.mittel.map((p) => ({ ...p }));
+        if (modelSelect) modelSelect.value = 'mittel';
+        if (tgtInput) tgtInput.value = '12';
+        if (tneInput) tneInput.value = '-8';
+        renderPointsForm();
+        updateChart();
+      });
+    }
+    // Delegation fuer die Stuetzpunkt-Inputs
+    if (pointsEl) {
+      pointsEl.addEventListener('input', (ev) => {
+        const t = ev.target as HTMLElement;
+        if (!t || typeof t.closest !== 'function') return;
+        const row = t.closest('.hz-diag__point-row') as HTMLElement | null;
+        if (!row) return;
+        const idxRaw = row.getAttribute('data-diag-idx');
+        const field = t.getAttribute('data-diag-field');
+        if (idxRaw == null || !field) return;
+        const idx = Number(idxRaw);
+        const val = Number((t as HTMLInputElement).value);
+        if (!currentPoints[idx]) return;
+        if (field === 'theta') currentPoints[idx].theta = isFinite(val) ? val : currentPoints[idx].theta;
+        else if (field === 'kw') currentPoints[idx].kw = isFinite(val) && val >= 0 ? val : currentPoints[idx].kw;
+        // Manuelle Aenderung => Variante auf "custom"
+        currentModel = 'custom';
+        if (modelSelect && modelSelect.value !== 'custom') modelSelect.value = 'custom';
+        updateChart();
+      });
+    }
+  }
+</script>
