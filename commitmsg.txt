@@ -1,1 +1,1 @@
-HANDOFF-PHASE-3: Copy-Paste-Prompt fuer neuen Chat ergaenzt
+CLAUDE.md: Handoff-Konvention ergaenzt (Copy-Paste-Prompt oben in jeder HANDOFF-PHASE-N.md)

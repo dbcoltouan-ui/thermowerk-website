@@ -2,6 +2,8 @@
 
 > **WICHTIG:** Diese Datei ist die zentrale Wissensbasis für Claude. Jede neue Funktion, jedes neue Schema, jeder neue Workflow oder jede architektonische Änderung MUSS hier dokumentiert werden, sobald sie umgesetzt ist. So bleibt Claude in jeder neuen Session sofort auf dem aktuellen Stand.
 
+> **HANDOFF-KONVENTION:** Jede Handoff-Datei (`HANDOFF-PHASE-N.md`) muss **ganz oben** einen fertigen Copy-Paste-Prompt für den nächsten Chat enthalten (als ```-Block). Der Prompt verweist auf die jeweilige Handoff-Datei, nennt den aktuellen Stand, listet die zu lesenden Dokumente in Reihenfolge und gibt konkrete erste Schritte. Claude übergibt diesen Prompt am Ende einer Phase immer auch direkt im Chat, damit Daniel ihn 1:1 kopieren kann — ohne die Datei erst öffnen zu müssen.
+
 > **AKTUELLES OFFENES PROJEKT: Heizlastrechner-Redesign** — Siehe `HANDOFF-HEIZLAST-REDESIGN.md` im Projekt-Root. Das Backend steht (Sanity-Schema, Cloudflare Functions, Auth, Env-Vars), aber der Frontend-Teil unter `/heizlast` wird komplett neu aufgebaut. Bei neuer Session zu diesem Thema zuerst `HANDOFF-HEIZLAST-REDESIGN.md` lesen.
 >
 > **Phase 1 abgeschlossen (2026-04-16):** Rechenkern als TypeScript portiert in `src/lib/heizlast/{types,constants,calculations}.ts`. 49 Regressions-Tests (FWS-Aufgaben 1–4 + eigenes Beispiel + Rückrechnung) laufen grün via `node --experimental-strip-types scripts/test-heizlast.ts`. Die Beispielrechnung ist dokumentiert in `reference/BEISPIELRECHNUNG.md`.
