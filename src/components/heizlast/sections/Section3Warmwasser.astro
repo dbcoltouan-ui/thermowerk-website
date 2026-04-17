@@ -11,7 +11,7 @@ import KpiCard from '../KpiCard.astro';
 import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
 import OverrideField from '../OverrideField.astro';
-import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
+import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
   id="sektion-3"
@@ -115,59 +115,63 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
     <h3 class="hz-block__heading">Verluste (optional)</h3>
     <div class="hz-grid-3">
       <OverrideField
-        label="Speicher-Verlust"
+        label="Speicherverluste"
         id="hz-ww-speicher"
         bindPath="warmwasser.speicherProzent"
         overridePath="warmwasser.speicher"
-        defaultValue={10}
+        defaultValue={WW_VERLUSTE_DEFAULTS.speicher}
         unit="%"
-        source="SIA 385/1"
+        source="FWS §8"
         type="number"
         step={1}
         min={0}
         max={50}
+        hint="Stehverluste am Speicher. Typisch 5-15 %."
       />
       <OverrideField
-        label="Zirkulations-Verlust"
+        label="Zirkulationsverluste"
         id="hz-ww-zirk"
         bindPath="warmwasser.zirkProzent"
         overridePath="warmwasser.zirk"
-        defaultValue={0}
+        defaultValue={WW_VERLUSTE_DEFAULTS.zirk}
         unit="%"
-        source="SIA 385/1"
+        source="FWS §8"
         type="number"
         step={1}
         min={0}
         max={50}
+        hint="Nur bei Zirkulationsleitung. Typisch 0-20 %."
       />
       <OverrideField
-        label="Ausstoss-Verlust"
+        label="Ausstossverluste"
         id="hz-ww-ausstoss"
         bindPath="warmwasser.ausstossProzent"
         overridePath="warmwasser.ausstoss"
-        defaultValue={15}
+        defaultValue={WW_VERLUSTE_DEFAULTS.ausstoss}
         unit="%"
-        source="SIA 385/1"
+        source="FWS §8"
         type="number"
         step={1}
         min={0}
         max={50}
+        hint="Leitungsverluste zur Zapfstelle. Typisch 10-20 %."
       />
     </div>
 
     <div style="margin-top: 14px; max-width: 320px;">
       <OverrideField
-        label="ΔT Kaltwasser → WW"
+        label="ΔT Kaltwasser → Warmwasser"
         id="hz-ww-deltaT"
         bindPath="warmwasser.deltaTOverride"
         overridePath="warmwasser.deltaT"
-        defaultValue={50}
+        defaultValue={PHYSIK.deltaT_ww}
         unit="K"
-        source="SIA 385/1"
+        source="SIA 385/2"
         type="number"
         step={1}
         min={20}
         max={70}
+        hint="Temperatur-Hub 10 °C → 60 °C = 50 K."
       />
     </div>
   </div>

@@ -289,9 +289,10 @@ export function createDefaultState(): HeizlastState {
       direkt: { vwuPerTag: 160 },
       messung: { qwwTagKWh: 8.5 },
       deltaTOverride: null,
-      speicherProzent: 10,
-      zirkProzent: null,
-      ausstossProzent: null,
+      // Block C: sichtbare Defaults aus zentraler Konstante (WW_VERLUSTE_DEFAULTS).
+      speicherProzent: WW_VERLUSTE_DEFAULTS.speicher,
+      zirkProzent: WW_VERLUSTE_DEFAULTS.zirk,
+      ausstossProzent: WW_VERLUSTE_DEFAULTS.ausstoss,
     },
 
     zuschlaege: {
@@ -302,7 +303,8 @@ export function createDefaultState(): HeizlastState {
 
     speicher: {
       wwActive: true,
-      wwTStoAus: 60,
+      // Block C: Default aus WW_SPEICHER_DEFAULTS (Austritt 60 °C gem. FWS/SIA).
+      wwTStoAus: WW_SPEICHER_DEFAULTS.tAustritt,
       wwTStoEinOverride: null,
       wwRundungLiter: 10,
 
@@ -434,7 +436,7 @@ export const tvollEffektiv = computed(heizlastState, (s) => {
 });
 
 // lokale Lookup-Funktion (spiegelt calculations.tvollRichtwert, aber synchron)
-import { VOLLASTSTUNDEN, PHYSIK } from './constants.ts';
+import { VOLLASTSTUNDEN, PHYSIK, WW_VERLUSTE_DEFAULTS, WW_SPEICHER_DEFAULTS } from './constants.ts';
 function tvollLookup(profil: TvollProfil, lage: Lage): number {
   const row = VOLLASTSTUNDEN.find((r) => r.gebaeudetyp === profil && r.lage === lage);
   return row ? row.tvoll : 2000;
@@ -535,15 +537,15 @@ export function resolveDefault(state: HeizlastState, path: string): number | nul
     case 'warmwasser.deltaT':
       return PHYSIK.deltaT_ww;
     case 'warmwasser.speicher':
-      return 10;
+      return WW_VERLUSTE_DEFAULTS.speicher;
     case 'warmwasser.zirk':
-      return 0;
+      return WW_VERLUSTE_DEFAULTS.zirk;
     case 'warmwasser.ausstoss':
-      return 15;
+      return WW_VERLUSTE_DEFAULTS.ausstoss;
     case 'speicher.wwTEintritt':
-      return PHYSIK.t_kaltwasser;
+      return WW_SPEICHER_DEFAULTS.tEintritt;
     case 'speicher.wwTAustritt':
-      return 60;
+      return WW_SPEICHER_DEFAULTS.tAustritt;
     case 'zuschlaege.toff':
       return 2;
     default:

@@ -8,6 +8,7 @@ import InfoBox from '../InfoBox.astro';
 import KpiCard from '../KpiCard.astro';
 import SectionNotes from '../SectionNotes.astro';
 import OverrideField from '../OverrideField.astro';
+import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
   id="sektion-6"
@@ -39,30 +40,32 @@ import OverrideField from '../OverrideField.astro';
 
       <div class="hz-grid-2">
         <OverrideField
-          label="Speicher-Austrittstemperatur"
+          label="Speicher-Solltemperatur (Austritt)"
           id="hz-ww-t-aus"
           bindPath="speicher.wwTStoAus"
           overridePath="speicher.wwTAustritt"
-          defaultValue={60}
+          defaultValue={WW_SPEICHER_DEFAULTS.tAustritt}
           unit="°C"
-          source="SIA 385/2"
+          source="FWS §10"
           type="number"
           step={1}
           min={40}
           max={80}
+          hint="Legionellen-Hygiene: mind. 55 °C. Standard FWS: 60 °C."
         />
         <OverrideField
-          label="Eintritt (Kaltwasser)"
+          label="Kaltwasser-Eintrittstemperatur"
           id="hz-ww-t-ein"
           bindPath="speicher.wwTStoEinOverride"
           overridePath="speicher.wwTEintritt"
-          defaultValue={10}
+          defaultValue={WW_SPEICHER_DEFAULTS.tEintritt}
           unit="°C"
           source="SIA 385/2"
           type="number"
           step={1}
           min={5}
           max={20}
+          hint="Referenzwert Kaltwasser: 10 °C."
         />
       </div>
 

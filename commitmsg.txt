@@ -1,10 +1,15 @@
-Phase 9 Block B: Auto-Methoden-Erkennung + OverrideField-Migration
+Phase 9 Block C: WW-Defaults zentralisiert, UI-Labels konsolidiert
 
-- state.ts: HeizlastMethod entfernt, HeizlastMethodsEnabled-Record
-- storage.ts: Migration alter method-Strings -> Record
-- compute.ts: Hierarchie override -> bstd -> messung -> verbrauch -> bauperiode
-- Section2: Ja/Nein-Switches pro Methode, rote Akzente entfernt
-- heizlast.astro: syncMethodToggles entfernt
-- OverrideField in Section 1/3/4/6 angewendet (tvoll, Verluste, deltaT, toff, WW-Temps)
-- bindings.ts: \! Heredoc-Artefakte repariert
-- Tests: 49 + 16 gruen
+- constants.ts: neue Exporte WW_VERLUSTE_DEFAULTS (10/0/15 %) und
+  WW_SPEICHER_DEFAULTS (tEintritt=10, tAustritt=60) mit Quellen FWS 8/10.
+- state.ts: resolveDefault() und createDefaultState() beziehen jetzt
+  aus den Konstanten statt Literalen. Default-State zeigt die Verluste
+  gleich beim ersten Laden.
+- Section3Warmwasser.astro: Labels vereinheitlicht (Speicherverluste,
+  Zirkulationsverluste, Ausstossverluste, Kaltwasser -> Warmwasser).
+  Hints mit typischen Ranges; Quelle auf FWS 8.
+- Section6Speicher.astro: Speicher-Solltemperatur (Austritt),
+  Kaltwasser-Eintrittstemperatur; Hints mit Legionellen-/Referenz-Hinweis.
+- HANDOFF-PHASE-12.md fuer Block D angelegt; CLAUDE.md aktualisiert.
+
+Tests 49 + 16 gruen.

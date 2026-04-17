@@ -160,3 +160,22 @@ export const PHYSIK = {
   t_kaltwasser: 10,      // °C (SIA 385/2)
   deltaT_ww:    50,      // K (10 → 60 °C)
 } as const;
+
+// WW-Verluste Default-Prozentsätze (FWS §8, SIA 385/1)
+// Einheitliche Quelle für resolveDefault() in state.ts und die UI-Default-Anzeige.
+export const WW_VERLUSTE_DEFAULTS = {
+  /** Speicherverluste (Stehverluste) — typisch 5–15 %. */
+  speicher: 10,
+  /** Zirkulationsverluste — typisch 0–20 %. 0 = ohne Zirkulation. */
+  zirk: 0,
+  /** Ausstossverluste (Leitungsverluste) — typisch 10–20 %. */
+  ausstoss: 15,
+} as const;
+
+// WW-Speicher Default-Temperaturen (FWS §10, SIA 385/2)
+export const WW_SPEICHER_DEFAULTS = {
+  /** Kaltwasser-Eintritt (Speicher) — SIA 385/2. */
+  tEintritt: PHYSIK.t_kaltwasser,
+  /** Solltemperatur Austritt — Legionellen-Hygiene FWS/SIA. */
+  tAustritt: 60,
+} as const;
