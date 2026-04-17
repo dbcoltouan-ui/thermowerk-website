@@ -149,40 +149,22 @@ Fehlt dort ein Pfad → Switch-Case ergänzen.
 
 ## Stolpersteine
 
-- **Cowork-Mount-Drift 1 — Truncated Writes:** Beim Schreiben grosser
-  Dateien über das Edit/Write-Tool kann die Datei auf der Linux-Seite
-  truncated ankommen, obwohl das Tool "Success" zurückgibt. Bei jedem
-  grösseren Write via `wc -l` auf dem Linux-Mount prüfen. Wenn truncated:
+> **WICHTIG:** Die Root-Cause-Analyse + definitiven Workarounds stehen in
+> `CLAUDE.md` unter „Cowork-VM — Architektur-Eigenheiten (Root Cause
+> dokumentiert)". Dort sind Problem 1 (Mount-Drift via FUSE-Cache),
+> Problem 2 (virtiofs unlink-Block in .git), Problem 3 (index.lock mit
+> PowerShell lösen) und Problem 4 (Heredoc-Escape) beschrieben. Vor dem
+> ersten Commit kurz dort reinschauen.
+
+- **Cowork-Mount-Drift — Truncated Writes:** Zusätzlich zu den in
+  CLAUDE.md dokumentierten Fällen kann das Edit/Write-Tool gelegentlich
+  eine Datei truncated auf der Linux-Seite ablegen, obwohl es "Success"
+  meldet. Nach jedem grösseren Write via `wc -l` auf dem Linux-Mount
+  prüfen. Wenn truncated:
   ```bash
   git show HEAD:src/lib/heizlast/bindings.ts > src/lib/heizlast/bindings.ts
-  # dann Python-Patch via heredoc
+  # dann Python-Patch via heredoc (siehe CLAUDE.md Problem 4 für !-Escape-Handling)
   ```
-
-- **Cowork-Mount-Drift 2 — Edits landen nicht im Linux-Mount:** Manchmal
-  bestätigt das Edit/Write-Tool einen Write auf der Windows-Seite, aber
-  `git status` auf dem Linux-Mount zeigt die Datei nicht als modifiziert.
-  Symptom: `git diff HEAD -- <file>` ist leer, obwohl der Inhalt offensichtlich
-  anders ist. Fix: `git update-index --refresh` zwingt Git, die mtime neu
-  zu lesen — danach taucht die Datei in `git status` auf.
-  ```bash
-  git update-index --refresh  # stale index aufräumen
-  git status --short           # sollte jetzt alle Änderungen zeigen
-  ```
-  **Achtung:** `git add -A` auf dem Linux-Mount scheitert danach trotzdem,
-  weil `.git` nur Read-Only gemountet ist (fatal: "Operation not permitted"
-  beim Index-Lock). Also zwingend über Desktop Commander auf Windows committen.
-
-- **index.lock hängt (Windows-Seite):** Manchmal bleibt nach abgebrochenen
-  Git-Operationen `.git/index.lock` liegen und lässt sich mit `del /f /q`
-  in cmd NICHT löschen (der Befehl reportet keinen Fehler, aber der Lock
-  bleibt). PowerShell `Remove-Item -Force` klappt dagegen zuverlässig:
-  ```powershell
-  Remove-Item -Path "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue
-  ```
-  Danach sofort `git add -A` + `git commit -F commitmsg.txt` + `git push`
-  via cmd-Shell (CLAUDE.md-Workflow). PowerShell-Pipelines mit `&` +
-  git.exe bekommen gerne einen "CantActivateDocumentInPipeline"-Fehler —
-  also PowerShell NUR für das `Remove-Item`, den Rest in cmd.
 - **Bash-Heredoc escaped `!` als `\!`:** Wenn du einen Python-Patch in
   `python3 << 'PY'` schreibst und der Code ein `!` enthält, sauberes
   Single-Quote-Heredoc (`<< 'PY'`) verwenden. Zur Not hinterher

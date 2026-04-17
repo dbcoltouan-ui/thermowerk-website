@@ -1,5 +1,8 @@
-docs: HANDOFF-PHASE-10 Stolpersteine erweitert
+docs: Cowork-VM Root Cause + Workarounds in CLAUDE.md
 
-- Cowork-Mount-Drift 2: Edits landen nicht im Linux-Mount, git update-index --refresh als Fix
-- index.lock haengt: cmd del klappt nicht, PowerShell Remove-Item schon
-- PowerShell-Pipeline-Fehler mit git.exe dokumentiert (nur Remove-Item in PS, Rest in cmd)
+Problem 1 (Mount-Drift via FUSE-Cache): git update-index --refresh
+Problem 2 (virtiofs unlink-Block in .git): Commits immer via Desktop Commander auf Windows
+Problem 3 (index.lock haengt): PowerShell Remove-Item -Force statt cmd del
+Problem 4 (Heredoc ! -> \!): sed -i hinterher oder ! vermeiden
+
+HANDOFF-PHASE-10.md Stolpersteine-Sektion verweist auf die neue CLAUDE.md-Sektion, damit kuenftige Chats die Root Cause kennen und nicht wieder rumprobieren muessen.

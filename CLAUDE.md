@@ -239,6 +239,48 @@ Claude macht das **selbstständig und vollständig** – kein manueller Schritt 
 - Sprache der Website: Deutsch (Schweiz)
 - Bei Antworten: knapp halten, keine langen Aufzählungen, nur bei Auswahl oder Fragen ausführlicher
 
+## Cowork-VM — Architektur-Eigenheiten (Root Cause dokumentiert)
+> **Warum das wichtig ist:** Seit Phase 7/8 sind zwei wiederkehrende Probleme aufgetaucht, die NICHT durch „falsches Vorgehen" eines Chats entstanden sind, sondern durch fundamentale Eigenheiten der Cowork-VM-Architektur. Hier die Root Cause und die definitiven Workarounds, damit kein Chat mehr rumprobieren muss.
+
+**Architektur:** Der Cowork-Agent läuft in einer Linux-VM und mountet den Windows-Projektordner via **virtiofs/FUSE** (`/sessions/<id>/mnt/thermowerk-website`). Das Edit/Write-Tool schreibt direkt auf die Windows-Seite (`C:\Users\Daniel\Documents\thermowerk-website`). Bash-Tool (`mcp__workspace__bash`) arbeitet auf dem Linux-Mount.
+
+### Problem 1 — „Mount-Drift": Edits landen nicht im Linux-Mount-Cache
+**Symptom:** Edit/Write-Tool meldet Success, aber `git status` auf dem Linux-Mount zeigt die Datei nicht als modifiziert; `git diff HEAD -- <file>` ist leer, obwohl der Inhalt offensichtlich neu ist.
+**Ursache:** FUSE cached `stat()`-Ergebnisse; die Windows-Schreiboperation invalidiert den Cache nicht immer zuverlässig. Git liest die alte mtime und glaubt, die Datei sei unverändert.
+**Fix:** `git update-index --refresh` (auf Linux) zwingt Git, alle Dateien neu zu stat-en. Danach taucht die Änderung in `git status` auf. Als Faustregel: nach jedem grösseren Edit/Write einmal `git update-index --refresh` laufen lassen.
+
+### Problem 2 — „virtiofs unlink-Block": Linux kann nicht in .git löschen
+**Symptom:** `rm -f .git/index.lock` im Linux-Mount scheitert mit `Operation not permitted`, obwohl `.git` mit `0700`-Rechten dem Linux-User gehört und `create` erlaubt ist.
+**Ursache:** virtiofs/FUSE mit `default_permissions` erlaubt in `.git` teils `create`/`write`, aber blockt `unlink` (vermutlich weil Windows die Datei offen hält oder die Rechte-Übersetzung asymmetrisch ist).
+**Konsequenz:** Git-Operationen (`git add`, `git commit`) MÜSSEN immer über Desktop Commander auf der Windows-Seite laufen — NIE im Linux-Bash.
+
+### Problem 3 — „index.lock hängt": cmd-`del` schlägt still fehl
+**Symptom:** `.git\index.lock` bleibt nach einem abgebrochenen Git-Prozess liegen; `del /f /q .git\index.lock` in cmd meldet Erfolg, aber der Lock ist beim nächsten Befehl wieder da (oder wurde nie gelöscht).
+**Ursache:** Offenes Handle (VS Code Git-Extension, Watcher, oder crashed git.exe) hält den Lock. `del` in cmd verwendet Shell-Builtins mit eingeschränkter Semantik.
+**Fix:** PowerShell `Remove-Item -Force` nutzt die vollen Win32-API-Calls und kann solche Locks brechen:
+```powershell
+Remove-Item -Path "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue
+```
+**Wichtig:** NUR `Remove-Item` in PowerShell laufen lassen. Git-Befehle danach zurück in cmd — PowerShell-Pipelines mit `& git.exe` werfen `CantActivateDocumentInPipeline`-Fehler.
+
+### Standard-Workflow für Commits (nach diesen Erkenntnissen)
+1. Edits via Edit/Write-Tool machen (landet auf Windows-Seite).
+2. `git update-index --refresh` im Linux-Bash (räumt Stale-Cache auf, macht die Änderungen für `git status` sichtbar — nur als Verifikations-Schritt, wenn man prüfen will, was sich geändert hat).
+3. `commitmsg.txt` via `write_file` erstellen.
+4. PowerShell-Fallback nur wenn `.git\index.lock` hängt:
+   ```
+   Remove-Item "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue
+   ```
+5. In cmd via Desktop Commander:
+   ```
+   cd /d C:\Users\Daniel\Documents\thermowerk-website && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
+   ```
+
+### Problem 4 — „Heredoc escaped `!` als `\!`"
+**Symptom:** Python-Patches, die via `python3 << 'PY'` ... `PY` ausgeführt werden und ein `!` in Strings enthalten, bekommen nach Execution `\!` im Output.
+**Ursache:** Bash Histexpansion greift trotz Single-Quoted Heredoc manchmal.
+**Fix:** Entweder `!` vermeiden oder hinterher `sed -i 's|\\!|!|g' <file>` laufen lassen.
+
 ## Bekannte Fallstricke (WICHTIG)
 - **fade-up Animation überschreibt transform**: Alle Hero-Elemente haben die Klasse `fade-up`. Die Regel `.fade-up.visible { transform: translateY(0) }` überschreibt jedes custom `transform` auf Hero-Elementen. Lösung: Spezifischeren Selektor verwenden, z.B. `.hero h1.fade-up.visible { transform: translateY(-9vh); }`. Das gilt auch für Mobile-Breakpoints!
 - **Topbar-Alignment per JS**: Die Topbar-Kontaktinfos werden per JavaScript an der Nav-Position ausgerichtet. Das Script in `index.astro` liest `nav.getBoundingClientRect().left` und setzt `--nav-left` als CSS-Variable. Ebenso wird `--cta-btn-width` für die Social-Icons gemessen. Beide müssen NACH Font-Load gemessen werden (`document.fonts.ready.then()`), sonst stimmen die Werte nicht.
