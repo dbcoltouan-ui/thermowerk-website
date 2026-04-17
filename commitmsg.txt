@@ -1,14 +1,14 @@
-Phase 9 / Block M2: 12-Spalten-Grid + Feldbreiten
+Phase 9 / Block M: Mobile-Polish (Worttrennung + Logo)
 
-- Neue Utility: .hz-row (grid 12 cols) + .hz-col-3/4/6/8/12, auf Mobile
-  alle span 12
-- Intrinsische Feldbreiten per max-width:
-  .hz-field__input-with-unit = 220 px
-  number-Inputs = 240 px
-  select-Inputs = 320 px
-- Fein-justierbar per data-size="xs|sm|md|lg|full" auf .hz-field
-- Mobile (<=720 px) Override -> alles 100 %
-- Text-Inputs (Projektname, Anschrift) bleiben full wie gehabt
-- Toggle-Button Desktop war bereits inline-flex -> kein Change
-- Keine Section-Wrapper-Umbauten (kein Mass-Refactor)
+- .hz-brand__text Span komplett entfernt (HTML + CSS), nicht nur
+  display:none -> saubere Logo-Kante
+- Mobile-Logo auf 32 px (Container nicht mehr gestaucht)
+- Header-Height Mobile 60 px
+- Konservative Worttrennung im .hz-scope: hyphens: manual +
+  overflow-wrap: break-word + word-break: normal -> keine mid-word-
+  Breaks mehr
+- text-wrap: balance auf H1-H3, Section-Title, Section-Subline, Kicker
+- Mobile-Regel ersetzt das bisherige overflow-wrap: anywhere
+- Desktop-Logo buendig mit .hz-container-Kante (bereits durch Block M1
+  via --hz-container-max sichergestellt)
 - Tests weiterhin 49 + 33 gruen

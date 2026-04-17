@@ -215,10 +215,6 @@ const {
       flex: 0 0 auto;
     }
     .hz-brand__logo { height: 30px; width: auto; }
-    .hz-brand__text {
-      font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
-      font-size: 17px; letter-spacing: -0.005em;
-    }
 
     /* Header-Projekt-Info (Mitte) */
     .hz-topbar__project {
@@ -311,14 +307,14 @@ const {
       .hz-topbar__actions .hz-btn-icon { padding: 8px 10px; }
     }
     @media (max-width: 640px) {
-      :root { --hz-header-height: 58px; }
+      :root { --hz-header-height: 60px; }
       .hz-topbar__inner {
         grid-template-columns: auto 1fr auto;
         gap: 8px;
         padding: 8px clamp(10px, 4vw, 16px);
       }
-      .hz-brand__text { display: none; }
-      .hz-brand__logo { height: 26px; }
+      /* Phase 9 / Block M — Logo-Proportionen stabiler auf Mobile */
+      .hz-brand__logo { height: 32px; width: auto; }
       .hz-topbar__project {
         padding: 0 8px;
       }
@@ -329,6 +325,30 @@ const {
         padding: 7px;
         min-width: 34px; min-height: 34px;
         justify-content: center;
+      }
+    }
+
+    /* Phase 9 / Block M — Mobile-Polish: konservative Worttrennung,
+       keine mid-word-Breaks. Sublines und Sektions-Titel bekommen
+       text-wrap: balance, damit Umbrueche nicht ungluecklich fallen. */
+    .hz-scope {
+      hyphens: manual;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+    .hz-scope h1, .hz-scope h2, .hz-scope h3,
+    .hz-scope .hz-section__title,
+    .hz-scope .hz-section__subline,
+    .hz-scope .hz-kicker {
+      text-wrap: balance;
+    }
+    @media (max-width: 640px) {
+      .hz-scope p, .hz-scope span, .hz-scope label, .hz-scope dt, .hz-scope dd,
+      .hz-scope small, .hz-scope li {
+        /* Phase 9 / Block M — `anywhere` aus Phase 8 verbot nichts,
+           aber fuehrte mitten im Wort zu Umbruechen. Konservativer: */
+        overflow-wrap: break-word;
+        word-break: normal;
       }
     }
 
@@ -458,7 +478,6 @@ const {
     <div class="hz-topbar__inner">
       <a href="/" class="hz-brand" aria-label="Zur Thermowerk-Startseite">
         <img src="/img/logo.png" alt="Thermowerk" class="hz-brand__logo" />
-        <span class="hz-brand__text">Thermowerk</span>
       </a>
 
       <div class="hz-topbar__project" aria-live="polite">
