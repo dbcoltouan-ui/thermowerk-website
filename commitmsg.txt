@@ -1,11 +1,14 @@
-Phase 9 / Block M1: Desktop-Breite + fluide Typografie
+Phase 9 / Block M2: 12-Spalten-Grid + Feldbreiten
 
-- Neue Tokens: --hz-container-max (min 92vw, 960px), --hz-gap-section/row/card
-- .hz-container und .hz-topbar__inner haengen am selben Token -> Header
-  bleibt buendig mit Content auf allen Viewports (1440-1920 px: ruhige
-  Raender, Content ~960 px)
-- Body-Schrift fluid (15.5-17 px)
-- SectionWrapper-Padding ueber --hz-gap-section
-- KpiCard Default-Zahl + Einheit fluid (24-30 px / 13-15 px)
-- Mobile-Verhalten aus Phase 8 unveraendert
+- Neue Utility: .hz-row (grid 12 cols) + .hz-col-3/4/6/8/12, auf Mobile
+  alle span 12
+- Intrinsische Feldbreiten per max-width:
+  .hz-field__input-with-unit = 220 px
+  number-Inputs = 240 px
+  select-Inputs = 320 px
+- Fein-justierbar per data-size="xs|sm|md|lg|full" auf .hz-field
+- Mobile (<=720 px) Override -> alles 100 %
+- Text-Inputs (Projektname, Anschrift) bleiben full wie gehabt
+- Toggle-Button Desktop war bereits inline-flex -> kein Change
+- Keine Section-Wrapper-Umbauten (kein Mass-Refactor)
 - Tests weiterhin 49 + 33 gruen

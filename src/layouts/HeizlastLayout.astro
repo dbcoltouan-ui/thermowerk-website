@@ -116,6 +116,59 @@ const {
     .hz-scope input, .hz-scope select, .hz-scope textarea, .hz-scope button {
       max-width: 100%;
     }
+
+    /* Phase 9 / Block M2 — 12-Spalten-Grid als Utility.
+       `.hz-row` ist die Grid-Basis, `.hz-col-*` spannen eine bestimmte
+       Zahl von Spalten. Auf Mobile wird jede Spalte full-width. */
+    .hz-row {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--hz-gap-row, clamp(16px, 2.2vw, 28px));
+      align-items: start;
+    }
+    .hz-col-3  { grid-column: span 3; }
+    .hz-col-4  { grid-column: span 4; }
+    .hz-col-6  { grid-column: span 6; }
+    .hz-col-8  { grid-column: span 8; }
+    .hz-col-12 { grid-column: span 12; }
+    @media (max-width: 720px) {
+      .hz-row { gap: 12px; }
+      .hz-col-3, .hz-col-4, .hz-col-6, .hz-col-8, .hz-col-12 { grid-column: span 12; }
+    }
+
+    /* Phase 9 / Block M2 — intrinsische Feldbreiten.
+       Zahl+Einheit-Felder sowie numerische Inputs bekommen eine
+       sichtbare Maximalbreite, damit auf Desktop (1440 px) rechts
+       Freiraum entsteht. Text-Inputs bleiben volle Breite. Selects
+       werden ebenfalls begrenzt, damit Dropdowns nicht unproportional
+       breit werden. Ueber `[data-size]` laesst sich jede Zelle fein-
+       justieren. Mobile-Default bleibt full-width via Phase-8-Regel. */
+    :root {
+      --hz-input-max-number: 240px;
+      --hz-input-max-select: 320px;
+      --hz-input-max-unit: 220px;
+    }
+    .hz-scope .hz-field__input-with-unit { max-width: var(--hz-input-max-unit); }
+    .hz-scope .hz-field:not([data-size]) > .hz-field__input[type="number"] { max-width: var(--hz-input-max-number); }
+    .hz-scope .hz-field:not([data-size]) > select.hz-field__input { max-width: var(--hz-input-max-select); }
+    .hz-scope .hz-field[data-size="xs"] .hz-field__input,
+    .hz-scope .hz-field[data-size="xs"] .hz-field__input-with-unit { max-width: 120px; }
+    .hz-scope .hz-field[data-size="sm"] .hz-field__input,
+    .hz-scope .hz-field[data-size="sm"] .hz-field__input-with-unit { max-width: 180px; }
+    .hz-scope .hz-field[data-size="md"] .hz-field__input,
+    .hz-scope .hz-field[data-size="md"] .hz-field__input-with-unit { max-width: 280px; }
+    .hz-scope .hz-field[data-size="lg"] .hz-field__input,
+    .hz-scope .hz-field[data-size="lg"] .hz-field__input-with-unit { max-width: 420px; }
+    .hz-scope .hz-field[data-size="full"] .hz-field__input,
+    .hz-scope .hz-field[data-size="full"] .hz-field__input-with-unit { max-width: 100%; }
+    @media (max-width: 720px) {
+      .hz-scope .hz-field__input-with-unit,
+      .hz-scope .hz-field .hz-field__input,
+      .hz-scope .hz-field[data-size] .hz-field__input,
+      .hz-scope .hz-field[data-size] .hz-field__input-with-unit {
+        max-width: 100%;
+      }
+    }
     .hz-stack > * + * { margin-top: 12px; }
     .hz-muted { color: var(--hz-mid-gray); }
     .hz-kicker {
