@@ -533,7 +533,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   const saveCloudNewBtns = Array.from(document.querySelectorAll('[data-hz-action="save-cloud-new"]')) as HTMLButtonElement[];
   const openProjectsBtns = Array.from(document.querySelectorAll('[data-hz-action="open-projects"]')) as HTMLButtonElement[];
   const loginBtn = document.querySelector('[data-hz-action="login"]') as HTMLButtonElement | null;
-  const newProjectBtn = document.querySelector('[data-hz-action="new-project"]') as HTMLButtonElement | null;
+  // Phase 9 / Block I: Neues-Projekt-Button wird via Event-Delegation gehandhabt (siehe unten)
   // Alias fuer die (alten) Einzel-Listener
   const saveCloudBtn = saveCloudBtns[0] || null;
   const saveCloudNewBtn = saveCloudNewBtns[0] || null;
@@ -541,7 +541,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   const statusEl = document.querySelector('[data-hz-save-status]') as HTMLElement | null;
   const statusText = document.querySelector('[data-hz-save-status-text]') as HTMLElement | null;
   const saveLocalEl = document.querySelector('[data-hz-save-local]') as HTMLElement | null;
-  const saveCloudEl = document.querySelector('[data-hz-save-cloud]') as HTMLElement | null;
+  // Phase 9 / Block I: "Letzte Cloud-Speicherung"-Anzeige entfernt — Status-Pill reicht.
 
   function setStatus(tone: 'ok' | 'busy' | 'err' | 'idle', text: string) {
     if (statusEl) {
@@ -571,7 +571,6 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     else if (u.lastCloudSave) setStatus('ok', 'In Cloud gespeichert.');
     else setStatus('idle', 'Bereit.');
     if (saveLocalEl) saveLocalEl.textContent = fmtTime(u.lastLocalSave);
-    if (saveCloudEl) saveCloudEl.textContent = fmtTime(u.lastCloudSave);
     // Flash-Animation nur bei neuem Cloud-Save
     if (u.lastCloudSave && u.lastCloudSave !== lastCloudSaveSeen && !u.syncInFlight && !u.lastError) {
       lastCloudSaveSeen = u.lastCloudSave;
@@ -1001,9 +1000,39 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     openExportModal(btn);
   });
 
-  if (newProjectBtn) newProjectBtn.addEventListener('click', () => {
-    if (!confirm('Aktuelles Projekt verwerfen und neues starten?')) return;
+  // Phase 9 / Block I: Neues Projekt mit vollstaendigem Confirm-Dialog + Export-Option
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const btn = t.closest('[data-hz-action="new-project"]') as HTMLButtonElement | null;
+    if (!btn) return;
+    const u = uiState.get();
+    const parts = [
+      'Aktuelles Projekt verwerfen? Eingaben gehen verloren.',
+    ];
+    if (u.isAuthenticated && isDirty.get()) {
+      parts.push('Aktuelle Änderungen wurden noch nicht in der Cloud gespeichert.');
+    }
+    parts.push('OK = Neues Projekt · Abbrechen + Export nochmal: zuerst "Abbrechen" klicken, dann Export verwenden.');
+    const doReset = confirm(parts.join('\n\n'));
+    if (!doReset) {
+      // Zweite Bestaetigung: direkt exportieren?
+      if (confirm('Projekt vorher exportieren (PDF oder JSON)?')) {
+        openExportModal(btn);
+      }
+      return;
+    }
     hardReset();
     setStatus('idle', 'Neues Projekt.');
+  });
+
+  // Phase 9 / Block I: beforeunload-Warnung, wenn ungespeicherte Aenderungen in der Cloud stehen
+  window.addEventListener('beforeunload', (ev) => {
+    const u = uiState.get();
+    if (u.isAuthenticated && isDirty.get() && !u.syncInFlight) {
+      ev.preventDefault();
+      // Spec: returnValue leer setzen reicht, Browser zeigt Standardtext
+      (ev as BeforeUnloadEvent).returnValue = '';
+    }
   });
 </script>

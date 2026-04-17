@@ -1,12 +1,13 @@
-phase-9-block-h: Plausibilitaet immer aktiv, Export-Checkbox + Print-CSS
+phase-9-block-i: Save-Block entschlacken, Confirm + beforeunload
 
-- compute.ts: computePlausi ohne plausiActive-Gate (Kommentar Block H)
-- state.ts: plausiActive als Legacy-Feld markiert (Migration-safe)
-- Section2: "Plausibilitaet pruefen"-Toggle entfernt, data-hz-plausi-Attr
-  auf Plausi-KpiCard
-- export.ts: ExportPart um 'plausi' erweitert, PART_CLASS.plausi
-- ExportModal: Checkbox "Plausibilitaetscheck einschliessen" (default an)
-- HeizlastLayout Print-CSS: hz-print-mode:not(.hz-print-plausi-on)
-  [data-hz-plausi] blendet Plausi-Kachel im Druck aus
+- Section7: Cloud-Aktionen in .hz-save-actions__cloud gruppiert und per
+  data-hz-auth-only + body:not(.is-auth) im Nicht-Login-Zustand versteckt
+- Header-Text gekuerzt, Cloud-Saetze raus, "Wie werden Projekte
+  gespeichert?"-InfoBox entfernt
+- "Letzte Cloud-Speicherung: —" aus der Save-Hint-Zeile entfernt
+- "Neues Projekt"-Button: Mistkuebel-Icon weg, Ghost-Style, Confirm-Dialog
+  mit Cloud-Hinweis wenn isDirty + isAuthenticated + optionalem Export
+- beforeunload-Listener: zeigt Browser-Warnung wenn isAuthenticated +
+  isDirty + !syncInFlight
 
 Tests weiterhin 49 + 32 gruen.

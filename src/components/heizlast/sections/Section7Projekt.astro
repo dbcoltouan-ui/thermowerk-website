@@ -5,7 +5,6 @@
 // in die `data-hz-sum`-Slots geschrieben (siehe src/pages/heizlast.astro).
 
 import SectionWrapper from '../SectionWrapper.astro';
-import InfoBox from '../InfoBox.astro';
 import SectionNotes from '../SectionNotes.astro';
 ---
 <SectionWrapper
@@ -76,14 +75,13 @@ import SectionNotes from '../SectionNotes.astro';
     </div>
   </div>
 
-  <!-- Speichern / Laden -->
+  <!-- Speichern / Laden (Phase 9 / Block I: entschlackt) -->
   <div class="hz-save-block">
     <header class="hz-save-block__head">
       <div>
         <h3 class="hz-save-block__title">Projekt speichern</h3>
         <p class="hz-muted" style="margin: 0;">
           Alle Eingaben werden lokal automatisch gespeichert.
-          Angemeldete Benutzer können Projekte zusätzlich in der Cloud ablegen.
         </p>
       </div>
       <span class="hz-save-status" data-hz-save-status role="status" aria-live="polite">
@@ -93,44 +91,33 @@ import SectionNotes from '../SectionNotes.astro';
     </header>
 
     <div class="hz-save-actions">
-      <button type="button" class="hz-btn hz-btn-primary" data-hz-action="save-cloud" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        In Cloud speichern
-      </button>
-      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="save-cloud-new" disabled>
-        Als neues Projekt speichern
-      </button>
-      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="open-projects" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Projekte öffnen
-      </button>
+      <!-- Cloud-Aktionen nur fuer eingeloggte User (via body.is-auth) -->
+      <div class="hz-save-actions__cloud" data-hz-auth-only>
+        <button type="button" class="hz-btn hz-btn-primary" data-hz-action="save-cloud" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          In Cloud speichern
+        </button>
+        <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="save-cloud-new" disabled>
+          Als neues Projekt speichern
+        </button>
+        <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="open-projects" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Projekte öffnen
+        </button>
+      </div>
       <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="login">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         <span data-hz-login-label>Anmelden</span>
       </button>
-      <button type="button" class="hz-btn hz-btn-danger-soft" data-hz-action="new-project">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>
+      <button type="button" class="hz-btn hz-btn-ghost" data-hz-action="new-project">
         Neues Projekt
       </button>
     </div>
 
     <p class="hz-save-hint hz-muted">
-      Letzte lokale Speicherung: <span data-hz-save-local>&mdash;</span> &middot;
-      Letzte Cloud-Speicherung: <span data-hz-save-cloud>&mdash;</span>
+      Letzte lokale Speicherung: <span data-hz-save-local>&mdash;</span>
     </p>
   </div>
-
-  <InfoBox title="Wie werden Projekte gespeichert?" icon="info">
-    <p>
-      <strong>Lokal</strong>: Alle Eingaben werden automatisch in deinem Browser zwischengespeichert
-      (localStorage, Debounce 500&nbsp;ms). So geht nichts verloren, wenn du den Tab schliesst.
-    </p>
-    <p>
-      <strong>Cloud</strong>: Nach der Anmeldung können Projekte namentlich in der Cloud abgelegt,
-      wieder geladen und gelöscht werden. Der Status (Arbeit, Offeriert, Bestellt, Abgeschlossen,
-      Archiv) hilft beim Überblick über laufende Anfragen.
-    </p>
-  </InfoBox>
 
   <SectionNotes sectionKey="sektion7" sectionLabel="Sektion 7 (Projekt)" />
 </SectionWrapper>
@@ -307,7 +294,13 @@ import SectionNotes from '../SectionNotes.astro';
 
   .hz-save-actions {
     display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center;
   }
+  .hz-save-actions__cloud {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  /* Phase 9 / Block I: Cloud-Aktionen nur fuer eingeloggte User */
+  body:not(.is-auth) [data-hz-auth-only] { display: none !important; }
   .hz-btn-danger-soft {
     background: transparent; color: var(--hz-red);
     border: 1px solid var(--hz-red-soft);
@@ -322,8 +315,10 @@ import SectionNotes from '../SectionNotes.astro';
     .hz-sum-card { padding: 14px 16px; }
     .hz-sum-grid { grid-template-columns: 1fr; gap: 6px 0; }
     .hz-save-block { padding: 16px 16px; }
-    .hz-save-actions { flex-direction: column; }
-    .hz-save-actions > .hz-btn { width: 100%; justify-content: center; }
+    .hz-save-actions { flex-direction: column; align-items: stretch; }
+    .hz-save-actions > .hz-btn,
+    .hz-save-actions__cloud > .hz-btn { width: 100%; justify-content: center; }
+    .hz-save-actions__cloud { flex-direction: column; }
     .hz-save-block__head { flex-direction: column; gap: 10px; }
   }
 </style>
