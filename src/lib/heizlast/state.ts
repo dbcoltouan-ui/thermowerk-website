@@ -63,14 +63,22 @@ export interface PersonenEinheitInput {
   vwui: number; // l/P/d
 }
 
-/** Einzelnes Zimmer im EBF-Helper. Fläche wird aus Länge × Breite berechnet
- *  (oder, wenn eingeschaltet, manuell gesetzt — flaecheOverride != null). */
+/** Einzelnes Zimmer im EBF-Helper. Flaeche wird aus Laenge x Breite berechnet,
+ *  oder direkt als Flaeche eingegeben (flaecheDirekt, Phase 9 / Block E).
+ *  `beheizt` steuert, ob die Flaeche in die Netto-EBF einfliesst (true) oder
+ *  nur separat ausgewiesen wird (false). */
 export interface RaumInput {
   id: string;
   name: string;
-  laenge: number; // m
-  breite: number; // m
-  flaecheOverride: number | null; // m² — falls gesetzt, wird laenge×breite ignoriert
+  laenge: number | null; // m
+  breite: number | null; // m
+  /** Phase 9 / Block E — wenn gesetzt, Vorrang vor laenge x breite. */
+  flaecheDirekt: number | null; // m^2
+  /** Phase 9 / Block E — wenn false, Flaeche NICHT in Netto-EBF-Summe. */
+  beheizt: boolean;
+  /** Legacy (Phase 4) — bleibt erhalten fuer alte gespeicherte States,
+   *  kuenftig ersetzt durch flaecheDirekt. */
+  flaecheOverride: number | null;
 }
 
 export interface GebaeudeState {
@@ -484,7 +492,15 @@ export function addRaum(name = ''): void {
   const nextId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
   const raeume: RaumInput[] = [
     ...g.raeume,
-    { id: nextId, name, laenge: 0, breite: 0, flaecheOverride: null },
+    {
+      id: nextId,
+      name,
+      laenge: null,
+      breite: null,
+      flaecheDirekt: null,
+      beheizt: true,
+      flaecheOverride: null,
+    },
   ];
   heizlastState.setKey('gebaeude', { ...g, raeume });
   isDirty.set(true);
@@ -505,17 +521,45 @@ export function updateRaum(id: string, patch: Partial<RaumInput>): void {
   isDirty.set(true);
 }
 
-/** Summiert Flächen aller Zimmer. flaecheOverride hat Vorrang, sonst laenge·breite. */
-export function sumRaumFlaechen(raeume: RaumInput[]): number {
-  let sum = 0;
+/** Liefert die Flaeche eines Zimmers. flaecheDirekt > flaecheOverride (legacy) >
+ *  laenge * breite. Ergibt 0 wenn nichts sinnvoll gesetzt ist. */
+export function raumFlaeche(r: RaumInput): number {
+  if (r.flaecheDirekt != null && r.flaecheDirekt > 0) return r.flaecheDirekt;
+  if (r.flaecheOverride != null && r.flaecheOverride > 0) return r.flaecheOverride;
+  const l = r.laenge ?? 0;
+  const b = r.breite ?? 0;
+  if (l > 0 && b > 0) return l * b;
+  return 0;
+}
+
+/** Phase 9 / Block E — Netto-Summe der Zimmerflaechen.
+ *  - `beheizt`: Summe aller beheizten Raeume (fliesst in EBF).
+ *  - `unbeheizt`: Summe aller unbeheizten Raeume (nur informativ).
+ *  - `netto`: beheizte Summe (gerundet auf 0.1 m^2). Das ist der Wert, der
+ *    beim "Uebernehmen" in `gebaeude.ebf` landet. */
+export function sumRaumFlaechenNetto(
+  raeume: RaumInput[],
+): { beheizt: number; unbeheizt: number; netto: number } {
+  let beheizt = 0;
+  let unbeheizt = 0;
   for (const r of raeume) {
-    if (r.flaecheOverride != null && r.flaecheOverride > 0) {
-      sum += r.flaecheOverride;
-    } else if (r.laenge > 0 && r.breite > 0) {
-      sum += r.laenge * r.breite;
+    const a = raumFlaeche(r);
+    if (a <= 0) continue;
+    if (r.beheizt === false) {
+      unbeheizt += a;
+    } else {
+      beheizt += a;
     }
   }
-  return Math.round(sum * 10) / 10;
+  const bh = Math.round(beheizt * 10) / 10;
+  const uh = Math.round(unbeheizt * 10) / 10;
+  return { beheizt: bh, unbeheizt: uh, netto: bh };
+}
+
+/** Rueckwaertskompatibler Alias fuer alten Aufrufer — liefert die Netto-Summe
+ *  (nur beheizte Raeume). Phase 9 / Block E: UI verwendet direkt `sumRaumFlaechenNetto`. */
+export function sumRaumFlaechen(raeume: RaumInput[]): number {
+  return sumRaumFlaechenNetto(raeume).netto;
 }
 
 // ---------------------------------------------------------------

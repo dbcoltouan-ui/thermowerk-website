@@ -54,6 +54,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     removeRaum,
     updateRaum,
     sumRaumFlaechen,
+    sumRaumFlaechenNetto,
+    raumFlaeche,
   } from '../lib/heizlast/state.ts';
   import { heizlastCompute } from '../lib/heizlast/compute.ts';
   import {
@@ -120,6 +122,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   // ------------------------------------------------------------
   const raumList = document.getElementById('hz-raum-list');
   const raumSumEl = document.getElementById('hz-raum-sum-value');
+  const raumSumBhEl = document.getElementById('hz-raum-sum-beheizt');
+  const raumSumUhEl = document.getElementById('hz-raum-sum-unbeheizt');
   const raumAddBtn = document.getElementById('hz-raum-add');
   const raumApplyBtn = document.getElementById('hz-raum-apply');
 
@@ -131,15 +135,22 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
       raumList.innerHTML = '<p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>';
     } else {
       raumList.innerHTML = raeume.map((r) => {
-        const auto = r.flaecheOverride == null
-          ? (r.laenge * r.breite)
-          : r.flaecheOverride;
+        const a = raumFlaeche(r);
+        const hatDirekt = r.flaecheDirekt != null && r.flaecheDirekt > 0;
+        const beheizt = r.beheizt !== false;
+        const laengeVal = r.laenge == null ? '' : r.laenge;
+        const breiteVal = r.breite == null ? '' : r.breite;
+        const direktVal = r.flaecheDirekt == null ? '' : r.flaecheDirekt;
         return `
-          <div class="hz-raum-row" data-raum-id="${r.id}">
+          <div class="hz-raum-row" data-raum-id="${r.id}" data-direkt="${hatDirekt}" data-beheizt="${beheizt}">
             <input type="text" placeholder="z. B. Wohnzimmer" data-raum-field="name" value="${escapeHtml(r.name)}" />
-            <input type="number" step="0.1" min="0" data-raum-field="laenge" value="${r.laenge || ''}" />
-            <input type="number" step="0.1" min="0" data-raum-field="breite" value="${r.breite || ''}" />
-            <span class="hz-raum-flaeche">${fmt(auto, 2)} m²</span>
+            <input type="number" step="0.1" min="0" placeholder="m" data-raum-field="laenge" value="${laengeVal}" />
+            <input type="number" step="0.1" min="0" placeholder="m" data-raum-field="breite" value="${breiteVal}" />
+            <input type="number" step="0.1" min="0" placeholder="m²" data-raum-field="flaecheDirekt" value="${direktVal}" />
+            <span class="hz-raum-flaeche">${a > 0 ? fmt(a, 2) + ' m²' : '—'}</span>
+            <label class="hz-raum-beheizt" title="Zählt in die Netto-EBF">
+              <input type="checkbox" data-raum-field="beheizt" ${beheizt ? 'checked' : ''} />
+            </label>
             <button type="button" class="hz-raum-remove" aria-label="Entfernen" data-raum-remove>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
             </button>
@@ -147,13 +158,14 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
         `;
       }).join('');
     }
-    const sum = sumRaumFlaechen(raeume);
-    if (raumSumEl) raumSumEl.textContent = fmt(sum, 1);
-    // Live-Modus: Summe direkt in EBF schreiben.
-    if (s.gebaeude.raeumeAktiv && sum > 0) {
-      const rounded = Math.round(sum * 10) / 10;
-      if (Math.abs(s.gebaeude.ebf - rounded) > 0.05) {
-        heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: rounded });
+    const agg = sumRaumFlaechenNetto(raeume);
+    if (raumSumEl) raumSumEl.textContent = fmt(agg.netto, 1);
+    if (raumSumBhEl) raumSumBhEl.textContent = fmt(agg.beheizt, 1);
+    if (raumSumUhEl) raumSumUhEl.textContent = fmt(agg.unbeheizt, 1);
+    // Live-Modus: Netto-Summe direkt in EBF schreiben.
+    if (s.gebaeude.raeumeAktiv && agg.netto > 0) {
+      if (Math.abs(s.gebaeude.ebf - agg.netto) > 0.05) {
+        heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: agg.netto });
       }
     }
   }
@@ -161,13 +173,19 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   if (raumAddBtn) raumAddBtn.addEventListener('click', () => addRaum(''));
   if (raumApplyBtn) raumApplyBtn.addEventListener('click', () => {
     const s = heizlastState.get();
-    const sum = sumRaumFlaechen(s.gebaeude.raeume);
-    if (sum > 0) {
-      const rounded = Math.round(sum * 10) / 10;
-      heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: rounded });
+    const agg = sumRaumFlaechenNetto(s.gebaeude.raeume);
+    if (agg.netto > 0) {
+      heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: agg.netto });
       isDirty.set(true);
     }
   });
+
+  function parseRaumNumber(value: string): number | null {
+    if (value === '' || value == null) return null;
+    const n = Number(value);
+    if (!isFinite(n) || n < 0) return null;
+    return n;
+  }
 
   // Event-Delegation fuer Raum-Inputs
   document.addEventListener('input', (ev) => {
@@ -178,10 +196,23 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     const id = row.getAttribute('data-raum-id');
     const field = t.getAttribute('data-raum-field');
     if (!id || !field) return;
+    if (field === 'beheizt') return; // change-Handler kümmert sich
     const value = (t as HTMLInputElement).value;
     if (field === 'name') updateRaum(id, { name: value });
-    else if (field === 'laenge') updateRaum(id, { laenge: Number(value) || 0 });
-    else if (field === 'breite') updateRaum(id, { breite: Number(value) || 0 });
+    else if (field === 'laenge') updateRaum(id, { laenge: parseRaumNumber(value) });
+    else if (field === 'breite') updateRaum(id, { breite: parseRaumNumber(value) });
+    else if (field === 'flaecheDirekt') updateRaum(id, { flaecheDirekt: parseRaumNumber(value) });
+  });
+  document.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const row = t.closest('.hz-raum-row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-raum-id');
+    const field = t.getAttribute('data-raum-field');
+    if (!id || field !== 'beheizt') return;
+    const checked = (t as HTMLInputElement).checked;
+    updateRaum(id, { beheizt: checked });
   });
   document.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;

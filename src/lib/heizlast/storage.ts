@@ -92,6 +92,33 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
         obj.zuschlaege.sperrzeitActive = Number.isFinite(toff) && toff > 0;
       }
     }
+    // Phase 9 / Block E: RaumInput um flaecheDirekt + beheizt erweitert.
+    // Alte Eintraege ohne die neuen Felder bekommen beheizt=true (Default)
+    // und flaecheDirekt=null; laenge/breite werden zu number|null normalisiert.
+    if (obj.gebaeude && Array.isArray(obj.gebaeude.raeume)) {
+      obj.gebaeude.raeume = obj.gebaeude.raeume.map((r: any) => {
+        const laenge = typeof r?.laenge === 'number' && isFinite(r.laenge) ? r.laenge : null;
+        const breite = typeof r?.breite === 'number' && isFinite(r.breite) ? r.breite : null;
+        const flaecheDirekt =
+          typeof r?.flaecheDirekt === 'number' && isFinite(r.flaecheDirekt)
+            ? r.flaecheDirekt
+            : null;
+        const flaecheOverride =
+          typeof r?.flaecheOverride === 'number' && isFinite(r.flaecheOverride)
+            ? r.flaecheOverride
+            : null;
+        const beheizt = typeof r?.beheizt === 'boolean' ? r.beheizt : true;
+        return {
+          id: String(r?.id ?? ''),
+          name: String(r?.name ?? ''),
+          laenge,
+          breite,
+          flaecheDirekt,
+          beheizt,
+          flaecheOverride,
+        };
+      });
+    }
     return obj as HeizlastState;
   }
   // Unbekannte Version → lieber Default-State zurückgeben, damit der Rechner

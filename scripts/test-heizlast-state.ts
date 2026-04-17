@@ -4,7 +4,15 @@
 //
 // Ausfuehren: node --experimental-strip-types scripts/test-heizlast-state.ts
 
-import { heizlastState, createDefaultState, replaceState } from '../src/lib/heizlast/state.ts';
+import {
+  heizlastState,
+  createDefaultState,
+  replaceState,
+  raumFlaeche,
+  sumRaumFlaechenNetto,
+  sumRaumFlaechen,
+} from '../src/lib/heizlast/state.ts';
+import type { RaumInput } from '../src/lib/heizlast/state.ts';
 import { runCascade } from '../src/lib/heizlast/compute.ts';
 import {
   serializeState, deserializeState, saveNow, loadFromStorage, clearStorage,
@@ -158,6 +166,61 @@ const baseQh = rOn.qh?.value ?? 0;
 heizlastState.set({ ...sSperr, zuschlaege: { ...sSperr.zuschlaege, sperrzeitActive: true, toff: 2, qas: 0.75, qasActive: false } });
 const rQas = runCascade(heizlastState.get());
 close('Qh mit qas=0.75 steigt um 0.75', (rQas.qh?.value ?? 0) - baseQh, 0.75, 0.01);
+
+// 9. Block E (Phase 9) \u2014 EBF-Helfer Netto-Summe
+section('INTEGRATION \u2014 EBF-Helfer beheizt/unbeheizt + flaecheDirekt (Block E)');
+
+const raeumeE: RaumInput[] = [
+  { id: 'r1', name: 'Wohnen', laenge: null, breite: null, flaecheDirekt: 20, beheizt: true, flaecheOverride: null },
+  { id: 'r2', name: 'Kueche', laenge: 5, breite: 3, flaecheDirekt: null, beheizt: true, flaecheOverride: null },
+  { id: 'r3', name: 'Keller', laenge: null, breite: null, flaecheDirekt: 10, beheizt: false, flaecheOverride: null },
+];
+const aggE = sumRaumFlaechenNetto(raeumeE);
+check('sumRaumFlaechenNetto.beheizt === 35', aggE.beheizt === 35, aggE.beheizt, 35);
+check('sumRaumFlaechenNetto.unbeheizt === 10', aggE.unbeheizt === 10, aggE.unbeheizt, 10);
+check('sumRaumFlaechenNetto.netto === 35', aggE.netto === 35, aggE.netto, 35);
+check('sumRaumFlaechen (alias) === 35', sumRaumFlaechen(raeumeE) === 35, sumRaumFlaechen(raeumeE), 35);
+
+// flaecheDirekt hat Vorrang vor L x B
+const beide: RaumInput = {
+  id: 'rb', name: 'Bad', laenge: 2, breite: 2, flaecheDirekt: 9, beheizt: true, flaecheOverride: null,
+};
+check('raumFlaeche: flaecheDirekt hat Vorrang vor laenge*breite', raumFlaeche(beide) === 9, raumFlaeche(beide), 9);
+
+// Fallback: weder flaecheDirekt noch L/B gesetzt -> 0
+const leer: RaumInput = {
+  id: 'rl', name: '', laenge: null, breite: null, flaecheDirekt: null, beheizt: true, flaecheOverride: null,
+};
+check('raumFlaeche: leerer Raum -> 0', raumFlaeche(leer) === 0, raumFlaeche(leer), 0);
+
+// Migration: alter State mit nur laenge/breite/name wird gelesen, beheizt defaultet auf true
+section('PERSISTIERUNG \u2014 Migration alter RaumInput (Block E)');
+
+const altState = createDefaultState();
+// Simuliere alten Serialisierungs-Stand (pre-Block-E): ohne beheizt/flaecheDirekt
+const altRaw = JSON.stringify({
+  ...altState,
+  gebaeude: {
+    ...altState.gebaeude,
+    raeume: [
+      { id: 'old1', name: 'Wohnen', laenge: 4, breite: 5, flaecheOverride: null },
+      { id: 'old2', name: 'Kueche', laenge: 3, breite: 4, flaecheOverride: null },
+    ],
+  },
+});
+const altMigriert = deserializeState(altRaw);
+check('Migration: State wird akzeptiert', altMigriert !== null);
+if (altMigriert) {
+  const r0 = altMigriert.gebaeude.raeume[0];
+  const r1 = altMigriert.gebaeude.raeume[1];
+  check('Migration: r0.beheizt defaultet auf true', r0.beheizt === true, r0.beheizt, true);
+  check('Migration: r0.flaecheDirekt defaultet auf null', r0.flaecheDirekt === null, r0.flaecheDirekt, null);
+  check('Migration: r0.laenge === 4', r0.laenge === 4, r0.laenge, 4);
+  check('Migration: r1.breite === 4', r1.breite === 4, r1.breite, 4);
+  const aggMig = sumRaumFlaechenNetto(altMigriert.gebaeude.raeume);
+  check('Migration: sumRaumFlaechenNetto.unbeheizt === 0', aggMig.unbeheizt === 0, aggMig.unbeheizt, 0);
+  check('Migration: sumRaumFlaechenNetto.beheizt === 32', aggMig.beheizt === 32, aggMig.beheizt, 32);
+}
 
 console.log(`\n${'='.repeat(60)}\nZUSAMMENFASSUNG (Phase 3)\n${'='.repeat(60)}`);
 console.log(`  Bestanden: ${passed}`);

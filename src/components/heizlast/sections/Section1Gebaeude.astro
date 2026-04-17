@@ -164,16 +164,20 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   <!-- EBF aus Zimmermassen berechnen -->
   <Toggle label="EBF aus Zimmermassen berechnen" caption="Helfer" id="hz-ebf-helper">
     <p class="hz-muted" style="margin-bottom: 10px;">
-      Zimmer einzeln eintragen, die Summe der Flächen wird live berechnet.
-      Mit <strong>Übernehmen</strong> wird der Wert in die EBF-Eingabe geschrieben.
-      Mit <strong>Live</strong>-Modus wird die EBF bei jeder Änderung aktualisiert.
+      Pro Zimmer entweder Länge × Breite eintragen oder die Fläche direkt
+      angeben (letztere hat Vorrang). Unbeheizte Räume (Checkbox „Beheizt" aus)
+      werden nicht in die Netto-EBF einbezogen, sondern separat ausgewiesen.
+      <strong>Übernehmen</strong> schreibt die Netto-EBF in das Feld oben,
+      <strong>Live</strong> aktualisiert sie bei jeder Änderung.
     </p>
 
     <div class="hz-raum-header">
       <span>Bezeichnung</span>
       <span>Länge</span>
       <span>Breite</span>
+      <span>Fläche direkt</span>
       <span>Fläche</span>
+      <span>Beheizt</span>
       <span></span>
     </div>
     <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
@@ -191,7 +195,11 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           <span>Live-Modus (EBF automatisch übernehmen)</span>
         </label>
         <div class="hz-raum-sum">
-          Summe: <strong id="hz-raum-sum-value">0.0</strong> m²
+          <span class="hz-raum-sum__part">beheizt: <strong id="hz-raum-sum-beheizt">0.0</strong> m²</span>
+          <span class="hz-raum-sum__sep">·</span>
+          <span class="hz-raum-sum__part">abgezogen (unbeheizt): <strong id="hz-raum-sum-unbeheizt">0.0</strong> m²</span>
+          <span class="hz-raum-sum__sep">·</span>
+          <span class="hz-raum-sum__part hz-raum-sum__netto">Netto-EBF: <strong id="hz-raum-sum-value">0.0</strong> m²</span>
         </div>
         <button type="button" class="hz-btn hz-btn-dark" id="hz-raum-apply">
           In EBF übernehmen
@@ -306,7 +314,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   /* Zimmer-Helper */
   .hz-raum-header, .hz-raum-row {
     display: grid;
-    grid-template-columns: 1.6fr 1fr 1fr 1fr 44px;
+    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 58px 44px;
     gap: 10px;
     align-items: center;
   }
@@ -320,14 +328,26 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     padding: 8px 4px;
     border-bottom: 1px dashed var(--hz-border);
   }
-  .hz-raum-row input {
+  .hz-raum-row input[type="text"], .hz-raum-row input[type="number"] {
     padding: 8px 10px;
     border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
     background: var(--hz-white);
     font-family: var(--hz-font-body); font-size: 14.5px;
   }
   .hz-raum-row input:focus { outline: 0; border-color: var(--hz-navy); box-shadow: 0 0 0 3px rgba(27,42,74,0.08); }
+  /* Wenn flaecheDirekt gesetzt ist, bekommt die Zeile `data-direkt="true"` und
+     Länge/Breite werden visuell gedämpft (aber bleiben bedienbar). */
+  .hz-raum-row[data-direkt="true"] input[data-raum-field="laenge"],
+  .hz-raum-row[data-direkt="true"] input[data-raum-field="breite"] {
+    opacity: 0.45;
+    background: var(--hz-off-white);
+  }
+  .hz-raum-row[data-beheizt="false"] { background: rgba(200, 200, 210, 0.12); }
   .hz-raum-flaeche { font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); }
+  .hz-raum-beheizt {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .hz-raum-beheizt input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--hz-navy); }
   .hz-raum-remove {
     border: 0; background: transparent; padding: 6px;
     color: var(--hz-mid-gray); border-radius: var(--hz-radius-sm);
@@ -342,12 +362,35 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   .hz-raum-actions__right { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .hz-raum-live { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--hz-mid-gray); }
   .hz-raum-live input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--hz-navy); }
-  .hz-raum-sum { font-size: 14px; color: var(--hz-navy); }
+  .hz-raum-sum {
+    display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    font-size: 14px; color: var(--hz-navy);
+  }
   .hz-raum-sum strong { font-family: var(--hz-font-heading); font-size: 16px; }
+  .hz-raum-sum__sep { color: var(--hz-mid-gray); }
+  .hz-raum-sum__netto strong { color: var(--hz-navy); }
 
+  @media (max-width: 820px) {
+    .hz-raum-header, .hz-raum-row {
+      grid-template-columns: 1.2fr 0.8fr 0.8fr 0.9fr 0.9fr auto 44px;
+    }
+  }
   @media (max-width: 640px) {
     .hz-raum-header { display: none; }
-    .hz-raum-row { grid-template-columns: 1fr 44px; gap: 8px; }
-    .hz-raum-row > .hz-raum-dim-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .hz-raum-row {
+      grid-template-columns: 1fr 1fr auto 44px;
+      grid-template-areas:
+        "name name beheizt remove"
+        "laenge breite direkt direkt"
+        "flaeche flaeche flaeche flaeche";
+      gap: 8px;
+    }
+    .hz-raum-row input[data-raum-field="name"] { grid-area: name; }
+    .hz-raum-row input[data-raum-field="laenge"] { grid-area: laenge; }
+    .hz-raum-row input[data-raum-field="breite"] { grid-area: breite; }
+    .hz-raum-row input[data-raum-field="flaecheDirekt"] { grid-area: direkt; }
+    .hz-raum-row .hz-raum-flaeche { grid-area: flaeche; }
+    .hz-raum-row .hz-raum-beheizt { grid-area: beheizt; }
+    .hz-raum-row .hz-raum-remove { grid-area: remove; }
   }
 </style>

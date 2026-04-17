@@ -1,1 +1,21 @@
-Docs: HANDOFF-PHASE-13 (Block E) + CLAUDE.md Block-D-Eintrag
+Phase 9 / Block E: EBF-Helfer erweitern (beheizt/unbeheizt + Flaeche direkt)
+
+- RaumInput um flaecheDirekt + beheizt erweitert; laenge/breite jetzt
+  number|null. flaecheOverride bleibt als Legacy-Feld. Neue Exporte
+  raumFlaeche() und sumRaumFlaechenNetto() in state.ts.
+- sumRaumFlaechen() bleibt als Alias auf .netto fuer Rueckwaertskompat.
+- Sanfte v1-Migration in storage.ts: alte Zimmer ohne beheizt/flaecheDirekt
+  bekommen beheizt=true, flaecheDirekt=null; laenge/breite werden zu
+  number|null normalisiert.
+- Section1Gebaeude.astro: Tabelle um zwei Spalten erweitert (Flaeche direkt,
+  Beheizt Checkbox). Neue dreigliedrige Summenzeile beheizt/unbeheizt/Netto.
+  CSS mit data-direkt-/data-beheizt-Attributen, Mobile-Layout via
+  grid-template-areas.
+- heizlast.astro: renderRaumList komplett ueberarbeitet, Event-Delegation
+  um flaecheDirekt + beheizt, Live-Modus uebernimmt agg.netto, neuer
+  parseRaumNumber-Helper.
+- Tests: zwei neue Sektionen in test-heizlast-state.ts (13 neue Asserts).
+  Neue Summe: 49 + 32 gruen.
+- HANDOFF-PHASE-14.md geschrieben (Block F: Section-5-Entfernung +
+  Endergebnis-Block in Section 7 + Sektions-Umnummerierung).
+- CLAUDE.md um Block-E-Eintrag ergaenzt.
