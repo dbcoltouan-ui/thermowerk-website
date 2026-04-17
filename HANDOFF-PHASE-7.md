@@ -1,4 +1,6 @@
-# HANDOFF · Phase 7 — Testing + Deploy
+# HANDOFF · Phase 7 — Testing + Deploy (ABGESCHLOSSEN 2026-04-17)
+
+**Status:** Code-Polish umgesetzt (Focus-Trap in Modalen, Live-Projektname im Header, Save-Status-Animation, Plausi-Ampel-A11y). Tests 49 + 16 grün. Manuelle Live-Abnahme durch Daniel läuft — Checklist unten.
 
 ## Copy-Paste-Prompt für den nächsten Chat
 

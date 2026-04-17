@@ -55,7 +55,7 @@ import SectionNotes from '../SectionNotes.astro';
           Angemeldete Benutzer können Projekte zusätzlich in der Cloud ablegen.
         </p>
       </div>
-      <span class="hz-save-status" data-hz-save-status>
+      <span class="hz-save-status" data-hz-save-status role="status" aria-live="polite">
         <span class="hz-save-status__dot" aria-hidden="true"></span>
         <span class="hz-save-status__text" data-hz-save-status-text>Bereit.</span>
       </span>
@@ -170,7 +170,16 @@ import SectionNotes from '../SectionNotes.astro';
   .hz-save-status[data-tone="ok"] .hz-save-status__dot { background: #2e7d32; }
   .hz-save-status[data-tone="busy"] .hz-save-status__dot { background: #f9a825; animation: hz-pulse 1.2s infinite; }
   .hz-save-status[data-tone="err"] .hz-save-status__dot { background: var(--hz-red); }
+  .hz-save-status.is-flash {
+    animation: hz-save-flash 1.4s ease-out;
+    border-color: #2e7d32;
+  }
   @keyframes hz-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @keyframes hz-save-flash {
+    0%   { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.45); background: #EAF6EC; }
+    40%  { box-shadow: 0 0 0 6px rgba(46, 125, 50, 0);   background: #EAF6EC; }
+    100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);     background: var(--hz-white); }
+  }
 
   .hz-save-actions {
     display: flex; flex-wrap: wrap; gap: 10px;

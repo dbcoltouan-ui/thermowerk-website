@@ -413,6 +413,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     if (wm2 < 40 || wm2 > 140) return 'gelb';
     return 'gruen';
   }
+  function ampelLabel(a: 'gruen' | 'gelb' | 'rot'): string {
+    return a === 'gruen' ? 'plausibel' : a === 'gelb' ? 'grenzwertig' : 'unplausibel';
+  }
   function labelBauperiode(id: string): string {
     const p = BAUPERIODEN.find((b) => b.id === id);
     return p ? p.label : id;
@@ -456,7 +459,11 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setKpi('tvoll', fmtInt(r.tvoll));
     setKpi('qhlRaw', fmt(r.qhlRaw?.value));
     setKpi('qhlKorr', fmt(r.qhlKorr?.value));
-    setKpi('plausi', fmt(r.plausi?.value, 1), { 'data-ampel': ampelFromPlausi(r.plausi?.value ?? null) });
+    const ampel = ampelFromPlausi(r.plausi?.value ?? null);
+    setKpi('plausi', fmt(r.plausi?.value, 1), {
+      'data-ampel': ampel,
+      'title': 'Spezifische Heizleistung — ' + ampelLabel(ampel),
+    });
     setKpi('qw', fmt(r.qw?.value));
     setKpi('qwwTag', fmt(r.qwwTagVal?.value));
     setKpi('vwu', fmtInt(r.vwu?.value));
@@ -465,6 +472,13 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setKpi('qh', fmt(r.qh?.value));
     setKpi('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setKpi('puffer', fmtInt(r.pufferGerundet));
+
+    // Header: Projektname als Brand-Sub (fallback auf "Heizlast-Rechner")
+    const brandSub = document.querySelector('[data-hz-brand-sub]') as HTMLElement | null;
+    if (brandSub) {
+      const label = (s.projectName && s.projectName.trim()) || 'Heizlast-Rechner';
+      if (brandSub.textContent !== label) brandSub.textContent = label;
+    }
 
     // Zusammenfassung (Section 7)
     setSum('projectName', s.projectName || '—');
@@ -532,6 +546,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     if (loginLabel) loginLabel.textContent = auth ? 'Abmelden' : 'Anmelden';
   }
 
+  let lastCloudSaveSeen: number | null = null;
   uiState.subscribe((u) => {
     refreshCloudButtons(u.isAuthenticated);
     if (u.syncInFlight) setStatus('busy', 'Synchronisiere \u2026');
@@ -540,6 +555,17 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     else setStatus('idle', 'Bereit.');
     if (saveLocalEl) saveLocalEl.textContent = fmtTime(u.lastLocalSave);
     if (saveCloudEl) saveCloudEl.textContent = fmtTime(u.lastCloudSave);
+    // Flash-Animation nur bei neuem Cloud-Save
+    if (u.lastCloudSave && u.lastCloudSave !== lastCloudSaveSeen && !u.syncInFlight && !u.lastError) {
+      lastCloudSaveSeen = u.lastCloudSave;
+      if (statusEl) {
+        statusEl.classList.remove('is-flash');
+        // Reflow erzwingen, damit Animation neu startet
+        void (statusEl as HTMLElement).offsetWidth;
+        statusEl.classList.add('is-flash');
+        setTimeout(() => statusEl.classList.remove('is-flash'), 1500);
+      }
+    }
   });
 
   // Nach jeder Aenderung: Timestamp "zuletzt lokal gespeichert" aktualisieren (analog zum Debounce in storage.ts).
@@ -617,6 +643,40 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     if (loginModal && !loginModal.hidden) { closeModal(loginModal); uiState.setKey('authModalOpen', false); }
     if (projectsModal && !projectsModal.hidden) { closeModal(projectsModal); uiState.setKey('projectsModalOpen', false); }
     if (exportModal && !exportModal.hidden) { closeModal(exportModal); uiState.setKey('exportModalOpen', false); }
+  });
+
+  // Focus-Trap: Tab bleibt im offenen Modal-Card (erstes <-> letztes fokussierbares Element).
+  function getVisibleModal(): HTMLElement | null {
+    if (loginModal && !loginModal.hidden) return loginModal;
+    if (projectsModal && !projectsModal.hidden) return projectsModal;
+    if (exportModal && !exportModal.hidden) return exportModal;
+    return null;
+  }
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Tab') return;
+    const modal = getVisibleModal();
+    if (!modal) return;
+    const card = modal.querySelector('.hz-modal__card') || modal;
+    const focusables = Array.from(
+      card.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (ev.shiftKey) {
+      if (active === first || !card.contains(active)) {
+        ev.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !card.contains(active)) {
+        ev.preventDefault();
+        first.focus();
+      }
+    }
   });
 
   // Generic: Klick auf [data-hz-modal-dismiss] oder Backdrop schliesst.

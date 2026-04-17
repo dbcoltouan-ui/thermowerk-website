@@ -1,11 +1,11 @@
-Phase 6: Login-/Projekte-/Export-Modale + Print-CSS + Deckblatt
+Phase 7: Focus-Trap, Live-Projektname im Header, Save-Status-Animation, Plausi-Ampel-A11y
 
-- LoginModal.astro (Sign-in/Sign-out, Cookie via /api/heizlast-auth)
-- ProjectsModal.astro (Liste, Laden/Loeschen mit Confirm)
-- ExportModal.astro (Checkboxen pro Teil, PDF/JSON)
-- PrintCover.astro (Deckblatt mit KPIs + Meta fuer PDF)
-- src/lib/heizlast/export.ts (runExport, defaultFilename, PDF+JSON)
-- HeizlastLayout.astro: @media print + @page + konditionale Sektionen
-- heizlast.astro: Modal-Infrastruktur, Auth-Flow, Projects-Render, Export-Wire-up
-- CLAUDE.md: Phase-6-Block
-- HANDOFF-PHASE-7.md: Testing + Deploy-Scope fuer naechsten Chat
+- heizlast.astro: globaler keydown-Handler fuer Tab/Shift+Tab zyklisiert Focus im offenen Modal (.hz-modal__card). Laeuft parallel zum bestehenden ESC-Handler und lastTrigger-Restore.
+- HeizlastLayout.astro: brand-sub bekommt data-hz-brand-sub; renderAll() schreibt state.projectName rein (Fallback 'Heizlast-Rechner').
+- Section7Projekt.astro: neue Klasse .hz-save-status.is-flash mit 1.4s gruenem Pulse/Glow. role=status + aria-live=polite auf dem Status-Pill.
+- heizlast.astro: lastCloudSaveSeen im uiState.subscribe triggert Flash nur bei echt neuem Cloud-Save (nicht bei Reload). Auto-Remove nach 1500 ms.
+- heizlast.astro: setKpi(plausi) setzt title-Attribut mit Ampel-Klartext (plausibel/grenzwertig/unplausibel) via neuem Helper ampelLabel().
+
+Tests weiterhin gruen (49 + 16).
+
+Docs aktualisiert: CLAUDE.md Phase-7-Block, HANDOFF-PHASE-7.md als abgeschlossen markiert.
