@@ -10,8 +10,10 @@
 //   resolveDefault() auf.
 
 interface Props {
-  /** Label ueber dem Feld */
+  /** Label ueber dem Feld — Begriff, z.B. "Sperrzeit" */
   label: string;
+  /** Symbol + Einheit unter dem Label, z.B. "Qoff · h/d" (Phase 9 / Block G) */
+  symbol?: string;
   /** HTML-Id des Inputs (wird auch fuers for=-Label genutzt) */
   id: string;
   /** Pfad im State, den dieses Feld schreibt (z.B. "zuschlaege.toff") */
@@ -20,7 +22,7 @@ interface Props {
   overridePath?: string;
   /** Default-Wert (fuer Reset-Fallback, wenn resolveDefault nichts liefert) */
   defaultValue: string | number;
-  /** Einheit (z.B. "h", "L", "K") */
+  /** Einheit (z.B. "h", "L", "K") — optional, wenn symbol gesetzt darf leer bleiben */
   unit?: string;
   /** Kurzer erklaerender Hinweis unter dem Feld */
   hint?: string;
@@ -36,6 +38,7 @@ interface Props {
 
 const {
   label,
+  symbol,
   id,
   bindPath,
   overridePath,
@@ -58,6 +61,7 @@ const defaultString = String(defaultValue);
     <label for={id} class="hz-ovr__label">{label}</label>
     {source ? <span class="hz-ovr__source">Standard: {source}</span> : null}
   </div>
+  {symbol ? <div class="hz-ovr__symbol">{symbol}</div> : null}
 
   <div class="hz-ovr__control">
     <input
@@ -108,6 +112,14 @@ const defaultString = String(defaultValue);
     font-size: 12px;
     color: var(--hz-mid-gray);
     letter-spacing: 0.02em;
+  }
+  .hz-ovr__symbol {
+    font-family: var(--hz-font-body);
+    font-size: 12px;
+    color: var(--hz-mid-gray);
+    margin-top: -2px;
+    margin-bottom: 2px;
+    letter-spacing: 0.01em;
   }
 
   .hz-ovr__control {

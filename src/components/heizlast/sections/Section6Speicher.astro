@@ -40,7 +40,8 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
 
       <div class="hz-grid-2">
         <OverrideField
-          label="Speicher-Solltemperatur (Austritt)"
+          label="Speicher-Solltemperatur"
+          symbol="Taus · °C"
           id="hz-ww-t-aus"
           bindPath="speicher.wwTStoAus"
           overridePath="speicher.wwTAustritt"
@@ -54,7 +55,8 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
           hint="Legionellen-Hygiene: mind. 55 °C. Standard FWS: 60 °C."
         />
         <OverrideField
-          label="Kaltwasser-Eintrittstemperatur"
+          label="Kaltwasser-Eintritt"
+          symbol="Tein · °C"
           id="hz-ww-t-ein"
           bindPath="speicher.wwTStoEinOverride"
           overridePath="speicher.wwTEintritt"
@@ -138,10 +140,11 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
     </div>
   </div>
 
-  <InfoBox title="Referenzen" icon="book">
-    <p><strong>WW-Speicher</strong>: FWS Modul 3 §10 / §11 (SIA 385/2 für Nutzwarmwasser-Bedarf).</p>
-    <p><strong>Heizungs-Puffer</strong>: SWKI BT 102-01, VDI 4645, sowie Hersteller-Empfehlungen.
-       Das <em>Erfahrungswert-Band</em> 15–25 l/kW (L/W mit Abtau) stammt aus SWKI.</p>
+  <InfoBox title="Normen &amp; Richtwerte" icon="book">
+    <dl class="hz-info__grid">
+      <div><dt>WW-Speicher</dt><dd>FWS Modul 3 §10/§11, SIA 385/2 für Nutzbedarf.</dd></div>
+      <div><dt>Heizungs-Puffer</dt><dd>SWKI BT 102-01, VDI 4645. Erfahrungsband L/W mit Abtau: 15–25 l/kW.</dd></div>
+    </dl>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion6" sectionLabel="Sektion 6 (Speicher)" />

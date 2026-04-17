@@ -145,7 +145,8 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     <!-- tvoll mit Auto-Default + Override (Phase 9 / Block A + B) -->
     <div class="hz-grid-3">
       <OverrideField
-        label="Vollbetriebsstunden tvoll"
+        label="Vollbetriebsstunden"
+        symbol="tvoll · h/a"
         id="hz-tvoll"
         bindPath="gebaeude.tvollOverride"
         overridePath="gebaeude.tvoll"
@@ -156,7 +157,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
         step={50}
         min={1000}
         max={3500}
-        hint="Default aus Profil + Lage; Reset-Pfeil stellt den Richtwert wieder her."
+        hint="Richtwert aus Profil + Lage."
       />
     </div>
   </div>

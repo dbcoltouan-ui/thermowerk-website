@@ -17,7 +17,7 @@ import SectionNotes from './SectionNotes.astro';
   id="sektion-diagramm"
   kicker="04a - Leistungsdiagramm"
   title="WP-Kennlinie vs. Gebaeudelast"
-  subline="Vergleich der Waermepumpen-Leistung mit dem Waermebedarf des Gebaeudes. Der Schnittpunkt markiert den Bivalenzpunkt."
+  subline="Wärmepumpen-Kennlinie versus Gebäude-Heizkennlinie. Schnittpunkt = Bivalenzpunkt."
   tone="off"
 >
   <div class="hz-diag">
@@ -87,21 +87,12 @@ import SectionNotes from './SectionNotes.astro';
       </p>
     </details>
 
-    <InfoBox title="Wie lese ich das Diagramm?" icon="help">
-      <p>
-        Die <strong>blaue Linie</strong> ist die Waermepumpen-Kennlinie: Sie zeigt, wie viel Heizleistung die
-        WP bei welcher Aussentemperatur liefert. Luft/Wasser-WP liefern bei tiefen Temperaturen weniger Leistung
-        als bei milden.
-      </p>
-      <p>
-        Die <strong>rote Linie</strong> ist die Gebaeude-Heizkennlinie: bei Heizgrenztemperatur (θGT) ist der
-        Bedarf 0, bei Normaussentemperatur (θne) erreicht er die volle Heizlast Qhl.
-      </p>
-      <p>
-        Der <strong>Schnittpunkt</strong> beider Linien ist der <strong>Bivalenzpunkt</strong>: bis dort reicht
-        die WP allein, darunter benoetigt es einen Zusatz (Heizstab, bestehender Kessel).
-        Fuer Luft/Wasser-WP wird meist ein Bivalenzpunkt zwischen −5 °C und −3 °C angestrebt.
-      </p>
+    <InfoBox title="Begriffe" icon="help">
+      <dl class="hz-info__grid">
+        <div><dt>WP-Kennlinie (blau)</dt><dd>Heizleistung der WP je Aussentemperatur (Herstellerdaten).</dd></div>
+        <div><dt>Gebäude-Heizkennlinie (rot)</dt><dd>Heizbedarf: 0 bei θGT, voll bei θne.</dd></div>
+        <div><dt>Bivalenzpunkt</dt><dd>Schnittpunkt — bis dort deckt die WP allein. Richtwert L/W: −5 bis −3 °C.</dd></div>
+      </dl>
     </InfoBox>
 
     <SectionNotes sectionKey="sektion5" sectionLabel="Leistungsdiagramm" />

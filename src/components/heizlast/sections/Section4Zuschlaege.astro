@@ -16,7 +16,7 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
   id="sektion-4"
   kicker="04 - Zuschläge"
   title="Zuschläge"
-  subline="Sperrzeit-Aufschlag und Zuschlag für verbundene Systeme (Lüftung, Pool)."
+  subline="Sperrzeit-Zuschlag (Qoff) und Zuschlag für verbundene Systeme (Qas)."
   tone="off"
 >
   <slot name="aside" slot="aside">
@@ -39,7 +39,8 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
     <div class="hz-sperrzeit-block" data-hz-sperrzeit-block>
       <div class="hz-grid-3" style="margin-top: 12px;">
         <OverrideField
-          label="toff"
+          label="Sperrzeit"
+          symbol="toff · h/d"
           id="hz-toff"
           bindPath="zuschlaege.toff"
           defaultValue={2}
@@ -79,11 +80,11 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
     </label>
   </div>
 
-  <InfoBox title="Sperrzeit-Zuschlag" icon="info">
-    <p>
-      Zuschlag auf Qhl wegen täglicher Abschaltung der Wärmepumpe durch den Energieversorger (EVU).
-      Die wegfallende Heizzeit wird auf die restlichen Betriebsstunden umgelegt — Grundlage ist die FWS-Korrekturtabelle.
-    </p>
+  <InfoBox title="Begriffe" icon="help">
+    <dl class="hz-info__grid">
+      <div><dt>Qoff</dt><dd>Sperrzeit-Aufschlag auf Qhl (FWS-Faktortabelle).</dd></div>
+      <div><dt>Qas</dt><dd>Zuschlag für verbundene Systeme (Lüftung, Pool, Solar).</dd></div>
+    </dl>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion4" sectionLabel="Sektion 4 (Zuschläge)" />

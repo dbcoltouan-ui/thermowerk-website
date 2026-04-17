@@ -116,6 +116,7 @@ import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlas
     <div class="hz-grid-3">
       <OverrideField
         label="Speicherverluste"
+        symbol="fSp · %"
         id="hz-ww-speicher"
         bindPath="warmwasser.speicherProzent"
         overridePath="warmwasser.speicher"
@@ -130,6 +131,7 @@ import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlas
       />
       <OverrideField
         label="Zirkulationsverluste"
+        symbol="fZirk · %"
         id="hz-ww-zirk"
         bindPath="warmwasser.zirkProzent"
         overridePath="warmwasser.zirk"
@@ -144,6 +146,7 @@ import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlas
       />
       <OverrideField
         label="Ausstossverluste"
+        symbol="fAus · %"
         id="hz-ww-ausstoss"
         bindPath="warmwasser.ausstossProzent"
         overridePath="warmwasser.ausstoss"
@@ -160,7 +163,8 @@ import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlas
 
     <div style="margin-top: 14px; max-width: 320px;">
       <OverrideField
-        label="ΔT Kaltwasser → Warmwasser"
+        label="Temperaturhub Warmwasser"
+        symbol="ΔT · K"
         id="hz-ww-deltaT"
         bindPath="warmwasser.deltaTOverride"
         overridePath="warmwasser.deltaT"
@@ -171,14 +175,12 @@ import { WW_STANDARDS, WW_VERLUSTE_DEFAULTS, PHYSIK } from '../../../lib/heizlas
         step={1}
         min={20}
         max={70}
-        hint="Temperatur-Hub 10 °C → 60 °C = 50 K."
+        hint="Kaltwasser 10 °C → Warmwasser 60 °C = 50 K."
       />
     </div>
   </div>
 
-  <InfoBox title="Grundlage SIA 385/1" icon="book">
-    <p>Der Kaltwasser-Referenzwert liegt bei 10&nbsp;°C, die Zielzapftemperatur bei 60&nbsp;°C → ΔT&nbsp;=&nbsp;50&nbsp;K.
-       Der Verbrauch pro Person hängt vom Standard der Armaturen ab:</p>
+  <InfoBox title="Bedarfs-Richtwerte SIA 385/1" icon="book">
     <dl class="hz-info__grid">
       {WW_STANDARDS.map((w) => (
         <div><dt>{w.vwu} l/P/d</dt><dd>{w.label}</dd></div>

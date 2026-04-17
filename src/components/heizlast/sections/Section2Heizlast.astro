@@ -19,7 +19,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   id="sektion-2"
   kicker="02 - Heizlast Qhl"
   title="Heizlast-Berechnung"
-  subline="Waehle aus, welche Methoden du verwenden willst. Die oberste aktivierte Methode mit vollstaendigen Eingaben liefert Qhl. Bauperiode laeuft immer als Fallback."
+  subline="Berechnung nach FWS Modul 3. Bauperiode läuft als Fallback."
   tone="off"
 >
   <slot name="aside" slot="aside">
@@ -156,7 +156,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     </Toggle>
 
     <!-- Override -->
-    <Toggle label="Direkteingabe Qhl (Override)" caption="z. B. aus SIA-384-Berechnung" id="hz-m2-override">
+    <Toggle label="Direkteingabe Qhl" caption="z. B. aus SIA 384/1-Berechnung" id="hz-m2-override">
       <div class="hz-method" data-method="override">
         <label class="hz-method__switch">
           <input type="checkbox" data-hz-bind="heizlast.methodsEnabled.override" data-hz-type="boolean" />
@@ -219,13 +219,15 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     </Toggle>
   </div>
 
-  <InfoBox title="Methoden im Vergleich" icon="book" subtitle="FWS Modul 3">
-    <p><strong>Hierarchie:</strong> Direkteingabe &rarr; Betriebsstunden &rarr; Messung &rarr; Verbrauch &rarr; Bauperiode. Die oberste aktivierte Methode mit vollstaendigen Eingaben liefert Qhl.</p>
-    <p><strong>Verbrauch</strong> &ndash; genauste Methode wenn Verbrauchsdaten aus den letzten Jahren vorhanden sind.</p>
-    <p><strong>Messung</strong> &ndash; direkt aus Wärmezähler/Kesseldaten in kWh/a.</p>
-    <p><strong>Betriebsstunden</strong> &ndash; aus Laufzeit &times; Nennleistung, nützlich bei konstant betriebenen Kesseln.</p>
-    <p><strong>Bauperiode</strong> &ndash; Pauschale aus FWS-Tabelle, laeuft immer als Fallback.</p>
-    <p><strong>Direkteingabe</strong> &ndash; Qhl manuell setzen (z. B. aus SIA 384).</p>
+  <InfoBox title="Methoden" icon="book" subtitle="FWS Modul 3">
+    <p><strong>Hierarchie:</strong> Direkteingabe &rarr; Betriebsstunden &rarr; Messung &rarr; Verbrauch &rarr; Bauperiode.</p>
+    <dl class="hz-info__grid">
+      <div><dt>Verbrauch</dt><dd>Brennstoff-/Strommenge über einen Zeitraum.</dd></div>
+      <div><dt>Messung</dt><dd>Wärmezähler oder Kesseldaten in kWh/a.</dd></div>
+      <div><dt>Betriebsstunden</dt><dd>Laufzeit × Nennleistung.</dd></div>
+      <div><dt>Bauperiode</dt><dd>Pauschale aus FWS-Tabelle (Fallback).</dd></div>
+      <div><dt>Direkteingabe</dt><dd>Qhl manuell (z.&nbsp;B. aus SIA 384/1).</dd></div>
+    </dl>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion2" sectionLabel="Sektion 2 (Heizlast)" />
