@@ -1,8 +1,1 @@
-docs: Cowork-VM Root Cause + Workarounds in CLAUDE.md
-
-Problem 1 (Mount-Drift via FUSE-Cache): git update-index --refresh
-Problem 2 (virtiofs unlink-Block in .git): Commits immer via Desktop Commander auf Windows
-Problem 3 (index.lock haengt): PowerShell Remove-Item -Force statt cmd del
-Problem 4 (Heredoc ! -> \!): sed -i hinterher oder ! vermeiden
-
-HANDOFF-PHASE-10.md Stolpersteine-Sektion verweist auf die neue CLAUDE.md-Sektion, damit kuenftige Chats die Root Cause kennen und nicht wieder rumprobieren muessen.
+chore: drift-probe.txt entfernt (Test-Artefakt aus Mount-Drift-Diagnose)
