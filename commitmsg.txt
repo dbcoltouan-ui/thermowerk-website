@@ -1,13 +1,12 @@
-handoff: Phase 9 - UX-Refactor brief
+handoff: Phase 9 - Block M1 ergaenzt (Desktop-Breite + Fluid-Typografie)
 
-- HANDOFF-PHASE-9.md komplett geschrieben (Copy-Paste-Prompt oben,
-  Bloecke A-M mit Code-Pointern und Acceptance-Kriterien)
-- CLAUDE.md oben um Phase-9-Pointer ergaenzt, damit jede neue Session
-  die Handoff-Datei sofort findet
-- Inhalte: Defaults statt Platzhalter, Methodik ohne aktiv-Toggle,
-  EBF-Helfer mit unbeheizten Raeumen, Label-Pattern, Sperrzeit Ja/Nein,
-  Section 5 raus, Save-Block straffen, Neues-Projekt-Confirm +
-  beforeunload, Notizen-UI vereinfachen, Mobile word-wrap,
-  Logo-Proportionen fixen, Brand-Text rechts vom Logo entfernen
-
-Tests weiterhin gruen: 49 Rechenkern + 16 State-Integration.
+- Neuer Block M1 in HANDOFF-PHASE-9.md: Container-Max auf
+  min(92vw, 960px) reduzieren, damit links/rechts auf grossen
+  Monitoren mehr Rand entsteht und der Content ruhiger wirkt
+- Fluid-Typografie via clamp() fuer Body, Section-Titel, Kicker,
+  Subline, KPI-Zahlen und Form-Inputs - skaliert zwischen Mobile
+  und Desktop fliessend, prozentualer Seiten-Eindruck bleibt gleich
+- Abstands-Tokens (--hz-gap-section/row/card) auf clamp() umstellen
+- Grid-Minmax auf clamp(160px, 18vw, 220px) damit Felder symmetrisch
+  und ruhig bleiben, keine zu kleinen Micro-Spalten
+- Akzeptanzliste um Desktop-Breite-Kriterium ergaenzt

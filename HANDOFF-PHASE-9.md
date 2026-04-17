@@ -397,6 +397,83 @@ welche in CH üblich ist.
 
 ---
 
+### Block M1 — Desktop-Breite reduzieren (fluid & symmetrisch)
+
+**Problem:** Auf grossen Bildschirmen wirkt der `/heizlast`-Content zu weit
+in die Breite gezogen, links und rechts bleibt nur ein schmaler Rand. Daniel
+moechte mehr Rand, damit die Seite ruhiger wirkt, ohne dass die innere
+Anordnung umbricht. Schriftgroessen und Abstaende sollen dabei proportional
+mitskalieren (fluid), damit der prozentuale Eindruck auf allen Bildschirmen
+gleich bleibt.
+
+**Aufgaben:**
+1. **`--hz-container-max`** in `HeizlastLayout.astro` (unter den `--hz-*`-
+   Tokens) einfuehren und auf `min(92vw, 960px)` setzen (vorher implizit
+   ~1120–1160 px). Damit bleiben auf 1440-px-Monitoren etwa 240 px freier
+   Rand pro Seite und der Content ist nicht mehr bildschirmfuellend.
+   - `.hz-container { max-width: var(--hz-container-max); margin: 0 auto;
+     padding: 0 clamp(16px, 3vw, 32px); }`
+   - `.hz-topbar__inner` ebenfalls auf `var(--hz-container-max)` setzen,
+     damit Header und Content identisch beschnitten sind (Logo linksbuendig
+     mit Section-Inhalten).
+   - Executive-Summary-Stub + Print-Cover pruefen, ob sie dieselbe Max-
+     Breite bekommen oder voll bleiben (Print bleibt volle Seite).
+
+2. **Fluid-Typografie** via `clamp()` fuer die wichtigsten Textrollen in
+   `.hz-scope` (gleiche Datei):
+   - Body: `font-size: clamp(14.5px, 1.05vw + 0.25rem, 16px);`
+   - Section-Kicker: `font-size: clamp(11px, 0.85vw, 12.5px);`
+   - Section-Titel (`h2`): `font-size: clamp(20px, 1.8vw + 0.2rem, 28px);`
+   - Subline: `font-size: clamp(14px, 1vw + 0.2rem, 16px);`
+   - KPI-Zahl `.hz-kpi__value`: `font-size: clamp(22px, 2.2vw, 30px);`
+   - Hero-KPI `.hz-kpi--hero .hz-kpi__value`: `font-size: clamp(32px, 4vw,
+     52px);`
+   - Form-Input-Text: `font-size: clamp(14.5px, 1vw + 0.2rem, 16px);` —
+     iOS-Autozoom-Schutz bleibt (16px Minimum greift automatisch weil der
+     Clamp-Max auf 16 steht, aber Mobile-Block aus Phase 8 mit `font-size:
+     16px` bleibt drin).
+
+3. **Abstands-Tokens** in `:root .hz-scope` (oder `:root.hz-scope` je nach
+   Scope) auf fluide Werte umstellen:
+   - `--hz-gap-section: clamp(36px, 5vw, 64px);` (vorher fix 56/72 px je
+     Breakpoint).
+   - `--hz-gap-row: clamp(12px, 1.5vw, 20px);`
+   - `--hz-gap-card: clamp(14px, 1.8vw, 22px);`
+   - `SectionWrapper.astro` nutzt bereits ein festes Padding — auf die neuen
+     Tokens umstellen.
+
+4. **Grid-Feldgroessen symmetrisch halten**: Einige Grids nutzen
+   `repeat(auto-fit, minmax(180px, 1fr))` (z.B. `.hz-kpi-grid`). Auf
+   `minmax(clamp(160px, 18vw, 220px), 1fr)` anheben, damit bei schmalerem
+   Container nicht zu viele Micro-Spalten entstehen und die Felder ruhig
+   und symmetrisch wirken.
+
+5. Wichtig: Desktop-Breakpoints (>=640 px) pruefen, dass der neue
+   `container-max` nicht mit hartkodierten `max-width: 1120px` o.ae. in
+   Section-Komponenten kollidiert. Wenn doch, diese entfernen (`container-
+   max` zentral steuern).
+
+**Akzeptanz:**
+- Auf 1440-px-Viewport: links/rechts jeweils ca. 200–260 px Rand; Content-
+  Block wirkt mittig, nicht randfuellend.
+- Auf 1920-px-Viewport: Rand weiter, Content bleibt bei ~960 px.
+- Zwischen 768 px und 1440 px skalieren Fonts und Abstaende fliessend, kein
+  harter Sprung.
+- Mobile-Verhalten aus Phase 8 (Symmetrisches 16-px-Padding, 16-px-Inputs)
+  bleibt unveraendert — der Clamp-Min fuer Inputs wird auf Mobile durch die
+  bestehende 640-px-Regel auf fixe 16 px gehalten.
+
+**Code-Pointer:**
+- `src/layouts/HeizlastLayout.astro` (Tokens, `.hz-container`,
+  `.hz-topbar__inner`, Mobile-Block).
+- `src/components/heizlast/SectionWrapper.astro` (falls eigenes Padding
+  haerte Pixel hat — auf Tokens umstellen).
+- `src/components/heizlast/KpiCard.astro` (Fluid-Werte).
+- Alle Section-Komponenten nur pruefen, nicht editieren, wenn sie
+  `container-max`-kompatibel sind.
+
+---
+
 ### Block M — Mobile-Polish: Worttrennung & Logo
 
 **Problem:** Auf Mobile werden Wörter mitten umgebrochen oder nur der letzte
@@ -453,6 +530,10 @@ Buchstabe rutscht in eine neue Zeile (siehe User-Screenshots).
   pflichtiger Stand ungespeichert.
 - Speicher-Rundung an realistische Markt-Staffelung angepasst,
   „Berechnungswert X · Empfehlung Y" sichtbar.
+- **Desktop-Breite reduziert**: `--hz-container-max = min(92vw, 960px)`,
+  linker/rechter Rand auf 1440 px ca. 200–260 px. Schrift und Abstaende
+  skalieren via `clamp()` fluid zwischen Mobile und Desktop, der prozentuale
+  Seiten-Eindruck bleibt ueber alle Viewport-Breiten gleich.
 
 ---
 
