@@ -1,1 +1,1 @@
-test: defender-probe (wird gleich wieder entfernt)
+test: defender-probe entfernt
