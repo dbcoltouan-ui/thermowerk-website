@@ -131,7 +131,7 @@ export interface HeizlastSectionState {
   sanierungActive: boolean;
   sanierungMassnahmen: SanierungsMassnahme[];
 
-  /** M3: Plausibilitäts-Kontrolle W/m² */
+  /** M3: Plausibilitäts-Kontrolle W/m² — Phase 9 / Block H: always-on, Feld bleibt als Legacy. */
   plausiActive: boolean;
 }
 

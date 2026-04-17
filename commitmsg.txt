@@ -1,9 +1,12 @@
-phase-9-block-g: Label-Pattern vereinheitlicht, InfoBoxen gekuerzt, Sublines entschlackt
+phase-9-block-h: Plausibilitaet immer aktiv, Export-Checkbox + Print-CSS
 
-- OverrideField: neue optionale prop symbol (Formel + Einheit unter dem Label, .hz-ovr__symbol)
-- Section 1 tvoll, Section 3 Verluste + DeltaT, Section 4 toff, Section 6 Speichertemperaturen mit symbol="..."
-- "(Override)" im Section-2-Toggle-Label entfernt
-- InfoBoxen auf "was ist es" reduziert: Section 3 Bedarfs-Richtwerte SIA 385/1, Section 4 Begriffe Qoff/Qas, Section 6 Normen + Richtwerte, Diagramm Begriffe, Section 2 Methoden-Uebersicht als dl
-- Sublines konsistent einzeilig (Sektion 2, 4, 7, Diagramm)
+- compute.ts: computePlausi ohne plausiActive-Gate (Kommentar Block H)
+- state.ts: plausiActive als Legacy-Feld markiert (Migration-safe)
+- Section2: "Plausibilitaet pruefen"-Toggle entfernt, data-hz-plausi-Attr
+  auf Plausi-KpiCard
+- export.ts: ExportPart um 'plausi' erweitert, PART_CLASS.plausi
+- ExportModal: Checkbox "Plausibilitaetscheck einschliessen" (default an)
+- HeizlastLayout Print-CSS: hz-print-mode:not(.hz-print-plausi-on)
+  [data-hz-plausi] blendet Plausi-Kachel im Druck aus
 
-Tests: 49 + 32 grün.
+Tests weiterhin 49 + 32 gruen.

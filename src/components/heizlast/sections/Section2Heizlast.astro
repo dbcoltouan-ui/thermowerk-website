@@ -26,7 +26,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
       <KpiCard label="Qhl (roh)" value="—" unit="kW" data-kpi="qhlRaw" />
       <KpiCard label="Qhl (korrigiert)" value="—" unit="kW" caption="nach Sanierung" data-kpi="qhlKorr" />
-      <KpiCard label="W / m²" value="—" unit="W/m²" data-kpi="plausi" />
+      <KpiCard label="W / m²" value="—" unit="W/m²" data-kpi="plausi" data-hz-plausi />
     </div>
   </slot>
 
@@ -207,16 +207,6 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
       </div>
     </Toggle>
 
-    <Toggle label="Plausibilität (W/m²) prüfen" caption="M3 - FWS-Kontrollwerte" id="hz-m3-plausi">
-      <label class="hz-switch">
-        <input type="checkbox" data-hz-bind="heizlast.plausiActive" data-hz-type="boolean" />
-        <span>Plausibilitätsband anzeigen</span>
-      </label>
-      <p class="hz-muted" style="margin-top: 8px;">
-        Zeigt den spezifischen Heizleistungswert (W/m²) und ob er im FWS-Band liegt.
-        Ergebnis als Badge auf der rechten Zwischen-KPI.
-      </p>
-    </Toggle>
   </div>
 
   <InfoBox title="Methoden" icon="book" subtitle="FWS Modul 3">

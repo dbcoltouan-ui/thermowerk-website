@@ -379,6 +379,9 @@ const {
 
       /* Grundlagen: Block sichtbar wenn Flag an */
       body.hz-print-mode:not(.hz-print-grundlagen-on) .hz-grundlagen { display: none !important; }
+
+      /* Plausibilitaet: nur exportieren wenn Flag gesetzt (Phase 9 / Block H) */
+      body.hz-print-mode:not(.hz-print-plausi-on) [data-hz-plausi] { display: none !important; }
     }
   </style>
 </head>

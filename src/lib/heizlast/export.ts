@@ -19,7 +19,8 @@ export type ExportPart =
   | 'diagramm'
   | 'formeln'
   | 'grundlagen'
-  | 'notizen';
+  | 'notizen'
+  | 'plausi';
 
 export interface ExportOptions {
   format: 'pdf' | 'json';
@@ -153,6 +154,7 @@ const PART_CLASS: Record<ExportPart, string> = {
   formeln: 'hz-print-formeln-on',
   grundlagen: 'hz-print-grundlagen-on',
   notizen: 'hz-print-notizen-on',
+  plausi: 'hz-print-plausi-on',
 };
 
 function applyPartClasses(parts: Record<ExportPart, boolean>): void {

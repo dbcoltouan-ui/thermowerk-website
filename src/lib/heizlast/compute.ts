@@ -166,8 +166,9 @@ function computeQhlKorr(s: HeizlastState, qhlRaw: CalcResult | null): CalcResult
 }
 
 function computePlausi(s: HeizlastState, qhlKorr: CalcResult | null): CalcResult | null {
+  // Phase 9 / Block H: Plausibilitaet laeuft immer, kein Gate mehr. Anzeige-Gate
+  // erfolgt nur noch im Export (hz-print-plausi-on), nicht in der Berechnung.
   if (!qhlKorr) return null;
-  if (!s.heizlast.plausiActive) return null;
   return spezHeizleistung(qhlKorr.value, s.gebaeude.ebf, s.gebaeude.bauperiode, gebaeudetypNumerisch(s));
 }
 
