@@ -976,7 +976,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
       const format = (formatEl?.value === 'json' ? 'json' : 'pdf') as 'pdf' | 'json';
       const parts: Record<ExportPart, boolean> = {
         cover: true, objekt: true, resultate: true, diagramm: true,
-        formeln: false, grundlagen: true, notizen: true,
+        formeln: false, grundlagen: true,
+        notizenBereiche: true, notizenProjekt: true, plausi: true,
       };
       exportForm.querySelectorAll<HTMLInputElement>('[data-export-part]').forEach((cb) => {
         const key = cb.getAttribute('data-export-part') as ExportPart;

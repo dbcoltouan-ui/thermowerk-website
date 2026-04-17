@@ -1,8 +1,9 @@
-Phase 9 / Bundle 1 Abschluss: Handoff + CLAUDE.md
+Phase 9 / Block L: Notizen-Block schlanker
 
-- Neuer Handoff-Brief HANDOFF-PHASE-15.md fuer Bundle 2 (L + M1 + M2 + M)
-  mit Copy-Paste-Prompt, Uebersicht, Akzeptanzkriterien.
-- CLAUDE.md: neue Absaetze "Phase 9 / Block F|G|H|I|J|K abgeschlossen"
-  mit Dateipfaden, Testkurzfassung und Stolpersteinen je Block.
-- Tests 49 + 33 gruen (Block-J-Assert: WW-Speicher auf marktrealistische
-  Staffelung umgestellt).
+- Badge "ausgefuellt" entfernt, durch Navy-Info-Icon ersetzt (nur sichtbar wenn Text vorhanden)
+- Export-Checkbox pro Notiz entfernt
+- Zentrale Steuerung im ExportModal: notizenBereiche + notizenProjekt
+- Neuer Slot NotizenState.projekt (alter sektion7-Eintrag wird sanft migriert)
+- Print-CSS per data-hz-note-slot Attribut-Selektor gesteuert
+- ExportPart Union aktualisiert (notizenBereiche | notizenProjekt)
+- Tests weiterhin 49 + 33 gruen

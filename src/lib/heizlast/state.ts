@@ -176,12 +176,12 @@ export interface SpeicherState {
   pufferRundungLiter: 5 | 10;
 }
 
-/** Sektions-spezifische Notizen. Jede Notiz kann beim Export ein-/abgewählt werden. */
+/** Notiz-Slot (Sektion oder Projekt). Freitext; Export-Ein-/Ausschluss wird
+ *  seit Phase 9 / Block L zentral im Export-Modal gesteuert (nicht mehr pro
+ *  Notiz). */
 export interface SectionNote {
   /** Freitext */
   text: string;
-  /** Ob die Notiz beim PDF-/JSON-Export mit ausgegeben wird. */
-  includeInExport: boolean;
 }
 
 export interface NotizenState {
@@ -189,9 +189,13 @@ export interface NotizenState {
   sektion2: SectionNote;
   sektion3: SectionNote;
   sektion4: SectionNote;
+  /** Diagramm-/Leistungsdiagramm-Notiz (uebernimmt den Slot der alten Sektion 5). */
   sektion5: SectionNote;
   sektion6: SectionNote;
-  sektion7: SectionNote;
+  /** Phase 9 / Block L — Projekt-uebergreifende Notiz. Ersetzt die alte
+   *  Sektion-7-Notiz im UI; die Migration in storage.ts uebertraegt
+   *  bestehende sektion7.text-Inhalte in diesen Slot. */
+  projekt: SectionNote;
 }
 
 export interface HeizlastState {
@@ -225,7 +229,7 @@ export interface HeizlastState {
 }
 
 function emptyNote(): SectionNote {
-  return { text: '', includeInExport: true };
+  return { text: '' };
 }
 
 function defaultNotizen(): NotizenState {
@@ -236,7 +240,7 @@ function defaultNotizen(): NotizenState {
     sektion4: emptyNote(),
     sektion5: emptyNote(),
     sektion6: emptyNote(),
-    sektion7: emptyNote(),
+    projekt: emptyNote(),
   };
 }
 
@@ -468,16 +472,6 @@ export function setNoteText(key: NotizenKey, text: string): void {
   heizlastState.setKey('notizen', {
     ...current,
     [key]: { ...current[key], text },
-  });
-  isDirty.set(true);
-}
-
-/** Schaltet Export-Flag einer Sektions-Notiz. */
-export function setNoteExport(key: NotizenKey, include: boolean): void {
-  const current = heizlastState.get().notizen;
-  heizlastState.setKey('notizen', {
-    ...current,
-    [key]: { ...current[key], includeInExport: include },
   });
   isDirty.set(true);
 }

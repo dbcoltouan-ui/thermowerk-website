@@ -373,9 +373,14 @@ const {
       body.hz-print-mode:not(.hz-print-formeln-on) [data-hz-calc-steps],
       body.hz-print-mode:not(.hz-print-formeln-on) .hz-formel { display: none !important; }
 
-      /* Notizen: nur Exportieren wenn gewuenscht UND pro Notiz der Flag gesetzt ist (data-export-on) */
-      body.hz-print-mode:not(.hz-print-notizen-on) .hz-note,
-      body.hz-print-mode .hz-note:not([data-export-on="true"]) { display: none !important; }
+      /* Notizen (Phase 9 / Block L): zwei Body-Klassen schalten Bereichs-
+         Notizen und Projekt-Notiz getrennt ein/aus. Beim Druck ist eine
+         Notiz sichtbar, wenn die jeweilige Klasse gesetzt ist. Wenn weder
+         Bereichs- noch Projekt-Klasse aktiv ist, werden alle Notizen
+         ausgeblendet. */
+      body.hz-print-mode:not(.hz-print-notizen-bereiche-on):not(.hz-print-notizen-projekt-on) .hz-notes { display: none !important; }
+      body.hz-print-mode:not(.hz-print-notizen-bereiche-on) .hz-notes:not([data-hz-note-slot="projekt"]) { display: none !important; }
+      body.hz-print-mode:not(.hz-print-notizen-projekt-on) .hz-notes[data-hz-note-slot="projekt"] { display: none !important; }
 
       /* Grundlagen: Block sichtbar wenn Flag an */
       body.hz-print-mode:not(.hz-print-grundlagen-on) .hz-grundlagen { display: none !important; }

@@ -19,7 +19,8 @@ export type ExportPart =
   | 'diagramm'
   | 'formeln'
   | 'grundlagen'
-  | 'notizen'
+  | 'notizenBereiche'
+  | 'notizenProjekt'
   | 'plausi';
 
 export interface ExportOptions {
@@ -153,7 +154,10 @@ const PART_CLASS: Record<ExportPart, string> = {
   diagramm: 'hz-print-diagramm-on',
   formeln: 'hz-print-formeln-on',
   grundlagen: 'hz-print-grundlagen-on',
-  notizen: 'hz-print-notizen-on',
+  // Phase 9 / Block L — Notizen sind nun zentral im Export-Modal gesteuert
+  // (zwei globale Checkboxen statt pro-Notiz-Flag).
+  notizenBereiche: 'hz-print-notizen-bereiche-on',
+  notizenProjekt: 'hz-print-notizen-projekt-on',
   plausi: 'hz-print-plausi-on',
 };
 

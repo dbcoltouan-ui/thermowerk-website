@@ -1,23 +1,36 @@
 ---
-// SectionNotes — aufklappbarer Notiz-Toggle pro Sektion.
-// - Dezent als ghost-Toggle mit Notizblock-Icon.
-// - Beim Aufklappen: Textarea + Checkbox "beim Export einbeziehen".
-// - Bindings via data-hz-bind -> state.notizen.<key>.text / .includeInExport.
+// SectionNotes — aufklappbarer Notiz-Toggle pro Sektion oder fuer das Projekt.
+// - Dezent als Ghost-Toggle mit Notizblock-Icon.
+// - Beim Aufklappen: Textarea (Freitext).
+// - Ab Phase 9 / Block L: keine "Beim Export einbeziehen"-Checkbox mehr
+//   (zentral im Export-Modal). Stattdessen kleines Navy-Info-Icon rechts
+//   neben dem Label, sichtbar nur wenn die Notiz gefuellt ist.
 
 interface Props {
-  /** Schlüssel in state.notizen (z. B. "sektion1", "sektion2") */
-  sectionKey: 'sektion1' | 'sektion2' | 'sektion3' | 'sektion4' | 'sektion5' | 'sektion6' | 'sektion7';
-  /** Sichtbares Sektions-Kürzel für den Button-Text */
+  /** Schluessel in state.notizen (z. B. "sektion1", "sektion2", "projekt") */
+  sectionKey:
+    | 'sektion1'
+    | 'sektion2'
+    | 'sektion3'
+    | 'sektion4'
+    | 'sektion5'
+    | 'sektion6'
+    | 'projekt';
+  /** Sichtbares Sektions-Kuerzel fuer den Button-Text */
   sectionLabel?: string;
 }
 
 const { sectionKey, sectionLabel } = Astro.props;
-const label = sectionLabel ? `Notizen zu ${sectionLabel}` : 'Notizen zu dieser Sektion';
+const label =
+  sectionKey === 'projekt'
+    ? 'Projekt-Notiz'
+    : sectionLabel
+      ? `Notizen zu ${sectionLabel}`
+      : 'Notizen zu dieser Sektion';
 const contentId = `hz-notes-${sectionKey}`;
 const textareaId = `hz-notes-${sectionKey}-text`;
-const checkboxId = `hz-notes-${sectionKey}-export`;
 ---
-<div class="hz-notes" data-toggle>
+<div class="hz-notes" data-toggle data-hz-note-slot={sectionKey}>
   <button
     type="button"
     class="hz-notes__btn"
@@ -34,7 +47,13 @@ const checkboxId = `hz-notes-${sectionKey}-export`;
       </svg>
     </span>
     <span class="hz-notes__label">{label}</span>
-    <span class="hz-notes__badge" data-hz-notes-badge hidden>ausgefüllt</span>
+    <span class="hz-notes__indicator" data-hz-notes-indicator hidden aria-hidden="true" title="Notiz ausgefuellt">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </span>
   </button>
 
   <div id={contentId} class="hz-notes__content" aria-hidden="true" hidden>
@@ -43,19 +62,10 @@ const checkboxId = `hz-notes-${sectionKey}-export`;
       id={textareaId}
       class="hz-notes__textarea"
       rows="3"
-      placeholder="Bemerkungen, Sonderfälle, Abweichungen von den Defaults …"
+      placeholder="Bemerkungen, Sonderfaelle, Abweichungen von den Defaults …"
       data-hz-bind={`notizen.${sectionKey}.text`}
       data-hz-type="string"
     ></textarea>
-    <label class="hz-notes__export-row" for={checkboxId}>
-      <input
-        id={checkboxId}
-        type="checkbox"
-        data-hz-bind={`notizen.${sectionKey}.includeInExport`}
-        data-hz-type="boolean"
-      />
-      <span>Beim Export einbeziehen</span>
-    </label>
   </div>
 </div>
 
@@ -97,15 +107,16 @@ const checkboxId = `hz-notes-${sectionKey}-export`;
     border-color: var(--hz-navy);
     color: var(--hz-white);
   }
-  .hz-notes__badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: var(--hz-blue-tint);
+  /* Phase 9 / Block L: dezenter Fuell-Indikator (kleines Navy-Icon)
+     nur sichtbar, wenn der Text nicht leer ist. Ersetzt den frueheren
+     "ausgefuellt"-Badge. */
+  .hz-notes__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
     color: var(--hz-navy);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
   .hz-notes__content {
     margin-top: 12px;
@@ -141,33 +152,19 @@ const checkboxId = `hz-notes-${sectionKey}-export`;
     border-color: var(--hz-navy);
     box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.08);
   }
-  .hz-notes__export-row {
-    margin-top: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--hz-mid-gray);
-    cursor: pointer;
-  }
-  .hz-notes__export-row input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--hz-navy);
-  }
 </style>
 
 <script is:inline>
   (function () {
-    if (window.__hzNotesBadgeBound) return;
-    window.__hzNotesBadgeBound = true;
+    if (window.__hzNotesIndicatorBound) return;
+    window.__hzNotesIndicatorBound = true;
     function refresh() {
       document.querySelectorAll('.hz-notes').forEach(function (wrap) {
         var ta = wrap.querySelector('textarea.hz-notes__textarea');
-        var badge = wrap.querySelector('[data-hz-notes-badge]');
-        if (!ta || !badge) return;
+        var indicator = wrap.querySelector('[data-hz-notes-indicator]');
+        if (!ta || !indicator) return;
         var has = ta.value && ta.value.trim().length > 0;
-        badge.hidden = !has;
+        indicator.hidden = !has;
       });
     }
     document.addEventListener('input', function (ev) {

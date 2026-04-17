@@ -92,6 +92,31 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
         obj.zuschlaege.sperrzeitActive = Number.isFinite(toff) && toff > 0;
       }
     }
+    // Phase 9 / Block L: Notizen-Migration. SectionNote.includeInExport entfaellt
+    // (wird beim Laden ignoriert). Altes sektion7 uebernimmt der neue projekt-Slot,
+    // sofern dieser noch leer ist. Fehlende Notiz-Slots bekommen leeren Text.
+    if (obj.notizen && typeof obj.notizen === 'object') {
+      const keys = ['sektion1', 'sektion2', 'sektion3', 'sektion4', 'sektion5', 'sektion6', 'projekt'];
+      // sektion7 (Legacy) -> projekt, falls projekt noch nicht gesetzt
+      const legacy7 = obj.notizen.sektion7;
+      if (legacy7 && typeof legacy7 === 'object' && typeof legacy7.text === 'string') {
+        if (!obj.notizen.projekt || typeof obj.notizen.projekt !== 'object') {
+          obj.notizen.projekt = { text: legacy7.text };
+        } else if (!obj.notizen.projekt.text) {
+          obj.notizen.projekt.text = legacy7.text;
+        }
+      }
+      if ('sektion7' in obj.notizen) delete obj.notizen.sektion7;
+      // Slots normalisieren, includeInExport entfernen
+      for (const k of keys) {
+        const n = obj.notizen[k];
+        if (!n || typeof n !== 'object') {
+          obj.notizen[k] = { text: '' };
+        } else {
+          obj.notizen[k] = { text: typeof n.text === 'string' ? n.text : '' };
+        }
+      }
+    }
     // Phase 9 / Block E: RaumInput um flaecheDirekt + beheizt erweitert.
     // Alte Eintraege ohne die neuen Felder bekommen beheizt=true (Default)
     // und flaecheDirekt=null; laenge/breite werden zu number|null normalisiert.
