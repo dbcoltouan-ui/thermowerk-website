@@ -1,12 +1,12 @@
-handoff: Phase 9 - Block M1 ergaenzt (Desktop-Breite + Fluid-Typografie)
+handoff: Phase 9 - Block M2 ergaenzt (Feldbreiten + Grid-Leitlinien)
 
-- Neuer Block M1 in HANDOFF-PHASE-9.md: Container-Max auf
-  min(92vw, 960px) reduzieren, damit links/rechts auf grossen
-  Monitoren mehr Rand entsteht und der Content ruhiger wirkt
-- Fluid-Typografie via clamp() fuer Body, Section-Titel, Kicker,
-  Subline, KPI-Zahlen und Form-Inputs - skaliert zwischen Mobile
-  und Desktop fliessend, prozentualer Seiten-Eindruck bleibt gleich
-- Abstands-Tokens (--hz-gap-section/row/card) auf clamp() umstellen
-- Grid-Minmax auf clamp(160px, 18vw, 220px) damit Felder symmetrisch
-  und ruhig bleiben, keine zu kleinen Micro-Spalten
-- Akzeptanzliste um Desktop-Breite-Kriterium ergaenzt
+- Neuer Block M2 in HANDOFF-PHASE-9.md: 12-Spalten-Grid (.hz-row +
+  .hz-col-3/4/6/8/12) als zentrale Leitlinie in jeder Section
+- Feldtyp-Matrix: Zahl+Einheit = 3 Spalten mit data-size="sm" (max
+  10ch), Text = 6 Spalten, Select = 4, Textarea/Tabelle/Diagramm = 12
+- Toggle-Buttons und Radio-Rows auf Desktop auf clamp(280px, 32vw,
+  420px) begrenzen, nicht mehr full-width
+- .hz-field__input bekommt max-width via data-size Attribut
+  (xs/sm/md/lg), Default bleibt full-column (lg)
+- Migrations-Reihenfolge Section 1 -> 2 -> 3 -> 4 -> 6 -> 7
+- Akzeptanzliste um Feldbreiten-Kriterium ergaenzt

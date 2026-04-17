@@ -474,6 +474,110 @@ gleich bleibt.
 
 ---
 
+### Block M2 — Feldbreiten intrinsisch, Grid-Leitlinien
+
+**Problem:** Eingabefelder, Select-Boxen und Toggle-Balken nutzen aktuell
+pauschal `width: 100 %` des Containers und wirken dadurch auf Desktop wie
+ueberdimensionierte Full-Width-Elemente. Daniel moechte: Felder nur so
+breit wie fachlich noetig, freier Platz als visuelle Ruhezone oder fuer
+Nachbar-Felder, aber alles strikt an gemeinsamen Leitlinien — keine
+wilden Einzelbreiten pro Box.
+
+**Ansatz:** 12-Spalten-Grid innerhalb jeder Section, jedes Feld belegt
+eine definierte Spannweite. Felder, die fachlich schmal sind (Zahl +
+Einheit), belegen 3–4 Spalten. Text-Inputs 6 Spalten. Textarea/Notizen
+und vollbreite Informations-Bloecke 12 Spalten.
+
+**Aufgaben:**
+1. **Basis-Grid in `SectionWrapper.astro`** (oder zentral in
+   `HeizlastLayout.astro`):
+   ```css
+   .hz-row {
+     display: grid;
+     grid-template-columns: repeat(12, minmax(0, 1fr));
+     gap: var(--hz-gap-row);
+     align-items: end;
+   }
+   .hz-col-3  { grid-column: span 3; }
+   .hz-col-4  { grid-column: span 4; }
+   .hz-col-6  { grid-column: span 6; }
+   .hz-col-8  { grid-column: span 8; }
+   .hz-col-12 { grid-column: span 12; }
+   @media (max-width: 640px) {
+     .hz-col-3, .hz-col-4, .hz-col-6, .hz-col-8 { grid-column: span 12; }
+   }
+   ```
+   Damit sind Leitlinien konsistent: jedes Feld snappt auf 3er/4er/6er.
+
+2. **Feldtyp-Matrix** — pro Section durchgehen, diese Defaults anwenden:
+   - Zahl mit Einheit (kW, m², °C, K, %, h/d, L/d): `.hz-col-3`
+   - Zahl ohne Einheit / kleine Kennzahl: `.hz-col-3`
+   - Datum / Kurz-Text (PLZ, Postleitzahl): `.hz-col-3`
+   - Text mittlerer Laenge (Name, Adresse Strasse, Kunde): `.hz-col-6`
+   - Dropdown / Select (Lage, Bauperiode, Gebaeudetyp): `.hz-col-4`
+   - Toggle-Pane-Content (z.B. Verbrauchsmethode innen): `.hz-col-12`
+     **innerhalb** belegt aber selbst wieder ein `.hz-row` mit schmalen
+     Kindfeldern (Ba `.hz-col-3`, Eta `.hz-col-3`, Energietraeger
+     `.hz-col-4`, Rest leer → freier Platz).
+   - Textarea (Notizen, Freitext): `.hz-col-12`
+   - Qh-Summen-Block, Diagramm-Canvas, Tabellen: volle Breite (`.hz-col-12`).
+
+3. **Toggle-Leisten nicht mehr full-width**: `.hz-toggle__btn` steht
+   derzeit auf 100 % Breite des Parents. Auf Desktop auf `max-width:
+   clamp(280px, 32vw, 420px)` begrenzen, `justify-self: start`. Der
+   geoeffnete Content (`.hz-toggle__inner`) bleibt full-width (er traegt
+   das eigentliche Formular). Auf Mobile 100 %. Gleiches Pattern fuer
+   Radio-Row in Section 3 (WW-Methoden) und Main-Switches in Section 3/6.
+
+4. **Inputs nicht mehr pauschal 100 %** in `.hz-field__input`:
+   ```css
+   .hz-field__input { width: 100%; max-width: var(--hz-field-max, 100%); }
+   .hz-field[data-size="xs"] { --hz-field-max: 7ch; }   /* 2-stellig */
+   .hz-field[data-size="sm"] { --hz-field-max: 10ch; }  /* Zahl + Einheit */
+   .hz-field[data-size="md"] { --hz-field-max: 20ch; }  /* Kurzer Text */
+   .hz-field[data-size="lg"] { --hz-field-max: 100%; }  /* voller Spalten-Fill */
+   ```
+   Default bleibt `lg` (fuellt die Spalte). Zahl+Einheit-Felder bekommen
+   `data-size="sm"`, damit sie nicht die ganze 3-Spalten-Spalte fressen
+   und rechts daneben die Einheit Luft hat.
+
+5. **Abstand-Rhythmus**: `--hz-gap-row` (Block M1) ist der Spaltengap.
+   Zwischen zwei `.hz-row` vertikal `row-gap` gleich gross halten, damit
+   die Seite ein ruhiges Raster ergibt.
+
+6. **Migration** pro Section (in dieser Reihenfolge, damit Seite immer
+   lauffaehig bleibt):
+   1. Section 1 (Projekt-Kopf, Stammdaten) — exemplarisch, Pattern dort
+      festschreiben.
+   2. Section 2 (Methoden-Akkordeons intern)
+   3. Section 3 (WW Haupt + Panes + Verluste-Grid)
+   4. Section 4 (Sperrzeit, Qas)
+   5. Section 6 (Speicher)
+   6. Section 7 (Zusammenfassung + Save-Block)
+   Section 5 faellt weg (Block F), dort nichts zu tun.
+
+**Akzeptanz:**
+- Auf 1440-px-Viewport ist jedes einzelne Eingabefeld erkennbar schmal;
+  rechts neben einem Zahl+Einheit-Feld liegt sichtbarer Freiraum.
+- Gleichartige Felder (zwei Zahlen nebeneinander) haben identische
+  Breite, snappen an dieselben 12-Spalten-Linien.
+- Kein Feld ragt ueber die Container-Leitlinien hinaus, nichts schwebt
+  unmotiviert in der Mitte.
+- Textarea und Tabellen bleiben full-width — das ist der einzige Fall
+  fuer 12 Spalten fuer einzelne Elemente.
+- Auf Mobile kollabieren alle Spalten auf 1 — Verhalten identisch zu
+  Phase 8, keine Regression.
+
+**Code-Pointer:**
+- `src/layouts/HeizlastLayout.astro` — Grid-Utilities `.hz-row` +
+  `.hz-col-*`, Feldgroessen-Attribute `.hz-field[data-size]`.
+- Alle Section-Komponenten: bestehende `.hz-row`/`.hz-grid`-Wrapper
+  durch neues Grid ersetzen, jede `<div class="hz-field">` mit passender
+  Spannweite versehen.
+- `src/components/heizlast/Toggle.astro` — `.hz-toggle__btn` max-width.
+
+---
+
 ### Block M — Mobile-Polish: Worttrennung & Logo
 
 **Problem:** Auf Mobile werden Wörter mitten umgebrochen oder nur der letzte
@@ -534,6 +638,11 @@ Buchstabe rutscht in eine neue Zeile (siehe User-Screenshots).
   linker/rechter Rand auf 1440 px ca. 200–260 px. Schrift und Abstaende
   skalieren via `clamp()` fluid zwischen Mobile und Desktop, der prozentuale
   Seiten-Eindruck bleibt ueber alle Viewport-Breiten gleich.
+- **Feldbreiten intrinsisch**: 12-Spalten-Grid (`.hz-row` + `.hz-col-3/4/6/12`),
+  Zahl+Einheit-Felder belegen 3 Spalten mit `data-size="sm"`, Text 6, Select 4,
+  Textarea/Tabelle/Diagramm 12. Toggle-Buttons und Radio-Rows auf Desktop
+  auf `clamp(280px, 32vw, 420px)` begrenzt, auf Mobile weiterhin voll. Keine
+  pauschalen 100-%-Eingabefelder mehr, Leitlinien ueber alle Sections konstant.
 
 ---
 
