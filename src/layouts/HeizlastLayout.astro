@@ -52,9 +52,9 @@ const {
       --hz-font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
       --hz-font-mono: 'DM Sans', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-      --hz-radius-sm: 6px;
-      --hz-radius-md: 10px;
-      --hz-radius-lg: 14px;
+      --hz-radius-sm: 2px;
+      --hz-radius-md: 2px;
+      --hz-radius-lg: 2px;
 
       --hz-shadow-sm: 0 1px 2px rgba(17, 29, 51, 0.05);
       --hz-shadow-md: 0 8px 24px rgba(17, 29, 51, 0.08);
@@ -231,6 +231,11 @@ const {
       .hz-btn { font-size: 14.5px; padding: 9px 16px; }
       .hz-grid-2, .hz-grid-3 { grid-template-columns: 1fr !important; }
       .hz-field__input { font-size: 16px; /* verhindert iOS-Zoom */ }
+      /* Texte/Panes bleiben immer innerhalb des Containers */
+      .hz-scope p, .hz-scope span, .hz-scope label, .hz-scope dt, .hz-scope dd,
+      .hz-scope small, .hz-scope li { word-wrap: break-word; overflow-wrap: anywhere; }
+      .hz-scope input, .hz-scope select, .hz-scope textarea { width: 100%; min-width: 0; }
+      .hz-field__input-with-unit { width: 100%; }
     }
     @media (max-width: 390px) {
       .hz-container { padding: 0 14px; }

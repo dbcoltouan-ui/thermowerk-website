@@ -221,6 +221,14 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   .hz-methods { display: flex; flex-direction: column; gap: 10px; }
   .hz-method { position: relative; padding-right: 72px; }
   .hz-method__intro { margin-bottom: 14px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .hz-method { padding-right: 0; }
+    .hz-method__badge {
+      position: static; margin-bottom: 10px; display: none;
+    }
+    .hz-method.is-active .hz-method__badge { display: inline-flex; }
+  }
   .hz-method__badge {
     position: absolute; top: -4px; right: 0;
     padding: 3px 10px; border-radius: 999px;
@@ -266,7 +274,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     line-height: 1;
   }
   .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__content .hz-toggle__inner {
-    border-left-color: var(--hz-red);
+    border-color: var(--hz-red);
   }
 
   .hz-switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--hz-mid-gray); }
@@ -277,8 +285,20 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   .hz-san__empty { padding: 6px 0; font-style: italic; }
   .hz-san__row {
     display: grid; grid-template-columns: 1fr 120px 44px; gap: 10px; align-items: center;
-    padding: 8px 10px; border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
+    padding: 8px 10px; border: 1px solid var(--hz-border); border-radius: 2px;
     background: var(--hz-white);
+  }
+  @media (max-width: 640px) {
+    .hz-san__row {
+      grid-template-columns: 1fr 44px;
+      grid-template-areas: 'label remove' 'input input';
+      row-gap: 8px;
+    }
+    .hz-san__row > .hz-san__row-label { grid-area: label; }
+    .hz-san__row > .hz-san__remove { grid-area: remove; justify-self: end; }
+    .hz-san__row > input[type="number"] { grid-area: input; width: 100%; }
+    .hz-san__controls { flex-direction: column; align-items: stretch; }
+    .hz-san__controls > * { width: 100%; }
   }
   .hz-san__row-label { font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); font-size: 14px; }
   .hz-san__row input[type="number"] {

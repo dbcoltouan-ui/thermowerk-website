@@ -221,4 +221,21 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
   .hz-ww-main[disabled], .hz-ww-main.is-disabled { opacity: 0.6; }
   .hz-ww.is-inactive .hz-ww-methods,
   .hz-ww.is-inactive .hz-ww-pane { opacity: 0.5; pointer-events: none; }
+
+  @media (max-width: 640px) {
+    .hz-pe-header { display: none; }
+    .hz-pe-row {
+      grid-template-columns: 1fr 44px;
+      grid-template-areas: 'name remove' 'anzahl anzahl' 'liter liter';
+      row-gap: 8px;
+      padding: 10px 4px 12px;
+    }
+    .hz-pe-row > :nth-child(1) { grid-area: name; }
+    .hz-pe-row > :nth-child(2) { grid-area: anzahl; }
+    .hz-pe-row > :nth-child(3) { grid-area: liter; }
+    .hz-pe-row > .hz-pe-remove { grid-area: remove; justify-self: end; }
+    .hz-pe-row input { width: 100%; }
+    .hz-pe-actions { flex-direction: column; align-items: stretch; }
+    .hz-pe-actions > * { width: 100%; }
+  }
 </style>
