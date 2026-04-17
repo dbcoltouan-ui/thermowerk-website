@@ -13,11 +13,16 @@ import Section4Zuschlaege from '../components/heizlast/sections/Section4Zuschlae
 import Section5Auslegung from '../components/heizlast/sections/Section5Auslegung.astro';
 import Section6Speicher from '../components/heizlast/sections/Section6Speicher.astro';
 import Section7Projekt from '../components/heizlast/sections/Section7Projekt.astro';
+import LoginModal from '../components/heizlast/LoginModal.astro';
+import ProjectsModal from '../components/heizlast/ProjectsModal.astro';
+import ExportModal from '../components/heizlast/ExportModal.astro';
+import PrintCover from '../components/heizlast/PrintCover.astro';
 ---
 <HeizlastLayout
   title="Heizlast-Rechner | Thermowerk"
   description="Professionelle Heizlast- und W\u00e4rmepumpen-Auslegung nach FWS, SIA und VDI."
 >
+  <PrintCover />
   <ExecutiveSummary />
   <Section1Gebaeude />
   <Section2Heizlast />
@@ -27,6 +32,10 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
   <LeistungsDiagramm />
   <Section6Speicher />
   <Section7Projekt />
+
+  <LoginModal />
+  <ProjectsModal />
+  <ExportModal />
 </HeizlastLayout>
 
 <script>
@@ -61,9 +70,13 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
   } from '../lib/heizlast/constants.ts';
   import {
     listProjects,
+    loadProject,
     saveProject,
+    deleteProject,
     probeAuth,
   } from '../lib/heizlast/projects.ts';
+  import { runExport, defaultFilename, type ExportPart } from '../lib/heizlast/export.ts';
+  import { projectList, projectListLoaded, replaceState } from '../lib/heizlast/state.ts';
 
   // ------------------------------------------------------------
   // 1. Boot-Reihenfolge
@@ -539,34 +552,379 @@ import Section7Projekt from '../components/heizlast/sections/Section7Projekt.ast
     }
   });
 
+  function computedSummary() {
+    const summary = heizlastCompute.get().summary;
+    return {
+      qhl: summary.qhlKw,
+      qh: summary.qhKw,
+      ebf: heizlastState.get().gebaeude.ebf,
+    };
+  }
+
   if (saveCloudBtn) saveCloudBtn.addEventListener('click', async () => {
-    try { await saveProject({ asNew: false, computed: heizlastCompute.get().summary }); }
+    try { await saveProject({ asNew: false, computed: computedSummary() }); }
     catch (err) { console.warn('save failed:', err); }
   });
   if (saveCloudNewBtn) saveCloudNewBtn.addEventListener('click', async () => {
-    try { await saveProject({ asNew: true, computed: heizlastCompute.get().summary }); }
+    try { await saveProject({ asNew: true, computed: computedSummary() }); }
     catch (err) { console.warn('save-as-new failed:', err); }
   });
-  if (openProjectsBtn) openProjectsBtn.addEventListener('click', async () => {
-    try {
-      await listProjects();
-      uiState.setKey('projectsModalOpen', true);
-      alert('Projekte-Modal wird in Phase 6 implementiert.');
-    } catch (err) { console.warn('list failed:', err); }
+
+  // ------------------------------------------------------------
+  // 10. Modal-Infrastruktur (Login / Projekte / Export)
+  // ------------------------------------------------------------
+  const loginModal = document.getElementById('hz-login-modal') as HTMLElement | null;
+  const projectsModal = document.getElementById('hz-projects-modal') as HTMLElement | null;
+  const exportModal = document.getElementById('hz-export-modal') as HTMLElement | null;
+
+  let lastTrigger: HTMLElement | null = null;
+
+  function openModal(el: HTMLElement | null, trigger?: HTMLElement | null): void {
+    if (!el) return;
+    if (trigger) lastTrigger = trigger;
+    el.hidden = false;
+    document.body.classList.add('hz-modal-open');
+    // erstes fokussierbares Element im Card-Body fokussieren
+    setTimeout(() => {
+      const focusable = el.querySelector<HTMLElement>(
+        'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])',
+      );
+      focusable?.focus();
+    }, 30);
+  }
+
+  function closeModal(el: HTMLElement | null): void {
+    if (!el) return;
+    el.hidden = true;
+    const anyOpen =
+      (loginModal && !loginModal.hidden) ||
+      (projectsModal && !projectsModal.hidden) ||
+      (exportModal && !exportModal.hidden);
+    if (!anyOpen) document.body.classList.remove('hz-modal-open');
+    if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+  }
+
+  function closeAllModals(): void {
+    if (loginModal) loginModal.hidden = true;
+    if (projectsModal) projectsModal.hidden = true;
+    if (exportModal) exportModal.hidden = true;
+    document.body.classList.remove('hz-modal-open');
+  }
+
+  // Generic: ESC schliesst das offene Modal.
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    if (loginModal && !loginModal.hidden) { closeModal(loginModal); uiState.setKey('authModalOpen', false); }
+    if (projectsModal && !projectsModal.hidden) { closeModal(projectsModal); uiState.setKey('projectsModalOpen', false); }
+    if (exportModal && !exportModal.hidden) { closeModal(exportModal); uiState.setKey('exportModalOpen', false); }
   });
+
+  // Generic: Klick auf [data-hz-modal-dismiss] oder Backdrop schliesst.
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const dismiss = t.closest('[data-hz-modal-dismiss]') as HTMLElement | null;
+    if (!dismiss) return;
+    const modal = dismiss.closest('.hz-modal') as HTMLElement | null;
+    if (!modal) return;
+    closeModal(modal);
+    if (modal.id === 'hz-login-modal') uiState.setKey('authModalOpen', false);
+    if (modal.id === 'hz-projects-modal') uiState.setKey('projectsModalOpen', false);
+    if (modal.id === 'hz-export-modal') uiState.setKey('exportModalOpen', false);
+  });
+
+  // ------------------------------------------------------------
+  // 10a. Login-Modal
+  // ------------------------------------------------------------
+  const loginForm = document.getElementById('hz-login-form') as HTMLFormElement | null;
+  const loginPassword = document.getElementById('hz-login-password') as HTMLInputElement | null;
+  const loginSubmit = document.getElementById('hz-login-submit') as HTMLButtonElement | null;
+  const loginError = document.getElementById('hz-login-error') as HTMLElement | null;
+  const logoutSubmit = document.getElementById('hz-logout-submit') as HTMLButtonElement | null;
+  const logoutError = document.getElementById('hz-logout-error') as HTMLElement | null;
+
+  function showError(el: HTMLElement | null, msg: string) {
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+  }
+  function hideError(el: HTMLElement | null) {
+    if (!el) return;
+    el.hidden = true;
+    el.textContent = '';
+  }
+
+  function refreshLoginView() {
+    if (!loginModal) return;
+    const authed = uiState.get().isAuthenticated;
+    const signin = loginModal.querySelector('[data-hz-login-view="signin"]') as HTMLElement | null;
+    const signout = loginModal.querySelector('[data-hz-login-view="signout"]') as HTMLElement | null;
+    if (signin) signin.hidden = authed;
+    if (signout) signout.hidden = !authed;
+  }
+
+  if (loginForm && loginPassword && loginSubmit) {
+    loginForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      hideError(loginError);
+      const pw = loginPassword.value;
+      if (!pw) { showError(loginError, 'Bitte Passwort eingeben.'); return; }
+      loginSubmit.disabled = true;
+      loginSubmit.textContent = 'Pruefe \u2026';
+      try {
+        const resp = await fetch('/api/heizlast-auth', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.success) {
+          throw new Error(data.error || 'Anmeldung fehlgeschlagen');
+        }
+        uiState.setKey('isAuthenticated', true);
+        uiState.setKey('authModalOpen', false);
+        loginPassword.value = '';
+        closeModal(loginModal);
+      } catch (err: any) {
+        showError(loginError, err?.message || 'Anmeldung fehlgeschlagen');
+      } finally {
+        loginSubmit.disabled = false;
+        loginSubmit.textContent = 'Anmelden';
+      }
+    });
+  }
+
+  if (logoutSubmit) {
+    logoutSubmit.addEventListener('click', async () => {
+      hideError(logoutError);
+      logoutSubmit.disabled = true;
+      logoutSubmit.textContent = 'Melde ab \u2026';
+      try {
+        const resp = await fetch('/api/heizlast-auth', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        });
+        if (!resp.ok) throw new Error('Abmelden fehlgeschlagen');
+        uiState.setKey('isAuthenticated', false);
+        projectList.set([]);
+        projectListLoaded.set(false);
+        closeModal(loginModal);
+      } catch (err: any) {
+        showError(logoutError, err?.message || 'Abmelden fehlgeschlagen');
+      } finally {
+        logoutSubmit.disabled = false;
+        logoutSubmit.textContent = 'Abmelden';
+      }
+    });
+  }
+
   if (loginBtn) loginBtn.addEventListener('click', () => {
+    refreshLoginView();
     uiState.setKey('authModalOpen', true);
-    alert('Login-Modal wird in Phase 6 implementiert.');
+    openModal(loginModal, loginBtn);
   });
+  const loginHeader = document.getElementById('hz-login-trigger');
+  if (loginHeader) {
+    loginHeader.addEventListener('click', () => {
+      refreshLoginView();
+      uiState.setKey('authModalOpen', true);
+      openModal(loginModal, loginHeader);
+    });
+  }
+
+  // Body-Klasse `is-auth` spiegelt uiState.isAuthenticated (CSS-Hook fuer Cloud-Features).
+  uiState.subscribe((u) => {
+    document.body.classList.toggle('is-auth', u.isAuthenticated);
+    // Login-Header-Button: Label + Icon-Aria
+    const headerLabel = document.querySelector('#hz-login-trigger span') as HTMLElement | null;
+    if (headerLabel) headerLabel.textContent = u.isAuthenticated ? 'Abmelden' : 'Anmelden';
+    refreshLoginView();
+  });
+
+  // ------------------------------------------------------------
+  // 10b. Projekte-Modal
+  // ------------------------------------------------------------
+  const projectsListEl = document.getElementById('hz-projects-list');
+  const projectsCountEl = document.getElementById('hz-projects-count');
+  const projectsRefreshBtn = document.getElementById('hz-projects-refresh');
+
+  function setProjectsState(name: 'loading' | 'empty' | 'error' | 'list', msg?: string) {
+    if (!projectsModal) return;
+    projectsModal.querySelectorAll('[data-hz-projects-state]').forEach((el) => {
+      (el as HTMLElement).hidden = el.getAttribute('data-hz-projects-state') !== name;
+    });
+    if (projectsListEl) projectsListEl.hidden = name !== 'list';
+    if (name === 'error' && msg) {
+      const msgEl = projectsModal.querySelector('[data-hz-projects-error-message]');
+      if (msgEl) msgEl.textContent = msg;
+    }
+  }
+
+  function renderProjectsList(items: any[]) {
+    if (!projectsListEl) return;
+    if (projectsCountEl) {
+      projectsCountEl.textContent = items.length === 1
+        ? '1 Projekt' : items.length + ' Projekte';
+    }
+    if (!items.length) { setProjectsState('empty'); return; }
+    const activeId = heizlastState.get().projectId || '';
+    projectsListEl.innerHTML = items.map((p) => {
+      const name = escapeHtml(p.projectName || 'Unbenannt');
+      const cust = p.customerName ? escapeHtml(p.customerName) : '';
+      const addr = p.address ? escapeHtml(p.address) : '';
+      const status = p.status || 'arbeit';
+      const updated = p.updatedAt
+        ? new Date(p.updatedAt).toLocaleString('de-CH', { dateStyle: 'short', timeStyle: 'short' })
+        : '—';
+      const qhl = p.qhl != null ? fmt(p.qhl) + ' kW' : '—';
+      const qh = p.qh != null ? fmt(p.qh) + ' kW' : '—';
+      const ebf = p.ebf != null ? fmt(p.ebf, 0) + ' m²' : '—';
+      return `
+        <div class="hz-project-row" data-project-id="${escapeHtml(p._id)}"${p._id === activeId ? ' data-active="true"' : ''}>
+          <div class="hz-project-row__main">
+            <h3 class="hz-project-row__title">
+              ${name}
+              <span class="hz-badge" data-status="${status}">${escapeHtml(labelStatus(status))}</span>
+            </h3>
+            ${cust ? `<p class="hz-project-row__customer">${cust}${addr ? ' \u00b7 ' + addr : ''}</p>` : (addr ? `<p class="hz-project-row__customer">${addr}</p>` : '')}
+            <p class="hz-project-row__meta">
+              <span>EBF <strong>${ebf}</strong></span>
+              <span>Qhl <strong>${qhl}</strong></span>
+              <span>Qh <strong>${qh}</strong></span>
+              <span>Aktualisiert <strong>${updated}</strong></span>
+            </p>
+          </div>
+          <div class="hz-project-row__actions">
+            <button type="button" class="hz-project-row__btn" data-project-action="load" data-project-id="${escapeHtml(p._id)}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+              Laden
+            </button>
+            <button type="button" class="hz-project-row__btn hz-project-row__btn--danger" data-project-action="delete" data-project-id="${escapeHtml(p._id)}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Loeschen
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    setProjectsState('list');
+  }
+
+  async function reloadProjects() {
+    setProjectsState('loading');
+    try {
+      const items = await listProjects();
+      renderProjectsList(items);
+    } catch (err: any) {
+      if ((err?.message || '').toLowerCase().includes('nicht autorisiert')) {
+        setProjectsState('error', 'Bitte zuerst anmelden.');
+      } else {
+        setProjectsState('error', err?.message || 'Fehler beim Laden.');
+      }
+    }
+  }
+
+  if (projectsRefreshBtn) {
+    projectsRefreshBtn.addEventListener('click', () => { reloadProjects(); });
+  }
+
+  // Row-Actions (Laden / Loeschen) — Event-Delegation
+  document.addEventListener('click', async (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const btn = t.closest('[data-project-action]') as HTMLElement | null;
+    if (!btn) return;
+    const action = btn.getAttribute('data-project-action');
+    const id = btn.getAttribute('data-project-id');
+    if (!action || !id) return;
+    if (action === 'load') {
+      try {
+        await loadProject(id);
+        uiState.setKey('projectsModalOpen', false);
+        closeModal(projectsModal);
+        setStatus('ok', 'Projekt geladen.');
+      } catch (err: any) {
+        alert('Laden fehlgeschlagen: ' + (err?.message || 'unbekannter Fehler'));
+      }
+    } else if (action === 'delete') {
+      if (!confirm('Dieses Projekt dauerhaft aus der Cloud loeschen?')) return;
+      try {
+        await deleteProject(id);
+        renderProjectsList(projectList.get());
+      } catch (err: any) {
+        alert('Loeschen fehlgeschlagen: ' + (err?.message || 'unbekannter Fehler'));
+      }
+    }
+  });
+
+  if (openProjectsBtn) openProjectsBtn.addEventListener('click', () => {
+    uiState.setKey('projectsModalOpen', true);
+    openModal(projectsModal, openProjectsBtn);
+    reloadProjects();
+  });
+
+  // ------------------------------------------------------------
+  // 10c. Export-Modal
+  // ------------------------------------------------------------
+  const exportForm = document.getElementById('hz-export-form') as HTMLFormElement | null;
+  const exportFilename = document.getElementById('hz-export-filename') as HTMLInputElement | null;
+  const exportError = document.getElementById('hz-export-error') as HTMLElement | null;
+
+  function openExportModal(trigger: HTMLElement | null) {
+    if (exportFilename) exportFilename.value = defaultFilename();
+    uiState.setKey('exportModalOpen', true);
+    openModal(exportModal, trigger);
+  }
+
+  if (exportForm) {
+    exportForm.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      hideError(exportError);
+      const formatEl = exportForm.querySelector<HTMLInputElement>('input[name="hz-export-format"]:checked');
+      const format = (formatEl?.value === 'json' ? 'json' : 'pdf') as 'pdf' | 'json';
+      const parts: Record<ExportPart, boolean> = {
+        cover: true, objekt: true, resultate: true, diagramm: true,
+        formeln: false, grundlagen: true, notizen: true,
+      };
+      exportForm.querySelectorAll<HTMLInputElement>('[data-export-part]').forEach((cb) => {
+        const key = cb.getAttribute('data-export-part') as ExportPart;
+        parts[key] = cb.checked;
+      });
+      const filename = exportFilename?.value.trim() || defaultFilename();
+      try {
+        runExport({ format, parts, filename });
+        closeModal(exportModal);
+        uiState.setKey('exportModalOpen', false);
+      } catch (err: any) {
+        showError(exportError, err?.message || 'Export fehlgeschlagen');
+      }
+    });
+  }
+
+  // Export-Trigger: Section 7 hat (noch) keinen dedizierten Button, wir nutzen
+  // jeden [data-hz-action="export"] und zusaetzlich einen globalen Shortcut
+  // ueber dem Save-Block: wir fuegen einen Button zur Laufzeit hinzu.
+  const saveActions = document.querySelector('.hz-save-actions');
+  if (saveActions && !saveActions.querySelector('[data-hz-action="export"]')) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hz-btn hz-btn-dark';
+    btn.setAttribute('data-hz-action', 'export');
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportieren';
+    saveActions.appendChild(btn);
+  }
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const btn = t.closest('[data-hz-action="export"]') as HTMLElement | null;
+    if (!btn) return;
+    openExportModal(btn);
+  });
+
   if (newProjectBtn) newProjectBtn.addEventListener('click', () => {
     if (!confirm('Aktuelles Projekt verwerfen und neues starten?')) return;
     hardReset();
     setStatus('idle', 'Neues Projekt.');
   });
-
-  // Login-Trigger im Header
-  const loginHeader = document.getElementById('hz-login-trigger');
-  if (loginHeader && loginBtn) {
-    loginHeader.addEventListener('click', () => loginBtn.click());
-  }
 </script>

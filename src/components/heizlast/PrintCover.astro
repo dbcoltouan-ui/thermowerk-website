@@ -1,0 +1,182 @@
+---
+// PrintCover — Deckblatt fuer den PDF-Export.
+// Nur sichtbar wenn <body> die Klasse `hz-print-mode` traegt (wird vom Export
+// kurzzeitig gesetzt). Die eigentlichen Inhalte kommen aus dem State; Werte
+// werden per data-print-slot befuellt.
+---
+<section class="hz-print-cover" aria-hidden="true" data-hz-print-part="cover">
+  <header class="hz-print-cover__header">
+    <img src="/img/logo.png" alt="Thermowerk" class="hz-print-cover__logo" />
+    <div class="hz-print-cover__brand">
+      <span class="hz-print-cover__brand-name">Thermowerk</span>
+      <span class="hz-print-cover__brand-sub">Heizlast &amp; WP-Auslegung</span>
+    </div>
+  </header>
+
+  <div class="hz-print-cover__body">
+    <p class="hz-print-cover__kicker">Auslegung</p>
+    <h1 class="hz-print-cover__title">Waermepumpen-Dimensionierung</h1>
+    <p class="hz-print-cover__subtitle">
+      <span data-print-slot="projectName">&mdash;</span>
+      <span class="hz-print-cover__divider" data-print-slot-if="customerName"> &middot; </span>
+      <span data-print-slot="customerName">&mdash;</span>
+    </p>
+    <p class="hz-print-cover__address" data-print-slot="address">&mdash;</p>
+
+    <div class="hz-print-cover__kpis">
+      <div class="hz-print-cover__kpi hz-print-cover__kpi--hero">
+        <span class="hz-print-cover__kpi-label">Qh &middot; Auslegung</span>
+        <span class="hz-print-cover__kpi-value" data-print-slot="qh">&mdash;</span>
+        <span class="hz-print-cover__kpi-unit">kW</span>
+      </div>
+      <div class="hz-print-cover__kpi">
+        <span class="hz-print-cover__kpi-label">Qhl &middot; Heizlast</span>
+        <span class="hz-print-cover__kpi-value" data-print-slot="qhl">&mdash;</span>
+        <span class="hz-print-cover__kpi-unit">kW</span>
+      </div>
+      <div class="hz-print-cover__kpi">
+        <span class="hz-print-cover__kpi-label">WW-Speicher</span>
+        <span class="hz-print-cover__kpi-value" data-print-slot="wwSpeicher">&mdash;</span>
+        <span class="hz-print-cover__kpi-unit">L</span>
+      </div>
+      <div class="hz-print-cover__kpi">
+        <span class="hz-print-cover__kpi-label">Puffer</span>
+        <span class="hz-print-cover__kpi-value" data-print-slot="puffer">&mdash;</span>
+        <span class="hz-print-cover__kpi-unit">L</span>
+      </div>
+    </div>
+
+    <dl class="hz-print-cover__meta">
+      <div><dt>Gebaeudetyp</dt><dd data-print-slot="typ">&mdash;</dd></div>
+      <div><dt>Lage</dt><dd data-print-slot="lage">&mdash;</dd></div>
+      <div><dt>Bauperiode</dt><dd data-print-slot="bauperiode">&mdash;</dd></div>
+      <div><dt>EBF</dt><dd><span data-print-slot="ebf">&mdash;</span> m²</dd></div>
+      <div><dt>tvoll</dt><dd><span data-print-slot="tvoll">&mdash;</span> h/a</dd></div>
+      <div><dt>Status</dt><dd data-print-slot="status">&mdash;</dd></div>
+    </dl>
+  </div>
+
+  <footer class="hz-print-cover__footer">
+    <span>Erstellt: <span data-print-slot="today">&mdash;</span></span>
+    <span>Grundlagen: FWS &middot; SIA 385/1 &middot; SWKI BT 102-01 &middot; VDI 4645</span>
+  </footer>
+</section>
+
+<style is:global>
+  /* Standard: unsichtbar */
+  .hz-print-cover { display: none; }
+
+  /* Nur im Print-Modus sichtbar */
+  body.hz-print-mode .hz-print-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    padding: 28mm 24mm;
+    background: var(--hz-white);
+    color: var(--hz-dark);
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .hz-print-cover__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--hz-navy);
+  }
+  .hz-print-cover__logo { height: 38px; width: auto; }
+  .hz-print-cover__brand { display: flex; flex-direction: column; }
+  .hz-print-cover__brand-name {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: 18px; color: var(--hz-navy); letter-spacing: -0.005em;
+  }
+  .hz-print-cover__brand-sub {
+    font-family: var(--hz-font-heading); font-weight: 500;
+    font-size: 12px; color: var(--hz-mid-gray);
+  }
+
+  .hz-print-cover__body {
+    flex: 1 1 auto;
+    padding: 42px 0 24px;
+  }
+  .hz-print-cover__kicker {
+    font-family: var(--hz-font-heading); font-weight: 600;
+    font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--hz-red); margin: 0 0 10px;
+  }
+  .hz-print-cover__title {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    color: var(--hz-navy); font-size: 38px; line-height: 1.15;
+    letter-spacing: -0.01em; margin: 0 0 14px;
+  }
+  .hz-print-cover__subtitle {
+    font-family: var(--hz-font-heading); font-weight: 500;
+    font-size: 20px; color: var(--hz-dark); margin: 0 0 6px;
+  }
+  .hz-print-cover__address {
+    font-size: 14.5px; color: var(--hz-mid-gray); margin: 0 0 28px;
+  }
+
+  .hz-print-cover__kpis {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 28px 0 36px;
+  }
+  .hz-print-cover__kpi {
+    border: 1px solid var(--hz-border);
+    border-top: 3px solid var(--hz-navy-light);
+    border-radius: var(--hz-radius-md);
+    padding: 12px 14px;
+    background: var(--hz-off-white);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .hz-print-cover__kpi--hero {
+    border-top-color: var(--hz-red);
+    background: var(--hz-white);
+  }
+  .hz-print-cover__kpi-label {
+    font-family: var(--hz-font-heading); font-weight: 600;
+    font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--hz-mid-gray);
+  }
+  .hz-print-cover__kpi--hero .hz-print-cover__kpi-label { color: var(--hz-red); }
+  .hz-print-cover__kpi-value {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    color: var(--hz-navy); font-size: 28px; line-height: 1; letter-spacing: -0.01em;
+  }
+  .hz-print-cover__kpi--hero .hz-print-cover__kpi-value { font-size: 42px; }
+  .hz-print-cover__kpi-unit {
+    font-family: var(--hz-font-heading); font-size: 12px; color: var(--hz-mid-gray);
+  }
+
+  .hz-print-cover__meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 28px;
+    margin: 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--hz-border);
+  }
+  .hz-print-cover__meta > div {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .hz-print-cover__meta dt {
+    font-family: var(--hz-font-heading); font-weight: 600;
+    font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--hz-mid-gray);
+  }
+  .hz-print-cover__meta dd {
+    margin: 0; font-size: 14px; color: var(--hz-dark); font-weight: 500;
+  }
+
+  .hz-print-cover__footer {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hz-border);
+    font-size: 11px; color: var(--hz-mid-gray);
+    font-family: var(--hz-font-heading); letter-spacing: 0.02em;
+  }
+</style>

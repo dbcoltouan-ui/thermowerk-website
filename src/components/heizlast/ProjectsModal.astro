@@ -1,0 +1,218 @@
+---
+// ProjectsModal — Liste aller Cloud-Projekte (Heizlast).
+// - Zeigt alle Projekte des angemeldeten Nutzers (Abfrage: listProjects()).
+// - Jede Zeile: Projektname, Kunde, Status-Badge, EBF, Qhl, Qh, zuletzt aktualisiert.
+// - Aktionen pro Zeile: Laden (loadProject), Loeschen (deleteProject mit Bestaetigung).
+// - Wird ueber uiState.projectsModalOpen gesteuert.
+---
+<div
+  class="hz-modal"
+  id="hz-projects-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="hz-projects-modal-title"
+  hidden
+>
+  <div class="hz-modal__backdrop" data-hz-modal-dismiss></div>
+  <div class="hz-modal__card hz-modal__card--wide">
+    <header class="hz-modal__head">
+      <div>
+        <p class="hz-kicker">Cloud-Projekte</p>
+        <h2 class="hz-modal__title" id="hz-projects-modal-title">Gespeicherte Projekte</h2>
+      </div>
+      <button
+        type="button"
+        class="hz-modal__close"
+        data-hz-modal-dismiss
+        aria-label="Schliessen"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </header>
+
+    <section class="hz-modal__body">
+      <div class="hz-projects__toolbar">
+        <span class="hz-projects__count" id="hz-projects-count">—</span>
+        <button
+          type="button"
+          class="hz-btn hz-btn-ghost hz-btn--sm"
+          id="hz-projects-refresh"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>
+          Aktualisieren
+        </button>
+      </div>
+
+      <!-- Zustand: Laden -->
+      <div class="hz-projects__state" data-hz-projects-state="loading">
+        <div class="hz-projects__spinner" aria-hidden="true"></div>
+        <p>Projekte werden geladen&nbsp;&hellip;</p>
+      </div>
+
+      <!-- Zustand: Leer -->
+      <div class="hz-projects__state" data-hz-projects-state="empty" hidden>
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <p><strong>Noch keine Projekte in der Cloud.</strong></p>
+        <p class="hz-muted">
+          Sobald das aktuelle Projekt benannt und gespeichert wird, erscheint es hier.
+        </p>
+      </div>
+
+      <!-- Zustand: Fehler -->
+      <div class="hz-projects__state" data-hz-projects-state="error" hidden>
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p><strong>Fehler beim Laden.</strong></p>
+        <p class="hz-muted" data-hz-projects-error-message>Bitte spaeter erneut versuchen.</p>
+      </div>
+
+      <!-- Liste -->
+      <div class="hz-projects__list" id="hz-projects-list" hidden>
+        <!-- wird per JS befuellt -->
+      </div>
+    </section>
+  </div>
+</div>
+
+<style is:global>
+  .hz-projects__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .hz-projects__count {
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--hz-mid-gray);
+    letter-spacing: 0.04em;
+  }
+  .hz-btn--sm {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .hz-projects__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 36px 20px;
+    color: var(--hz-mid-gray);
+    text-align: center;
+  }
+  .hz-projects__state[hidden] { display: none; }
+  .hz-projects__state p { margin: 0; font-size: 14.5px; }
+  .hz-projects__state strong { color: var(--hz-navy); }
+  .hz-projects__state svg { color: var(--hz-mid-gray); opacity: 0.6; }
+
+  .hz-projects__spinner {
+    width: 28px; height: 28px;
+    border: 2.5px solid var(--hz-light-gray);
+    border-top-color: var(--hz-navy);
+    border-radius: 50%;
+    animation: hz-spin 720ms linear infinite;
+  }
+  @keyframes hz-spin { to { transform: rotate(360deg); } }
+
+  .hz-projects__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hz-projects__list[hidden] { display: none; }
+
+  .hz-project-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 16px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-md);
+    transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
+  }
+  .hz-project-row:hover {
+    border-color: var(--hz-navy-light);
+    box-shadow: var(--hz-shadow-sm);
+  }
+  .hz-project-row[data-active="true"] {
+    border-color: var(--hz-red);
+    background: var(--hz-red-soft);
+  }
+
+  .hz-project-row__main { min-width: 0; }
+  .hz-project-row__title {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-family: var(--hz-font-heading); font-weight: 700;
+    color: var(--hz-navy); font-size: 16px; line-height: 1.25;
+    margin: 0;
+  }
+  .hz-project-row__customer {
+    font-size: 13.5px; color: var(--hz-mid-gray); margin-top: 2px;
+  }
+  .hz-project-row__meta {
+    display: flex; flex-wrap: wrap; gap: 6px 16px;
+    margin-top: 6px; font-size: 12.5px; color: var(--hz-mid-gray);
+  }
+  .hz-project-row__meta strong {
+    color: var(--hz-dark); font-weight: 600;
+  }
+
+  .hz-project-row__actions {
+    display: flex; gap: 6px; align-items: center;
+    flex-shrink: 0;
+  }
+
+  .hz-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .hz-badge[data-status="arbeit"]        { background: #FFF3DC; color: #8A5A12; border-color: #EED9A5; }
+  .hz-badge[data-status="offeriert"]     { background: #E4ECF8; color: #1B2A4A; border-color: #C3D1EA; }
+  .hz-badge[data-status="bestellt"]      { background: #DDEFE0; color: #0F5132; border-color: #B5D7BB; }
+  .hz-badge[data-status="abgeschlossen"] { background: #E7F3EA; color: #1F5E33; border-color: #C6E0CC; }
+  .hz-badge[data-status="archiv"]        { background: #EDEFF3; color: #4B5563; border-color: #D5D9E0; }
+
+  .hz-project-row__btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 10px; border-radius: var(--hz-radius-sm);
+    border: 1px solid var(--hz-border);
+    background: var(--hz-white);
+    font-family: var(--hz-font-heading);
+    font-size: 12.5px; font-weight: 600;
+    color: var(--hz-navy);
+    transition: all var(--hz-transition);
+    cursor: pointer;
+  }
+  .hz-project-row__btn:hover {
+    border-color: var(--hz-navy);
+    background: var(--hz-off-white);
+  }
+  .hz-project-row__btn--danger {
+    color: var(--hz-red);
+    border-color: var(--hz-red-soft);
+  }
+  .hz-project-row__btn--danger:hover {
+    background: var(--hz-red-soft);
+    border-color: var(--hz-red);
+  }
+
+  @media (max-width: 640px) {
+    .hz-project-row {
+      grid-template-columns: 1fr;
+    }
+    .hz-project-row__actions { justify-self: stretch; }
+    .hz-project-row__btn { flex: 1 1 auto; justify-content: center; }
+  }
+</style>

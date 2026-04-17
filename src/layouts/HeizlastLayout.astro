@@ -174,6 +174,119 @@ const {
       .hz-topbar { height: 60px; }
       :root { --hz-header-height: 60px; }
     }
+
+    /* =========================================================
+       PRINT-CSS — PDF-Export via window.print()
+       Aktiv wenn body.hz-print-mode gesetzt ist.
+       Einzelne Sektionen werden via body.hz-print-*-on freigeschaltet.
+       ========================================================= */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 18mm 16mm 20mm 16mm;
+      }
+
+      /* Komplett ausblenden (Nav, Sticky-Row, Buttons, Modals, etc.) */
+      body.hz-print-mode .hz-topbar,
+      body.hz-print-mode .hz-exec,
+      body.hz-print-mode .hz-footer,
+      body.hz-print-mode .hz-modal,
+      body.hz-print-mode .hz-save-block,
+      body.hz-print-mode [data-hz-print-exclude],
+      body.hz-print-mode button,
+      body.hz-print-mode .hz-toggle__trigger,
+      body.hz-print-mode .hz-diag__controls,
+      body.hz-print-mode .hz-diag__points,
+      body.hz-print-mode .hz-info,
+      body.hz-print-mode summary { display: none !important; }
+
+      /* Auch die offenen details-Blocks auf nur-Inhalt reduzieren */
+      body.hz-print-mode details { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+      body.hz-print-mode details > *:not(summary) { display: block !important; }
+
+      /* Container-Reset fuer Druck */
+      body.hz-print-mode {
+        background: #FFFFFF !important;
+        color: #1A1A1A !important;
+        font-size: 11pt;
+        line-height: 1.5;
+      }
+      body.hz-print-mode .hz-scope { display: block; min-height: 0; }
+      body.hz-print-mode .hz-main { padding: 0 !important; }
+      body.hz-print-mode .hz-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+
+      /* Sektionen ohne grosse Farbflaechen, mit Seitenumbruch danach */
+      body.hz-print-mode section.hz-section {
+        padding: 8mm 0 6mm !important;
+        background: #FFFFFF !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      body.hz-print-mode section.hz-section + section.hz-section {
+        page-break-before: auto;
+      }
+
+      /* Headlines dezenter */
+      body.hz-print-mode h1 { font-size: 22pt; margin: 0 0 6pt; }
+      body.hz-print-mode h2 { font-size: 16pt; margin: 0 0 5pt; color: #1B2A4A !important; }
+      body.hz-print-mode h3 { font-size: 12pt; margin: 0 0 4pt; }
+      body.hz-print-mode .hz-kicker { font-size: 9pt; letter-spacing: 1.6px; }
+
+      /* KPI-Kacheln kompakt */
+      body.hz-print-mode .hz-kpi-card {
+        box-shadow: none !important;
+        border: 1px solid #E2E5EB !important;
+      }
+
+      /* Grid-Sum-Karten duerfen den Seitenumbruch nicht zerreissen */
+      body.hz-print-mode .hz-sum-card,
+      body.hz-print-mode .hz-kpi-grid,
+      body.hz-print-mode .hz-kpi-card { break-inside: avoid; page-break-inside: avoid; }
+
+      /* Canvas wird durch das Screenshot-<img> ersetzt */
+      body.hz-print-mode #hz-diag-canvas { display: none !important; }
+      body.hz-print-mode .hz-diag__print-img {
+        display: block;
+        width: 100%;
+        max-height: 95mm;
+        object-fit: contain;
+        border: 1px solid #E2E5EB;
+        border-radius: 6px;
+        padding: 6px;
+        background: #FFFFFF;
+      }
+
+      /* Footer pro Seite: Firma links, Seitenzahlen rechts (via CSS Counters) */
+      @page { @bottom-left  { content: 'Thermowerk · Heizlastberechnung'; font-family: 'DM Sans', sans-serif; font-size: 8pt; color: #6B7280; }
+              @bottom-right { content: 'Seite ' counter(page) ' / ' counter(pages); font-family: 'DM Sans', sans-serif; font-size: 8pt; color: #6B7280; } }
+
+      /* Conditional Parts: blende die Sektion aus, wenn der jeweilige
+         Parts-Toggle nicht aktiv ist. Matcht via :not auf body-Klasse. */
+      body.hz-print-mode:not(.hz-print-objekt-on) #sektion-1,
+      body.hz-print-mode:not(.hz-print-objekt-on) #sektion-2,
+      body.hz-print-mode:not(.hz-print-objekt-on) #sektion-3,
+      body.hz-print-mode:not(.hz-print-objekt-on) #sektion-4 { display: none !important; }
+
+      body.hz-print-mode:not(.hz-print-resultate-on) #sektion-5,
+      body.hz-print-mode:not(.hz-print-resultate-on) #sektion-6,
+      body.hz-print-mode:not(.hz-print-resultate-on) #sektion-7 { display: none !important; }
+
+      body.hz-print-mode:not(.hz-print-diagramm-on) #sektion-diagramm { display: none !important; }
+
+      /* Formeln & Rechenwege: standardmaessig versteckt, nur wenn Flag an */
+      body.hz-print-mode:not(.hz-print-formeln-on) [data-hz-calc-steps],
+      body.hz-print-mode:not(.hz-print-formeln-on) .hz-formel { display: none !important; }
+
+      /* Notizen: nur Exportieren wenn gewuenscht UND pro Notiz der Flag gesetzt ist (data-export-on) */
+      body.hz-print-mode:not(.hz-print-notizen-on) .hz-note,
+      body.hz-print-mode .hz-note:not([data-export-on="true"]) { display: none !important; }
+
+      /* Grundlagen: Block sichtbar wenn Flag an */
+      body.hz-print-mode:not(.hz-print-grundlagen-on) .hz-grundlagen { display: none !important; }
+    }
   </style>
 </head>
 <body class="hz-scope">
