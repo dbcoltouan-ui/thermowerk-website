@@ -9,8 +9,8 @@ import InfoBox from '../InfoBox.astro';
 import SectionNotes from '../SectionNotes.astro';
 ---
 <SectionWrapper
-  id="sektion-7"
-  kicker="07 - Projekt"
+  id="sektion-6"
+  kicker="06 - Projekt"
   title="Zusammenfassung & Projekt speichern"
   subline="Kurzübersicht aller Eingaben und Ergebnisse. Speicherung lokal (Auto-Save) und optional in der Cloud."
 >
@@ -31,18 +31,49 @@ import SectionNotes from '../SectionNotes.astro';
     </dl>
   </div>
 
-  <!-- Zusammenfassung: Ergebnis -->
-  <div class="hz-sum-card hz-sum-card--accent">
-    <h3 class="hz-sum-card__title">Ergebnis</h3>
-    <dl class="hz-sum-grid">
-      <div><dt>Qhl (Heizlast)</dt><dd><span data-hz-sum="qhl">&mdash;</span> kW</dd></div>
-      <div><dt>Qw (Warmwasser)</dt><dd><span data-hz-sum="qw">&mdash;</span> kW</dd></div>
-      <div><dt>Qoff (Sperrzeit)</dt><dd><span data-hz-sum="qoff">&mdash;</span> kW</dd></div>
-      <div><dt>Qas (Sonder)</dt><dd><span data-hz-sum="qas">&mdash;</span> kW</dd></div>
-      <div class="hz-sum-grid__hero"><dt>Qh Auslegung</dt><dd><span data-hz-sum="qh">&mdash;</span> kW</dd></div>
-      <div><dt>WW-Speicher</dt><dd><span data-hz-sum="wwSpeicher">&mdash;</span> L</dd></div>
-      <div><dt>Puffer</dt><dd><span data-hz-sum="puffer">&mdash;</span> L</dd></div>
-    </dl>
+  <!-- Endergebnis (Phase 9 / Block F) — Qhl + Qw + Qoff + Qas = Qh -->
+  <div class="hz-endresult" data-hz-plausi-wrap>
+    <h3 class="hz-endresult__title">Wärmepumpenleistung</h3>
+    <div class="hz-endresult__rows">
+      <div class="hz-endresult__row">
+        <span class="hz-endresult__name">Heizlast</span>
+        <span class="hz-endresult__code">Qhl</span>
+        <span class="hz-endresult__value"><span data-hz-sum="qhl">&mdash;</span></span>
+        <span class="hz-endresult__unit">kW</span>
+      </div>
+      <div class="hz-endresult__op" aria-hidden="true">+</div>
+      <div class="hz-endresult__row">
+        <span class="hz-endresult__name">Warmwasser</span>
+        <span class="hz-endresult__code">Qw</span>
+        <span class="hz-endresult__value"><span data-hz-sum="qw">&mdash;</span></span>
+        <span class="hz-endresult__unit">kW</span>
+      </div>
+      <div class="hz-endresult__op" aria-hidden="true">+</div>
+      <div class="hz-endresult__row">
+        <span class="hz-endresult__name">Sperrzeit</span>
+        <span class="hz-endresult__code">Qoff</span>
+        <span class="hz-endresult__value"><span data-hz-sum="qoff">&mdash;</span></span>
+        <span class="hz-endresult__unit">kW</span>
+      </div>
+      <div class="hz-endresult__op" aria-hidden="true">+</div>
+      <div class="hz-endresult__row">
+        <span class="hz-endresult__name">Sonderzuschlag</span>
+        <span class="hz-endresult__code">Qas</span>
+        <span class="hz-endresult__value"><span data-hz-sum="qas">&mdash;</span></span>
+        <span class="hz-endresult__unit">kW</span>
+      </div>
+      <div class="hz-endresult__op hz-endresult__op--eq" aria-hidden="true">=</div>
+      <div class="hz-endresult__row hz-endresult__row--total">
+        <span class="hz-endresult__name">Wärmepumpenleistung</span>
+        <span class="hz-endresult__code">Qh</span>
+        <span class="hz-endresult__value"><span data-hz-sum="qh">&mdash;</span></span>
+        <span class="hz-endresult__unit">kW</span>
+      </div>
+    </div>
+    <div class="hz-endresult__secondary">
+      <div class="hz-endresult__pair"><span>WW-Speicher</span><strong><span data-hz-sum="wwSpeicher">&mdash;</span> L</strong></div>
+      <div class="hz-endresult__pair"><span>Puffer</span><strong><span data-hz-sum="puffer">&mdash;</span> L</strong></div>
+    </div>
   </div>
 
   <!-- Speichern / Laden -->
@@ -140,6 +171,100 @@ import SectionNotes from '../SectionNotes.astro';
   .hz-sum-grid__hero dd {
     font-family: var(--hz-font-heading); font-weight: 700;
     font-size: clamp(26px, 3.5vw, 34px); color: var(--hz-navy); line-height: 1.1;
+  }
+
+  /* Endergebnis-Karte (Phase 9 / Block F) */
+  .hz-endresult {
+    padding: 22px 24px 20px;
+    background: var(--hz-white);
+    border: 1px solid var(--hz-border);
+    border-top: 3px solid var(--hz-red);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .hz-endresult__title {
+    font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
+    margin: 0 0 14px; font-size: 17px;
+  }
+  .hz-endresult__rows { display: flex; flex-direction: column; }
+  .hz-endresult__row {
+    display: grid;
+    grid-template-columns: 1fr 56px minmax(70px, auto) 36px;
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .hz-endresult__name {
+    font-family: var(--hz-font-heading); font-weight: 600;
+    font-size: 14.5px; color: var(--hz-dark);
+  }
+  .hz-endresult__code {
+    font-family: var(--hz-font-body);
+    font-size: 13px; color: var(--hz-mid-gray);
+    font-style: italic;
+  }
+  .hz-endresult__value {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: 18px; color: var(--hz-navy);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .hz-endresult__unit {
+    font-size: 13px; color: var(--hz-mid-gray);
+    text-align: left;
+  }
+  .hz-endresult__op {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: 16px; color: var(--hz-mid-gray);
+    margin-left: calc(100% - 120px);
+    padding-left: 4px;
+    line-height: 1;
+  }
+  .hz-endresult__op--eq {
+    color: var(--hz-red);
+    font-size: 18px;
+    margin-top: 4px; margin-bottom: 2px;
+  }
+  .hz-endresult__row--total {
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--hz-border);
+  }
+  .hz-endresult__row--total .hz-endresult__name {
+    font-size: 15.5px; color: var(--hz-navy);
+  }
+  .hz-endresult__row--total .hz-endresult__code {
+    color: var(--hz-red); font-style: normal; font-weight: 600;
+  }
+  .hz-endresult__row--total .hz-endresult__value {
+    font-size: clamp(24px, 2.8vw, 30px);
+    color: var(--hz-red);
+  }
+  .hz-endresult__row--total .hz-endresult__unit {
+    font-size: 14px; color: var(--hz-dark); font-weight: 600;
+  }
+  .hz-endresult__secondary {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed var(--hz-border);
+  }
+  .hz-endresult__pair {
+    display: inline-flex; align-items: baseline; gap: 8px;
+    font-size: 13.5px; color: var(--hz-mid-gray);
+  }
+  .hz-endresult__pair strong {
+    color: var(--hz-navy); font-weight: 700;
+    font-family: var(--hz-font-heading);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 520px) {
+    .hz-endresult { padding: 16px 16px 14px; }
+    .hz-endresult__row {
+      grid-template-columns: 1fr 44px minmax(60px, auto) 30px;
+      gap: 8px;
+    }
+    .hz-endresult__op { margin-left: calc(100% - 100px); }
+    .hz-endresult__row--total .hz-endresult__value { font-size: 22px; }
   }
 
   .hz-save-block {
