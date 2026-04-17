@@ -1,14 +1,8 @@
-Phase 9 / Block M: Mobile-Polish (Worttrennung + Logo)
+Phase 9 / Bundle 2 abgeschlossen: Doku (HANDOFF-PHASE-16 + CLAUDE.md)
 
-- .hz-brand__text Span komplett entfernt (HTML + CSS), nicht nur
-  display:none -> saubere Logo-Kante
-- Mobile-Logo auf 32 px (Container nicht mehr gestaucht)
-- Header-Height Mobile 60 px
-- Konservative Worttrennung im .hz-scope: hyphens: manual +
-  overflow-wrap: break-word + word-break: normal -> keine mid-word-
-  Breaks mehr
-- text-wrap: balance auf H1-H3, Section-Title, Section-Subline, Kicker
-- Mobile-Regel ersetzt das bisherige overflow-wrap: anywhere
-- Desktop-Logo buendig mit .hz-container-Kante (bereits durch Block M1
-  via --hz-container-max sichergestellt)
-- Tests weiterhin 49 + 33 gruen
+- HANDOFF-PHASE-16.md neu: Copy-Paste-Prompt fuer naechste Session,
+  Statusbericht aller vier Bloecke L/M1/M2/M, offene manuelle
+  Abnahme-Punkte, optionale Folge-Themen.
+- CLAUDE.md hat die vier Bundle-2-Eintraege chronologisch gesetzt.
+- Code unveraendert — reine Doku.
+- Tests weiterhin 49 + 33 gruen.
