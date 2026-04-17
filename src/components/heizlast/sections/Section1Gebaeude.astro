@@ -12,6 +12,7 @@ import SectionWrapper from '../SectionWrapper.astro';
 import InfoBox from '../InfoBox.astro';
 import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
+import OverrideField from '../OverrideField.astro';
 import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
@@ -141,25 +142,22 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
       </label>
     </div>
 
-    <!-- tvoll-Override -->
+    <!-- tvoll mit Auto-Default + Override (Phase 9 / Block A + B) -->
     <div class="hz-grid-3">
-      <label class="hz-field">
-        <span class="hz-field__label">tvoll manuell setzen (optional)</span>
-        <div class="hz-field__input-with-unit">
-          <input
-            class="hz-field__input"
-            type="number"
-            step="50"
-            min="1000"
-            max="3500"
-            placeholder="Leer = aus Profil + Lage"
-            data-hz-bind="gebaeude.tvollOverride"
-            data-hz-type="number"
-          />
-          <span class="hz-field__unit">h/a</span>
-        </div>
-        <small class="hz-muted">Leer lassen heisst: Richtwert aus Profil + Lage verwenden.</small>
-      </label>
+      <OverrideField
+        label="Vollbetriebsstunden tvoll"
+        id="hz-tvoll"
+        bindPath="gebaeude.tvollOverride"
+        overridePath="gebaeude.tvoll"
+        defaultValue={1900}
+        unit="h/a"
+        source="FWS"
+        type="number"
+        step={50}
+        min={1000}
+        max={3500}
+        hint="Default aus Profil + Lage; Reset-Pfeil stellt den Richtwert wieder her."
+      />
     </div>
   </div>
 

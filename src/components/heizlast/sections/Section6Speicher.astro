@@ -7,6 +7,7 @@ import SectionWrapper from '../SectionWrapper.astro';
 import InfoBox from '../InfoBox.astro';
 import KpiCard from '../KpiCard.astro';
 import SectionNotes from '../SectionNotes.astro';
+import OverrideField from '../OverrideField.astro';
 ---
 <SectionWrapper
   id="sektion-6"
@@ -37,23 +38,32 @@ import SectionNotes from '../SectionNotes.astro';
       </header>
 
       <div class="hz-grid-2">
-        <label class="hz-field">
-          <span class="hz-field__label">Speicher-Austrittstemperatur</span>
-          <div class="hz-field__input-with-unit">
-            <input class="hz-field__input" type="number" step="1" min="40" max="80"
-              data-hz-bind="speicher.wwTStoAus" data-hz-type="number" />
-            <span class="hz-field__unit">°C</span>
-          </div>
-        </label>
-        <label class="hz-field">
-          <span class="hz-field__label">Eintritt (Kaltwasser) — Override</span>
-          <div class="hz-field__input-with-unit">
-            <input class="hz-field__input" type="number" step="1" min="5" max="20"
-              placeholder="10 (SIA 385/2)"
-              data-hz-bind="speicher.wwTStoEinOverride" data-hz-type="number" />
-            <span class="hz-field__unit">°C</span>
-          </div>
-        </label>
+        <OverrideField
+          label="Speicher-Austrittstemperatur"
+          id="hz-ww-t-aus"
+          bindPath="speicher.wwTStoAus"
+          overridePath="speicher.wwTAustritt"
+          defaultValue={60}
+          unit="°C"
+          source="SIA 385/2"
+          type="number"
+          step={1}
+          min={40}
+          max={80}
+        />
+        <OverrideField
+          label="Eintritt (Kaltwasser)"
+          id="hz-ww-t-ein"
+          bindPath="speicher.wwTStoEinOverride"
+          overridePath="speicher.wwTEintritt"
+          defaultValue={10}
+          unit="°C"
+          source="SIA 385/2"
+          type="number"
+          step={1}
+          min={5}
+          max={20}
+        />
       </div>
 
       <fieldset class="hz-radio-group">

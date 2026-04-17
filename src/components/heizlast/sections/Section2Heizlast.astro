@@ -1,11 +1,12 @@
 ---
-// Section 2 — Heizlast-Berechnung (M2 + M4 + M3)
-// - Fuenf Methoden (Verbrauch / Messung / Bstd / Bauperiode / Override) als
-//   zuschaltbare Toggles. Beim Aufklappen einer Methode wird sie als "aktive
-//   Methode" fuer Qhl gesetzt (state.heizlast.method).
-// - Die aktive Methode erhaelt einen roten Akzent und den Badge "aktiv".
-// - Optional M4: Sanierungs-Delta (multiplikativ).
-// - Optional M3: Plausibilitaets-Badge (W/m2).
+// Section 2 - Heizlast-Berechnung (M2 + M4 + M3)
+// Phase 9 / Block B: Methodenwahl ist weggefallen. Jede Methode hat oben einen
+// Ja/Nein-Switch ("Diese Methode verwenden"); das schreibt in
+// state.heizlast.methodsEnabled.<methode>. Die Compute-Hierarchie
+// (compute.ts) nutzt die erste aktivierte Methode, die ein gueltiges
+// Ergebnis liefert. Bauperiode ist IMMER als Fallback aktiv und hat deshalb
+// keinen Switch.
+// Optional M4: Sanierungs-Delta (multiplikativ). Optional M3: Plausi-Badge.
 
 import SectionWrapper from '../SectionWrapper.astro';
 import InfoBox from '../InfoBox.astro';
@@ -18,7 +19,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   id="sektion-2"
   kicker="02 - Heizlast Qhl"
   title="Heizlast-Berechnung"
-  subline="Waehle eine oder mehrere Methoden. Die aufgeklappte, rot markierte Methode liefert den Qhl-Wert fuer die weiteren Sektionen."
+  subline="Waehle aus, welche Methoden du verwenden willst. Die oberste aktivierte Methode mit vollstaendigen Eingaben liefert Qhl. Bauperiode laeuft immer als Fallback."
   tone="off"
 >
   <slot name="aside" slot="aside">
@@ -33,7 +34,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <!-- Verbrauchsmethode -->
     <Toggle label="Verbrauchsmethode" caption="aus Brennstoff-/Energieverbrauch" id="hz-m2-verbrauch" open={true}>
       <div class="hz-method" data-method="verbrauch">
-        <span class="hz-method__badge" data-method-badge>aktiv</span>
+        <label class="hz-method__switch">
+          <input type="checkbox" data-hz-bind="heizlast.methodsEnabled.verbrauch" data-hz-type="boolean" />
+          <span>Diese Methode verwenden</span>
+        </label>
         <p class="hz-muted hz-method__intro">Letzte Jahresverbräuche eines Heizkessels in Qn umrechnen.</p>
         <div class="hz-grid-3">
           <label class="hz-field">
@@ -88,7 +92,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <!-- Messung -->
     <Toggle label="Direktmessung" caption="Qn aus Waermezaähler / Kessel-Protokoll" id="hz-m2-messung">
       <div class="hz-method" data-method="messung">
-        <span class="hz-method__badge" data-method-badge>aktiv</span>
+        <label class="hz-method__switch">
+          <input type="checkbox" data-hz-bind="heizlast.methodsEnabled.messung" data-hz-type="boolean" />
+          <span>Diese Methode verwenden</span>
+        </label>
         <p class="hz-muted hz-method__intro">Wenn Qn direkt gemessen ist, einfach Jahreswert eingeben.</p>
         <div class="hz-grid-3">
           <label class="hz-field">
@@ -106,7 +113,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <!-- Betriebsstunden -->
     <Toggle label="Betriebsstunden-Methode" caption="aus Kessel-Betriebsstunden" id="hz-m2-bstd">
       <div class="hz-method" data-method="bstd">
-        <span class="hz-method__badge" data-method-badge>aktiv</span>
+        <label class="hz-method__switch">
+          <input type="checkbox" data-hz-bind="heizlast.methodsEnabled.bstd" data-hz-type="boolean" />
+          <span>Diese Methode verwenden</span>
+        </label>
         <p class="hz-muted hz-method__intro">Aus Laufzeit und Nennleistung des bestehenden Kessels.</p>
         <div class="hz-grid-3">
           <label class="hz-field">
@@ -134,13 +144,13 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
       </div>
     </Toggle>
 
-    <!-- Bauperiode -->
-    <Toggle label="Pauschale nach Bauperiode" caption="FWS-Tabelle" id="hz-m2-bauperiode">
+    <!-- Bauperiode — immer aktiv, kein Switch -->
+    <Toggle label="Pauschale nach Bauperiode" caption="FWS-Tabelle - Fallback, immer aktiv" id="hz-m2-bauperiode">
       <div class="hz-method" data-method="bauperiode">
-        <span class="hz-method__badge" data-method-badge>aktiv</span>
         <p class="hz-muted hz-method__intro">
           Default-Kennwert aus der FWS-Tabelle wird automatisch verwendet (Gebäudetyp + Bauperiode aus Sektion 1).
-          Kein zusätzlicher Input nötig — diese Methode gilt mit den Werten der Stammdaten.
+          Diese Methode laeuft immer als Fallback, wenn keine der anderen Methoden ein Ergebnis liefert.
+          Kein zusätzlicher Input nötig — sie gilt mit den Werten der Stammdaten.
         </p>
       </div>
     </Toggle>
@@ -148,7 +158,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <!-- Override -->
     <Toggle label="Direkteingabe Qhl (Override)" caption="z. B. aus SIA-384-Berechnung" id="hz-m2-override">
       <div class="hz-method" data-method="override">
-        <span class="hz-method__badge" data-method-badge>aktiv</span>
+        <label class="hz-method__switch">
+          <input type="checkbox" data-hz-bind="heizlast.methodsEnabled.override" data-hz-type="boolean" />
+          <span>Diese Methode verwenden</span>
+        </label>
         <p class="hz-muted hz-method__intro">Wenn bereits ein Qhl-Wert extern berechnet wurde.</p>
         <div class="hz-grid-3">
           <label class="hz-field">
@@ -207,11 +220,12 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   </div>
 
   <InfoBox title="Methoden im Vergleich" icon="book" subtitle="FWS Modul 3">
+    <p><strong>Hierarchie:</strong> Direkteingabe &rarr; Betriebsstunden &rarr; Messung &rarr; Verbrauch &rarr; Bauperiode. Die oberste aktivierte Methode mit vollstaendigen Eingaben liefert Qhl.</p>
     <p><strong>Verbrauch</strong> &ndash; genauste Methode wenn Verbrauchsdaten aus den letzten Jahren vorhanden sind.</p>
     <p><strong>Messung</strong> &ndash; direkt aus Wärmezähler/Kesseldaten in kWh/a.</p>
     <p><strong>Betriebsstunden</strong> &ndash; aus Laufzeit &times; Nennleistung, nützlich bei konstant betriebenen Kesseln.</p>
-    <p><strong>Bauperiode</strong> &ndash; Pauschale aus FWS-Tabelle, wenn keine Verbrauchsdaten vorliegen.</p>
-    <p><strong>Direkteingabe</strong> &ndash; Qhl manuell setzen (z. B. aus SIA 384).</p>
+    <p><strong>Bauperiode</strong> &ndash; Pauschale aus FWS-Tabelle, laeuft immer als Fallback.</p>
+    <p><strong>Direkteingabe</strong> &ndash; Qhl manuell setzen (z. B. aus SIA 384).</p>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion2" sectionLabel="Sektion 2 (Heizlast)" />
@@ -219,62 +233,27 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
 
 <style is:global>
   .hz-methods { display: flex; flex-direction: column; gap: 10px; }
-  .hz-method { position: relative; padding-right: 72px; }
+  .hz-method { position: relative; }
   .hz-method__intro { margin-bottom: 14px; font-size: 14px; }
 
-  @media (max-width: 640px) {
-    .hz-method { padding-right: 0; }
-    .hz-method__badge {
-      position: static; margin-bottom: 10px; display: none;
-    }
-    .hz-method.is-active .hz-method__badge { display: inline-flex; }
+  /* Phase 9 / Block B: Ja/Nein-Switch oben in jeder Methode.
+     Kompakt, subtil, aber erkennbar als Primaer-Aktion des Panels. */
+  .hz-method__switch {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 12px; margin-bottom: 14px;
+    border: 1px solid var(--hz-border); border-radius: 2px;
+    background: var(--hz-white);
+    font-family: var(--hz-font-heading); font-weight: 600; font-size: 13.5px;
+    color: var(--hz-navy);
+    cursor: pointer;
+    transition: border-color var(--hz-transition), background var(--hz-transition);
   }
-  .hz-method__badge {
-    position: absolute; top: -4px; right: 0;
-    padding: 3px 10px; border-radius: 999px;
-    background: var(--hz-red); color: var(--hz-white);
-    font-family: var(--hz-font-heading); font-weight: 700; font-size: 11px;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    display: none;
+  .hz-method__switch input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--hz-navy); cursor: pointer;
   }
-  .hz-method.is-active .hz-method__badge { display: inline-flex; }
-
-  /* Phase 8 — Aktiver Methoden-Toggle auch eingeklappt klar sichtbar.
-     Wrapper bekommt roten Balken + Aktiv-Pill im Chip.
-     Wird per data-active="true" vom Glue-JS gesetzt. */
-  .hz-toggle[data-toggle][data-active="true"] {
-    position: relative;
-    padding-left: 14px;
-  }
-  .hz-toggle[data-toggle][data-active="true"]::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 2px; bottom: 2px;
-    width: 4px; border-radius: 4px;
-    background: var(--hz-red);
-  }
-  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn {
-    background: var(--hz-red-soft);
-    border-color: var(--hz-red);
-    color: var(--hz-red);
-  }
-  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn:hover {
-    background: #F8DED9;
-  }
-  .hz-toggle[data-toggle][data-active="true"] .hz-toggle__sign {
-    background: var(--hz-red); color: var(--hz-white);
-  }
-  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn::after {
-    content: 'aktiv';
-    margin-left: 8px; padding: 3px 9px;
-    border-radius: 999px;
-    background: var(--hz-red); color: var(--hz-white);
-    font-family: var(--hz-font-heading); font-weight: 700; font-size: 10.5px;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    line-height: 1;
-  }
-  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__content .hz-toggle__inner {
-    border-color: var(--hz-red);
+  .hz-method__switch:has(input:checked) {
+    border-color: var(--hz-navy);
+    background: var(--hz-blue-tint);
   }
 
   .hz-switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--hz-mid-gray); }

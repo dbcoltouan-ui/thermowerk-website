@@ -42,7 +42,7 @@ s.gebaeude.ebf = 270;
 s.gebaeude.tvollProfil = 'wohnen_mitWW';
 s.gebaeude.tvollOverride = 2000;
 
-s.heizlast.method = 'verbrauch';
+s.heizlast.methodsEnabled = { verbrauch: true, messung: false, bstd: false, override: false };
 s.heizlast.verbrauch.energietraeger = 'oel';
 s.heizlast.verbrauch.ba = 3500;
 s.heizlast.verbrauch.etaOverride = 0.80;

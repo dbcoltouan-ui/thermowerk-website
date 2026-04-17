@@ -65,6 +65,22 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
     if (!obj.overrides || typeof obj.overrides !== 'object') {
       obj.overrides = {};
     }
+    // Phase 9 / Block B: heizlast.method (Enum) → heizlast.methodsEnabled (Record).
+    // Alte States, die noch `method` tragen, werden in den neuen Record
+    // uebersetzt. `bauperiode` war immer der implizite Fallback und kommt
+    // deshalb nicht mehr in den Record.
+    if (obj.heizlast && typeof obj.heizlast === 'object') {
+      if (!obj.heizlast.methodsEnabled || typeof obj.heizlast.methodsEnabled !== 'object') {
+        const prev = typeof obj.heizlast.method === 'string' ? obj.heizlast.method : null;
+        obj.heizlast.methodsEnabled = {
+          verbrauch: prev === 'verbrauch',
+          messung: prev === 'messung',
+          bstd: prev === 'bstd',
+          override: prev === 'override',
+        };
+      }
+      if ('method' in obj.heizlast) delete obj.heizlast.method;
+    }
     return obj as HeizlastState;
   }
   // Unbekannte Version → lieber Default-State zurückgeben, damit der Rechner

@@ -8,6 +8,7 @@ import InfoBox from '../InfoBox.astro';
 import KpiCard from '../KpiCard.astro';
 import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
+import OverrideField from '../OverrideField.astro';
 import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
@@ -26,15 +27,19 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
   <div class="hz-block">
     <h3 class="hz-block__heading">Sperrzeit (EVU)</h3>
     <div class="hz-grid-3">
-      <label class="hz-field">
-        <span class="hz-field__label">toff — Sperrstunden pro Tag</span>
-        <div class="hz-field__input-with-unit">
-          <input class="hz-field__input" type="number" step="1" min="0" max="8"
-            data-hz-bind="zuschlaege.toff" data-hz-type="number" />
-          <span class="hz-field__unit">h/d</span>
-        </div>
-        <small class="hz-muted">0 = keine Sperre. Typisch: 2&ndash;4 h (EVU).</small>
-      </label>
+      <OverrideField
+        label="toff - Sperrstunden pro Tag"
+        id="hz-toff"
+        bindPath="zuschlaege.toff"
+        defaultValue={2}
+        unit="h/d"
+        source="EVU-Vorgabe"
+        type="number"
+        step={1}
+        min={0}
+        max={8}
+        hint="0 = keine Sperre. Typisch: 2-4 h (EVU)."
+      />
     </div>
 
     <p class="hz-muted" style="margin-top: 8px; font-size: 13.5px;">

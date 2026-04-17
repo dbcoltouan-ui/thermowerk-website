@@ -68,61 +68,93 @@ function gebaeudetypNumerisch(s: HeizlastState): 'efh' | 'mfh' {
   return s.gebaeude.typ === 'mfh' ? 'mfh' : 'efh';
 }
 
-function computeQhlRaw(s: HeizlastState, tvoll: number): CalcResult | null {
-  const { method } = s.heizlast;
-  switch (method) {
-    case 'verbrauch': {
-      const v = s.heizlast.verbrauch;
-      const brenn = BRENNWERTE[v.energietraeger];
-      if (!brenn || !v.ba || v.ba <= 0 || !tvoll) return null;
-      const eta = resolveEta(s);
-      const qnBrutto = qnAusVerbrauch(v.ba, brenn.ho, eta, {
-        label: brenn.label,
-        trennerEinheit: brenn.verbrauchEinheit,
-      });
-      let qnHeiz = qnBrutto.value;
-      if (v.inklWW && v.vwuAbzug > 0) {
-        const deltaT = s.warmwasser.deltaTOverride ?? PHYSIK.deltaT_ww;
-        const qnww = qnwwJahr(
-          v.vwuAbzug,
-          {
-            speicher: (s.warmwasser.speicherProzent ?? 0) / 100,
-            zirk: (s.warmwasser.zirkProzent ?? 0) / 100,
-            ausstoss: (s.warmwasser.ausstossProzent ?? 0) / 100,
-          },
-          deltaT,
-        );
-        qnHeiz = qnBrutto.value - qnww.value;
-      }
-      return qhlAusQn(qnHeiz, tvoll);
-    }
-    case 'messung': {
-      const qn = s.heizlast.messung.qnPerJahr;
-      if (!qn || qn <= 0 || !tvoll) return null;
-      return qhlAusQn(qn, tvoll);
-    }
-    case 'bstd': {
-      const b = s.heizlast.bstd;
-      if (!b.stundenGesamt || !b.jahre || !b.qhWP || !tvoll) return null;
-      const qnRes = qnAusBetriebsstunden(b.stundenGesamt, b.jahre, b.qhWP);
-      return qhlAusQn(qnRes.value, tvoll);
-    }
-    case 'bauperiode': {
-      const { bauperiode, ebf } = s.gebaeude;
-      if (!ebf || !bauperiode) return null;
-      return qhlAusBauperiode(bauperiode, gebaeudetypNumerisch(s), ebf, tvoll);
-    }
-    case 'override': {
-      const q = s.heizlast.override.qhl;
-      if (!q || q <= 0) return null;
-      return {
-        value: q,
-        unit: 'kW',
-        steps: [{ formel: 'Qhl (direkt eingegeben)', wert: q.toFixed(2) + ' kW' }],
-      };
-    }
+// --- Einzel-Methoden (Phase 9 / Block B) ---
+// Jede Methode bekommt ihre eigene Funktion und liefert entweder ein
+// `CalcResult` oder null (wenn die Eingaben unvollstaendig sind). Die
+// Hierarchie in `computeQhlRaw` arbeitet die aktivierten Methoden in fester
+// Reihenfolge ab: override > bstd > messung > verbrauch > bauperiode.
+
+function qhlVerbrauch(s: HeizlastState, tvoll: number): CalcResult | null {
+  const v = s.heizlast.verbrauch;
+  const brenn = BRENNWERTE[v.energietraeger];
+  if (!brenn || !v.ba || v.ba <= 0 || !tvoll) return null;
+  const eta = resolveEta(s);
+  const qnBrutto = qnAusVerbrauch(v.ba, brenn.ho, eta, {
+    label: brenn.label,
+    trennerEinheit: brenn.verbrauchEinheit,
+  });
+  let qnHeiz = qnBrutto.value;
+  if (v.inklWW && v.vwuAbzug > 0) {
+    const deltaT = s.warmwasser.deltaTOverride ?? PHYSIK.deltaT_ww;
+    const qnww = qnwwJahr(
+      v.vwuAbzug,
+      {
+        speicher: (s.warmwasser.speicherProzent ?? 0) / 100,
+        zirk: (s.warmwasser.zirkProzent ?? 0) / 100,
+        ausstoss: (s.warmwasser.ausstossProzent ?? 0) / 100,
+      },
+      deltaT,
+    );
+    qnHeiz = qnBrutto.value - qnww.value;
   }
-  return null;
+  return qhlAusQn(qnHeiz, tvoll);
+}
+
+function qhlMessung(s: HeizlastState, tvoll: number): CalcResult | null {
+  const qn = s.heizlast.messung.qnPerJahr;
+  if (!qn || qn <= 0 || !tvoll) return null;
+  return qhlAusQn(qn, tvoll);
+}
+
+function qhlBstd(s: HeizlastState, tvoll: number): CalcResult | null {
+  const b = s.heizlast.bstd;
+  if (!b.stundenGesamt || !b.jahre || !b.qhWP || !tvoll) return null;
+  const qnRes = qnAusBetriebsstunden(b.stundenGesamt, b.jahre, b.qhWP);
+  return qhlAusQn(qnRes.value, tvoll);
+}
+
+function qhlBauperiode(s: HeizlastState, tvoll: number): CalcResult | null {
+  const { bauperiode, ebf } = s.gebaeude;
+  if (!ebf || !bauperiode) return null;
+  return qhlAusBauperiode(bauperiode, gebaeudetypNumerisch(s), ebf, tvoll);
+}
+
+function qhlOverride(s: HeizlastState): CalcResult | null {
+  const q = s.heizlast.override.qhl;
+  if (!q || q <= 0) return null;
+  return {
+    value: q,
+    unit: 'kW',
+    steps: [{ formel: 'Qhl (direkt eingegeben)', wert: q.toFixed(2) + ' kW' }],
+  };
+}
+
+/**
+ * Phase 9 / Block B — Auto-Erkennung in fester Reihenfolge. Die erste
+ * aktivierte Methode, die ein gueltiges Ergebnis liefert, gewinnt.
+ * Reihenfolge: override → bstd → messung → verbrauch → bauperiode.
+ * `bauperiode` laeuft immer als Fallback, auch wenn im Record nichts aktiv
+ * ist — solange Lage, Bauperiode und EBF gesetzt sind.
+ */
+function computeQhlRaw(s: HeizlastState, tvoll: number): CalcResult | null {
+  const m = s.heizlast.methodsEnabled;
+  if (m?.override) {
+    const r = qhlOverride(s);
+    if (r) return r;
+  }
+  if (m?.bstd) {
+    const r = qhlBstd(s, tvoll);
+    if (r) return r;
+  }
+  if (m?.messung) {
+    const r = qhlMessung(s, tvoll);
+    if (r) return r;
+  }
+  if (m?.verbrauch) {
+    const r = qhlVerbrauch(s, tvoll);
+    if (r) return r;
+  }
+  return qhlBauperiode(s, tvoll);
 }
 
 function computeQhlKorr(s: HeizlastState, qhlRaw: CalcResult | null): CalcResult | null {

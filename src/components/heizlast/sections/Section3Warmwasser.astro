@@ -10,6 +10,7 @@ import InfoBox from '../InfoBox.astro';
 import KpiCard from '../KpiCard.astro';
 import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
+import OverrideField from '../OverrideField.astro';
 import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
@@ -109,48 +110,66 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
     </div>
   </div>
 
-  <!-- Verluste -->
+  <!-- Verluste (Phase 9 / Block A + B: als OverrideField mit Auto-Default) -->
   <div class="hz-block" style="margin-top: 22px;">
     <h3 class="hz-block__heading">Verluste (optional)</h3>
     <div class="hz-grid-3">
-      <label class="hz-field">
-        <span class="hz-field__label">Speicher-Verlust</span>
-        <div class="hz-field__input-with-unit">
-          <input class="hz-field__input" type="number" step="1" min="0" max="50"
-            placeholder="0"
-            data-hz-bind="warmwasser.speicherProzent" data-hz-type="number" />
-          <span class="hz-field__unit">%</span>
-        </div>
-      </label>
-      <label class="hz-field">
-        <span class="hz-field__label">Zirkulations-Verlust</span>
-        <div class="hz-field__input-with-unit">
-          <input class="hz-field__input" type="number" step="1" min="0" max="50"
-            placeholder="0"
-            data-hz-bind="warmwasser.zirkProzent" data-hz-type="number" />
-          <span class="hz-field__unit">%</span>
-        </div>
-      </label>
-      <label class="hz-field">
-        <span class="hz-field__label">Ausstoss-Verlust</span>
-        <div class="hz-field__input-with-unit">
-          <input class="hz-field__input" type="number" step="1" min="0" max="50"
-            placeholder="0"
-            data-hz-bind="warmwasser.ausstossProzent" data-hz-type="number" />
-          <span class="hz-field__unit">%</span>
-        </div>
-      </label>
+      <OverrideField
+        label="Speicher-Verlust"
+        id="hz-ww-speicher"
+        bindPath="warmwasser.speicherProzent"
+        overridePath="warmwasser.speicher"
+        defaultValue={10}
+        unit="%"
+        source="SIA 385/1"
+        type="number"
+        step={1}
+        min={0}
+        max={50}
+      />
+      <OverrideField
+        label="Zirkulations-Verlust"
+        id="hz-ww-zirk"
+        bindPath="warmwasser.zirkProzent"
+        overridePath="warmwasser.zirk"
+        defaultValue={0}
+        unit="%"
+        source="SIA 385/1"
+        type="number"
+        step={1}
+        min={0}
+        max={50}
+      />
+      <OverrideField
+        label="Ausstoss-Verlust"
+        id="hz-ww-ausstoss"
+        bindPath="warmwasser.ausstossProzent"
+        overridePath="warmwasser.ausstoss"
+        defaultValue={15}
+        unit="%"
+        source="SIA 385/1"
+        type="number"
+        step={1}
+        min={0}
+        max={50}
+      />
     </div>
 
-    <label class="hz-field" style="margin-top: 14px; max-width: 280px;">
-      <span class="hz-field__label">ΔT Kaltwasser → WW (optional)</span>
-      <div class="hz-field__input-with-unit">
-        <input class="hz-field__input" type="number" step="1" min="20" max="70"
-          placeholder="50 K (Default)"
-          data-hz-bind="warmwasser.deltaTOverride" data-hz-type="number" />
-        <span class="hz-field__unit">K</span>
-      </div>
-    </label>
+    <div style="margin-top: 14px; max-width: 320px;">
+      <OverrideField
+        label="ΔT Kaltwasser → WW"
+        id="hz-ww-deltaT"
+        bindPath="warmwasser.deltaTOverride"
+        overridePath="warmwasser.deltaT"
+        defaultValue={50}
+        unit="K"
+        source="SIA 385/1"
+        type="number"
+        step={1}
+        min={20}
+        max={70}
+      />
+    </div>
   </div>
 
   <InfoBox title="Grundlage SIA 385/1" icon="book">

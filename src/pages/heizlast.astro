@@ -351,51 +351,13 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   });
 
   // ------------------------------------------------------------
-  // 6. M2-Methoden-Aktivierung
-  //    Jeder Toggle in Section2 traegt die Methode im Kind-Element
-  //    `.hz-method[data-method="..."]`. Wenn der User einen Toggle
-  //    aufklappt, wird diese Methode als aktive gesetzt.
+  // 6. M2-Methodenwahl: Phase 9 / Block B - entfernt.
+  //    Der Methoden-Enum (state.heizlast.method) wurde durch den Record
+  //    state.heizlast.methodsEnabled ersetzt. Jede Methode hat jetzt einen
+  //    eigenen Ja/Nein-Switch (Checkbox mit data-hz-bind), den bindings.ts
+  //    automatisch schreibt - kein zusaetzlicher Glue hier.
+  //    Bauperiode laeuft immer als Fallback (siehe compute.ts).
   // ------------------------------------------------------------
-  function syncMethodToggles() {
-    const s = heizlastState.get();
-    const active = s.heizlast.method;
-    document.querySelectorAll('.hz-toggle').forEach((tog) => {
-      const methodEl = tog.querySelector('.hz-method');
-      if (!methodEl) return;
-      const method = methodEl.getAttribute('data-method');
-      const isActive = method === active;
-      tog.setAttribute('data-active', isActive ? 'true' : 'false');
-      methodEl.classList.toggle('is-active', isActive);
-      // Aktive Methode automatisch aufklappen
-      if (isActive && !tog.classList.contains('is-open')) {
-        const btn = tog.querySelector('[data-action="toggle-module"]') as HTMLButtonElement | null;
-        if (btn) btn.click();
-      }
-    });
-  }
-
-  // Klick auf einen Methoden-Toggle setzt die Methode (beim Oeffnen)
-  document.addEventListener('click', (ev) => {
-    const t = ev.target as HTMLElement;
-    if (!t || typeof t.closest !== 'function') return;
-    const btn = t.closest('[data-action="toggle-module"]') as HTMLElement | null;
-    if (!btn) return;
-    const tog = btn.closest('.hz-toggle') as HTMLElement | null;
-    if (!tog) return;
-    const methodEl = tog.querySelector('.hz-method') as HTMLElement | null;
-    if (!methodEl) return;
-    setTimeout(() => {
-      if (tog.classList.contains('is-open')) {
-        const method = methodEl.getAttribute('data-method');
-        if (method) {
-          const s = heizlastState.get();
-          if (s.heizlast.method !== method) {
-            heizlastState.setKey('heizlast', { ...s.heizlast, method: method as any });
-          }
-        }
-      }
-    }, 0);
-  });
 
   // ------------------------------------------------------------
   // 7. WW-Panes (nur aktive Methode sichtbar)
@@ -523,7 +485,6 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
 
     // Panes / Methoden
     syncWwPanes();
-    syncMethodToggles();
   }
 
   renderAll();

@@ -148,7 +148,7 @@ function writeDom(el: HTMLElement, value: unknown): void {
 /** Findet den Override-Pfad, unter dem ein Input steht (falls vorhanden). */
 function overridePathOf(el: HTMLElement): string | null {
   const wrapper = el.closest<HTMLElement>('[data-hz-override-field]');
-  if (\!wrapper) return null;
+  if (!wrapper) return null;
   return wrapper.getAttribute('data-hz-override-field');
 }
 
@@ -235,7 +235,7 @@ export function syncOverrideClasses(root: ParentNode = document): void {
   const wrappers = root.querySelectorAll<HTMLElement>('[data-hz-override-field]');
   wrappers.forEach((w) => {
     const path = w.getAttribute('data-hz-override-field');
-    if (\!path) return;
+    if (!path) return;
     const on = isOverridden(state, path);
     w.classList.toggle('is-overridden', on);
   });

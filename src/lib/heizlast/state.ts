@@ -26,12 +26,20 @@ import type { Gebaeudetyp, Lage, TvollProfil } from './types.ts';
 /** Aktuelle State-Version. Bei breaking changes hochzählen + Migration in storage.ts ergänzen. */
 export const STATE_VERSION = 1 as const;
 
-export type HeizlastMethod =
-  | 'verbrauch'
-  | 'messung'
-  | 'bstd'
-  | 'bauperiode'
-  | 'override';
+/**
+ * Phase 9 / Block B — Methodenwahl ist weggefallen. Statt einer Enum gibt es jetzt
+ * einen Record `methodsEnabled`, in dem der User jede verfügbare Methode einzeln
+ * ein- oder ausschalten kann. `bauperiode` ist IMMER als Fallback aktiv und liegt
+ * deshalb NICHT im Record. Die Compute-Hierarchie (siehe compute.ts) arbeitet die
+ * eingeschalteten Methoden in fester Reihenfolge ab: override → bstd → messung →
+ * verbrauch → bauperiode.
+ */
+export interface HeizlastMethodsEnabled {
+  verbrauch: boolean;
+  messung: boolean;
+  bstd: boolean;
+  override: boolean;
+}
 
 export type WarmwasserMethod = 'personen' | 'direkt' | 'messung';
 
@@ -105,7 +113,7 @@ export interface OverrideMethodState {
 }
 
 export interface HeizlastSectionState {
-  method: HeizlastMethod;
+  methodsEnabled: HeizlastMethodsEnabled;
   verbrauch: VerbrauchState;
   messung: MessungState;
   bstd: BstdState;
@@ -250,7 +258,12 @@ export function createDefaultState(): HeizlastState {
     },
 
     heizlast: {
-      method: 'verbrauch',
+      methodsEnabled: {
+        verbrauch: false,
+        messung: false,
+        bstd: false,
+        override: false,
+      },
       verbrauch: {
         energietraeger: 'oel',
         ba: 3200,
