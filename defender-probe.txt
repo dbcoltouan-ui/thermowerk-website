@@ -1,0 +1,1 @@
+Probe-Datei, nach dem Commit wieder entfernt.

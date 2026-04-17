@@ -1,1 +1,1 @@
-chore: drift-probe.txt entfernt (Test-Artefakt aus Mount-Drift-Diagnose)
+test: defender-probe (wird gleich wieder entfernt)
