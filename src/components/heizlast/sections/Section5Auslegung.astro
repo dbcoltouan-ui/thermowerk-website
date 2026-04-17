@@ -12,21 +12,21 @@ import SectionNotes from '../SectionNotes.astro';
   id="sektion-5"
   kicker="05 - WP-Auslegung"
   title="Dimensionierung Qh"
-  subline="Qh = Qhl + Qw + Qoff + Qas \u2014 das ist die Zielleistung der W\u00e4rmepumpe."
+  subline="Qh = Qhl + Qw + Qoff + Qas — das ist die Zielleistung der Wärmepumpe."
 >
   <div class="hz-qh-result">
     <div class="hz-qh-summands">
-      <KpiCard label="Qhl" value="\u2014" unit="kW" caption="Heizlast" data-kpi="qhlKorr" />
+      <KpiCard label="Qhl" value="—" unit="kW" caption="Heizlast" data-kpi="qhlKorr" />
       <span class="hz-qh-sign">+</span>
-      <KpiCard label="Qw" value="\u2014" unit="kW" caption="Warmwasser" data-kpi="qw" />
+      <KpiCard label="Qw" value="—" unit="kW" caption="Warmwasser" data-kpi="qw" />
       <span class="hz-qh-sign">+</span>
-      <KpiCard label="Qoff" value="\u2014" unit="kW" caption="Sperrzeit" data-kpi="qoff" />
+      <KpiCard label="Qoff" value="—" unit="kW" caption="Sperrzeit" data-kpi="qoff" />
       <span class="hz-qh-sign">+</span>
-      <KpiCard label="Qas" value="\u2014" unit="kW" caption="Sonderzuschlag" data-kpi="qas" />
+      <KpiCard label="Qas" value="—" unit="kW" caption="Sonderzuschlag" data-kpi="qas" />
     </div>
 
     <div class="hz-qh-total">
-      <span class="hz-qh-total__label">Qh \u2014 Auslegungsleistung</span>
+      <span class="hz-qh-total__label">Qh — Auslegungsleistung</span>
       <span class="hz-qh-total__value" data-kpi="qh">&mdash;</span>
       <span class="hz-qh-total__unit">kW</span>
     </div>
@@ -34,10 +34,10 @@ import SectionNotes from '../SectionNotes.astro';
 
   <InfoBox title="Was ist Qh?" icon="info">
     <p>
-      <strong>Qh</strong> ist die Summe aller Leistungs-Anteile, die die W\u00e4rmepumpe am k\u00e4ltesten
-      Auslegungstag bereitstellen muss. Diese Zahl wird f\u00fcr die Ger\u00e4teauswahl verwendet.
-      Zus\u00e4tzliche Sicherheiten (z. B. Bivalenz, Abtaureserve) werden im Ger\u00e4teblatt bzw. im
-      Leistungsdiagramm ber\u00fccksichtigt.
+      <strong>Qh</strong> ist die Summe aller Leistungs-Anteile, die die Wärmepumpe am kältesten
+      Auslegungstag bereitstellen muss. Diese Zahl wird für die Geräteauswahl verwendet.
+      Zusätzliche Sicherheiten (z. B. Bivalenz, Abtaureserve) werden im Geräteblatt bzw. im
+      Leistungsdiagramm berücksichtigt.
     </p>
   </InfoBox>
 
@@ -88,5 +88,15 @@ import SectionNotes from '../SectionNotes.astro';
 
   @media (max-width: 720px) {
     .hz-qh-summands { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .hz-qh-summands { grid-template-columns: 1fr; }
+    .hz-qh-total {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .hz-qh-total__label { font-size: 12.5px; }
+    .hz-qh-total__value { font-size: 40px; }
+    .hz-qh-total__unit { font-size: 16px; }
   }
 </style>

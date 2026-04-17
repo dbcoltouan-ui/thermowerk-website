@@ -1,11 +1,13 @@
-Phase 7: Focus-Trap, Live-Projektname im Header, Save-Status-Animation, Plausi-Ampel-A11y
+heizlast: Phase 8 - Header-Redesign, Unicode-Fix, Mobile-Feinschliff
 
-- heizlast.astro: globaler keydown-Handler fuer Tab/Shift+Tab zyklisiert Focus im offenen Modal (.hz-modal__card). Laeuft parallel zum bestehenden ESC-Handler und lastTrigger-Restore.
-- HeizlastLayout.astro: brand-sub bekommt data-hz-brand-sub; renderAll() schreibt state.projectName rein (Fallback 'Heizlast-Rechner').
-- Section7Projekt.astro: neue Klasse .hz-save-status.is-flash mit 1.4s gruenem Pulse/Glow. role=status + aria-live=polite auf dem Status-Pill.
-- heizlast.astro: lastCloudSaveSeen im uiState.subscribe triggert Flash nur bei echt neuem Cloud-Save (nicht bei Reload). Auto-Remove nach 1500 ms.
-- heizlast.astro: setKpi(plausi) setzt title-Attribut mit Ampel-Klartext (plausibel/grenzwertig/unplausibel) via neuem Helper ampelLabel().
+- Unicode-Escapes durch echte UTF-8-Zeichen ersetzt (147 Stellen in 8 Dateien)
+- Sticky-Header neu: Logo | Projektname+Meta | 4 Icon-Aktions-Buttons
+- ExecutiveSummary entfernt (keine KPIs mehr im Header-Bereich)
+- Section 1: Projekt-Block Navy -> Blue-Tint, Tvoll-Aside entfernt
+- Section 2: Aktiver Methoden-Toggle collapsed erkennbar (roter Balken + Pill)
+- Mobile 640/520 px: 1-spaltige Grids, 16 px Container, iOS-Zoom-Fix, overflow-x hidden
+- Multi-Button-Actions via Event-Delegation (Header + Section 7 gleichwertig)
 
-Tests weiterhin gruen (49 + 16).
+Tests weiterhin gruen: 49 Rechenkern + 16 State-Integration.
 
-Docs aktualisiert: CLAUDE.md Phase-7-Block, HANDOFF-PHASE-7.md als abgeschlossen markiert.
+Docs: CLAUDE.md Phase-8-Block, HANDOFF-PHASE-8.md als abgeschlossen markiert.

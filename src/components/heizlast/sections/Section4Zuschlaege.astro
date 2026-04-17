@@ -12,14 +12,14 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
   id="sektion-4"
-  kicker="04 - Zuschl\u00e4ge"
-  title="Zuschl\u00e4ge"
-  subline="Sperrzeit-Aufschlag und optionale Sonderzuschl\u00e4ge (z. B. Abtau-Reserve)."
+  kicker="04 - Zuschläge"
+  title="Zuschläge"
+  subline="Sperrzeit-Aufschlag und optionale Sonderzuschläge (z. B. Abtau-Reserve)."
   tone="off"
 >
   <slot name="aside" slot="aside">
     <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
-      <KpiCard label="Qoff" value="\u2014" unit="kW" caption="Sperrzeit-Zuschlag" data-kpi="qoff" />
+      <KpiCard label="Qoff" value="—" unit="kW" caption="Sperrzeit-Zuschlag" data-kpi="qoff" />
     </div>
   </slot>
 
@@ -27,7 +27,7 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
     <h3 class="hz-block__heading">Sperrzeit (EVU)</h3>
     <div class="hz-grid-3">
       <label class="hz-field">
-        <span class="hz-field__label">toff \u2014 Sperrstunden pro Tag</span>
+        <span class="hz-field__label">toff — Sperrstunden pro Tag</span>
         <div class="hz-field__input-with-unit">
           <input class="hz-field__input" type="number" step="1" min="0" max="8"
             data-hz-bind="zuschlaege.toff" data-hz-type="number" />
@@ -40,12 +40,12 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
     <p class="hz-muted" style="margin-top: 8px; font-size: 13.5px;">
       Korrekturfaktor je Sperrzeit (FWS):
       {Object.entries(SPERRZEIT_FAKTOREN).map(([h, f]) => (
-        <span class="hz-sperrzeit-chip">{h}&nbsp;h \u2192 &times;{f.toFixed(2)}</span>
+        <span class="hz-sperrzeit-chip">{h}&nbsp;h → &times;{f.toFixed(2)}</span>
       ))}
     </p>
   </div>
 
-  <Toggle label="Zus\u00e4tzlicher Sonder-/Abtauzuschlag (Qas)" caption="optional" id="hz-m6-qas">
+  <Toggle label="Zusätzlicher Sonder-/Abtauzuschlag (Qas)" caption="optional" id="hz-m6-qas">
     <label class="hz-field" style="max-width: 280px;">
       <span class="hz-field__label">Qas</span>
       <div class="hz-field__input-with-unit">
@@ -63,13 +63,13 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
 
   <InfoBox title="Warum ein Sperrzeit-Zuschlag?" icon="help">
     <p>
-      EVU k\u00f6nnen W\u00e4rmepumpen stundenweise abschalten (Lastmanagement).
-      In dieser Zeit fehlt Heizleistung \u2014 sie muss in den restlichen Stunden nachgeholt werden.
-      Der Zuschlag wird als Faktor auf Qhl aufgeschlagen (FWS \u00a74).
+      EVU können Wärmepumpen stundenweise abschalten (Lastmanagement).
+      In dieser Zeit fehlt Heizleistung — sie muss in den restlichen Stunden nachgeholt werden.
+      Der Zuschlag wird als Faktor auf Qhl aufgeschlagen (FWS §4).
     </p>
   </InfoBox>
 
-  <SectionNotes sectionKey="sektion4" sectionLabel="Sektion 4 (Zuschl\u00e4ge)" />
+  <SectionNotes sectionKey="sektion4" sectionLabel="Sektion 4 (Zuschläge)" />
 </SectionWrapper>
 
 <style is:global>

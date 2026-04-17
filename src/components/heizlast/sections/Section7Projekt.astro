@@ -193,4 +193,13 @@ import SectionNotes from '../SectionNotes.astro';
   }
   .hz-btn[disabled] { opacity: 0.5; pointer-events: none; }
   .hz-save-hint { margin-top: 14px; font-size: 12.5px; }
+
+  @media (max-width: 520px) {
+    .hz-sum-card { padding: 14px 16px; }
+    .hz-sum-grid { grid-template-columns: 1fr; gap: 6px 0; }
+    .hz-save-block { padding: 16px 16px; }
+    .hz-save-actions { flex-direction: column; }
+    .hz-save-actions > .hz-btn { width: 100%; justify-content: center; }
+    .hz-save-block__head { flex-direction: column; gap: 10px; }
+  }
 </style>

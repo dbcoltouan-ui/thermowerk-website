@@ -12,13 +12,13 @@ import SectionNotes from '../SectionNotes.astro';
   id="sektion-6"
   kicker="06 - Speicher"
   title="Speicher-Dimensionierung"
-  subline="WW-Speicher nach FWS \u00a710/11 und Heizungs-Pufferspeicher nach SWKI BT 102-01 / VDI 4645."
+  subline="WW-Speicher nach FWS §10/11 und Heizungs-Pufferspeicher nach SWKI BT 102-01 / VDI 4645."
   tone="off"
 >
   <slot name="aside" slot="aside">
     <div class="hz-kpi-grid" style="grid-template-columns: 1fr 1fr; min-width: 320px;">
-      <KpiCard label="WW-Speicher" value="\u2014" unit="L" data-kpi="wwSpeicher" />
-      <KpiCard label="Puffer" value="\u2014" unit="L" data-kpi="puffer" />
+      <KpiCard label="WW-Speicher" value="—" unit="L" data-kpi="wwSpeicher" />
+      <KpiCard label="Puffer" value="—" unit="L" data-kpi="puffer" />
     </div>
   </slot>
 
@@ -28,7 +28,7 @@ import SectionNotes from '../SectionNotes.astro';
       <header class="hz-storage-card__head">
         <div>
           <h3 class="hz-storage-card__title">WW-Speicher</h3>
-          <p class="hz-muted" style="margin: 0; font-size: 13px;">Trinkwarmwasser \u2014 Pufferung gegen Spitzenlast.</p>
+          <p class="hz-muted" style="margin: 0; font-size: 13px;">Trinkwarmwasser — Pufferung gegen Spitzenlast.</p>
         </div>
         <label class="hz-switch">
           <input type="checkbox" data-hz-bind="speicher.wwActive" data-hz-type="boolean" />
@@ -42,16 +42,16 @@ import SectionNotes from '../SectionNotes.astro';
           <div class="hz-field__input-with-unit">
             <input class="hz-field__input" type="number" step="1" min="40" max="80"
               data-hz-bind="speicher.wwTStoAus" data-hz-type="number" />
-            <span class="hz-field__unit">\u00b0C</span>
+            <span class="hz-field__unit">°C</span>
           </div>
         </label>
         <label class="hz-field">
-          <span class="hz-field__label">Eintritt (Kaltwasser) \u2014 Override</span>
+          <span class="hz-field__label">Eintritt (Kaltwasser) — Override</span>
           <div class="hz-field__input-with-unit">
             <input class="hz-field__input" type="number" step="1" min="5" max="20"
               placeholder="10 (SIA 385/2)"
               data-hz-bind="speicher.wwTStoEinOverride" data-hz-type="number" />
-            <span class="hz-field__unit">\u00b0C</span>
+            <span class="hz-field__unit">°C</span>
           </div>
         </label>
       </div>
@@ -70,7 +70,7 @@ import SectionNotes from '../SectionNotes.astro';
       <header class="hz-storage-card__head">
         <div>
           <h3 class="hz-storage-card__title">Heizungs-Puffer</h3>
-          <p class="hz-muted" style="margin: 0; font-size: 13px;">Entkoppelung und Reserve f\u00fcr Abtau / Taktung.</p>
+          <p class="hz-muted" style="margin: 0; font-size: 13px;">Entkoppelung und Reserve für Abtau / Taktung.</p>
         </div>
         <label class="hz-switch">
           <input type="checkbox" data-hz-bind="speicher.pufferActive" data-hz-type="boolean" />
@@ -106,7 +106,7 @@ import SectionNotes from '../SectionNotes.astro';
           </div>
         </label>
         <label class="hz-field">
-          <span class="hz-field__label">\u0394T Puffer</span>
+          <span class="hz-field__label">ΔT Puffer</span>
           <div class="hz-field__input-with-unit">
             <input class="hz-field__input" type="number" step="1" min="3" max="10"
               data-hz-bind="speicher.pufferDeltaT" data-hz-type="number" />
@@ -126,9 +126,9 @@ import SectionNotes from '../SectionNotes.astro';
   </div>
 
   <InfoBox title="Referenzen" icon="book">
-    <p><strong>WW-Speicher</strong>: FWS Modul 3 \u00a710 / \u00a711 (SIA 385/2 f\u00fcr Nutzwarmwasser-Bedarf).</p>
+    <p><strong>WW-Speicher</strong>: FWS Modul 3 §10 / §11 (SIA 385/2 für Nutzwarmwasser-Bedarf).</p>
     <p><strong>Heizungs-Puffer</strong>: SWKI BT 102-01, VDI 4645, sowie Hersteller-Empfehlungen.
-       Das <em>Erfahrungswert-Band</em> 15\u201325 l/kW (L/W mit Abtau) stammt aus SWKI.</p>
+       Das <em>Erfahrungswert-Band</em> 15–25 l/kW (L/W mit Abtau) stammt aus SWKI.</p>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion6" sectionLabel="Sektion 6 (Speicher)" />

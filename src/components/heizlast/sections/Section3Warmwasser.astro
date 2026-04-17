@@ -1,8 +1,8 @@
 ---
 // Section 3 — Warmwasser (M5)
-// - Toggle-Hauptschalter "WW ber\u00fccksichtigen"
-// - Methode w\u00e4hlen: personen | direkt | messung
-// - Verluste: Speicher / Zirkulation / Ausstoss (Prozentzuschl\u00e4ge)
+// - Toggle-Hauptschalter "WW berücksichtigen"
+// - Methode wählen: personen | direkt | messung
+// - Verluste: Speicher / Zirkulation / Ausstoss (Prozentzuschläge)
 // - Live-KPIs: Vw,u, Qw (kW), QwwTag (kWh/d)
 
 import SectionWrapper from '../SectionWrapper.astro';
@@ -16,13 +16,13 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
   id="sektion-3"
   kicker="03 - Warmwasser"
   title="Warmwasser (WW)"
-  subline="Zusatzleistung f\u00fcr Trinkwarmwasser nach SIA 385/1 und FWS \u00a78."
+  subline="Zusatzleistung für Trinkwarmwasser nach SIA 385/1 und FWS §8."
 >
   <slot name="aside" slot="aside">
     <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
-      <KpiCard label="Qw" value="\u2014" unit="kW" data-kpi="qw" />
-      <KpiCard label="Qww / Tag" value="\u2014" unit="kWh/d" data-kpi="qwwTag" />
-      <KpiCard label="Vw,u" value="\u2014" unit="l/d" data-kpi="vwu" />
+      <KpiCard label="Qw" value="—" unit="kW" data-kpi="qw" />
+      <KpiCard label="Qww / Tag" value="—" unit="kWh/d" data-kpi="qwwTag" />
+      <KpiCard label="Vw,u" value="—" unit="l/d" data-kpi="vwu" />
     </div>
   </slot>
 
@@ -56,8 +56,8 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
   <div class="hz-ww-pane" data-ww-pane="personen">
     <h4 class="hz-ww-pane__title">Personen-Einheiten</h4>
     <p class="hz-muted" style="margin-bottom: 10px;">
-      Pro Wohneinheit: ANF (anrechenbare Netto-Fl\u00e4che) und Vw,u (Liter pro Person und Tag).
-      Richtwerte f\u00fcr EFH: 40&ndash;55&nbsp;l/P/d.
+      Pro Wohneinheit: ANF (anrechenbare Netto-Fläche) und Vw,u (Liter pro Person und Tag).
+      Richtwerte für EFH: 40&ndash;55&nbsp;l/P/d.
     </p>
     <div class="hz-pe-header">
       <span>Bezeichnung</span>
@@ -71,10 +71,10 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
     <div class="hz-pe-actions">
       <button type="button" class="hz-btn hz-btn-ghost" id="hz-pe-add">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Einheit hinzuf\u00fcgen
+        Einheit hinzufügen
       </button>
       <span class="hz-muted" style="font-size: 13px;">
-        Standard-Richtwerte: {WW_STANDARDS.slice(0, 3).map((w) => `${w.vwu} l/P/d ${w.label.includes('gehoben') ? '(gehoben)' : w.label.includes('mittel') ? '(mittel)' : '(einfach)'}`).join(' \u00b7 ')}
+        Standard-Richtwerte: {WW_STANDARDS.slice(0, 3).map((w) => `${w.vwu} l/P/d ${w.label.includes('gehoben') ? '(gehoben)' : w.label.includes('mittel') ? '(mittel)' : '(einfach)'}`).join(' · ')}
       </span>
     </div>
   </div>
@@ -143,7 +143,7 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
     </div>
 
     <label class="hz-field" style="margin-top: 14px; max-width: 280px;">
-      <span class="hz-field__label">\u0394T Kaltwasser \u2192 WW (optional)</span>
+      <span class="hz-field__label">ΔT Kaltwasser → WW (optional)</span>
       <div class="hz-field__input-with-unit">
         <input class="hz-field__input" type="number" step="1" min="20" max="70"
           placeholder="50 K (Default)"
@@ -154,8 +154,8 @@ import { WW_STANDARDS } from '../../../lib/heizlast/constants.ts';
   </div>
 
   <InfoBox title="Grundlage SIA 385/1" icon="book">
-    <p>Der Kaltwasser-Referenzwert liegt bei 10&nbsp;\u00b0C, die Zielzapftemperatur bei 60&nbsp;\u00b0C \u2192 \u0394T&nbsp;=&nbsp;50&nbsp;K.
-       Der Verbrauch pro Person h\u00e4ngt vom Standard der Armaturen ab:</p>
+    <p>Der Kaltwasser-Referenzwert liegt bei 10&nbsp;°C, die Zielzapftemperatur bei 60&nbsp;°C → ΔT&nbsp;=&nbsp;50&nbsp;K.
+       Der Verbrauch pro Person hängt vom Standard der Armaturen ab:</p>
     <dl class="hz-info__grid">
       {WW_STANDARDS.map((w) => (
         <div><dt>{w.vwu} l/P/d</dt><dd>{w.label}</dd></div>

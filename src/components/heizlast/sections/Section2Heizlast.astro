@@ -23,9 +23,9 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
 >
   <slot name="aside" slot="aside">
     <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
-      <KpiCard label="Qhl (roh)" value="\u2014" unit="kW" data-kpi="qhlRaw" />
-      <KpiCard label="Qhl (korrigiert)" value="\u2014" unit="kW" caption="nach Sanierung" data-kpi="qhlKorr" />
-      <KpiCard label="W / m\u00b2" value="\u2014" unit="W/m\u00b2" data-kpi="plausi" />
+      <KpiCard label="Qhl (roh)" value="—" unit="kW" data-kpi="qhlRaw" />
+      <KpiCard label="Qhl (korrigiert)" value="—" unit="kW" caption="nach Sanierung" data-kpi="qhlKorr" />
+      <KpiCard label="W / m²" value="—" unit="W/m²" data-kpi="plausi" />
     </div>
   </slot>
 
@@ -34,10 +34,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     <Toggle label="Verbrauchsmethode" caption="aus Brennstoff-/Energieverbrauch" id="hz-m2-verbrauch" open={true}>
       <div class="hz-method" data-method="verbrauch">
         <span class="hz-method__badge" data-method-badge>aktiv</span>
-        <p class="hz-muted hz-method__intro">Letzte Jahresverbr\u00e4uche eines Heizkessels in Qn umrechnen.</p>
+        <p class="hz-muted hz-method__intro">Letzte Jahresverbräuche eines Heizkessels in Qn umrechnen.</p>
         <div class="hz-grid-3">
           <label class="hz-field">
-            <span class="hz-field__label">Energietr\u00e4ger</span>
+            <span class="hz-field__label">Energieträger</span>
             <select class="hz-field__input" data-hz-bind="heizlast.verbrauch.energietraeger" data-hz-type="string">
               {Object.entries(BRENNWERTE).map(([id, b]) => (
                 <option value={id}>{b.label}</option>
@@ -48,20 +48,20 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
             <span class="hz-field__label">Verbrauch Ba</span>
             <input class="hz-field__input" type="number" step="1" min="0"
               data-hz-bind="heizlast.verbrauch.ba" data-hz-type="number" />
-            <small class="hz-muted">Einheit je nach Energietr\u00e4ger (l/a, m\u00b3/a, kg/a, rm/a, kWh/a)</small>
+            <small class="hz-muted">Einheit je nach Energieträger (l/a, m³/a, kg/a, rm/a, kWh/a)</small>
           </label>
           <label class="hz-field">
-            <span class="hz-field__label">Wirkungsgrad \u03b7 (Default)</span>
+            <span class="hz-field__label">Wirkungsgrad η (Default)</span>
             <select class="hz-field__input" data-hz-bind="heizlast.verbrauch.etaWirkungsgradId" data-hz-type="string">
               {WIRKUNGSGRADE.map((w) => (
-                <option value={w.id}>{w.label} (\u03b7 {w.default.toFixed(2)})</option>
+                <option value={w.id}>{w.label} (η {w.default.toFixed(2)})</option>
               ))}
             </select>
           </label>
         </div>
         <div class="hz-grid-3">
           <label class="hz-field">
-            <span class="hz-field__label">\u03b7 manuell (optional)</span>
+            <span class="hz-field__label">η manuell (optional)</span>
             <input class="hz-field__input" type="number" step="0.01" min="0.3" max="1.0"
               placeholder="Leer = Default"
               data-hz-bind="heizlast.verbrauch.etaOverride" data-hz-type="number" />
@@ -86,7 +86,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     </Toggle>
 
     <!-- Messung -->
-    <Toggle label="Direktmessung" caption="Qn aus Waermeza\u00e4hler / Kessel-Protokoll" id="hz-m2-messung">
+    <Toggle label="Direktmessung" caption="Qn aus Waermezaähler / Kessel-Protokoll" id="hz-m2-messung">
       <div class="hz-method" data-method="messung">
         <span class="hz-method__badge" data-method-badge>aktiv</span>
         <p class="hz-muted hz-method__intro">Wenn Qn direkt gemessen ist, einfach Jahreswert eingeben.</p>
@@ -118,7 +118,7 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
             </div>
           </label>
           <label class="hz-field">
-            <span class="hz-field__label">\u00fcber wie viele Jahre?</span>
+            <span class="hz-field__label">über wie viele Jahre?</span>
             <input class="hz-field__input" type="number" step="1" min="1"
               data-hz-bind="heizlast.bstd.jahre" data-hz-type="number" />
           </label>
@@ -139,8 +139,8 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
       <div class="hz-method" data-method="bauperiode">
         <span class="hz-method__badge" data-method-badge>aktiv</span>
         <p class="hz-muted hz-method__intro">
-          Default-Kennwert aus der FWS-Tabelle wird automatisch verwendet (Geb\u00e4udetyp + Bauperiode aus Sektion 1).
-          Kein zus\u00e4tzlicher Input n\u00f6tig \u2014 diese Methode gilt mit den Werten der Stammdaten.
+          Default-Kennwert aus der FWS-Tabelle wird automatisch verwendet (Gebäudetyp + Bauperiode aus Sektion 1).
+          Kein zusätzlicher Input nötig — diese Methode gilt mit den Werten der Stammdaten.
         </p>
       </div>
     </Toggle>
@@ -167,25 +167,25 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
   <!-- M4: Sanierungs-Delta -->
   <div class="hz-block" style="margin-top: 22px;">
     <h3 class="hz-block__heading">Optionale Erweiterungen</h3>
-    <Toggle label="Sanierungs-Delta beruecksichtigen" caption="M4 - multiplikativ nach FWS \u00a76" id="hz-m4-san">
+    <Toggle label="Sanierungs-Delta beruecksichtigen" caption="M4 - multiplikativ nach FWS §6" id="hz-m4-san">
       <div class="hz-san">
         <p class="hz-muted" style="margin-bottom: 10px;">
-          W\u00e4hle durchgef\u00fchrte Sanierungsmassnahmen. Der Qhl-Wert wird multiplikativ reduziert.
+          Wähle durchgeführte Sanierungsmassnahmen. Der Qhl-Wert wird multiplikativ reduziert.
         </p>
         <div class="hz-san__list" id="hz-san-list" aria-live="polite">
-          <p class="hz-muted hz-san__empty">Noch keine Massnahme gew\u00e4hlt.</p>
+          <p class="hz-muted hz-san__empty">Noch keine Massnahme gewählt.</p>
         </div>
         <div class="hz-san__controls">
           <label class="hz-field" style="flex: 1 1 260px;">
-            <span class="hz-field__label">Massnahme hinzuf\u00fcgen</span>
+            <span class="hz-field__label">Massnahme hinzufügen</span>
             <select class="hz-field__input" id="hz-san-select">
-              <option value="">\u2014 ausw\u00e4hlen \u2014</option>
+              <option value="">— auswählen —</option>
               {SANIERUNGS_MASSNAHMEN.map((m) => (
                 <option value={m.id} data-default={m.default} data-label={m.label}>{m.label} ({m.default} %)</option>
               ))}
             </select>
           </label>
-          <button type="button" class="hz-btn hz-btn-ghost" id="hz-san-add">Hinzuf\u00fcgen</button>
+          <button type="button" class="hz-btn hz-btn-ghost" id="hz-san-add">Hinzufügen</button>
           <label class="hz-switch" style="align-self: flex-end;">
             <input type="checkbox" data-hz-bind="heizlast.sanierungActive" data-hz-type="boolean" />
             <span>Sanierungsabzug aktiv</span>
@@ -194,13 +194,13 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
       </div>
     </Toggle>
 
-    <Toggle label="Plausibilit\u00e4t (W/m\u00b2) pr\u00fcfen" caption="M3 - FWS-Kontrollwerte" id="hz-m3-plausi">
+    <Toggle label="Plausibilität (W/m²) prüfen" caption="M3 - FWS-Kontrollwerte" id="hz-m3-plausi">
       <label class="hz-switch">
         <input type="checkbox" data-hz-bind="heizlast.plausiActive" data-hz-type="boolean" />
-        <span>Plausibilit\u00e4tsband anzeigen</span>
+        <span>Plausibilitätsband anzeigen</span>
       </label>
       <p class="hz-muted" style="margin-top: 8px;">
-        Zeigt den spezifischen Heizleistungswert (W/m\u00b2) und ob er im FWS-Band liegt.
+        Zeigt den spezifischen Heizleistungswert (W/m²) und ob er im FWS-Band liegt.
         Ergebnis als Badge auf der rechten Zwischen-KPI.
       </p>
     </Toggle>
@@ -208,10 +208,10 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
 
   <InfoBox title="Methoden im Vergleich" icon="book" subtitle="FWS Modul 3">
     <p><strong>Verbrauch</strong> &ndash; genauste Methode wenn Verbrauchsdaten aus den letzten Jahren vorhanden sind.</p>
-    <p><strong>Messung</strong> &ndash; direkt aus W\u00e4rmez\u00e4hler/Kesseldaten in kWh/a.</p>
-    <p><strong>Betriebsstunden</strong> &ndash; aus Laufzeit &times; Nennleistung, n\u00fctzlich bei konstant betriebenen Kesseln.</p>
+    <p><strong>Messung</strong> &ndash; direkt aus Wärmezähler/Kesseldaten in kWh/a.</p>
+    <p><strong>Betriebsstunden</strong> &ndash; aus Laufzeit &times; Nennleistung, nützlich bei konstant betriebenen Kesseln.</p>
     <p><strong>Bauperiode</strong> &ndash; Pauschale aus FWS-Tabelle, wenn keine Verbrauchsdaten vorliegen.</p>
-    <p><strong>Direkteingabe</strong> &ndash; Qhl manuell setzen (z.\u202fB. aus SIA 384).</p>
+    <p><strong>Direkteingabe</strong> &ndash; Qhl manuell setzen (z. B. aus SIA 384).</p>
   </InfoBox>
 
   <SectionNotes sectionKey="sektion2" sectionLabel="Sektion 2 (Heizlast)" />
@@ -230,11 +230,40 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN } from '../../../lib/h
     display: none;
   }
   .hz-method.is-active .hz-method__badge { display: inline-flex; }
+
+  /* Phase 8 — Aktiver Methoden-Toggle auch eingeklappt klar sichtbar.
+     Wrapper bekommt roten Balken + Aktiv-Pill im Chip.
+     Wird per data-active="true" vom Glue-JS gesetzt. */
+  .hz-toggle[data-toggle][data-active="true"] {
+    position: relative;
+    padding-left: 14px;
+  }
+  .hz-toggle[data-toggle][data-active="true"]::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 2px; bottom: 2px;
+    width: 4px; border-radius: 4px;
+    background: var(--hz-red);
+  }
   .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn {
-    border-color: var(--hz-red); color: var(--hz-red);
+    background: var(--hz-red-soft);
+    border-color: var(--hz-red);
+    color: var(--hz-red);
+  }
+  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn:hover {
+    background: #F8DED9;
   }
   .hz-toggle[data-toggle][data-active="true"] .hz-toggle__sign {
     background: var(--hz-red); color: var(--hz-white);
+  }
+  .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__btn::after {
+    content: 'aktiv';
+    margin-left: 8px; padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--hz-red); color: var(--hz-white);
+    font-family: var(--hz-font-heading); font-weight: 700; font-size: 10.5px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    line-height: 1;
   }
   .hz-toggle[data-toggle][data-active="true"] > .hz-toggle__content .hz-toggle__inner {
     border-left-color: var(--hz-red);

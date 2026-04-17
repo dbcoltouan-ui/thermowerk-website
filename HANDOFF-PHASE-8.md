@@ -1,5 +1,9 @@
 # HANDOFF · Phase 8 — Header-Umbau, Section-1-Polish, Unicode-Fix, Mobile-Feinschliff
 
+> **STATUS: ABGESCHLOSSEN (2026-04-17)** — siehe CLAUDE.md „Phase 8 abgeschlossen".
+> Code-Abnahme A–G erledigt. Manuelle Mobile-Emulation (375 / 390 px) + Live-Test + Cloudflare-Build-Check stehen beim User.
+
+
 ## Copy-Paste-Prompt für den nächsten Chat
 
 ```

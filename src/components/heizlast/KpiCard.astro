@@ -142,4 +142,12 @@ const Tag = href ? 'a' : 'div';
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
   }
+  @media (max-width: 520px) {
+    .hz-kpi-grid,
+    .hz-kpi-grid--hero { grid-template-columns: 1fr; }
+    .hz-kpi { padding: 14px 16px; }
+    .hz-kpi__value { font-size: 24px; }
+    .hz-kpi--hero { padding: 20px; }
+    .hz-kpi--hero .hz-kpi__value { font-size: 30px; }
+  }
 </style>

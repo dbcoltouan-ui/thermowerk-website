@@ -6,27 +6,21 @@
 //   Wohneinheiten, tvoll-Profil, tvoll-Override).
 // - Aufklappbarer EBF-Helper: Zimmerliste mit Laenge x Breite -> Summe.
 // - Info-Box: Abkuerzungen erklaert.
-// - Zwischenergebnis: tvoll-Wert als KpiCard.
+// - Phase 8: Projekt-Block auf Blue-tint statt Navy, keine tvoll-Side-Box.
 
 import SectionWrapper from '../SectionWrapper.astro';
 import InfoBox from '../InfoBox.astro';
 import Toggle from '../Toggle.astro';
-import KpiCard from '../KpiCard.astro';
 import SectionNotes from '../SectionNotes.astro';
 import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
   id="sektion-1"
-  kicker="01 - Projekt & Gebaeude"
-  title="Projekt & Geb\u00e4udedaten"
-  subline="Projekt-Eckdaten und Stammdaten des Geb\u00e4udes als Grundlage der Berechnung."
+  kicker="01 - Projekt & Gebäude"
+  title="Projekt & Gebäudedaten"
+  subline="Projekt-Eckdaten und Stammdaten des Gebäudes als Grundlage der Berechnung."
   first
 >
-  <slot name="aside" slot="aside">
-    <div class="hz-kpi-grid" style="min-width: 220px; grid-template-columns: 1fr;">
-      <KpiCard label="tvoll (Vollbetriebsstd.)" value="2300" unit="h/a" caption="aus Profil + Lage" data-kpi="tvoll" />
-    </div>
-  </slot>
 
   <!-- Projekt-Block -->
   <div class="hz-proj">
@@ -80,21 +74,21 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
 
   <!-- Gebaeudedaten -->
   <div class="hz-block">
-    <h3 class="hz-block__heading">Geb\u00e4ude &amp; Standort</h3>
+    <h3 class="hz-block__heading">Gebäude &amp; Standort</h3>
     <div class="hz-grid-3">
       <label class="hz-field">
-        <span class="hz-field__label">Geb\u00e4udetyp</span>
+        <span class="hz-field__label">Gebäudetyp</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.typ" data-hz-type="string">
           <option value="efh">Einfamilienhaus (EFH)</option>
           <option value="mfh">Mehrfamilienhaus (MFH)</option>
-          <option value="buero">B\u00fcro / Gewerbe</option>
+          <option value="buero">Büro / Gewerbe</option>
         </select>
       </label>
       <label class="hz-field">
         <span class="hz-field__label">Lage</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.lage" data-hz-type="string">
-          <option value="mittelland">Mittelland (unter 800 m \u00fc.\u00a0M.)</option>
-          <option value="hoehe">Ab 800 m \u00fc.\u00a0M.</option>
+          <option value="mittelland">Mittelland (unter 800 m ü. M.)</option>
+          <option value="hoehe">Ab 800 m ü. M.</option>
         </select>
       </label>
       <label class="hz-field">
@@ -109,7 +103,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
 
     <div class="hz-grid-3">
       <label class="hz-field">
-        <span class="hz-field__label">Energiebezugsfl\u00e4che EBF</span>
+        <span class="hz-field__label">Energiebezugsfläche EBF</span>
         <div class="hz-field__input-with-unit">
           <input
             class="hz-field__input"
@@ -119,7 +113,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
             data-hz-bind="gebaeude.ebf"
             data-hz-type="number"
           />
-          <span class="hz-field__unit">m\u00b2</span>
+          <span class="hz-field__unit">m²</span>
         </div>
       </label>
       <label class="hz-field">
@@ -138,8 +132,8 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
         <select class="hz-field__input" data-hz-bind="gebaeude.tvollProfil" data-hz-type="string">
           {VOLLASTSTUNDEN.filter((r) => r.lage === 'mittelland').map((r) => (
             <option value={r.gebaeudetyp}>{
-              r.gebaeudetyp === 'wohnen_mitWW' ? 'Wohngeb\u00e4ude mit WW'
-              : r.gebaeudetyp === 'wohnen_ohneWW' ? 'Wohngeb\u00e4ude ohne WW'
+              r.gebaeudetyp === 'wohnen_mitWW' ? 'Wohngebäude mit WW'
+              : r.gebaeudetyp === 'wohnen_ohneWW' ? 'Wohngebäude ohne WW'
               : 'Gewerbe / Wochenend-Absenkung'
             }</option>
           ))}
@@ -172,16 +166,16 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   <!-- EBF aus Zimmermassen berechnen -->
   <Toggle label="EBF aus Zimmermassen berechnen" caption="Helfer" id="hz-ebf-helper">
     <p class="hz-muted" style="margin-bottom: 10px;">
-      Zimmer einzeln eintragen, die Summe der Fl\u00e4chen wird live berechnet.
-      Mit <strong>\u00dcbernehmen</strong> wird der Wert in die EBF-Eingabe geschrieben.
-      Mit <strong>Live</strong>-Modus wird die EBF bei jeder \u00c4nderung aktualisiert.
+      Zimmer einzeln eintragen, die Summe der Flächen wird live berechnet.
+      Mit <strong>Übernehmen</strong> wird der Wert in die EBF-Eingabe geschrieben.
+      Mit <strong>Live</strong>-Modus wird die EBF bei jeder Änderung aktualisiert.
     </p>
 
     <div class="hz-raum-header">
       <span>Bezeichnung</span>
-      <span>L\u00e4nge</span>
+      <span>Länge</span>
       <span>Breite</span>
-      <span>Fl\u00e4che</span>
+      <span>Fläche</span>
       <span></span>
     </div>
     <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
@@ -191,45 +185,45 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     <div class="hz-raum-actions">
       <button type="button" class="hz-btn hz-btn-ghost" id="hz-raum-add">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Zimmer hinzuf\u00fcgen
+        Zimmer hinzufügen
       </button>
       <div class="hz-raum-actions__right">
         <label class="hz-raum-live">
           <input type="checkbox" data-hz-bind="gebaeude.raeumeAktiv" data-hz-type="boolean" />
-          <span>Live-Modus (EBF automatisch \u00fcbernehmen)</span>
+          <span>Live-Modus (EBF automatisch übernehmen)</span>
         </label>
         <div class="hz-raum-sum">
-          Summe: <strong id="hz-raum-sum-value">0.0</strong> m\u00b2
+          Summe: <strong id="hz-raum-sum-value">0.0</strong> m²
         </div>
         <button type="button" class="hz-btn hz-btn-dark" id="hz-raum-apply">
-          In EBF \u00fcbernehmen
+          In EBF übernehmen
         </button>
       </div>
     </div>
   </Toggle>
 
   <!-- Info-Box -->
-  <InfoBox title="Abk\u00fcrzungen erkl\u00e4rt" icon="help" subtitle="Begriffe dieser Sektion">
+  <InfoBox title="Abkürzungen erklärt" icon="help" subtitle="Begriffe dieser Sektion">
     <dl class="hz-info__grid">
-      <div><dt>EBF</dt><dd>Energiebezugsfl\u00e4che \u2014 beheizte Nutzfl\u00e4che des Geb\u00e4udes (SIA&nbsp;380/1).</dd></div>
-      <div><dt>tvoll</dt><dd>Vollbetriebsstunden pro Jahr, aus FWS-Tabelle. Wird als Default-Nenner f\u00fcr Qhl genutzt.</dd></div>
-      <div><dt>Bauperiode</dt><dd>Liefert Default-Kennwerte (kWh/m\u00b2\u00b7a, W/m\u00b2) falls keine Verbrauchsdaten vorliegen.</dd></div>
-      <div><dt>Mittelland / H\u00f6he</dt><dd>\u00a0&lt;800\u00a0m\u00a0\u00fc.\u00a0M. bzw. \u2265\u00a0800\u00a0m \u2014 beeinflusst tvoll.</dd></div>
+      <div><dt>EBF</dt><dd>Energiebezugsfläche — beheizte Nutzfläche des Gebäudes (SIA&nbsp;380/1).</dd></div>
+      <div><dt>tvoll</dt><dd>Vollbetriebsstunden pro Jahr, aus FWS-Tabelle. Wird als Default-Nenner für Qhl genutzt.</dd></div>
+      <div><dt>Bauperiode</dt><dd>Liefert Default-Kennwerte (kWh/m²·a, W/m²) falls keine Verbrauchsdaten vorliegen.</dd></div>
+      <div><dt>Mittelland / Höhe</dt><dd> &lt;800 m ü. M. bzw. ≥ 800 m — beeinflusst tvoll.</dd></div>
     </dl>
   </InfoBox>
 
-  <SectionNotes sectionKey="sektion1" sectionLabel="Sektion 1 (Projekt &amp; Geb\u00e4ude)" />
+  <SectionNotes sectionKey="sektion1" sectionLabel="Sektion 1 (Projekt &amp; Gebäude)" />
 </SectionWrapper>
 
 <style is:global>
-  /* Projekt-Block */
+  /* Projekt-Block (Phase 8: Blue-tint statt Navy) */
   .hz-proj {
-    margin-bottom: clamp(28px, 4vh, 40px);
-    padding: 20px 22px;
-    background: var(--hz-navy);
-    color: var(--hz-white);
+    margin-bottom: clamp(24px, 4vh, 36px);
+    padding: clamp(16px, 3vw, 22px);
+    background: var(--hz-blue-tint);
+    color: var(--hz-dark);
+    border: 1px solid var(--hz-blue-tint-strong);
     border-radius: var(--hz-radius-lg);
-    box-shadow: var(--hz-shadow-md);
   }
   .hz-proj__title-row {
     display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
@@ -239,23 +233,22 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     font-family: var(--hz-font-heading);
     font-weight: 600; font-size: 14px;
     letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(255,255,255,0.75);
+    color: var(--hz-navy);
     margin: 0;
   }
-  .hz-proj__hint { color: rgba(255,255,255,0.6); font-size: 13px; }
-  .hz-proj .hz-field__label { color: rgba(255,255,255,0.82); }
+  .hz-proj__hint { color: var(--hz-mid-gray); font-size: 13px; margin: 0; }
+  .hz-proj .hz-field__label { color: var(--hz-navy); }
   .hz-proj .hz-field__input {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.18);
-    color: var(--hz-white);
+    background: var(--hz-white);
+    border-color: var(--hz-blue-tint-strong);
+    color: var(--hz-dark);
   }
-  .hz-proj .hz-field__input::placeholder { color: rgba(255,255,255,0.45); }
+  .hz-proj .hz-field__input::placeholder { color: var(--hz-mid-gray); }
   .hz-proj .hz-field__input:focus {
-    background: rgba(255,255,255,0.12);
-    border-color: var(--hz-white);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+    background: var(--hz-white);
+    border-color: var(--hz-navy);
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.12);
   }
-  .hz-proj select.hz-field__input option { color: var(--hz-dark); }
 
   /* Gebaeude-Block */
   .hz-block { margin-top: clamp(18px, 3vh, 26px); }

@@ -4,7 +4,6 @@
 // verwaltet (src/lib/heizlast/state.ts) und automatisch in localStorage
 // zwischengespeichert.
 import HeizlastLayout from '../layouts/HeizlastLayout.astro';
-import ExecutiveSummary from '../components/heizlast/ExecutiveSummary.astro';
 import LeistungsDiagramm from '../components/heizlast/LeistungsDiagramm.astro';
 import Section1Gebaeude from '../components/heizlast/sections/Section1Gebaeude.astro';
 import Section2Heizlast from '../components/heizlast/sections/Section2Heizlast.astro';
@@ -20,10 +19,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
 ---
 <HeizlastLayout
   title="Heizlast-Rechner | Thermowerk"
-  description="Professionelle Heizlast- und W\u00e4rmepumpen-Auslegung nach FWS, SIA und VDI."
+  description="Professionelle Heizlast- und Wärmepumpen-Auslegung nach FWS, SIA und VDI."
 >
   <PrintCover />
-  <ExecutiveSummary />
   <Section1Gebaeude />
   <Section2Heizlast />
   <Section3Warmwasser />
@@ -197,7 +195,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     const s = heizlastState.get();
     const items = s.heizlast.sanierungMassnahmen || [];
     if (items.length === 0) {
-      sanList.innerHTML = '<p class="hz-muted hz-san__empty">Noch keine Massnahme gew\u00e4hlt.</p>';
+      sanList.innerHTML = '<p class="hz-muted hz-san__empty">Noch keine Massnahme gewählt.</p>';
       return;
     }
     sanList.innerHTML = items.map((m) => `
@@ -421,10 +419,10 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     return p ? p.label : id;
   }
   function labelTyp(id: string): string {
-    return (({ efh: 'Einfamilienhaus', mfh: 'Mehrfamilienhaus', buero: 'B\u00fcro / Gewerbe' } as any)[id]) || id;
+    return (({ efh: 'Einfamilienhaus', mfh: 'Mehrfamilienhaus', buero: 'Büro / Gewerbe' } as any)[id]) || id;
   }
   function labelLage(id: string): string {
-    return (({ mittelland: 'Mittelland (<800 m)', hoehe: 'ab 800 m \u00fc. M.' } as any)[id]) || id;
+    return (({ mittelland: 'Mittelland (<800 m)', hoehe: 'ab 800 m ü. M.' } as any)[id]) || id;
   }
   function labelStatus(id: string): string {
     return (({
@@ -473,11 +471,19 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setKpi('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setKpi('puffer', fmtInt(r.pufferGerundet));
 
-    // Header: Projektname als Brand-Sub (fallback auf "Heizlast-Rechner")
-    const brandSub = document.querySelector('[data-hz-brand-sub]') as HTMLElement | null;
-    if (brandSub) {
-      const label = (s.projectName && s.projectName.trim()) || 'Heizlast-Rechner';
-      if (brandSub.textContent !== label) brandSub.textContent = label;
+    // Header: Projektinfo (Name + Meta-Zeile: Kunde · Adresse)
+    const headerName = document.querySelector('[data-hz-header-project]') as HTMLElement | null;
+    const headerMeta = document.querySelector('[data-hz-header-meta]') as HTMLElement | null;
+    if (headerName) {
+      const name = (s.projectName && s.projectName.trim()) || 'Neues Projekt';
+      if (headerName.textContent !== name) headerName.textContent = name;
+    }
+    if (headerMeta) {
+      const parts = [] as string[];
+      if (s.customerName && s.customerName.trim()) parts.push(s.customerName.trim());
+      if (s.address && s.address.trim()) parts.push(s.address.trim());
+      const meta = parts.length ? parts.join(' · ') : 'Heizlast-Rechner';
+      if (headerMeta.textContent !== meta) headerMeta.textContent = meta;
     }
 
     // Zusammenfassung (Section 7)
@@ -516,11 +522,15 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   // ------------------------------------------------------------
   // 9. Speichern/Laden-Buttons
   // ------------------------------------------------------------
-  const saveCloudBtn = document.querySelector('[data-hz-action="save-cloud"]') as HTMLButtonElement | null;
-  const saveCloudNewBtn = document.querySelector('[data-hz-action="save-cloud-new"]') as HTMLButtonElement | null;
-  const openProjectsBtn = document.querySelector('[data-hz-action="open-projects"]') as HTMLButtonElement | null;
+  const saveCloudBtns = Array.from(document.querySelectorAll('[data-hz-action="save-cloud"]')) as HTMLButtonElement[];
+  const saveCloudNewBtns = Array.from(document.querySelectorAll('[data-hz-action="save-cloud-new"]')) as HTMLButtonElement[];
+  const openProjectsBtns = Array.from(document.querySelectorAll('[data-hz-action="open-projects"]')) as HTMLButtonElement[];
   const loginBtn = document.querySelector('[data-hz-action="login"]') as HTMLButtonElement | null;
   const newProjectBtn = document.querySelector('[data-hz-action="new-project"]') as HTMLButtonElement | null;
+  // Alias fuer die (alten) Einzel-Listener
+  const saveCloudBtn = saveCloudBtns[0] || null;
+  const saveCloudNewBtn = saveCloudNewBtns[0] || null;
+  const openProjectsBtn = openProjectsBtns[0] || null;
   const statusEl = document.querySelector('[data-hz-save-status]') as HTMLElement | null;
   const statusText = document.querySelector('[data-hz-save-status-text]') as HTMLElement | null;
   const saveLocalEl = document.querySelector('[data-hz-save-local]') as HTMLElement | null;
@@ -539,9 +549,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     return d.toLocaleString('de-CH', { dateStyle: 'short', timeStyle: 'short' });
   }
   function refreshCloudButtons(auth: boolean) {
-    if (saveCloudBtn) saveCloudBtn.disabled = !auth;
-    if (saveCloudNewBtn) saveCloudNewBtn.disabled = !auth;
-    if (openProjectsBtn) openProjectsBtn.disabled = !auth;
+    saveCloudBtns.forEach((b) => { b.disabled = !auth; });
+    saveCloudNewBtns.forEach((b) => { b.disabled = !auth; });
+    openProjectsBtns.forEach((b) => { b.disabled = !auth; });
     const loginLabel = document.querySelector('[data-hz-login-label]') as HTMLElement | null;
     if (loginLabel) loginLabel.textContent = auth ? 'Abmelden' : 'Anmelden';
   }
@@ -549,7 +559,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   let lastCloudSaveSeen: number | null = null;
   uiState.subscribe((u) => {
     refreshCloudButtons(u.isAuthenticated);
-    if (u.syncInFlight) setStatus('busy', 'Synchronisiere \u2026');
+    if (u.syncInFlight) setStatus('busy', 'Synchronisiere …');
     else if (u.lastError) setStatus('err', u.lastError);
     else if (u.lastCloudSave) setStatus('ok', 'In Cloud gespeichert.');
     else setStatus('idle', 'Bereit.');
@@ -587,13 +597,21 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     };
   }
 
-  if (saveCloudBtn) saveCloudBtn.addEventListener('click', async () => {
-    try { await saveProject({ asNew: false, computed: computedSummary() }); }
-    catch (err) { console.warn('save failed:', err); }
-  });
-  if (saveCloudNewBtn) saveCloudNewBtn.addEventListener('click', async () => {
-    try { await saveProject({ asNew: true, computed: computedSummary() }); }
-    catch (err) { console.warn('save-as-new failed:', err); }
+  // Save-Cloud-Buttons (Header + Section 7) per Delegation
+  document.addEventListener('click', async (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const save = t.closest('[data-hz-action="save-cloud"]') as HTMLButtonElement | null;
+    if (save && !save.disabled) {
+      try { await saveProject({ asNew: false, computed: computedSummary() }); }
+      catch (err) { console.warn('save failed:', err); }
+      return;
+    }
+    const saveNew = t.closest('[data-hz-action="save-cloud-new"]') as HTMLButtonElement | null;
+    if (saveNew && !saveNew.disabled) {
+      try { await saveProject({ asNew: true, computed: computedSummary() }); }
+      catch (err) { console.warn('save-as-new failed:', err); }
+    }
   });
 
   // ------------------------------------------------------------
@@ -730,7 +748,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
       const pw = loginPassword.value;
       if (!pw) { showError(loginError, 'Bitte Passwort eingeben.'); return; }
       loginSubmit.disabled = true;
-      loginSubmit.textContent = 'Pruefe \u2026';
+      loginSubmit.textContent = 'Pruefe …';
       try {
         const resp = await fetch('/api/heizlast-auth', {
           method: 'POST',
@@ -759,7 +777,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     logoutSubmit.addEventListener('click', async () => {
       hideError(logoutError);
       logoutSubmit.disabled = true;
-      logoutSubmit.textContent = 'Melde ab \u2026';
+      logoutSubmit.textContent = 'Melde ab …';
       try {
         const resp = await fetch('/api/heizlast-auth', {
           method: 'DELETE',
@@ -847,7 +865,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
               ${name}
               <span class="hz-badge" data-status="${status}">${escapeHtml(labelStatus(status))}</span>
             </h3>
-            ${cust ? `<p class="hz-project-row__customer">${cust}${addr ? ' \u00b7 ' + addr : ''}</p>` : (addr ? `<p class="hz-project-row__customer">${addr}</p>` : '')}
+            ${cust ? `<p class="hz-project-row__customer">${cust}${addr ? ' · ' + addr : ''}</p>` : (addr ? `<p class="hz-project-row__customer">${addr}</p>` : '')}
             <p class="hz-project-row__meta">
               <span>EBF <strong>${ebf}</strong></span>
               <span>Qhl <strong>${qhl}</strong></span>
@@ -918,9 +936,13 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     }
   });
 
-  if (openProjectsBtn) openProjectsBtn.addEventListener('click', () => {
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const btn = t.closest('[data-hz-action="open-projects"]') as HTMLButtonElement | null;
+    if (!btn || btn.disabled) return;
     uiState.setKey('projectsModalOpen', true);
-    openModal(projectsModal, openProjectsBtn);
+    openModal(projectsModal, btn);
     reloadProjects();
   });
 
@@ -962,18 +984,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     });
   }
 
-  // Export-Trigger: Section 7 hat (noch) keinen dedizierten Button, wir nutzen
-  // jeden [data-hz-action="export"] und zusaetzlich einen globalen Shortcut
-  // ueber dem Save-Block: wir fuegen einen Button zur Laufzeit hinzu.
-  const saveActions = document.querySelector('.hz-save-actions');
-  if (saveActions && !saveActions.querySelector('[data-hz-action="export"]')) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'hz-btn hz-btn-dark';
-    btn.setAttribute('data-hz-action', 'export');
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportieren';
-    saveActions.appendChild(btn);
-  }
+  // Export-Trigger: jeder [data-hz-action="export"] oeffnet das Export-Modal
+  // (Header-Button + ggf. Section-7-Button).
   document.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement | null;
     if (!t) return;
