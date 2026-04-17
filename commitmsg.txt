@@ -1,14 +1,13 @@
-heizlast: UI-Feinschliff - scharfkantig, dezente Rahmen, Mobile-Fixes
+handoff: Phase 9 - UX-Refactor brief
 
-- Radius-Tokens auf 2 px reduziert (scharfkantig, angelehnt an Thermowerk-Hauptsite)
-- Linke Navy/Rot-Akzentbalken an Panes durch dezenten 1-px-Rahmen ersetzt
-  (Toggle-Inner, Sum-Card, Storage-Card, Qh-Total)
-- Endergebnis bleibt farblich akzentuiert: Hero-KpiCard + Qh-Total + Accent-
-  Sum-Card bekommen dezenten 3-px roten Top-Border, alles andere einfarbig
-- Box-Shadows raus aus Sektions-Karten (nur Modals behalten Shadow)
-- Mobile 640 px: Toggle-Chip bricht Label/Caption untereinander, Method-Badge
-  statisch uebers Pane, Sanierungs- und Personen-Rows 1-spaltig, Inputs
-  volle Breite, word-wrap fuer lange Captions ('aus Brennstoff-/Energie-
-  verbrauch', 'Einheit je nach Energietraeger ...') gegen Overflow
+- HANDOFF-PHASE-9.md komplett geschrieben (Copy-Paste-Prompt oben,
+  Bloecke A-M mit Code-Pointern und Acceptance-Kriterien)
+- CLAUDE.md oben um Phase-9-Pointer ergaenzt, damit jede neue Session
+  die Handoff-Datei sofort findet
+- Inhalte: Defaults statt Platzhalter, Methodik ohne aktiv-Toggle,
+  EBF-Helfer mit unbeheizten Raeumen, Label-Pattern, Sperrzeit Ja/Nein,
+  Section 5 raus, Save-Block straffen, Neues-Projekt-Confirm +
+  beforeunload, Notizen-UI vereinfachen, Mobile word-wrap,
+  Logo-Proportionen fixen, Brand-Text rechts vom Logo entfernen
 
 Tests weiterhin gruen: 49 Rechenkern + 16 State-Integration.
