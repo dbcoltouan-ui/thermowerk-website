@@ -1,11 +1,1 @@
-phase-9-block-f: Section 5 entfernt, Endergebnis-Block in Section 7, Sektionen 1-6 umnummeriert
-
-- Section5Auslegung.astro: Content zu Stub reduziert (Phase-8-Pattern, virtiofs erlaubt kein Loeschen)
-- Section7Projekt.astro: neuer schlanker Endergebnis-Block (Qhl + Qw + Qoff + Qas = Qh) oberhalb Save-Actions, WW-Speicher + Puffer als Sekundaerpaar darunter; eigene .hz-endresult CSS mit rotem Top-Akzent und hervorgehobener Total-Zeile
-- Section6Speicher.astro: id=sektion-5, kicker "05 - Speicher"
-- Section7Projekt.astro: id=sektion-6, kicker "06 - Projekt"
-- LeistungsDiagramm.astro: kicker "04a - Leistungsdiagramm"
-- heizlast.astro: Section5Auslegung Import und Render entfernt
-- HeizlastLayout.astro: Print-CSS resultate-Kette ohne #sektion-7
-
-Tests: 49 + 32 grün.
+chore: Test-Logs aus Repo entfernt, .gitignore ergaenzt

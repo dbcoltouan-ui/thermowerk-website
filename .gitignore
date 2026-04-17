@@ -9,3 +9,7 @@ commitmsg.txt
 
 # Local backups (Block D)
 _backup-*.zip
+
+# Test-Run Logs (nicht versionieren)
+test-out.log
+test-state.log
