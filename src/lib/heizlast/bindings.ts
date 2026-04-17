@@ -24,10 +24,15 @@
 //   3. abonniert Store-Änderungen → schreibt Werte in andere DOM-Elemente
 //      mit gleichem data-hz-bind (Broadcast).
 //
-// Der OverrideField-Flow (readonly bis Klick aufs Stift-Icon) bleibt intakt —
-// wir triggern bei Reset einfach ein 'input'-Event, das hier aufgefangen wird.
+// Phase 9 / Block A — Override-Handling:
+//   Wenn ein Input innerhalb eines [data-hz-override-field="<pfad>"]-Wrappers
+//   liegt UND der User den Wert tatsaechlich aendert, rufen wir
+//   setOverride(pfad, true) auf. Der Store-Subscriber setzt dann die Klasse
+//   .is-overridden auf dem Wrapper (CSS macht den Reset-Pfeil sichtbar).
+//   Bei clearOverride() via Reset-Button (siehe OverrideField.astro) wird die
+//   Klasse wieder entfernt und das Feld zeigt den Default-Wert.
 
-import { heizlastState, isDirty } from './state.ts';
+import { heizlastState, isDirty, setOverride, isOverridden } from './state.ts';
 import type { HeizlastState } from './state.ts';
 
 type BindType = 'number' | 'string' | 'boolean';
@@ -140,6 +145,13 @@ function writeDom(el: HTMLElement, value: unknown): void {
   }
 }
 
+/** Findet den Override-Pfad, unter dem ein Input steht (falls vorhanden). */
+function overridePathOf(el: HTMLElement): string | null {
+  const wrapper = el.closest<HTMLElement>('[data-hz-override-field]');
+  if (\!wrapper) return null;
+  return wrapper.getAttribute('data-hz-override-field');
+}
+
 /** Initialisiert alle gefundenen Bindings einmalig und meldet Event-Listener an.
  *  Gibt eine Unsubscribe-Funktion zurück. Mehrmals aufrufen ist safe (guard). */
 export function bootBindings(root: ParentNode = document): () => void {
@@ -169,6 +181,14 @@ export function bootBindings(root: ParentNode = document): () => void {
     if (current === coerced) return;
     heizlastState.set(setPath(state, m.path, coerced));
     isDirty.set(true);
+
+    // Phase 9 / Block A: Echte User-Aenderung an einem Override-Feld markieren.
+    // Synthetische Events (vom Reset-Button) tragen isTrusted=false — dort NICHT
+    // als Override markieren, sonst wuerde der Reset gleich wieder ueberschrieben.
+    if (ev.isTrusted) {
+      const ovrPath = overridePathOf(target);
+      if (ovrPath) setOverride(ovrPath, true);
+    }
   };
   document.addEventListener('input', handler);
   document.addEventListener('change', handler);
@@ -176,7 +196,11 @@ export function bootBindings(root: ParentNode = document): () => void {
   // 3) Store-Änderungen → alle DOM-Elemente broadcasten.
   const unsub = heizlastState.subscribe(() => {
     syncDomFromState(root);
+    syncOverrideClasses(root);
   });
+
+  // Initialer Sync der .is-overridden-Klassen (beim Laden aus localStorage).
+  syncOverrideClasses(root);
 
   return () => {
     document.removeEventListener('input', handler);
@@ -200,5 +224,19 @@ export function syncDomFromState(root: ParentNode = document): void {
       return;
     }
     writeDom(el, value);
+  });
+}
+
+/** Setzt die .is-overridden-Klasse auf allen [data-hz-override-field]-Wrappern
+ *  passend zum aktuellen overrides-Record im State. */
+export function syncOverrideClasses(root: ParentNode = document): void {
+  if (typeof window === 'undefined') return;
+  const state = heizlastState.get();
+  const wrappers = root.querySelectorAll<HTMLElement>('[data-hz-override-field]');
+  wrappers.forEach((w) => {
+    const path = w.getAttribute('data-hz-override-field');
+    if (\!path) return;
+    const on = isOverridden(state, path);
+    w.classList.toggle('is-overridden', on);
   });
 }

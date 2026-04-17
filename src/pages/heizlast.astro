@@ -62,6 +62,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     hardReset,
   } from '../lib/heizlast/storage.ts';
   import { bootBindings, syncDomFromState } from '../lib/heizlast/bindings.ts';
+  import { clearOverride, resolveDefault } from '../lib/heizlast/state.ts';
   import {
     SANIERUNGS_MASSNAHMEN,
     BAUPERIODEN,
@@ -83,6 +84,16 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   subscribeAutoSave();         // Store -> localStorage (debounced)
   bootBindings();              // DOM <-> Store
   syncDomFromState();          // Initial-Sync falls Boot ohne Store-Change
+
+  // Phase 9 / Block A: Globals fuer OverrideField-Reset-Button.
+  // OverrideField.astro ruft diese beim Klick auf den Reset-Pfeil auf.
+  (window as any).__hzClearOverride = (path: string) => {
+    clearOverride(path);
+  };
+  (window as any).__hzResolveDefault = (path: string): string | null => {
+    const v = resolveDefault(heizlastState.get(), path);
+    return v == null ? null : String(v);
+  };
 
   // Auth-Status pruefen (setzt uiState.isAuthenticated).
   probeAuth().then((ok) => { uiState.setKey('isAuthenticated', ok); }).catch(() => {});

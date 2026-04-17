@@ -193,6 +193,13 @@ export interface HeizlastState {
 
   /** Sektions-Notizen (pro Sektion ein Feld, inkl. Export-Flag). */
   notizen: NotizenState;
+
+  /**
+   * Pro Feld-Pfad ein Boolean: true = vom User ueberschrieben, false/absent = Default aus
+   * Vorbedingungen (Lage, Bauperiode, Konstanten). Gesteuert via setOverride()/clearOverride().
+   * Beispiel-Pfade: "gebaeude.tvoll", "warmwasser.deltaT", "speicher.wwTAustritt", ...
+   */
+  overrides: Record<string, boolean>;
 }
 
 function emptyNote(): SectionNote {
@@ -296,6 +303,8 @@ export function createDefaultState(): HeizlastState {
     },
 
     notizen: defaultNotizen(),
+
+    overrides: {},
   };
 }
 
@@ -412,7 +421,7 @@ export const tvollEffektiv = computed(heizlastState, (s) => {
 });
 
 // lokale Lookup-Funktion (spiegelt calculations.tvollRichtwert, aber synchron)
-import { VOLLASTSTUNDEN } from './constants.ts';
+import { VOLLASTSTUNDEN, PHYSIK } from './constants.ts';
 function tvollLookup(profil: TvollProfil, lage: Lage): number {
   const row = VOLLASTSTUNDEN.find((r) => r.gebaeudetyp === profil && r.lage === lage);
   return row ? row.tvoll : 2000;
@@ -484,4 +493,70 @@ export function sumRaumFlaechen(raeume: RaumInput[]): number {
     }
   }
   return Math.round(sum * 10) / 10;
+}
+
+// ---------------------------------------------------------------
+// Helper: Overrides — Block A (Phase 9)
+// ---------------------------------------------------------------
+// Der Override-Record steuert, ob ein Feld vom User manuell gesetzt wurde oder
+// ob es aus Vorbedingungen (Lage + Bauperiode + Konstanten) abgeleitet wird.
+// UI zeigt den Default-Wert sichtbar im Feld; sobald der User einen Wert
+// schreibt, wird overrides[path] = true gesetzt und ein Reset-Knopf erscheint.
+
+/** Pfade aller bekannten Override-Felder. */
+export type OverrideFieldPath =
+  | 'gebaeude.tvoll'
+  | 'warmwasser.deltaT'
+  | 'warmwasser.speicher'
+  | 'warmwasser.zirk'
+  | 'warmwasser.ausstoss'
+  | 'speicher.wwTEintritt'
+  | 'speicher.wwTAustritt'
+  | 'zuschlaege.toff';
+
+/** Default-Werte pro Pfad. Einige sind dynamisch (tvoll aus Lage+Bauperiode). */
+export function resolveDefault(state: HeizlastState, path: string): number | null {
+  switch (path) {
+    case 'gebaeude.tvoll':
+      return tvollLookup(state.gebaeude.tvollProfil, state.gebaeude.lage);
+    case 'warmwasser.deltaT':
+      return PHYSIK.deltaT_ww;
+    case 'warmwasser.speicher':
+      return 10;
+    case 'warmwasser.zirk':
+      return 0;
+    case 'warmwasser.ausstoss':
+      return 15;
+    case 'speicher.wwTEintritt':
+      return PHYSIK.t_kaltwasser;
+    case 'speicher.wwTAustritt':
+      return 60;
+    case 'zuschlaege.toff':
+      return 2;
+    default:
+      return null;
+  }
+}
+
+/** Markiert ein Feld als vom User ueberschrieben. */
+export function setOverride(path: string, overridden = true): void {
+  const current = heizlastState.get().overrides ?? {};
+  if (Boolean(current[path]) === overridden) return;
+  heizlastState.setKey('overrides', { ...current, [path]: overridden });
+  isDirty.set(true);
+}
+
+/** Entfernt die Override-Markierung (Feld faellt zurueck auf Default). */
+export function clearOverride(path: string): void {
+  const current = heizlastState.get().overrides ?? {};
+  if (!current[path]) return;
+  const next = { ...current };
+  delete next[path];
+  heizlastState.setKey('overrides', next);
+  isDirty.set(true);
+}
+
+/** Prueft, ob ein Feld vom User ueberschrieben wurde. */
+export function isOverridden(state: HeizlastState, path: string): boolean {
+  return Boolean(state.overrides?.[path]);
 }

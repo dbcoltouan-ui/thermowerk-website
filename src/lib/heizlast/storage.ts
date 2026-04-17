@@ -58,7 +58,15 @@ export function deserializeState(raw: string): HeizlastState | null {
  *   if (obj.version === 1 && STATE_VERSION === 2) { obj = migrateV1toV2(obj); }
  */
 function migrateIfNeeded(obj: any): HeizlastState | null {
-  if (obj.version === STATE_VERSION) return obj as HeizlastState;
+  if (obj.version === STATE_VERSION) {
+    // Sanfte v1-zu-v1-Migration: neuer overrides-Record seit Phase 9 / Block A.
+    // Bestehende localStorage-States ohne diesen Record bekommen ein leeres
+    // Objekt angehaengt (= nichts ueberschrieben).
+    if (!obj.overrides || typeof obj.overrides !== 'object') {
+      obj.overrides = {};
+    }
+    return obj as HeizlastState;
+  }
   // Unbekannte Version → lieber Default-State zurückgeben, damit der Rechner
   // nicht mit korrupten Daten crashed.
   return null;

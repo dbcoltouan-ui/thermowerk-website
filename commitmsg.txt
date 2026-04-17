@@ -1,12 +1,11 @@
-handoff: Phase 9 - Block M2 ergaenzt (Feldbreiten + Grid-Leitlinien)
+Phase 9 / Block A: Override-Infrastruktur
 
-- Neuer Block M2 in HANDOFF-PHASE-9.md: 12-Spalten-Grid (.hz-row +
-  .hz-col-3/4/6/8/12) als zentrale Leitlinie in jeder Section
-- Feldtyp-Matrix: Zahl+Einheit = 3 Spalten mit data-size="sm" (max
-  10ch), Text = 6 Spalten, Select = 4, Textarea/Tabelle/Diagramm = 12
-- Toggle-Buttons und Radio-Rows auf Desktop auf clamp(280px, 32vw,
-  420px) begrenzen, nicht mehr full-width
-- .hz-field__input bekommt max-width via data-size Attribut
-  (xs/sm/md/lg), Default bleibt full-column (lg)
-- Migrations-Reihenfolge Section 1 -> 2 -> 3 -> 4 -> 6 -> 7
-- Akzeptanzliste um Feldbreiten-Kriterium ergaenzt
+- state.ts: overrides-Record + resolveDefault/setOverride/clearOverride/isOverridden + OverrideFieldPath
+- storage.ts: sanfte v1-Migration fuer fehlendes overrides-Feld
+- OverrideField.astro: neu - Wert immer sichtbar/editierbar, Reset-Pfeil nur bei .is-overridden
+- bindings.ts: setOverride bei User-Events (isTrusted), syncOverrideClasses
+- heizlast.astro: window.__hzClearOverride + window.__hzResolveDefault Globals
+
+Tests 49 + 16 grün. Anwendung auf konkrete Felder (tvoll, deltaT, Verluste, toff, WW-Temps) folgt in Block B zusammen mit dem Section-Umbau.
+
+Handoff fuer naechsten Chat: HANDOFF-PHASE-10.md

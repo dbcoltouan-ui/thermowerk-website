@@ -1,18 +1,24 @@
 ---
-// OverrideField — Input mit "Ueberschreiben"-Icon (Variante A).
-// Verhalten:
-//   - Default sichtbar (gegraut), Feld readonly.
-//   - Klick auf Stift-Icon -> aria-pressed toggle, Feld editierbar, Icon wird zu Reset-Pfeil.
-//   - Reset-Pfeil setzt Wert auf data-default zurueck.
-//   - Status wird per CSS-Klasse .is-overridden am Wrapper abgebildet.
-//   - Clientseitig via kleines inline JS (einmal pro Seite bootstrappt delegiert).
+// OverrideField — Phase 9 / Block A neu:
+// - Feld ist IMMER editierbar und zeigt den aktuellen Wert (User oder Default).
+// - data-hz-override="<pfad>" signalisiert den Binding-Pfad im overrides-Record.
+// - data-hz-bind="<pfad>" bindet den tatsaechlichen Wert an den State.
+// - Reset-Pfeil rechts wird nur bei .is-overridden angezeigt (vom Binding-
+//   Layer an den Wrapper gesetzt).
+// - Klick auf Reset loescht den Override und schreibt den Default-Wert zurueck
+//   ins Feld; der State-Binding-Layer picks den Default dann beim naechsten
+//   resolveDefault() auf.
 
 interface Props {
   /** Label ueber dem Feld */
   label: string;
   /** HTML-Id des Inputs (wird auch fuers for=-Label genutzt) */
   id: string;
-  /** Default-Wert (aus Konstanten/FWS) */
+  /** Pfad im State, den dieses Feld schreibt (z.B. "zuschlaege.toff") */
+  bindPath: string;
+  /** Pfad im overrides-Record (meist == bindPath, ausser bei Verlusten) */
+  overridePath?: string;
+  /** Default-Wert (fuer Reset-Fallback, wenn resolveDefault nichts liefert) */
   defaultValue: string | number;
   /** Einheit (z.B. "h", "L", "K") */
   unit?: string;
@@ -24,13 +30,15 @@ interface Props {
   min?: number;
   max?: number;
   step?: number;
-  /** Default-Quelle fuer Reset-Tooltip ("FWS", "SIA 385/1", ...) */
+  /** Default-Quelle fuer Tooltip ("FWS", "SIA 385/1", ...) */
   source?: string;
 }
 
 const {
   label,
   id,
+  bindPath,
+  overridePath,
   defaultValue,
   unit,
   hint,
@@ -41,9 +49,11 @@ const {
   source,
 } = Astro.props;
 
+const ovrPath = overridePath ?? bindPath;
+const bindType = type === 'number' ? 'number' : 'string';
 const defaultString = String(defaultValue);
 ---
-<div class="hz-ovr" data-field data-default={defaultString}>
+<div class="hz-ovr" data-field data-hz-override-field={ovrPath} data-default={defaultString}>
   <div class="hz-ovr__head">
     <label for={id} class="hz-ovr__label">{label}</label>
     {source ? <span class="hz-ovr__source">Standard: {source}</span> : null}
@@ -56,26 +66,20 @@ const defaultString = String(defaultValue);
       class="hz-ovr__input"
       type={type}
       value={defaultString}
-      readonly
       min={min}
       max={max}
       step={step}
+      data-hz-bind={bindPath}
+      data-hz-type={bindType}
       aria-describedby={hint ? `${id}-hint` : undefined}
     />
     {unit ? <span class="hz-ovr__unit">{unit}</span> : null}
     <button
       type="button"
       class="hz-ovr__btn"
-      aria-pressed="false"
-      aria-label={`${label} manuell ueberschreiben`}
-      data-action="toggle"
+      aria-label={`${label} auf Standardwert zuruecksetzen`}
+      data-action="reset-override"
     >
-      <span class="hz-ovr__icon hz-ovr__icon--edit" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-          <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-        </svg>
-      </span>
       <span class="hz-ovr__icon hz-ovr__icon--reset" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="1 4 1 10 7 10"></polyline>
@@ -131,8 +135,10 @@ const defaultString = String(defaultValue);
     min-width: 0;
     width: 100%;
   }
-  .hz-ovr__input[readonly] { color: var(--hz-mid-gray); cursor: not-allowed; }
-  .hz-ovr.is-overridden .hz-ovr__input { color: var(--hz-dark); font-weight: 600; cursor: text; }
+  /* Default-Zustand (kein Override): Wert dezenter dargestellt */
+  .hz-ovr__input { color: var(--hz-mid-gray); }
+  /* Ueberschrieben: voller Text-Kontrast */
+  .hz-ovr.is-overridden .hz-ovr__input { color: var(--hz-dark); font-weight: 600; }
 
   .hz-ovr__unit {
     display: inline-flex;
@@ -144,6 +150,8 @@ const defaultString = String(defaultValue);
     border-left: 1px solid var(--hz-border);
   }
 
+  /* Reset-Button: im Default-Zustand unsichtbar, aber Platzhalter bleibt
+     damit Layout nicht wackelt — per visibility, nicht display. */
   .hz-ovr__btn {
     display: inline-flex;
     align-items: center;
@@ -152,16 +160,13 @@ const defaultString = String(defaultValue);
     border: 0;
     border-left: 1px solid var(--hz-border);
     background: var(--hz-off-white);
-    color: var(--hz-mid-gray);
-    transition: color var(--hz-transition), background var(--hz-transition);
+    color: var(--hz-red);
+    visibility: hidden;
+    transition: background var(--hz-transition);
   }
-  .hz-ovr__btn:hover { color: var(--hz-navy); background: var(--hz-light-gray); }
+  .hz-ovr.is-overridden .hz-ovr__btn { visibility: visible; }
+  .hz-ovr__btn:hover { background: var(--hz-red-soft); }
   .hz-ovr__btn:focus-visible { outline: 2px solid var(--hz-navy); outline-offset: -2px; }
-
-  .hz-ovr__icon--reset { display: none; }
-  .hz-ovr.is-overridden .hz-ovr__icon--edit { display: none; }
-  .hz-ovr.is-overridden .hz-ovr__icon--reset { display: inline-flex; }
-  .hz-ovr.is-overridden .hz-ovr__btn { color: var(--hz-red); background: var(--hz-red-soft); }
 
   .hz-ovr__hint { font-size: 12.5px; color: var(--hz-mid-gray); line-height: 1.4; }
 
@@ -172,31 +177,33 @@ const defaultString = String(defaultValue);
 
 <script is:inline>
   // Delegiertes Verhalten: einmal pro Seite verdrahtet.
+  // Erwartet, dass bindings.ts per Store-Subscriber das .is-overridden
+  // zeitnah aktualisiert. Dieses Script loescht nur den Override + schreibt
+  // den Default-Wert ins Feld + feuert input-Event, damit der State-Layer
+  // mitbekommt, dass das Feld auf Default zurueckgesetzt wurde.
   (function () {
     if (window.__hzOvrBound) return;
     window.__hzOvrBound = true;
     document.addEventListener('click', function (ev) {
-      const btn = ev.target instanceof Element ? ev.target.closest('[data-action="toggle"]') : null;
+      const btn = ev.target instanceof Element ? ev.target.closest('[data-action="reset-override"]') : null;
       if (!btn) return;
-      const wrapper = btn.closest('[data-field]');
+      const wrapper = btn.closest('[data-hz-override-field]');
       if (!wrapper) return;
+      const path = wrapper.getAttribute('data-hz-override-field');
       const input = wrapper.querySelector('.hz-ovr__input');
-      if (!input) return;
-
-      const isOverridden = wrapper.classList.toggle('is-overridden');
-      if (isOverridden) {
-        input.removeAttribute('readonly');
-        btn.setAttribute('aria-pressed', 'true');
-        input.focus();
-        try { input.select(); } catch (_) {}
-      } else {
-        const def = wrapper.getAttribute('data-default') ?? '';
-        input.value = def;
-        input.setAttribute('readonly', '');
-        btn.setAttribute('aria-pressed', 'false');
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
+      if (!input || !path) return;
+      // Globalen Hook benutzen (wird in heizlast.astro installiert):
+      if (typeof window.__hzClearOverride === 'function') {
+        window.__hzClearOverride(path);
       }
+      // Default-Wert aus State zurueckholen:
+      const def = typeof window.__hzResolveDefault === 'function'
+        ? window.__hzResolveDefault(path)
+        : wrapper.getAttribute('data-default');
+      if (def != null) input.value = String(def);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.focus();
     });
   })();
 </script>
