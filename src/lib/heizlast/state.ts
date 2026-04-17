@@ -142,9 +142,15 @@ export interface WarmwasserState {
 }
 
 export interface ZuschlaegeState {
-  toff: number; // h Sperrzeit
+  /** Phase 9 / Block D — Ja/Nein-Schalter. Nur wenn true wird Qoff gerechnet
+   *  und das toff-Feld in der UI sichtbar. */
+  sperrzeitActive: boolean;
+  toff: number; // h Sperrzeit (nur wirksam wenn sperrzeitActive === true)
+  /** Legacy seit Phase 9 / Block D — Wert wird nicht mehr als Gate genutzt.
+   *  Qas wird automatisch addiert, sobald `qas > 0`. Feld bleibt aus
+   *  Migrations-Gruenden erhalten. */
   qasActive: boolean;
-  qas: number; // kW Abtau-/Sonderzuschlag
+  qas: number; // kW Zuschlag fuer verbundene Systeme (Lueftung, Pool u. Ae.)
 }
 
 export interface SpeicherState {
@@ -296,6 +302,8 @@ export function createDefaultState(): HeizlastState {
     },
 
     zuschlaege: {
+      // Block D: Sperrzeit standardmaessig aus — der User aktiviert sie bewusst.
+      sperrzeitActive: false,
       toff: 2,
       qasActive: false,
       qas: 0,

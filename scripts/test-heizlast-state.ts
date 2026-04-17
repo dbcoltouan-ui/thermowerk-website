@@ -32,7 +32,7 @@ function section(t: string): void {
 }
 
 // 1. FWS-Aufgabe 2 via State -> Cascade
-section('INTEGRATION — FWS-Aufgabe 2 via State + runCascade');
+section('INTEGRATION \u2014 FWS-Aufgabe 2 via State + runCascade');
 
 const s = createDefaultState();
 s.gebaeude.typ = 'efh';
@@ -55,15 +55,19 @@ s.warmwasser.speicherProzent = 10;
 s.warmwasser.zirkProzent = 0;
 s.warmwasser.ausstossProzent = 15;
 
+// Phase 9 / Block D: Sperrzeit-Toggle ist neu. FWS-Aufgabe 2 hat toff = 2 h
+// und rechnet Qoff als Zuschlag, also muss der Schalter hier aktiv sein.
+s.zuschlaege.sperrzeitActive = true;
+
 replaceState(s);
 
 const result = runCascade(heizlastState.get());
-close('Qhl (kW) — FWS Referenzwert 12.55', result.qhlRaw?.value ?? 0, 12.55, 0.05);
+close('Qhl (kW) \u2014 FWS Referenzwert 12.55', result.qhlRaw?.value ?? 0, 12.55, 0.05);
 close('Qhl_korr == Qhl_raw (keine Sanierung)', result.qhlKorr?.value ?? 0, result.qhlRaw?.value ?? 0, 0.001);
 check('tvoll effektiv = 2000', result.tvoll === 2000, result.tvoll, 2000);
 
 // 2. Sanierung hinzu -> Wert muss kleiner werden
-section('INTEGRATION — Sanierung aktiviert reduziert Qhl');
+section('INTEGRATION \u2014 Sanierung aktiviert reduziert Qhl');
 
 const s2 = heizlastState.get();
 const qhlVorher = result.qhlRaw?.value ?? 0;
@@ -82,7 +86,7 @@ close('Qhl_korr nach 15% Fenster = Qhl * 0.85', r2.qhlKorr?.value ?? 0, qhlVorhe
 check('Qhl_raw unveraendert durch Sanierung', Math.abs((r2.qhlRaw?.value ?? 0) - qhlVorher) < 0.001);
 
 // 3. Qh = Qhl + Qw + Qoff
-section('INTEGRATION — Qh-Summe konsistent');
+section('INTEGRATION \u2014 Qh-Summe konsistent');
 
 const r3 = runCascade(heizlastState.get());
 if (r3.qh && r3.qhlKorr && r3.qoff) {
@@ -93,7 +97,7 @@ if (r3.qh && r3.qhlKorr && r3.qoff) {
 }
 
 // 4. Serialisierung round-trip
-section('PERSISTIERUNG — Serialisierung round-trip');
+section('PERSISTIERUNG \u2014 Serialisierung round-trip');
 
 const vorher = heizlastState.get();
 const json = serializeState(vorher);
@@ -107,14 +111,14 @@ if (wieder) {
 }
 
 // 5. Unbekannte Version -> null
-section('PERSISTIERUNG — Unbekannte Version wird abgelehnt');
+section('PERSISTIERUNG \u2014 Unbekannte Version wird abgelehnt');
 
 const fremd = JSON.stringify({ ...vorher, version: 999 });
 const frResult = deserializeState(fremd);
 check('deserializeState(version=999) === null', frResult === null);
 
 // 6. SSR-Safety
-section('PERSISTIERUNG — SSR-Safety');
+section('PERSISTIERUNG \u2014 SSR-Safety');
 
 let crashed = false;
 try {
@@ -128,12 +132,32 @@ check('saveNow/load/clear crashen nicht ohne window', !crashed);
 check('STORAGE_KEY hat Version-Suffix', STORAGE_KEY_CURRENT.endsWith('.v1'), STORAGE_KEY_CURRENT);
 
 // 7. WW-Speicher-Rundung
-section('INTEGRATION — WW-Speicher wird auf 10-L-Schritt gerundet');
+section('INTEGRATION \u2014 WW-Speicher wird auf 10-L-Schritt gerundet');
 
 if (r3.wwSpeicherGerundet != null) {
   check('wwSpeicherGerundet % 10 === 0', r3.wwSpeicherGerundet % 10 === 0, r3.wwSpeicherGerundet);
   check('wwSpeicherGerundet > 0', r3.wwSpeicherGerundet > 0, r3.wwSpeicherGerundet);
 }
+
+// 8. Block D \u2014 Sperrzeit-Toggle gated Qoff
+section('INTEGRATION \u2014 Sperrzeit-Toggle (Block D)');
+
+const sSperr = heizlastState.get();
+// Gate aus -> Qoff = 0, unabhaengig von toff
+heizlastState.set({ ...sSperr, zuschlaege: { ...sSperr.zuschlaege, sperrzeitActive: false, toff: 2 } });
+const rOff = runCascade(heizlastState.get());
+check('Qoff == 0 wenn sperrzeitActive=false', (rOff.qoff?.value ?? -1) === 0, rOff.qoff?.value);
+
+// Gate an -> Qoff > 0 mit toff=2
+heizlastState.set({ ...sSperr, zuschlaege: { ...sSperr.zuschlaege, sperrzeitActive: true, toff: 2 } });
+const rOn = runCascade(heizlastState.get());
+check('Qoff > 0 wenn sperrzeitActive=true und toff=2', (rOn.qoff?.value ?? 0) > 0, rOn.qoff?.value);
+
+// Qas-Auto: Wert > 0 wird automatisch addiert, kein qasActive mehr noetig
+const baseQh = rOn.qh?.value ?? 0;
+heizlastState.set({ ...sSperr, zuschlaege: { ...sSperr.zuschlaege, sperrzeitActive: true, toff: 2, qas: 0.75, qasActive: false } });
+const rQas = runCascade(heizlastState.get());
+close('Qh mit qas=0.75 steigt um 0.75', (rQas.qh?.value ?? 0) - baseQh, 0.75, 0.01);
 
 console.log(`\n${'='.repeat(60)}\nZUSAMMENFASSUNG (Phase 3)\n${'='.repeat(60)}`);
 console.log(`  Bestanden: ${passed}`);

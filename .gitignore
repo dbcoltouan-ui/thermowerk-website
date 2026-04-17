@@ -6,3 +6,6 @@ _reference/
 .astro/
 sanity-export.json
 commitmsg.txt
+
+# Local backups (Block D)
+_backup-*.zip

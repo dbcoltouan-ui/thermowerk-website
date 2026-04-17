@@ -1,12 +1,13 @@
 ---
 // Section 4 — Zuschlaege (M6)
-// - toff: Sperrzeit in Stunden
-// - Qas: optionaler Sonder-/Abtauzuschlag
+// Phase 9 / Block D:
+// - Sperrzeit per Ja/Nein-Switch (toff-Feld + FWS-Faktoren nur sichtbar wenn aktiv).
+// - Qas = Zuschlag fuer verbundene Systeme (Lueftung, Pool, Solar). Feld immer
+//   sichtbar, wird automatisch addiert sobald Wert > 0. Kein Aktiv-Toggle mehr.
 
 import SectionWrapper from '../SectionWrapper.astro';
 import InfoBox from '../InfoBox.astro';
 import KpiCard from '../KpiCard.astro';
-import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
 import OverrideField from '../OverrideField.astro';
 import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
@@ -15,7 +16,7 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
   id="sektion-4"
   kicker="04 - Zuschläge"
   title="Zuschläge"
-  subline="Sperrzeit-Aufschlag und optionale Sonderzuschläge (z. B. Abtau-Reserve)."
+  subline="Sperrzeit-Aufschlag und Zuschlag für verbundene Systeme (Lüftung, Pool)."
   tone="off"
 >
   <slot name="aside" slot="aside">
@@ -25,52 +26,63 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
   </slot>
 
   <div class="hz-block">
-    <h3 class="hz-block__heading">Sperrzeit (EVU)</h3>
-    <div class="hz-grid-3">
-      <OverrideField
-        label="toff - Sperrstunden pro Tag"
-        id="hz-toff"
-        bindPath="zuschlaege.toff"
-        defaultValue={2}
-        unit="h/d"
-        source="EVU-Vorgabe"
-        type="number"
-        step={1}
-        min={0}
-        max={8}
-        hint="0 = keine Sperre. Typisch: 2-4 h (EVU)."
-      />
+    <div class="hz-block__head">
+      <h3 class="hz-block__heading">Sperrzeit</h3>
+      <small class="hz-muted">Abschaltung durch den Energieversorger</small>
     </div>
 
-    <p class="hz-muted" style="margin-top: 8px; font-size: 13.5px;">
-      Korrekturfaktor je Sperrzeit (FWS):
-      {Object.entries(SPERRZEIT_FAKTOREN).map(([h, f]) => (
-        <span class="hz-sperrzeit-chip">{h}&nbsp;h → &times;{f.toFixed(2)}</span>
-      ))}
-    </p>
+    <label class="hz-switch hz-sperrzeit-switch">
+      <input type="checkbox" data-hz-bind="zuschlaege.sperrzeitActive" data-hz-type="boolean" />
+      <span>Sperrzeit vorhanden?</span>
+    </label>
+
+    <div class="hz-sperrzeit-block" data-hz-sperrzeit-block>
+      <div class="hz-grid-3" style="margin-top: 12px;">
+        <OverrideField
+          label="toff"
+          id="hz-toff"
+          bindPath="zuschlaege.toff"
+          defaultValue={2}
+          unit="h/d"
+          source="EVU"
+          type="number"
+          step={1}
+          min={0}
+          max={8}
+          hint="Stunden pro Tag, in denen die WP abgeschaltet wird."
+        />
+      </div>
+
+      <p class="hz-muted hz-sperrzeit-chips">
+        Korrekturfaktor je Sperrzeit (FWS):
+        {Object.entries(SPERRZEIT_FAKTOREN).map(([h, f]) => (
+          <span class="hz-sperrzeit-chip">{h}&nbsp;h → &times;{f.toFixed(2)}</span>
+        ))}
+      </p>
+    </div>
   </div>
 
-  <Toggle label="Zusätzlicher Sonder-/Abtauzuschlag (Qas)" caption="optional" id="hz-m6-qas">
+  <div class="hz-block">
+    <div class="hz-block__head">
+      <h3 class="hz-block__heading">Qas — Verbundene Systeme</h3>
+      <small class="hz-muted">Lüftung, Pool, Solar – optional</small>
+    </div>
+
     <label class="hz-field" style="max-width: 280px;">
-      <span class="hz-field__label">Qas</span>
+      <span class="hz-field__label">Zuschlag</span>
       <div class="hz-field__input-with-unit">
         <input class="hz-field__input" type="number" step="0.1" min="0"
           data-hz-bind="zuschlaege.qas" data-hz-type="number" />
         <span class="hz-field__unit">kW</span>
       </div>
-      <small class="hz-muted">Wird direkt zu Qh addiert.</small>
+      <small class="hz-muted">0 oder leer = kein Zuschlag. Richtwerte: Pool 1–3 kW, grosse Wohnungslüftung 0.3–0.8 kW.</small>
     </label>
-    <label class="hz-switch" style="margin-top: 10px;">
-      <input type="checkbox" data-hz-bind="zuschlaege.qasActive" data-hz-type="boolean" />
-      <span>Qas aktiv</span>
-    </label>
-  </Toggle>
+  </div>
 
-  <InfoBox title="Warum ein Sperrzeit-Zuschlag?" icon="help">
+  <InfoBox title="Sperrzeit-Zuschlag" icon="info">
     <p>
-      EVU können Wärmepumpen stundenweise abschalten (Lastmanagement).
-      In dieser Zeit fehlt Heizleistung — sie muss in den restlichen Stunden nachgeholt werden.
-      Der Zuschlag wird als Faktor auf Qhl aufgeschlagen (FWS §4).
+      Zuschlag auf Qhl wegen täglicher Abschaltung der Wärmepumpe durch den Energieversorger (EVU).
+      Die wegfallende Heizzeit wird auf die restlichen Betriebsstunden umgelegt — Grundlage ist die FWS-Korrekturtabelle.
     </p>
   </InfoBox>
 
@@ -78,10 +90,32 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
 </SectionWrapper>
 
 <style is:global>
+  .hz-sperrzeit-switch { margin-bottom: 4px; }
+
+  .hz-sperrzeit-chips { margin-top: 10px; font-size: 13.5px; }
+
   .hz-sperrzeit-chip {
-    display: inline-block; margin: 4px 6px 0 0;
-    padding: 3px 8px; border-radius: 999px;
-    background: var(--hz-blue-tint); color: var(--hz-navy);
-    font-size: 12px; font-family: var(--hz-font-heading); font-weight: 600;
+    display: inline-block;
+    margin: 4px 6px 0 0;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--hz-blue-tint);
+    color: var(--hz-navy);
+    font-size: 12px;
+    font-family: var(--hz-font-heading);
+    font-weight: 600;
+  }
+
+  .hz-block__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+  }
+
+  /* Sperrzeit-Block nur sichtbar, wenn der Hauptschalter an ist.
+     Wird in heizlast.astro per body.hz-sperrzeit-on gesteuert. */
+  body:not(.hz-sperrzeit-on) .hz-sperrzeit-block {
+    display: none;
   }
 </style>

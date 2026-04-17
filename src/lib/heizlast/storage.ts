@@ -81,6 +81,17 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
       }
       if ('method' in obj.heizlast) delete obj.heizlast.method;
     }
+    // Phase 9 / Block D: zuschlaege.sperrzeitActive wurde neu eingefuehrt.
+    // Alte States ohne das Feld bekommen einen heuristischen Default: wenn
+    // der User zuvor toff > 0 hatte, war die Sperrzeit implizit aktiv; bei
+    // toff == 0 bleibt sie aus. So bleibt der Rechenkern nach dem Update
+    // konsistent.
+    if (obj.zuschlaege && typeof obj.zuschlaege === 'object') {
+      if (typeof obj.zuschlaege.sperrzeitActive !== 'boolean') {
+        const toff = Number(obj.zuschlaege.toff);
+        obj.zuschlaege.sperrzeitActive = Number.isFinite(toff) && toff > 0;
+      }
+    }
     return obj as HeizlastState;
   }
   // Unbekannte Version → lieber Default-State zurückgeben, damit der Rechner

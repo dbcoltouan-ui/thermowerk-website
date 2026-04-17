@@ -1,15 +1,15 @@
-Phase 9 Block C: WW-Defaults zentralisiert, UI-Labels konsolidiert
+Phase 9 / Block D: Sperrzeit-Toggle + Qas-Klarstellung
 
-- constants.ts: neue Exporte WW_VERLUSTE_DEFAULTS (10/0/15 %) und
-  WW_SPEICHER_DEFAULTS (tEintritt=10, tAustritt=60) mit Quellen FWS 8/10.
-- state.ts: resolveDefault() und createDefaultState() beziehen jetzt
-  aus den Konstanten statt Literalen. Default-State zeigt die Verluste
-  gleich beim ersten Laden.
-- Section3Warmwasser.astro: Labels vereinheitlicht (Speicherverluste,
-  Zirkulationsverluste, Ausstossverluste, Kaltwasser -> Warmwasser).
-  Hints mit typischen Ranges; Quelle auf FWS 8.
-- Section6Speicher.astro: Speicher-Solltemperatur (Austritt),
-  Kaltwasser-Eintrittstemperatur; Hints mit Legionellen-/Referenz-Hinweis.
-- HANDOFF-PHASE-12.md fuer Block D angelegt; CLAUDE.md aktualisiert.
-
-Tests 49 + 16 gruen.
+- Section 4: Sperrzeit Ja/Nein-Toggle (zuschlaege.sperrzeitActive),
+  toff-Feld sichtbar nur bei aktivem Gate. Qas umbenannt zu
+  "Qas - Verbundene Systeme" mit Hints (Pool 1-3 kW, Lueftung 0.3-0.8 kW).
+- compute.ts: computeQoff gated auf sperrzeitActive. qasActive-Gate
+  entfernt, Qas wird automatisch addiert wenn > 0.
+- state.ts: neues Feld sperrzeitActive: boolean. qasActive bleibt als
+  Legacy-Field (wird ignoriert).
+- storage.ts: sanfte Migration — alte States ohne sperrzeitActive
+  bekommen sperrzeitActive = (toff > 0).
+- Tests: test-heizlast-state.ts um Block-D-Sektion erweitert (Qoff-Gate,
+  Qas-Auto-Addition). Phase 3 Integrations-Tests 19 gruen, Rechenkern
+  49 weiterhin gruen. FWS-Aufgabe 2: Qhl = 12.55 kW stabil.
+- .gitignore: _backup-*.zip ausgeschlossen.

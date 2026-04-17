@@ -439,7 +439,10 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setKpi('qwwTag', fmt(r.qwwTagVal?.value));
     setKpi('vwu', fmtInt(r.vwu?.value));
     setKpi('qoff', fmt(r.qoff?.value));
-    setKpi('qas', fmt(s.zuschlaege.qasActive ? s.zuschlaege.qas : 0));
+    // Block D: Qas wird automatisch addiert, sobald ein Wert > 0 vorliegt.
+    const qasKw = Number(s.zuschlaege.qas);
+    const qasEff = Number.isFinite(qasKw) && qasKw > 0 ? qasKw : 0;
+    setKpi('qas', fmt(qasEff));
     setKpi('qh', fmt(r.qh?.value));
     setKpi('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setKpi('puffer', fmtInt(r.pufferGerundet));
@@ -473,7 +476,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setSum('qhl', fmt(r.qhlKorr?.value));
     setSum('qw', fmt(r.qw?.value));
     setSum('qoff', fmt(r.qoff?.value));
-    setSum('qas', fmt(s.zuschlaege.qasActive ? s.zuschlaege.qas : 0));
+    setSum('qas', fmt(qasEff));
     setSum('qh', fmt(r.qh?.value));
     setSum('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setSum('puffer', fmtInt(r.pufferGerundet));
@@ -485,6 +488,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
 
     // Panes / Methoden
     syncWwPanes();
+
+    // Block D: Body-Klasse gated den sichtbaren Sperrzeit-Block in Section 4.
+    document.body.classList.toggle('hz-sperrzeit-on', !!s.zuschlaege.sperrzeitActive);
   }
 
   renderAll();

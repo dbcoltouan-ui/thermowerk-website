@@ -221,6 +221,11 @@ function computeWarmwasser(s: HeizlastState, qhlKorr: CalcResult | null): {
 
 function computeQoff(s: HeizlastState, qhlKorr: CalcResult | null): CalcResult | null {
   if (!qhlKorr) return null;
+  // Block D: Ja/Nein-Gate. Ist der Sperrzeit-Toggle aus, traegt Qoff nichts
+  // zur WP-Auslegung bei — die FWS-Korrekturtabelle wird gar nicht aktiviert.
+  if (!s.zuschlaege.sperrzeitActive) {
+    return { value: 0, unit: 'kW', steps: [{ formel: 'Qoff', wert: 'keine Sperrzeit — 0 kW' }] };
+  }
   const toff = s.zuschlaege.toff;
   if (toff == null || toff < 0) return null;
   if (toff === 0) {
@@ -271,7 +276,11 @@ export function runCascade(s: HeizlastState): ComputeResult {
   const qoff = computeQoff(s, qhlKorr);
   let qh: CalcResult | null = null;
   if (qhlKorr && qoff) {
-    const qas = s.zuschlaege.qasActive ? s.zuschlaege.qas : 0;
+    // Block D: Qas wird automatisch addiert, sobald ein Wert > 0 vorliegt.
+    // Der frueher noetige `qasActive`-Switch ist entfallen — das Feld bleibt
+    // ausschliesslich als Legacy im State (siehe ZuschlaegeState.qasActive).
+    const qasVal = Number(s.zuschlaege.qas);
+    const qas = Number.isFinite(qasVal) && qasVal > 0 ? qasVal : 0;
     qh = qhGesamt(qhlKorr.value, qw?.value ?? 0, qoff.value, qas);
   }
   const ww = computeWwSpeicher(s, qwwTagVal);
