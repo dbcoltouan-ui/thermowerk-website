@@ -1,9 +1,11 @@
-Phase 9 / Block L: Notizen-Block schlanker
+Phase 9 / Block M1: Desktop-Breite + fluide Typografie
 
-- Badge "ausgefuellt" entfernt, durch Navy-Info-Icon ersetzt (nur sichtbar wenn Text vorhanden)
-- Export-Checkbox pro Notiz entfernt
-- Zentrale Steuerung im ExportModal: notizenBereiche + notizenProjekt
-- Neuer Slot NotizenState.projekt (alter sektion7-Eintrag wird sanft migriert)
-- Print-CSS per data-hz-note-slot Attribut-Selektor gesteuert
-- ExportPart Union aktualisiert (notizenBereiche | notizenProjekt)
+- Neue Tokens: --hz-container-max (min 92vw, 960px), --hz-gap-section/row/card
+- .hz-container und .hz-topbar__inner haengen am selben Token -> Header
+  bleibt buendig mit Content auf allen Viewports (1440-1920 px: ruhige
+  Raender, Content ~960 px)
+- Body-Schrift fluid (15.5-17 px)
+- SectionWrapper-Padding ueber --hz-gap-section
+- KpiCard Default-Zahl + Einheit fluid (24-30 px / 13-15 px)
+- Mobile-Verhalten aus Phase 8 unveraendert
 - Tests weiterhin 49 + 33 gruen

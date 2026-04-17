@@ -82,14 +82,15 @@ const Tag = href ? 'a' : 'div';
   .hz-kpi__value {
     font-family: var(--hz-font-heading);
     font-weight: 700;
-    font-size: 28px;
+    /* Phase 9 / Block M1 — fluide KPI-Zahl */
+    font-size: clamp(24px, 2.2vw, 30px);
     line-height: 1.05;
     letter-spacing: -0.01em;
   }
   .hz-kpi__unit {
     font-family: var(--hz-font-heading);
     font-weight: 500;
-    font-size: 14px;
+    font-size: clamp(13px, 1vw, 15px);
     color: var(--hz-mid-gray);
   }
   .hz-kpi__delta {

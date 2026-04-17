@@ -62,6 +62,15 @@ const {
 
       --hz-transition: 180ms ease;
       --hz-header-height: 72px;
+
+      /* Phase 9 / Block M1 — fluide Container-Breite und Abstände.
+         Container skaliert mit dem Viewport, aber nie über 960 px.
+         Das sorgt auf breiten Bildschirmen (1440–1920 px) fuer ruhige
+         Raender links/rechts. */
+      --hz-container-max: min(92vw, 960px);
+      --hz-gap-section: clamp(56px, 8svh, 88px);
+      --hz-gap-row: clamp(16px, 2.2vw, 28px);
+      --hz-gap-card: clamp(10px, 1.4vw, 18px);
     }
 
     /* Reset, nur fuer den Heizlast-Scope aktiv */
@@ -73,7 +82,8 @@ const {
       font-family: var(--hz-font-body);
       color: var(--hz-dark);
       background: var(--hz-white);
-      font-size: 16px;
+      /* Phase 9 / Block M1 — leicht fluide Body-Schrift */
+      font-size: clamp(15.5px, 0.35vw + 14.8px, 17px);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
@@ -100,7 +110,7 @@ const {
     .hz-scope p  { font-size: 16px; line-height: 1.65; color: var(--hz-dark); }
 
     /* Utility */
-    .hz-container { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 24px); width: 100%; }
+    .hz-container { max-width: var(--hz-container-max); margin: 0 auto; padding: 0 clamp(16px, 3vw, 24px); width: 100%; }
     .hz-scope, body { overflow-x: hidden; }
     .hz-scope *, .hz-scope *::before, .hz-scope *::after { max-width: 100%; }
     .hz-scope input, .hz-scope select, .hz-scope textarea, .hz-scope button {
@@ -144,7 +154,7 @@ const {
       grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: clamp(12px, 2vw, 20px);
-      width: 100%; max-width: 1160px; margin: 0 auto;
+      width: 100%; max-width: var(--hz-container-max); margin: 0 auto;
       padding: 10px clamp(12px, 3vw, 24px);
     }
     .hz-brand {
