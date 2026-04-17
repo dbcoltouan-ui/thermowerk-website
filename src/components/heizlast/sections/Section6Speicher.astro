@@ -95,11 +95,15 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
       <label class="hz-field" style="margin-bottom: 12px;">
         <span class="hz-field__label">Methode</span>
         <select class="hz-field__input" data-hz-bind="speicher.pufferMethod" data-hz-type="string">
-          <option value="abtau">Abtau (L/W mit Prozessumkehr)</option>
+          <option value="abtau">Abtau (L/W mit Prozessumkehr) — Standard CH</option>
           <option value="takt">Taktung (Mindestlaufzeit)</option>
+          <option value="sperrzeit">Sperrzeit-Reserve (EVU-gesperrte Anlagen)</option>
           <option value="err">Erfahrungswert (l/kW-Band)</option>
-          <option value="sperrzeit">Sperrzeit-Reserve</option>
         </select>
+        <small class="hz-muted">
+          In CH am häufigsten: <strong>Abtau</strong> (Luft-Wasser-WP).
+          Für EVU-gesperrte Anlagen <strong>Sperrzeit-Reserve</strong>.
+        </small>
       </label>
 
       <div class="hz-grid-2">

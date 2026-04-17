@@ -1,17 +1,7 @@
-phase-9-block-j: Speicher-Rundung an CH-WP-Marktstaffelung angepasst
+Phase 9 / Block K: Heizungspuffer — Abtau als CH-Standard
 
-- reference/SPEICHER-MARKT-CH.md: Recherche-Dokument mit Hersteller-Grid
-  (Hoval, Viessmann, Stiebel Eltron, Domotec, Jenni) + Rundungsempfehlung
-- calculations.ts: rundeSpeicherMarkt(v, 'ww' | 'puffer')
-  - WW: <=200 -> 50er, <=500 -> 100er, <=1000 -> 250er, sonst 500er
-  - Puffer: <=200 -> 50er, <=500 -> 100er, sonst 200er
-  - Immer AUFWAERTS aufgerundet (Auslegung nie zu klein)
-- compute.ts: nutzt rundeSpeicherMarkt, Legacy-Felder wwRundungLiter /
-  pufferRundungLiter bleiben fuer Migration, werden ignoriert
-- Section6Speicher: 5/10-L-Rundungs-Radio-Gruppen entfernt, stattdessen
-  "Berechnungswert X L - Empfehlung Y L" inkl. CSS-Hinweis
-- heizlast.astro renderAll: wwSpeicherRoh + pufferRoh als data-hz-sum
-- test-heizlast-state.ts: WW-Speicher-Test auf Markt-Staffelung
-  umgeschrieben (passende Step-Pruefung pro Groesse + Aufrundungs-Check)
-
-Tests: 49 + 33 gruen (ein zusaetzlicher Aufrundungs-Check).
+- Section6Speicher: Methoden-Select neu geordnet (abtau zuerst, mit
+  "Standard CH"-Marker), Hint-Text mit CH-Empfehlung ergaenzt.
+- Sperrzeit-Option bleibt fuer EVU-gesperrte Anlagen verfuegbar.
+- Default-Methode bleibt "abtau" (unveraendert in state.ts).
+- Tests: 49 + 33 gruen.
