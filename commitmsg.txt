@@ -1,1 +1,1 @@
-test: defender-probe entfernt
+test: defender-probe runde 2 (cmd whitelist)

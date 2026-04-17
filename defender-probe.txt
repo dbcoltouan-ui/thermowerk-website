@@ -1,1 +1,1 @@
-Probe-Datei, nach dem Commit wieder entfernt.
+Probe 2 — cmd.exe in Whitelist, Delete-Test.
