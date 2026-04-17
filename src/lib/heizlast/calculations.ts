@@ -392,9 +392,42 @@ export function speichervolumen(
   ]);
 }
 
-/** Speichervolumen auf 5- oder 10-Liter-Schritte runden (User-Anforderung). */
+/** Speichervolumen auf 5- oder 10-Liter-Schritte runden (Legacy; Phase 9 / Block J loesst durch
+ *  marktrealistische Staffelung ab — siehe `rundeSpeicherMarkt`). */
 export function rundeSpeicher(volumenL: number, schritt: 5 | 10 = 10): number {
   return Math.round(volumenL / schritt) * schritt;
+}
+
+/**
+ * Speicher-Staffelung nach Schweizer WP-Marktstandards (Phase 9 / Block J).
+ * Quelle: `reference/SPEICHER-MARKT-CH.md` (Hoval, Viessmann, Stiebel Eltron,
+ * Domotec, Jenni). Rundung immer AUFWAERTS auf die naechst groessere verfuegbare
+ * Markt-Groesse — Auslegung darf nie zu klein werden.
+ *
+ * Warmwasser (`ww`):
+ *   v <=  200 L → 50er-Schritte
+ *   200 <  v <=  500 L → 100er-Schritte
+ *   500 <  v <= 1000 L → 250er-Schritte
+ *   v  > 1000 L → 500er-Schritte
+ *
+ * Pufferspeicher (`puffer`):
+ *   v <=  200 L → 50er-Schritte
+ *   200 <  v <=  500 L → 100er-Schritte
+ *   v  >  500 L → 200er-Schritte
+ */
+export function rundeSpeicherMarkt(volumenL: number, kind: 'ww' | 'puffer'): number {
+  if (!Number.isFinite(volumenL) || volumenL <= 0) return 0;
+  const ceilTo = (v: number, step: number) => Math.ceil(v / step) * step;
+  if (kind === 'ww') {
+    if (volumenL <= 200) return ceilTo(volumenL, 50);
+    if (volumenL <= 500) return ceilTo(volumenL, 100);
+    if (volumenL <= 1000) return ceilTo(volumenL, 250);
+    return ceilTo(volumenL, 500);
+  }
+  // puffer
+  if (volumenL <= 200) return ceilTo(volumenL, 50);
+  if (volumenL <= 500) return ceilTo(volumenL, 100);
+  return ceilTo(volumenL, 200);
 }
 
 // -------------------------------------------------------------
@@ -496,7 +529,7 @@ export const formulas = {
   qoff, spezHeizleistung, qhlNachSanierung,
   personenbelegung, vwuTotal, qwuTag, qnwwJahr, qwwTag, speicherverlustAusVolumen,
   qw, qhGesamt, inverterCheck,
-  speichervolumen, rundeSpeicher, kaelteleistung, spezEntzugsleistung,
+  speichervolumen, rundeSpeicher, rundeSpeicherMarkt, kaelteleistung, spezEntzugsleistung,
   puffer_abtau, puffer_takt, puffer_err, puffer_sperrzeit,
   tvollRichtwert,
 };

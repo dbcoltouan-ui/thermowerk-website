@@ -509,6 +509,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setSum('qh', fmt(r.qh?.value));
     setSum('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setSum('puffer', fmtInt(r.pufferGerundet));
+    // Phase 9 / Block J: Rohwerte separat fuer "Berechnungswert X - Empfehlung Y"
+    setSum('wwSpeicherRoh', fmtInt(r.wwSpeicherRoh?.value ?? null));
+    setSum('pufferRoh', fmtInt(r.pufferRoh?.value ?? null));
 
     // Listen
     renderRaumList();

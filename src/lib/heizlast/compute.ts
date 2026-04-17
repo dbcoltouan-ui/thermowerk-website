@@ -19,6 +19,7 @@ import {
   qhGesamt,
   speichervolumen,
   rundeSpeicher,
+  rundeSpeicherMarkt,
   puffer_abtau,
   puffer_takt,
   puffer_err,
@@ -239,7 +240,10 @@ function computeWwSpeicher(s: HeizlastState, qwwTagVal: CalcResult | null): { ro
   if (!s.speicher.wwActive || !qwwTagVal) return { roh: null, gerundet: null };
   const tEin = s.speicher.wwTStoEinOverride ?? PHYSIK.t_kaltwasser;
   const roh = speichervolumen(qwwTagVal.value, s.speicher.wwTStoAus, tEin);
-  const gerundet = rundeSpeicher(roh.value, s.speicher.wwRundungLiter);
+  // Phase 9 / Block J: Marktrealistische Staffelung (CH-WP-Markt), Legacy-Feld
+  // `wwRundungLiter` wird nicht mehr gelesen (bleibt fuer Migration).
+  void s.speicher.wwRundungLiter;
+  const gerundet = rundeSpeicherMarkt(roh.value, 'ww');
   return { roh, gerundet };
 }
 
@@ -264,7 +268,9 @@ function computePuffer(s: HeizlastState, qh: CalcResult | null, qhlKorr: CalcRes
       break;
   }
   if (!roh) return { roh: null, gerundet: null };
-  const gerundet = rundeSpeicher(roh.value, sp.pufferRundungLiter);
+  // Phase 9 / Block J: Marktrealistische Staffelung, Legacy-Feld `pufferRundungLiter` ignoriert.
+  void sp.pufferRundungLiter;
+  const gerundet = rundeSpeicherMarkt(roh.value, 'puffer');
   return { roh, gerundet };
 }
 

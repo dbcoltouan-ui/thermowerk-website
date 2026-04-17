@@ -139,12 +139,21 @@ try {
 check('saveNow/load/clear crashen nicht ohne window', !crashed);
 check('STORAGE_KEY hat Version-Suffix', STORAGE_KEY_CURRENT.endsWith('.v1'), STORAGE_KEY_CURRENT);
 
-// 7. WW-Speicher-Rundung
-section('INTEGRATION \u2014 WW-Speicher wird auf 10-L-Schritt gerundet');
+// 7. WW-Speicher-Rundung (Phase 9 / Block J: marktrealistische Staffelung)
+section('INTEGRATION \u2014 WW-Speicher folgt CH-WP-Marktstaffelung');
 
 if (r3.wwSpeicherGerundet != null) {
-  check('wwSpeicherGerundet % 10 === 0', r3.wwSpeicherGerundet % 10 === 0, r3.wwSpeicherGerundet);
-  check('wwSpeicherGerundet > 0', r3.wwSpeicherGerundet > 0, r3.wwSpeicherGerundet);
+  const v = r3.wwSpeicherGerundet;
+  // Erwartete Staffelung: <=200 -> 50er, <=500 -> 100er, <=1000 -> 250er, sonst 500er
+  let step = 500;
+  if (v <= 200) step = 50;
+  else if (v <= 500) step = 100;
+  else if (v <= 1000) step = 250;
+  check(`wwSpeicherGerundet % ${step} === 0`, v % step === 0, v);
+  check('wwSpeicherGerundet > 0', v > 0, v);
+  if (r3.wwSpeicherRoh?.value != null) {
+    check('wwSpeicherGerundet >= Berechnungswert (Aufrundung)', v >= r3.wwSpeicherRoh.value, v);
+  }
 }
 
 // 8. Block D \u2014 Sperrzeit-Toggle gated Qoff

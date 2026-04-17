@@ -71,13 +71,12 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
         />
       </div>
 
-      <fieldset class="hz-radio-group">
-        <legend>Rundung</legend>
-        <label><input type="radio" name="ww-round" value="5"
-          data-hz-bind="speicher.wwRundungLiter" data-hz-type="number" /> 5-L-Schritte</label>
-        <label><input type="radio" name="ww-round" value="10"
-          data-hz-bind="speicher.wwRundungLiter" data-hz-type="number" /> 10-L-Schritte</label>
-      </fieldset>
+      <!-- Phase 9 / Block J: Marktrealistische Staffelung (siehe reference/SPEICHER-MARKT-CH.md) -->
+      <p class="hz-storage-recommendation hz-muted">
+        Berechnungswert <strong><span data-hz-sum="wwSpeicherRoh">—</span> L</strong>
+        &middot; Empfehlung <strong class="hz-rec-value"><span data-hz-sum="wwSpeicher">—</span> L</strong>
+        <small>(marktübliche Staffelung)</small>
+      </p>
     </div>
 
     <!-- Puffer -->
@@ -130,13 +129,12 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
         </label>
       </div>
 
-      <fieldset class="hz-radio-group">
-        <legend>Rundung</legend>
-        <label><input type="radio" name="puffer-round" value="5"
-          data-hz-bind="speicher.pufferRundungLiter" data-hz-type="number" /> 5-L-Schritte</label>
-        <label><input type="radio" name="puffer-round" value="10"
-          data-hz-bind="speicher.pufferRundungLiter" data-hz-type="number" /> 10-L-Schritte</label>
-      </fieldset>
+      <!-- Phase 9 / Block J: Marktrealistische Staffelung (siehe reference/SPEICHER-MARKT-CH.md) -->
+      <p class="hz-storage-recommendation hz-muted">
+        Berechnungswert <strong><span data-hz-sum="pufferRoh">—</span> L</strong>
+        &middot; Empfehlung <strong class="hz-rec-value"><span data-hz-sum="puffer">—</span> L</strong>
+        <small>(marktübliche Staffelung)</small>
+      </p>
     </div>
   </div>
 
@@ -170,6 +168,17 @@ import { WW_SPEICHER_DEFAULTS } from '../../../lib/heizlast/constants.ts';
     font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);
     margin: 0; font-size: 18px;
   }
+
+  /* Phase 9 / Block J: Empfehlungs-Zeile */
+  .hz-storage-recommendation {
+    margin: 12px 0 0; padding: 10px 12px;
+    border: 1px dashed var(--hz-border); border-radius: var(--hz-radius-md);
+    font-size: 13.5px; line-height: 1.5;
+    background: var(--hz-off-white);
+  }
+  .hz-storage-recommendation strong { color: var(--hz-navy); font-weight: 700; }
+  .hz-storage-recommendation .hz-rec-value { color: var(--hz-red); }
+  .hz-storage-recommendation small { display: block; margin-top: 2px; font-size: 12px; color: var(--hz-mid-gray); }
 
   .hz-radio-group {
     border: 0; padding: 0; margin: 12px 0 0;

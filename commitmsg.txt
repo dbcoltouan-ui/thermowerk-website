@@ -1,13 +1,17 @@
-phase-9-block-i: Save-Block entschlacken, Confirm + beforeunload
+phase-9-block-j: Speicher-Rundung an CH-WP-Marktstaffelung angepasst
 
-- Section7: Cloud-Aktionen in .hz-save-actions__cloud gruppiert und per
-  data-hz-auth-only + body:not(.is-auth) im Nicht-Login-Zustand versteckt
-- Header-Text gekuerzt, Cloud-Saetze raus, "Wie werden Projekte
-  gespeichert?"-InfoBox entfernt
-- "Letzte Cloud-Speicherung: —" aus der Save-Hint-Zeile entfernt
-- "Neues Projekt"-Button: Mistkuebel-Icon weg, Ghost-Style, Confirm-Dialog
-  mit Cloud-Hinweis wenn isDirty + isAuthenticated + optionalem Export
-- beforeunload-Listener: zeigt Browser-Warnung wenn isAuthenticated +
-  isDirty + !syncInFlight
+- reference/SPEICHER-MARKT-CH.md: Recherche-Dokument mit Hersteller-Grid
+  (Hoval, Viessmann, Stiebel Eltron, Domotec, Jenni) + Rundungsempfehlung
+- calculations.ts: rundeSpeicherMarkt(v, 'ww' | 'puffer')
+  - WW: <=200 -> 50er, <=500 -> 100er, <=1000 -> 250er, sonst 500er
+  - Puffer: <=200 -> 50er, <=500 -> 100er, sonst 200er
+  - Immer AUFWAERTS aufgerundet (Auslegung nie zu klein)
+- compute.ts: nutzt rundeSpeicherMarkt, Legacy-Felder wwRundungLiter /
+  pufferRundungLiter bleiben fuer Migration, werden ignoriert
+- Section6Speicher: 5/10-L-Rundungs-Radio-Gruppen entfernt, stattdessen
+  "Berechnungswert X L - Empfehlung Y L" inkl. CSS-Hinweis
+- heizlast.astro renderAll: wwSpeicherRoh + pufferRoh als data-hz-sum
+- test-heizlast-state.ts: WW-Speicher-Test auf Markt-Staffelung
+  umgeschrieben (passende Step-Pruefung pro Groesse + Aufrundungs-Check)
 
-Tests weiterhin 49 + 32 gruen.
+Tests: 49 + 33 gruen (ein zusaetzlicher Aufrundungs-Check).
