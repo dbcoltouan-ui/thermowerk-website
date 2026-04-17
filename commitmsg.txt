@@ -1,7 +1,8 @@
-Phase 9 / Block K: Heizungspuffer — Abtau als CH-Standard
+Phase 9 / Bundle 1 Abschluss: Handoff + CLAUDE.md
 
-- Section6Speicher: Methoden-Select neu geordnet (abtau zuerst, mit
-  "Standard CH"-Marker), Hint-Text mit CH-Empfehlung ergaenzt.
-- Sperrzeit-Option bleibt fuer EVU-gesperrte Anlagen verfuegbar.
-- Default-Methode bleibt "abtau" (unveraendert in state.ts).
-- Tests: 49 + 33 gruen.
+- Neuer Handoff-Brief HANDOFF-PHASE-15.md fuer Bundle 2 (L + M1 + M2 + M)
+  mit Copy-Paste-Prompt, Uebersicht, Akzeptanzkriterien.
+- CLAUDE.md: neue Absaetze "Phase 9 / Block F|G|H|I|J|K abgeschlossen"
+  mit Dateipfaden, Testkurzfassung und Stolpersteinen je Block.
+- Tests 49 + 33 gruen (Block-J-Assert: WW-Speicher auf marktrealistische
+  Staffelung umgestellt).
