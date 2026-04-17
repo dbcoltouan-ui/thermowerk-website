@@ -1,1 +1,1 @@
-test: defender-probe runde 2 entfernt
+docs: CLAUDE.md — verifizierter Commit-Workflow + Windows-Setup-Referenz

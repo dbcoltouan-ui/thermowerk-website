@@ -281,6 +281,58 @@ Remove-Item -Path "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock"
 **Ursache:** Bash Histexpansion greift trotz Single-Quoted Heredoc manchmal.
 **Fix:** Entweder `!` vermeiden oder hinterher `sed -i 's|\\!|!|g' <file>` laufen lassen.
 
+### Problem 5 — „Controlled Folder Access blockiert Löschen im Repo"
+**Symptom:** `del /f /q <file>` im Desktop-Commander-cmd-Aufruf scheitert still (kein Error-Code, aber die Datei bleibt); Windows-Meldung: „Zugriff auf geschützten Ordner blockiert — Blockierte APP: cmd.exe".
+**Ursache:** Der Ordner `C:\Users\Daniel\Documents\thermowerk-website` liegt unter Ransomware-Schutz (Controlled Folder Access). `cmd.exe` ist standardmässig nicht auf der Whitelist — `git.exe` und `node.exe` sind, weshalb `git add`/`commit`/`push` durchlaufen, aber das `del` davor scheitert.
+**Fix (einmalig, ist gemacht):** In Windows-Sicherheit → Ransomware-Schutz → Zulässige Apps: `C:\Windows\System32\cmd.exe` über „Zuletzt blockierte Apps" freigeben. Danach lief der Probe-Commit-Cycle (create → commit → delete → commit) sauber durch.
+**Dauerhafte Konsequenz:** Im Standard-Commit-Flow darf `del` genutzt werden. Falls auf einer anderen Maschine (ohne cmd-Whitelist) gearbeitet wird: auf `powershell -Command "Remove-Item -Force <file>"` ausweichen — powershell.exe ist in der Regel bereits zugelassen.
+
+## Windows-Setup (einmalig gemacht, 2026-04-17)
+> **WICHTIG:** Dieses Setup ist auf Daniels Laptop bereits aktiv. Nicht nochmal durchlaufen. Nur als Referenz für Re-Install oder Zweitrechner.
+
+**Windows Defender — Ausschlüsse (Viren- & Bedrohungsschutz → Einstellungen verwalten → Ausschlüsse):**
+- Ordner: `C:\Users\Daniel\Documents\thermowerk-website`
+- Ordner: `C:\Users\Daniel\AppData\Local\Packages\Claude_pzs8sxrjxfjjc` (MSIX-Container von Cowork)
+- Ordner: `C:\Users\Daniel\AppData\Roaming\Claude` (virtuelle App-Sicht, Cowork schreibt hier intern)
+- Ordner: `C:\Users\Daniel\AppData\Local\Programs\Git`
+- Ordner: `C:\Program Files\nodejs`
+- Prozess: `git.exe`
+- Prozess: `node.exe`
+
+**Controlled Folder Access — Zulässige Apps (Ransomware-Schutz → Zulässige Apps):**
+- `node.exe` (`C:\Program Files\nodejs`)
+- `git.exe` (via Cowork-Package-Pfad)
+- `claude.exe` (via WinGet)
+- `powershell.exe` (`C:\Windows\System32\WindowsPowerShell\v1.0`)
+- `cmd.exe` (`C:\Windows\System32\cmd.exe`)
+
+**PowerShell Execution Policy (einmalig in Admin-PS):**
+```
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+```
+
+**Long-Path-Support (einmalig in Admin-PS):**
+```
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
+Neustart danach erforderlich.
+
+**Cowork als Administrator:** Bei MSIX-Apps (Store-Installation) **nicht möglich** — der Haken „Als Administrator ausführen" ist in den Verknüpfungs-Eigenschaften grau. Ein Start als Admin via Taskleiste startet Cowork in einem separaten Admin-User-Kontext ohne Zugriff auf Daniels Projekte. Daher: Cowork bleibt im normalen User-Kontext.
+
+**Architektur-Hinweis zu MSIX-Cowork:** Cowork liegt unter `C:\Program Files\WindowsApps\Claude_…\app\Claude.exe` und speichert User-Daten physisch in `C:\Users\Daniel\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude`. Der Pfad `C:\Users\Daniel\AppData\Roaming\Claude`, den Cowork intern sieht, ist eine virtuelle App-Sicht und aus dem normalen User-PowerShell heraus nicht auflösbar (`Test-Path` → False). Das ist Windows-Sandbox-Normalverhalten, kein Fehler.
+
+**Verifizierter Commit-Workflow (nicht anders probieren):**
+1. Edits via Edit/Write-Tool (Windows-seitig)
+2. `commitmsg.txt` via Desktop Commander `write_file`
+3. In cmd via Desktop Commander `start_process` (shell: `cmd`):
+   ```
+   cd /d C:\Users\Daniel\Documents\thermowerk-website && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
+   ```
+4. Falls `.git\index.lock` hängt: einmalig Admin-PowerShell `Remove-Item -Path "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue`, dann Schritt 3 retry.
+5. Falls FUSE-Cache stale (nur zu Diagnose-Zwecken nötig): im Linux-Bash `git update-index --refresh`.
+
+Dieser Flow ist mit zwei vollständigen Create→Commit→Delete→Commit-Zyklen am 2026-04-17 verifiziert. Kein anderer Weg ist erlaubt (z.B. kein `git add` via Linux-Bash, kein `del` via PowerShell, kein MSIX-Admin-Start).
+
 ## Bekannte Fallstricke (WICHTIG)
 - **fade-up Animation überschreibt transform**: Alle Hero-Elemente haben die Klasse `fade-up`. Die Regel `.fade-up.visible { transform: translateY(0) }` überschreibt jedes custom `transform` auf Hero-Elementen. Lösung: Spezifischeren Selektor verwenden, z.B. `.hero h1.fade-up.visible { transform: translateY(-9vh); }`. Das gilt auch für Mobile-Breakpoints!
 - **Topbar-Alignment per JS**: Die Topbar-Kontaktinfos werden per JavaScript an der Nav-Position ausgerichtet. Das Script in `index.astro` liest `nav.getBoundingClientRect().left` und setzt `--nav-left` als CSS-Variable. Ebenso wird `--cta-btn-width` für die Social-Icons gemessen. Beide müssen NACH Font-Load gemessen werden (`document.fonts.ready.then()`), sonst stimmen die Werte nicht.
