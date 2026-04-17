@@ -1,11 +1,5 @@
-Phase 9 / Block A: Override-Infrastruktur
+docs: HANDOFF-PHASE-10 Stolpersteine erweitert
 
-- state.ts: overrides-Record + resolveDefault/setOverride/clearOverride/isOverridden + OverrideFieldPath
-- storage.ts: sanfte v1-Migration fuer fehlendes overrides-Feld
-- OverrideField.astro: neu - Wert immer sichtbar/editierbar, Reset-Pfeil nur bei .is-overridden
-- bindings.ts: setOverride bei User-Events (isTrusted), syncOverrideClasses
-- heizlast.astro: window.__hzClearOverride + window.__hzResolveDefault Globals
-
-Tests 49 + 16 grün. Anwendung auf konkrete Felder (tvoll, deltaT, Verluste, toff, WW-Temps) folgt in Block B zusammen mit dem Section-Umbau.
-
-Handoff fuer naechsten Chat: HANDOFF-PHASE-10.md
+- Cowork-Mount-Drift 2: Edits landen nicht im Linux-Mount, git update-index --refresh als Fix
+- index.lock haengt: cmd del klappt nicht, PowerShell Remove-Item schon
+- PowerShell-Pipeline-Fehler mit git.exe dokumentiert (nur Remove-Item in PS, Rest in cmd)
