@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /heizlast
+Disallow: /heizlast/

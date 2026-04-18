@@ -1,8 +1,5 @@
-Archive obsolete Handoff-Dateien nach handoffs-archive/
+Heizlast: noindex/nofollow + robots.txt (Seite aus SEO ausschliessen)
 
-- HANDOFF-HEIZLAST-UI-PORT.md + SESSION2
-- HANDOFF-PHASE-2.md bis HANDOFF-PHASE-17-SPEC.md
-- HANDOFF-HEIZLAST-REDESIGN.md bleibt im Root (Master-Spec)
-
-Phase 10 ist abgeschlossen, diese Dateien sind historisch.
-Keine Code-Aenderung.
+- HeizlastLayout.astro: meta robots noindex/nofollow/noarchive/nosnippet + googlebot-Tag
+- public/robots.txt: Disallow /heizlast + /heizlast/
+- Design + Funktionalitaet unveraendert
