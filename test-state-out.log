@@ -1,0 +1,99 @@
+
+============================================================
+INTEGRATION — FWS-Aufgabe 2 via State + runCascade
+============================================================
+  ✓ Qhl (kW) — FWS Referenzwert 12.55  ist=12.5453  soll=12.5500
+  ✓ Qhl_korr == Qhl_raw (keine Sanierung)  ist=12.5453  soll=12.5453
+  ✓ tvoll effektiv = 2000  ist=2000  soll=2000
+
+============================================================
+INTEGRATION — Sanierung aktiviert reduziert Qhl
+============================================================
+  ✓ Qhl_korr nach 15% Fenster = Qhl * 0.85  ist=10.6635  soll=10.6635
+  ✓ Qhl_raw unveraendert durch Sanierung
+
+============================================================
+INTEGRATION — Qh-Summe konsistent
+============================================================
+  ✓ Qh = Qhl_korr + Qw + Qoff  ist=11.9542  soll=11.9542
+
+============================================================
+PERSISTIERUNG — Serialisierung round-trip
+============================================================
+  ✓ deserializeState ergibt nicht null
+  ✓ version erhalten
+  ✓ EBF erhalten
+  ✓ Sanierung-Flag erhalten
+  ✓ Anzahl Massnahmen erhalten
+
+============================================================
+PERSISTIERUNG — Unbekannte Version wird abgelehnt
+============================================================
+  ✓ deserializeState(version=999) === null
+
+============================================================
+PERSISTIERUNG — SSR-Safety
+============================================================
+  ✓ saveNow/load/clear crashen nicht ohne window
+  ✓ STORAGE_KEY hat Version-Suffix  ist=thermowerk.heizlast.state.v2
+
+============================================================
+INTEGRATION — WW-Speicher folgt CH-WP-Marktstaffelung
+============================================================
+  ✓ wwSpeicherGerundet % 50 === 0  ist=150
+  ✓ wwSpeicherGerundet > 0  ist=150
+  ✓ wwSpeicherGerundet >= Berechnungswert (Aufrundung)  ist=150
+
+============================================================
+INTEGRATION — Sperrzeit-Toggle (Block D)
+============================================================
+  ✓ Qoff == 0 wenn sperrzeitActive=false  ist=0
+  ✓ Qoff > 0 wenn sperrzeitActive=true und toff=2  ist=0.9694082575757567
+  ✓ Qh mit qas=0.75 steigt um 0.75  ist=0.7500  soll=0.7500
+
+============================================================
+INTEGRATION — EBF-Helfer beheizt/unbeheizt + flaecheDirekt (Block E)
+============================================================
+  ✓ sumRaumFlaechenNetto.beheizt === 35  ist=35  soll=35
+  ✓ sumRaumFlaechenNetto.unbeheizt === 10  ist=10  soll=10
+  ✓ sumRaumFlaechenNetto.netto === 35  ist=35  soll=35
+  ✓ sumRaumFlaechen (alias) === 35  ist=35  soll=35
+  ✓ raumFlaeche: flaecheDirekt hat Vorrang vor laenge*breite  ist=9  soll=9
+  ✓ raumFlaeche: leerer Raum -> 0  ist=0  soll=0
+
+============================================================
+PERSISTIERUNG — Migration alter RaumInput (Block E)
+============================================================
+  ✓ Migration: State wird akzeptiert
+  ✓ Migration: r0.beheizt defaultet auf true  ist=true  soll=true
+  ✓ Migration: r0.flaecheDirekt defaultet auf null  ist=null  soll=null
+  ✓ Migration: r0.laenge === 4  ist=4  soll=4
+  ✓ Migration: r1.breite === 4  ist=4  soll=4
+  ✓ Migration: sumRaumFlaechenNetto.unbeheizt === 0  ist=0  soll=0
+  ✓ Migration: sumRaumFlaechenNetto.beheizt === 32  ist=32  soll=32
+
+============================================================
+PERSISTIERUNG — v1 → v2 Migration (Paket B)
+============================================================
+  ✓ v1→v2: State akzeptiert (nicht null)
+  ✓ v1→v2: version === 2  ist=2  soll=2
+  ✓ v1→v2: verbrauch.perioden ist Array
+  ✓ v1→v2: 1 migrierte Periode (aus ba=3500)  ist=1  soll=1
+  ✓ v1→v2: periode.wert === 3500  ist=3500  soll=3500
+  ✓ v1→v2: alle 3 Sanierungen datum=null, zeitpunkt=geplant
+  ✓ v1→v2: Anzahl Sanierungen erhalten (3)  ist=3  soll=3
+  ✓ v1→v2: Qhl_raw nach Migration ≈ 12.55 kW (tol 0.10 wegen Schaltjahr)  ist=12.5051  soll=12.5500
+
+============================================================
+INTEGRATION — § 4 Perioden + vergangene/geplante Sanierung (Ho=10.5)
+============================================================
+  ✓ §4 Qhl_ist (qhlRaw, nach vergangener San., Ho=10.5)  ist=10.0243  soll=10.0240
+  ✓ §4 Qhl_zukunft (qhlKorr, nach geplanter San. -20%)  ist=8.0194  soll=8.0190
+
+============================================================
+ZUSAMMENFASSUNG (Phase 3)
+============================================================
+  Bestanden: 43
+  Fehler:    0
+
+  ✓ Alle Integrations-Tests erfolgreich.

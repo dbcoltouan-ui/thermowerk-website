@@ -1,9 +1,1 @@
-Phase 10 / Paket B: Perioden + Sanierungs-Timeline implementiert
-
-- state.ts: STATE_VERSION 1->2, neue Typen VerbrauchPeriode/MessungPeriode/BstdPeriode/SanierungsZeitpunkt, SanierungsMassnahme um datum+zeitpunkt erweitert, perioden-Arrays in VerbrauchState/MessungState/BstdState, Helper add/remove/update fuer alle drei Perioden-Typen
-- storage.ts: migrateV1toV2() gemaess Spec 5.2 (perioden aus Einzelwerten ableiten, sanierungen bekommen datum=null/zeitpunkt=geplant), bootFromStorage prueft Legacy-v1-Key als Fallback
-- compute.ts: aggregierePerioden(), periodeAufIstZustand(), period-aware qhlVerbrauch/qhlMessung/qhlBstd, computeQhlRaw trennt vergangene/geplante Sanierungen, computeQhlKorr wendet nur geplante an
-- Section2Heizlast.astro: Perioden-Tabellen in Verbrauch/Bstd/Messung-Panels, datum+zeitpunkt-Felder in Sanierungs-Zeilen
-- heizlast.astro: renderVpList/renderBpList/renderMpList + Event-Delegation fuer Perioden, renderAll() ruft alle drei auf, renderSanList() mit datum-Input und zeitpunkt-Select
-- test-heizlast-state.ts: STORAGE_KEY v1->v2 Fix, sanierungMassnahmen um datum/zeitpunkt ergaenzt, neuer v1->v2-Migrationstest (8 Checks), neuer Sec4-Integrationstest 2 Perioden + vergangene/geplante San. Qhl_ist=10.024/Qhl_zukunft=8.019 (Ho=10.5)
-- Tests: 49 + 43 gruen
+Phase 10 / Paket D2: Container schmaler, Feld-Fluchten, Header-Buttons, Notizen-Fix

@@ -50,8 +50,8 @@ const textareaId = `hz-notes-${sectionKey}-text`;
     <span class="hz-notes__indicator" data-hz-notes-indicator hidden aria-hidden="true" title="Notiz ausgefuellt">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        <line x1="12" y1="8" x2="12" y2="13"></line>
+        <line x1="12" y1="16.5" x2="12.01" y2="16.5"></line>
       </svg>
     </span>
   </button>
@@ -107,17 +107,17 @@ const textareaId = `hz-notes-${sectionKey}-text`;
     border-color: var(--hz-navy);
     color: var(--hz-white);
   }
-  /* Phase 9 / Block L: dezenter Fuell-Indikator (kleines Navy-Icon)
-     nur sichtbar, wenn der Text nicht leer ist. Ersetzt den frueheren
-     "ausgefuellt"-Badge. */
+  /* Paket D2 / F: roter Exclamation-Circle-Indikator, sichtbar
+     nur wenn der Text nicht leer ist. */
   .hz-notes__indicator {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 18px;
     height: 18px;
-    color: var(--hz-navy);
+    color: var(--hz-red);
   }
+  .hz-notes__indicator[hidden] { display: none; }
   .hz-notes__content {
     margin-top: 12px;
     padding: 14px 16px;
@@ -174,5 +174,40 @@ const textareaId = `hz-notes-${sectionKey}-text`;
     // Nach dem Rehydrieren aus localStorage (Store-Broadcast) ebenfalls refreshen:
     setTimeout(refresh, 100);
     setTimeout(refresh, 800);
+  })();
+
+  // Paket D2 / F — dedizierter Notizen-Toggle-Handler (Defense-in-Depth).
+  // Der generische Toggle.astro-Handler greift per data-action="toggle-module",
+  // aber Notizen sollen auch öffnen, falls der gemeinsame Handler durch andere
+  // Listener gestört wird. Guard über eigenes Flag verhindert Doppel-Registrierung.
+  (function () {
+    if (window.__hzNotesToggleBound) return;
+    window.__hzNotesToggleBound = true;
+    document.addEventListener('click', function (ev) {
+      var el = ev.target instanceof Element ? ev.target.closest('.hz-notes__btn') : null;
+      if (!el) return;
+      var wrap = el.closest('.hz-notes');
+      if (!wrap) return;
+      var contentId = el.getAttribute('aria-controls');
+      var content = contentId ? document.getElementById(contentId) : wrap.querySelector('.hz-notes__content');
+      if (!content) return;
+      // Den Ziel-Zustand aus dem aktuellen DOM-Status ableiten.
+      var isOpen = wrap.classList.contains('is-open');
+      // Nur umschalten, wenn der generische Handler nicht bereits den Zielzustand gesetzt hat.
+      // Wir erzwingen Synchronisation: Content.hidden entspricht !isOpen.
+      var shouldBeHidden = isOpen ? false : true; // nach dem Click war Handler evtl. schneller
+      // Wenn bereits synchron, nichts zu tun. Falls nicht, erzwingen.
+      if (content.hasAttribute('hidden') === shouldBeHidden) return;
+      // Fallback: erneut togglen, damit der End-Zustand konsistent ist.
+      if (isOpen) {
+        content.removeAttribute('hidden');
+        content.setAttribute('aria-hidden', 'false');
+        el.setAttribute('aria-expanded', 'true');
+      } else {
+        content.setAttribute('hidden', '');
+        content.setAttribute('aria-hidden', 'true');
+        el.setAttribute('aria-expanded', 'false');
+      }
+    });
   })();
 </script>

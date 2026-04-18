@@ -67,8 +67,8 @@ const {
          Container skaliert mit dem Viewport, aber nie über 960 px.
          Das sorgt auf breiten Bildschirmen (1440–1920 px) fuer ruhige
          Raender links/rechts. */
-      --hz-container-max: min(86vw, 860px); /* Paket D / A+I */
-      --hz-gap-section: clamp(56px, 8svh, 88px);
+      --hz-container-max: clamp(640px, 72vw, 880px); /* Paket D2 / A */
+      --hz-gap-section: clamp(48px, 6vw, 72px);
       --hz-gap-row: clamp(16px, 2.2vw, 28px);
       --hz-gap-card: clamp(10px, 1.4vw, 18px);
     }
@@ -157,6 +157,18 @@ const {
        input-with-unit-Wrapper ist inline-flex und begrenzt auf --hz-input-max-unit.
        Mobile: alle Felder full-width via Media-Query. */
     .hz-scope .hz-field { max-width: 100%; }
+    /* Paket D2 / B — einheitliche 40-px-Höhe für alle Inputs/Selects. */
+    .hz-scope .hz-field__input,
+    .hz-scope select.hz-field__input,
+    .hz-scope .hz-field__input-with-unit {
+      min-height: 40px; height: 40px;
+    }
+    .hz-scope textarea.hz-field__input { height: auto; min-height: 80px; }
+    /* Hint direkt unter dem Input nie breiter als der Input selbst. */
+    .hz-scope .hz-field__hint,
+    .hz-scope .hz-ovr__hint { max-width: var(--hz-input-max-number, 240px); }
+    .hz-scope .hz-field[data-size="lg"] .hz-field__hint { max-width: 420px; }
+    .hz-scope .hz-field[data-size="full"] .hz-field__hint { max-width: 100%; }
     .hz-scope .hz-field__input { width: 100%; max-width: var(--hz-input-max-number); }
     .hz-scope select.hz-field__input { max-width: var(--hz-input-max-select); }
     .hz-scope textarea.hz-field__input { max-width: var(--hz-input-max-text); }
@@ -543,6 +555,17 @@ const {
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           <span>Projekte</span>
+        </button>
+        <button
+          type="button"
+          class="hz-btn-icon"
+          id="hz-header-new-project"
+          data-hz-action="new-project"
+          aria-label="Neues Projekt"
+          title="Neues Projekt"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span>Neues Projekt</span>
         </button>
         <button
           type="button"

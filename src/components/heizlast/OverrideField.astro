@@ -61,7 +61,7 @@ const defaultString = String(defaultValue);
     <label for={id} class="hz-ovr__label">{label}</label>
     {source ? <span class="hz-ovr__source">Standard: {source}</span> : null}
   </div>
-  {symbol ? <div class="hz-ovr__symbol">{symbol}</div> : null}
+  {/* Paket D2 / B — Symbol-Zeile entfernt, Standard-Quelle in .hz-ovr__head */}
 
   <div class="hz-ovr__control">
     <input
@@ -126,10 +126,12 @@ const defaultString = String(defaultValue);
     display: grid;
     grid-template-columns: 1fr auto auto;
     align-items: stretch;
+    min-height: 40px;
     border: 1px solid var(--hz-border);
     border-radius: var(--hz-radius-sm);
     background: var(--hz-white);
     transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
+    max-width: var(--hz-input-max-number, 240px);
   }
   .hz-ovr__control:focus-within {
     border-color: var(--hz-navy);

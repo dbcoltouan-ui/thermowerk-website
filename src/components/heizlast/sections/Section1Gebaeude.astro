@@ -66,13 +66,13 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     </div>
   </div>
 
-  <!-- Gebaeudedaten (Paket D / J: Zeile 1 = Typ/Lage/Bauperiode/EBF, Zeile 2 = Profil/tvoll) -->
+  <!-- Gebaeudedaten (Paket D2 / C: 2×2 Raster, Zimmer-Panel auf voller Breite) -->
   <div class="hz-block">
     <h3 class="hz-block__heading">Gebäude &amp; Standort</h3>
 
-    <!-- Zeile 1: 4 Spalten -->
-    <div class="hz-grid-4">
-      <label class="hz-field" data-size="sm">
+    <!-- Zeile 1: Gebäudetyp | Lage -->
+    <div class="hz-grid-2">
+      <label class="hz-field" data-size="md">
         <span class="hz-field__label">Gebäudetyp</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.typ" data-hz-type="string">
           <option value="efh">Einfamilienhaus (EFH)</option>
@@ -80,14 +80,18 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           <option value="buero">Büro / Gewerbe</option>
         </select>
       </label>
-      <label class="hz-field" data-size="sm">
+      <label class="hz-field" data-size="md">
         <span class="hz-field__label">Lage</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.lage" data-hz-type="string">
           <option value="mittelland">Mittelland (≤ 800 m ü. M.)</option>
           <option value="hoehe">Ab 800 m ü. M.</option>
         </select>
       </label>
-      <label class="hz-field" data-size="sm">
+    </div>
+
+    <!-- Zeile 2: Bauperiode | EBF -->
+    <div class="hz-grid-2" style="margin-top: 14px;">
+      <label class="hz-field" data-size="md">
         <span class="hz-field__label">Bauperiode</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.bauperiode" data-hz-type="string">
           {BAUPERIODEN.map((b) => (
@@ -95,61 +99,57 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           ))}
         </select>
       </label>
-
-      <!-- EBF + Zimmer-Helfer -->
-      <div>
-        <label class="hz-field">
-          <span class="hz-field__label">EBF</span>
-          <div class="hz-field__input-with-unit">
-            <input
-              class="hz-field__input"
-              id="hz-ebf-input"
-              type="number"
-              step="1"
-              min="10"
-              data-hz-bind="gebaeude.ebf"
-              data-hz-type="number"
-            />
-            <span class="hz-field__unit">m²</span>
-          </div>
-        </label>
-
-        <!-- Zimmer / Flächen-Helfer (direkt unter EBF) -->
-        <details class="hz-raum-details" id="hz-raum-details">
-          <summary class="hz-raum-summary">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            Zimmer / Flächen
-          </summary>
-
-          <div class="hz-raum-body">
-            <div class="hz-raum-header">
-              <span>Bezeichnung</span>
-              <span>Länge (m)</span>
-              <span>Breite (m)</span>
-              <span>Fläche (m²)</span>
-              <span>Unbeheizt</span>
-              <span></span>
-            </div>
-            <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
-              <p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>
-            </div>
-            <div class="hz-raum-footer">
-              <button type="button" class="hz-btn hz-btn-ghost hz-btn--sm" id="hz-raum-add">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Zimmer hinzufügen
-              </button>
-              <span class="hz-raum-sum-line">
-                <span class="hz-muted">Netto-EBF:</span>
-                <strong id="hz-raum-sum-value">0.0</strong> m²
-                <span class="hz-muted" id="hz-raum-sum-detail"></span>
-              </span>
-            </div>
-          </div>
-        </details>
-      </div>
+      <label class="hz-field" data-size="sm">
+        <span class="hz-field__label">EBF</span>
+        <div class="hz-field__input-with-unit">
+          <input
+            class="hz-field__input"
+            id="hz-ebf-input"
+            type="number"
+            step="1"
+            min="10"
+            data-hz-bind="gebaeude.ebf"
+            data-hz-type="number"
+          />
+          <span class="hz-field__unit">m²</span>
+        </div>
+      </label>
     </div>
 
-    <!-- Zeile 2: Nutzungsprofil + tvoll (max-content Columns) -->
+    <!-- Zimmer / Flächen-Helfer (volle Breite unter EBF) -->
+    <details class="hz-raum-details" id="hz-raum-details" style="margin-top: 14px;">
+      <summary class="hz-raum-summary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Zimmer / Flächen
+      </summary>
+
+      <div class="hz-raum-body">
+        <div class="hz-raum-header">
+          <span>Bezeichnung</span>
+          <span>Länge (m)</span>
+          <span>Breite (m)</span>
+          <span>Fläche (m²)</span>
+          <span>Unbeheizt</span>
+          <span></span>
+        </div>
+        <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
+          <p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>
+        </div>
+        <div class="hz-raum-footer">
+          <button type="button" class="hz-btn hz-btn-ghost hz-btn--sm" id="hz-raum-add">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Zimmer hinzufügen
+          </button>
+          <span class="hz-raum-sum-line">
+            <span class="hz-muted">Netto-EBF:</span>
+            <strong id="hz-raum-sum-value">0.0</strong> m²
+            <span class="hz-muted" id="hz-raum-sum-detail"></span>
+          </span>
+        </div>
+      </div>
+    </details>
+
+    <!-- Zeile 3: Nutzungsprofil + tvoll -->
     <div class="hz-grid-2" style="margin-top: 14px;">
       <label class="hz-field" data-size="md">
         <span class="hz-field__label">Nutzungsprofil (tvoll)</span>
@@ -164,10 +164,9 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
         </select>
       </label>
 
-      <!-- tvoll mit Auto-Default + Override (Phase 9 / Block A + B) -->
+      <!-- tvoll mit Auto-Default + Override (Paket D2 / B: ohne Symbol-Zeile) -->
       <OverrideField
         label="Vollbetriebsstunden tvoll"
-        symbol="h/a"
         id="hz-tvoll"
         bindPath="gebaeude.tvollOverride"
         overridePath="gebaeude.tvoll"
@@ -298,10 +297,12 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
 
   .hz-raum-header, .hz-raum-row {
     display: grid;
-    grid-template-columns: 1.8fr 1fr 1fr 1.1fr 64px 40px;
+    grid-template-columns: 2fr 1fr 1fr 1fr 80px 40px; /* Paket D2 / C */
     gap: 8px;
     align-items: center;
   }
+  /* Paket D2 / C — "Unbeheizt" Header nie umbrechen */
+  .hz-raum-header > span { white-space: nowrap; }
   .hz-raum-header {
     padding: 0 4px 6px;
     font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase;

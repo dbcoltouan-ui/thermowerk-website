@@ -106,14 +106,16 @@ import SectionNotes from './SectionNotes.astro';
     gap: 16px;
   }
   .hz-diag__controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Paket D2 / G — linksbündig, nicht fluid-1fr */
+    gap: 12px 16px;
     padding: 16px 18px;
     background: var(--hz-white);
     border: 1px solid var(--hz-border);
     border-radius: var(--hz-radius-md);
   }
+  .hz-diag__controls .hz-diag__field { min-width: 180px; }
   .hz-diag__field {
     display: flex;
     flex-direction: column;
@@ -157,9 +159,11 @@ import SectionNotes from './SectionNotes.astro';
     position: relative;
     min-height: 320px;
   }
+  /* Paket D2 / G — Canvas-Höhe viewport-fluid */
   #hz-diag-canvas {
     width: 100% !important;
-    max-height: 420px;
+    height: clamp(320px, 45vh, 480px) !important;
+    max-height: clamp(320px, 45vh, 480px);
   }
 
   .hz-diag__meta {

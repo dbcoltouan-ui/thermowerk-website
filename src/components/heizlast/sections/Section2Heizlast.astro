@@ -68,12 +68,14 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN, BAUPERIODEN } from '.
           placeholder="Leer = Default"
           data-hz-bind="heizlast.verbrauch.etaOverride" data-hz-type="number" />
       </label>
-      <label class="hz-field">
+      <div class="hz-field">
         <span class="hz-field__label">WW im Verbrauch enthalten?</span>
-        <div class="hz-switch">
-          <label><input type="checkbox" data-hz-bind="heizlast.verbrauch.inklWW" data-hz-type="boolean" /> <span>Ja, inkl. WW</span></label>
-        </div>
-      </label>
+        <label class="hz-toggle-pill">
+          <input type="checkbox" data-hz-bind="heizlast.verbrauch.inklWW" data-hz-type="boolean" />
+          <span class="hz-toggle-pill__track" aria-hidden="true"></span>
+          <span class="hz-toggle-pill__label">Ja, inkl. WW</span>
+        </label>
+      </div>
       <label class="hz-field">
         <span class="hz-field__label">WW-Tagesverbrauch Vw,u</span>
         <div class="hz-field__input-with-unit">
@@ -277,6 +279,40 @@ import { BRENNWERTE, WIRKUNGSGRADE, SANIERUNGS_MASSNAHMEN, BAUPERIODEN } from '.
 
   .hz-switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--hz-mid-gray); }
   .hz-switch input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--hz-navy); }
+
+  /* Paket D2 / D — iOS-Style Pill-Toggle, 40px Höhe wie Standard-Input */
+  .hz-toggle-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    min-height: 40px; height: 40px;
+    padding: 0 4px;
+    cursor: pointer;
+    font-family: var(--hz-font-body); font-size: 14px; color: var(--hz-dark);
+    user-select: none;
+  }
+  .hz-toggle-pill input[type="checkbox"] {
+    position: absolute; opacity: 0; pointer-events: none;
+  }
+  .hz-toggle-pill__track {
+    position: relative; display: inline-block;
+    width: 44px; height: 24px;
+    background: var(--hz-light-gray, #D6D9DF);
+    border-radius: 999px;
+    transition: background var(--hz-transition);
+    flex: 0 0 auto;
+  }
+  .hz-toggle-pill__track::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--hz-white);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    transition: transform var(--hz-transition);
+  }
+  .hz-toggle-pill input:checked + .hz-toggle-pill__track { background: var(--hz-navy); }
+  .hz-toggle-pill input:checked + .hz-toggle-pill__track::after { transform: translateX(20px); }
+  .hz-toggle-pill input:focus-visible + .hz-toggle-pill__track {
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.25);
+  }
+  .hz-toggle-pill__label { line-height: 1.2; }
 
   /* Sanierung */
   .hz-san__list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
