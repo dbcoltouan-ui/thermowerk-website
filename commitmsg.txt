@@ -1,1 +1,39 @@
-chore: test-state-out.log aus Git entfernen + gitignore
+Phase 10 / Paket D3: Design-Rebuild /heizlast komplett neu
+
+Layout + Primitives visuell erneuert. Keine Logik-Aenderung.
+Alle data-Hooks, IDs und aria-Attribute bleiben erhalten.
+
+- HeizlastLayout.astro:
+  - Container auf min(92vw, 1120px) gewidert
+  - Radien 2px -> 8/12/16px (weiche Linien)
+  - Typografie: H1 34-50px, H2 26-36px mit negativem letter-spacing
+  - Header: backdrop-blur, shadow-header, hover/active-States auf
+    Icon-Buttons mit translateY-Lift
+  - Buttons: Primary/Ghost/Dark mit subtlen Shadow + Lift-Hover
+  - Neue Field-Defaults: Padding, Radien, Focus-Rings harmonisiert
+  - iOS-Switch CSS global (.hz-switch__track) fuer spaetere Nutzung
+  - Feldbreiten: number 168px, select 288px, unit 208px, text-short 280px
+- KpiCard.astro:
+  - Weisser Grund statt off-white, min-height fuer Rhythmus
+  - Hero-Variante: shadow-sm, fluid 36-56px Value
+  - Grid-Gaps auf --hz-gap-card (clamp) umgestellt
+- Toggle.astro:
+  - Open-State: Border navy, Sign rotiert 180 Grad
+  - Radien an neue Tokens angebunden
+  - Inner-Padding grosszuegiger
+- OverrideField.astro:
+  - Einheit und Reset-Button integriert in .hz-ovr__control
+    (overflow: hidden, innen getrennt per Border-Left)
+  - Hover-Border und Focus-Ring harmonisiert
+- InfoBox.astro:
+  - Icon-Circle 30px mit shadow-sm
+  - Open-State: weisser BG, navy-light Border
+  - Content-Padding linksbuendig mit Icon+Text-Start
+- SectionWrapper.astro:
+  - Section-Head bekommt bottom-border + mehr Margin
+  - Subline-Typo auf body-Font, max-width 640px
+- SectionNotes.astro:
+  - Mehr Margin-Top, groesseres Content-Padding
+
+Erwartet: Tests 49 + 33 bleiben gruen (keine TS/Logik-Aenderung).
+Abnahme: Cloudflare-Build + visuelle Pruefung /heizlast.

@@ -97,7 +97,7 @@ const defaultString = String(defaultValue);
 </div>
 
 <style is:global>
-  .hz-ovr { display: flex; flex-direction: column; gap: 6px; }
+  .hz-ovr { display: flex; flex-direction: column; gap: 8px; }
 
   .hz-ovr__head {
     display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
@@ -107,6 +107,7 @@ const defaultString = String(defaultValue);
     font-weight: 600;
     font-size: 14px;
     color: var(--hz-navy);
+    letter-spacing: -0.005em;
   }
   .hz-ovr__source {
     font-size: 12px;
@@ -131,36 +132,40 @@ const defaultString = String(defaultValue);
     border-radius: var(--hz-radius-sm);
     background: var(--hz-white);
     transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
-    max-width: var(--hz-input-max-number, 240px);
+    max-width: var(--hz-input-max-unit, 208px);
+    overflow: hidden;
   }
+  .hz-ovr__control:hover { border-color: var(--hz-border-strong, var(--hz-navy-light)); }
   .hz-ovr__control:focus-within {
     border-color: var(--hz-navy);
-    box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.08);
+    box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.1);
   }
 
   .hz-ovr__input {
     border: 0;
     outline: 0;
-    padding: 10px 14px;
+    padding: 9px 14px;
     background: transparent;
     font-family: var(--hz-font-body);
-    font-size: 15.5px;
+    font-size: 15px;
     color: var(--hz-mid-gray);
     min-width: 0;
     width: 100%;
   }
   /* Default-Zustand (kein Override): Wert dezenter dargestellt */
-  .hz-ovr__input { color: var(--hz-mid-gray); }
+  .hz-ovr__input { color: var(--hz-mid-gray); font-weight: 500; }
   /* Ueberschrieben: voller Text-Kontrast */
   .hz-ovr.is-overridden .hz-ovr__input { color: var(--hz-dark); font-weight: 600; }
 
   .hz-ovr__unit {
     display: inline-flex;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 12px;
     font-family: var(--hz-font-heading);
+    font-weight: 500;
     font-size: 13px;
     color: var(--hz-mid-gray);
+    background: var(--hz-off-white);
     border-left: 1px solid var(--hz-border);
   }
 
@@ -179,12 +184,13 @@ const defaultString = String(defaultValue);
     transition: background var(--hz-transition);
   }
   .hz-ovr.is-overridden .hz-ovr__btn { visibility: visible; }
-  .hz-ovr__btn:hover { background: var(--hz-red-soft); }
+  .hz-ovr.is-overridden .hz-ovr__btn:hover { background: var(--hz-red-soft); }
   .hz-ovr__btn:focus-visible { outline: 2px solid var(--hz-navy); outline-offset: -2px; }
 
-  .hz-ovr__hint { font-size: 12.5px; color: var(--hz-mid-gray); line-height: 1.4; }
+  .hz-ovr__hint { font-size: 13px; color: var(--hz-mid-gray); line-height: 1.5; }
 
   @media (max-width: 480px) {
+    .hz-ovr__control { max-width: 100%; }
     .hz-ovr__btn { width: 44px; }
   }
 </style>

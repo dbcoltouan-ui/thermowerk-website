@@ -42,9 +42,10 @@ const {
       --hz-light-gray: #EEF0F4;
       --hz-mid-gray: #6B7280;
       --hz-dark: #1A1A1A;
-      --hz-border: #E2E5EB;
-      --hz-blue-tint: #E8EDF5;
-      --hz-blue-tint-strong: #D8E0EE;
+      --hz-border: #E4E7EE;
+      --hz-border-strong: #CDD3DE;
+      --hz-blue-tint: #EEF2F8;
+      --hz-blue-tint-strong: #DCE3EF;
       --hz-success: #1F8A4C;
       --hz-warn: #B7791F;
 
@@ -52,25 +53,30 @@ const {
       --hz-font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
       --hz-font-mono: 'DM Sans', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-      --hz-radius-sm: 2px;
-      --hz-radius-md: 2px;
-      --hz-radius-lg: 2px;
+      /* Phase 10 / Paket D3 — weichere Radien für ein moderneres,
+         ruhigeres Erscheinungsbild. Die bisherigen 2 px wirkten
+         zu hart; 8–14 px geben natürlichere Linien ohne "App"-Optik. */
+      --hz-radius-sm: 8px;
+      --hz-radius-md: 12px;
+      --hz-radius-lg: 16px;
 
       --hz-shadow-sm: 0 1px 2px rgba(17, 29, 51, 0.05);
-      --hz-shadow-md: 0 8px 24px rgba(17, 29, 51, 0.08);
-      --hz-shadow-hero: 0 24px 60px rgba(17, 29, 51, 0.18);
+      --hz-shadow-md: 0 10px 28px rgba(17, 29, 51, 0.08);
+      --hz-shadow-hero: 0 30px 70px rgba(17, 29, 51, 0.14);
+      --hz-shadow-header: 0 1px 0 rgba(17, 29, 51, 0.04), 0 6px 18px rgba(17, 29, 51, 0.04);
 
       --hz-transition: 180ms ease;
-      --hz-header-height: 72px;
+      --hz-header-height: 76px;
 
-      /* Phase 9 / Block M1 — fluide Container-Breite und Abstände.
-         Container skaliert mit dem Viewport, aber nie über 960 px.
-         Das sorgt auf breiten Bildschirmen (1440–1920 px) fuer ruhige
-         Raender links/rechts. */
-      --hz-container-max: clamp(640px, 72vw, 880px); /* Paket D2 / A */
-      --hz-gap-section: clamp(48px, 6vw, 72px);
+      /* Phase 10 / Paket D3 — großzügigerer Content-Korridor.
+         Auf breiten Bildschirmen bis 1120 px Inhaltsbreite,
+         auf schmaleren Displays respekt­volles Abfallen über
+         92 vw. Gibt dem Rechner sichtbare Ränder ohne zu eng
+         zu wirken. */
+      --hz-container-max: min(92vw, 1120px);
+      --hz-gap-section: clamp(56px, 7vw, 96px);
       --hz-gap-row: clamp(16px, 2.2vw, 28px);
-      --hz-gap-card: clamp(10px, 1.4vw, 18px);
+      --hz-gap-card: clamp(12px, 1.4vw, 20px);
     }
 
     /* Reset, nur fuer den Heizlast-Scope aktiv */
@@ -103,11 +109,11 @@ const {
       line-height: 1.2;
       font-weight: 700;
     }
-    .hz-scope h1 { font-size: clamp(32px, 4.4vw, 46px); letter-spacing: -0.01em; }
-    .hz-scope h2 { font-size: clamp(24px, 3vw, 34px); letter-spacing: -0.005em; }
-    .hz-scope h3 { font-size: clamp(18px, 2vw, 22px); font-weight: 600; }
+    .hz-scope h1 { font-size: clamp(34px, 4.6vw, 50px); letter-spacing: -0.015em; font-weight: 700; }
+    .hz-scope h2 { font-size: clamp(26px, 3.2vw, 36px); letter-spacing: -0.012em; font-weight: 700; }
+    .hz-scope h3 { font-size: clamp(18px, 2vw, 22px); font-weight: 600; letter-spacing: -0.005em; }
     .hz-scope h4 { font-size: 17px; font-weight: 600; }
-    .hz-scope p  { font-size: 16px; line-height: 1.65; color: var(--hz-dark); }
+    .hz-scope p  { font-size: 16px; line-height: 1.7; color: var(--hz-dark); }
 
     /* Utility */
     .hz-container { max-width: var(--hz-container-max); margin: 0 auto; padding: 0 clamp(16px, 3vw, 24px); width: 100%; }
@@ -144,11 +150,15 @@ const {
        breit werden. Ueber `[data-size]` laesst sich jede Zelle fein-
        justieren. Mobile-Default bleibt full-width via Phase-8-Regel. */
     :root {
-      /* Paket D / K — engere Feldbreiten, Text-Token neu */
-      --hz-input-max-number: 220px;
-      --hz-input-max-select: 280px;
-      --hz-input-max-unit: 200px;
+      /* Phase 10 / Paket D3 — intrinsische, ruhige Feldbreiten.
+         Zahlen schmal (Betrag allein braucht keine Fläche), Zahl-mit-
+         Einheit etwas breiter (Einheit erhält Platz innerhalb der Box),
+         Selects breiter (Labels variieren), Text großzügig. */
+      --hz-input-max-number: 168px;
+      --hz-input-max-select: 288px;
+      --hz-input-max-unit: 208px;
       --hz-input-max-text: 520px;
+      --hz-input-max-text-short: 280px;
     }
     /* Paket D / K — Globale Eingabe-Breiten-Governance.
        Alle Inputs sind standardmässig auf --hz-input-max-number begrenzt.
@@ -236,37 +246,59 @@ const {
     .hz-btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       font-family: var(--hz-font-heading); font-weight: 600; font-size: 15px;
-      padding: 10px 20px; border-radius: var(--hz-radius-sm); border: 2px solid transparent;
+      padding: 11px 22px; border-radius: var(--hz-radius-sm); border: 1.5px solid transparent;
       transition: all var(--hz-transition); line-height: 1; white-space: nowrap;
     }
-    .hz-btn-primary { background: var(--hz-red); color: var(--hz-white); border-color: var(--hz-red); }
-    .hz-btn-primary:hover { background: #B71C1C; border-color: #B71C1C; }
-    .hz-btn-ghost { background: transparent; color: var(--hz-navy); border-color: var(--hz-border); }
-    .hz-btn-ghost:hover { border-color: var(--hz-navy); background: var(--hz-off-white); }
+    .hz-btn-primary {
+      background: var(--hz-red); color: var(--hz-white); border-color: var(--hz-red);
+      box-shadow: 0 1px 2px rgba(217, 48, 37, 0.2);
+    }
+    .hz-btn-primary:hover {
+      background: #B71C1C; border-color: #B71C1C;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(217, 48, 37, 0.28);
+    }
+    .hz-btn-primary:active { transform: translateY(0); }
+    .hz-btn-ghost { background: var(--hz-white); color: var(--hz-navy); border-color: var(--hz-border); }
+    .hz-btn-ghost:hover {
+      border-color: var(--hz-navy); background: var(--hz-off-white);
+      transform: translateY(-1px);
+      box-shadow: var(--hz-shadow-sm);
+    }
+    .hz-btn-ghost:active { transform: translateY(0); }
     .hz-btn-dark { background: var(--hz-navy); color: var(--hz-white); border-color: var(--hz-navy); }
-    .hz-btn-dark:hover { background: var(--hz-navy-light); border-color: var(--hz-navy-light); }
+    .hz-btn-dark:hover {
+      background: var(--hz-navy-light); border-color: var(--hz-navy-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(27, 42, 74, 0.22);
+    }
+    .hz-btn-dark:active { transform: translateY(0); }
+    .hz-btn:focus-visible { outline: 2px solid var(--hz-navy); outline-offset: 2px; }
 
     /* Header */
     .hz-topbar {
       position: sticky; top: 0; z-index: 40;
       min-height: var(--hz-header-height);
-      background: var(--hz-white);
+      background: rgba(255, 255, 255, 0.88);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      backdrop-filter: saturate(180%) blur(14px);
       border-bottom: 1px solid var(--hz-border);
+      box-shadow: var(--hz-shadow-header);
       display: flex; align-items: center;
     }
     .hz-topbar__inner {
-      display: grid;
-      grid-template-columns: auto auto;
+      display: flex;
       align-items: center;
-      gap: clamp(12px, 2vw, 20px);
+      justify-content: space-between;
+      gap: clamp(14px, 2vw, 24px);
       width: 100%; max-width: var(--hz-container-max); margin: 0 auto;
-      padding: 10px clamp(16px, 3vw, 24px); /* D: gleiche Innenabstaende wie .hz-container */
+      padding: 12px clamp(16px, 3vw, 24px);
     }
     .hz-brand {
       display: inline-flex; align-items: center; gap: 10px;
       flex: 0 0 auto;
     }
-    .hz-brand__logo { height: 30px; width: auto; object-fit: contain; } /* C */
+    .hz-brand__logo { height: 34px; width: auto; object-fit: contain; }
 
     /* Header-Projekt-Info (Mitte) */
     .hz-topbar__project {
@@ -290,26 +322,42 @@ const {
 
     /* Header-Aktionen (rechts) */
     .hz-topbar__actions {
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
       flex: 0 0 auto;
     }
     .hz-topbar__actions .hz-btn-icon {
       display: inline-flex; align-items: center; gap: 8px;
       font-family: var(--hz-font-heading); font-weight: 600; font-size: 14px;
-      padding: 8px 14px;
+      padding: 9px 14px;
       border-radius: var(--hz-radius-sm);
       border: 1px solid var(--hz-border); background: var(--hz-white); color: var(--hz-navy);
       transition: all var(--hz-transition); white-space: nowrap; line-height: 1;
     }
-    .hz-topbar__actions .hz-btn-icon:hover { border-color: var(--hz-navy); background: var(--hz-off-white); }
+    .hz-topbar__actions .hz-btn-icon:hover {
+      border-color: var(--hz-navy); background: var(--hz-off-white);
+      transform: translateY(-1px);
+      box-shadow: var(--hz-shadow-sm);
+    }
+    .hz-topbar__actions .hz-btn-icon:active { transform: translateY(0); }
+    .hz-topbar__actions .hz-btn-icon:focus-visible {
+      outline: 2px solid var(--hz-navy); outline-offset: 2px;
+    }
     .hz-topbar__actions .hz-btn-icon:disabled {
       opacity: 0.45; cursor: not-allowed; border-color: var(--hz-border); background: var(--hz-white);
+      transform: none; box-shadow: none;
     }
     .hz-topbar__actions .hz-btn-icon--primary {
       background: var(--hz-red); border-color: var(--hz-red); color: var(--hz-white);
+      box-shadow: 0 1px 2px rgba(217, 48, 37, 0.25);
     }
-    .hz-topbar__actions .hz-btn-icon--primary:hover:not(:disabled) { background: #B71C1C; border-color: #B71C1C; }
-    .hz-topbar__actions .hz-btn-icon--primary:disabled { background: var(--hz-light-gray); border-color: var(--hz-light-gray); color: var(--hz-mid-gray); }
+    .hz-topbar__actions .hz-btn-icon--primary:hover:not(:disabled) {
+      background: #B71C1C; border-color: #B71C1C;
+      box-shadow: 0 4px 12px rgba(217, 48, 37, 0.3);
+    }
+    .hz-topbar__actions .hz-btn-icon--primary:disabled {
+      background: var(--hz-light-gray); border-color: var(--hz-light-gray); color: var(--hz-mid-gray);
+      box-shadow: none;
+    }
     .hz-topbar__actions svg { flex: 0 0 auto; }
 
     /* Footer */
@@ -329,6 +377,127 @@ const {
 
     /* Main */
     .hz-main { flex: 1 1 auto; }
+
+    /* Phase 10 / Paket D3 — iOS-Style Toggle-Switch.
+       Wiederverwendbar: Wrapper `.hz-switch` umschließt ein sr-only-
+       Checkbox und einen sichtbaren Track. Beschriftung folgt rechts.
+       Aktiv = navy, inaktiv = mid-gray. Sauberes Keyboard-Focus-Ring. */
+    .hz-switch {
+      display: inline-flex; align-items: center; gap: 12px;
+      cursor: pointer; user-select: none;
+      line-height: 1.3;
+    }
+    .hz-switch__input {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+    .hz-switch__track {
+      position: relative;
+      flex: 0 0 auto;
+      width: 44px; height: 26px;
+      background: #CFD4DE;
+      border-radius: 999px;
+      transition: background var(--hz-transition), box-shadow var(--hz-transition);
+    }
+    .hz-switch__track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: var(--hz-white);
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+      transition: transform var(--hz-transition), background var(--hz-transition);
+    }
+    .hz-switch__input:checked + .hz-switch__track { background: var(--hz-navy); }
+    .hz-switch__input:checked + .hz-switch__track::after { transform: translateX(18px); }
+    .hz-switch__input:focus-visible + .hz-switch__track {
+      box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.18);
+    }
+    .hz-switch__input:disabled + .hz-switch__track {
+      opacity: 0.5; cursor: not-allowed;
+    }
+    .hz-switch__label {
+      font-family: var(--hz-font-heading);
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--hz-navy);
+    }
+    .hz-switch__label small {
+      display: block;
+      font-family: var(--hz-font-body);
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--hz-mid-gray);
+      margin-top: 2px;
+    }
+
+    /* Global Field-Label Polish (wird von Sections genutzt). */
+    .hz-scope .hz-field__label {
+      display: block;
+      font-family: var(--hz-font-heading);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--hz-navy);
+      margin-bottom: 6px;
+      letter-spacing: -0.005em;
+    }
+    .hz-scope .hz-field__input,
+    .hz-scope select.hz-field__input {
+      padding: 9px 14px;
+      border: 1px solid var(--hz-border);
+      border-radius: var(--hz-radius-sm);
+      background: var(--hz-white);
+      color: var(--hz-dark);
+      font-family: var(--hz-font-body);
+      font-size: 15px;
+      transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
+    }
+    .hz-scope .hz-field__input:hover,
+    .hz-scope select.hz-field__input:hover { border-color: var(--hz-border-strong, var(--hz-navy-light)); }
+    .hz-scope .hz-field__input:focus,
+    .hz-scope select.hz-field__input:focus {
+      outline: 0;
+      border-color: var(--hz-navy);
+      box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.1);
+    }
+    .hz-scope .hz-field__input::placeholder { color: #9AA0AC; }
+    .hz-scope .hz-field__hint {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--hz-mid-gray);
+    }
+    .hz-scope .hz-field__input-with-unit {
+      align-items: stretch;
+      border: 1px solid var(--hz-border);
+      border-radius: var(--hz-radius-sm);
+      background: var(--hz-white);
+      transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
+      overflow: hidden;
+    }
+    .hz-scope .hz-field__input-with-unit:focus-within {
+      border-color: var(--hz-navy);
+      box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.1);
+    }
+    .hz-scope .hz-field__input-with-unit > input {
+      border: 0; background: transparent; padding: 9px 12px;
+      font-family: var(--hz-font-body); font-size: 15px; color: var(--hz-dark);
+      outline: 0;
+    }
+    .hz-scope .hz-field__input-with-unit > .hz-field__unit,
+    .hz-scope .hz-field__input-with-unit > .hz-unit {
+      display: inline-flex; align-items: center;
+      padding: 0 12px;
+      font-family: var(--hz-font-heading);
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--hz-mid-gray);
+      border-left: 1px solid var(--hz-border);
+      background: var(--hz-off-white);
+      white-space: nowrap;
+    }
 
     /* Responsive — globale Regeln */
     @media (max-width: 640px) {

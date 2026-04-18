@@ -66,15 +66,16 @@ const { title, subtitle, open = false, icon = 'info' } = Astro.props;
     overflow: hidden;
     transition: border-color var(--hz-transition), box-shadow var(--hz-transition);
   }
-  .hz-info + .hz-info { margin-top: 12px; }
+  .hz-info + .hz-info { margin-top: 14px; }
+  .hz-info:hover { border-color: var(--hz-navy-light); }
 
   .hz-info__summary {
     list-style: none;
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
+    gap: 14px;
+    padding: 16px 18px;
     cursor: pointer;
     user-select: none;
   }
@@ -90,11 +91,12 @@ const { title, subtitle, open = false, icon = 'info' } = Astro.props;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
     background: var(--hz-white);
     border: 1px solid var(--hz-blue-tint-strong);
     border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(17, 29, 51, 0.04);
   }
   .hz-info__labels { display: flex; flex-direction: column; min-width: 0; }
   .hz-info__title {
@@ -103,11 +105,12 @@ const { title, subtitle, open = false, icon = 'info' } = Astro.props;
     color: var(--hz-navy);
     font-size: 15.5px;
     line-height: 1.3;
+    letter-spacing: -0.005em;
   }
   .hz-info__subtitle {
     font-size: 13px;
     color: var(--hz-mid-gray);
-    margin-top: 2px;
+    margin-top: 3px;
   }
   .hz-info__chevron {
     color: var(--hz-mid-gray);
@@ -120,12 +123,13 @@ const { title, subtitle, open = false, icon = 'info' } = Astro.props;
   }
   .hz-info[open] {
     border-color: var(--hz-navy-light);
+    background: var(--hz-white);
   }
 
   .hz-info__content {
-    padding: 4px 16px 18px 54px;
+    padding: 6px 20px 20px 64px;
     font-size: 15px;
-    line-height: 1.65;
+    line-height: 1.7;
     color: var(--hz-dark);
   }
   .hz-info__content p { margin-bottom: 10px; }

@@ -20,6 +20,9 @@ interface Props {
 }
 
 const { label, caption, id, open = false, variant = 'default' } = Astro.props;
+// Phase 10 / Paket D3 — Toggle-Primitiv bleibt strukturell identisch
+// (alle Hooks, aria-controls, data-action) — nur CSS wird ruhiger
+// und fließender gestaltet.
 ---
 <div class={`hz-toggle${open ? ' is-open' : ''}`} data-toggle>
   <button
@@ -63,8 +66,8 @@ const { label, caption, id, open = false, variant = 'default' } = Astro.props;
     align-items: center;
     gap: 10px;
     max-width: 100%;
-    padding: 8px 16px 8px 10px;
-    border-radius: 2px;
+    padding: 9px 18px 9px 10px;
+    border-radius: var(--hz-radius-sm);
     background: var(--hz-white);
     border: 1px solid var(--hz-border);
     color: var(--hz-navy);
@@ -77,46 +80,56 @@ const { label, caption, id, open = false, variant = 'default' } = Astro.props;
   .hz-toggle__btn:hover {
     border-color: var(--hz-navy);
     background: var(--hz-off-white);
+    box-shadow: var(--hz-shadow-sm);
   }
   .hz-toggle__btn:focus-visible {
     outline: 2px solid var(--hz-navy);
     outline-offset: 2px;
   }
+  .hz-toggle.is-open .hz-toggle__btn {
+    border-color: var(--hz-navy);
+    background: var(--hz-off-white);
+  }
   .hz-toggle__btn--ghost {
     background: transparent;
     border-color: transparent;
     padding-left: 4px;
+    box-shadow: none;
   }
   .hz-toggle__btn--ghost:hover {
     background: var(--hz-off-white);
     border-color: var(--hz-border);
+    box-shadow: none;
   }
 
   .hz-toggle__sign {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 999px;
     background: var(--hz-blue-tint);
     color: var(--hz-navy);
-    transition: background var(--hz-transition), color var(--hz-transition);
+    transition: background var(--hz-transition), color var(--hz-transition), transform var(--hz-transition);
   }
   .hz-toggle__sign-minus { display: none; }
-  .hz-toggle.is-open .hz-toggle__sign { background: var(--hz-navy); color: var(--hz-white); }
+  .hz-toggle.is-open .hz-toggle__sign {
+    background: var(--hz-navy); color: var(--hz-white);
+    transform: rotate(180deg);
+  }
   .hz-toggle.is-open .hz-toggle__sign-plus { display: none; }
   .hz-toggle.is-open .hz-toggle__sign-minus { display: inline-flex; }
 
-  .hz-toggle__label { line-height: 1; }
+  .hz-toggle__label { line-height: 1.15; }
   .hz-toggle__caption {
     font-weight: 500;
     font-size: 12.5px;
     color: var(--hz-mid-gray);
-    padding-left: 6px;
-    margin-left: 2px;
+    padding-left: 8px;
+    margin-left: 4px;
     border-left: 1px solid var(--hz-border);
-    line-height: 1.2;
+    line-height: 1.25;
   }
 
   .hz-toggle__content {
@@ -127,11 +140,11 @@ const { label, caption, id, open = false, variant = 'default' } = Astro.props;
   .hz-toggle__content[aria-hidden="false"] { opacity: 1; }
 
   .hz-toggle__inner {
-    margin-top: 14px;
-    padding: 18px 20px;
+    margin-top: 16px;
+    padding: 20px 22px;
     background: var(--hz-off-white);
     border: 1px solid var(--hz-border);
-    border-radius: 2px;
+    border-radius: var(--hz-radius-md);
   }
 
   @media (max-width: 640px) {
@@ -150,7 +163,7 @@ const { label, caption, id, open = false, variant = 'default' } = Astro.props;
       margin-top: 2px;
       font-size: 12px;
     }
-    .hz-toggle__inner { padding: 14px 16px; }
+    .hz-toggle__inner { padding: 16px 18px; }
   }
 </style>
 

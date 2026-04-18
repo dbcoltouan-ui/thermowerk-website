@@ -53,28 +53,34 @@ const {
 
 <style is:global>
   .hz-section {
-    padding: var(--hz-gap-section, clamp(48px, 6vw, 72px)) 0;
+    padding: var(--hz-gap-section, clamp(56px, 7vw, 96px)) 0;
     background: var(--hz-white);
     border-top: 1px solid var(--hz-border);
   }
-  .hz-section--first { border-top: 0; padding-top: clamp(40px, 6svh, 64px); }
+  .hz-section--first {
+    border-top: 0;
+    padding-top: clamp(48px, 7svh, 80px);
+  }
   .hz-section--off { background: var(--hz-off-white); }
 
   .hz-section__head {
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
-    margin-bottom: clamp(24px, 4svh, 36px);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 32px;
+    margin-bottom: clamp(28px, 4.5svh, 44px);
+    padding-bottom: clamp(12px, 2svh, 18px);
+    border-bottom: 1px solid var(--hz-border);
   }
-  .hz-section__heading { max-width: 720px; }
+  .hz-section__heading { max-width: 760px; }
   .hz-section__title {
-    margin-top: 8px;
+    margin-top: 10px;
   }
   .hz-section__subline {
-    margin-top: 10px;
-    font-family: var(--hz-font-heading);
-    font-weight: 500;
-    font-size: clamp(16px, 1.8vw, 19px);
+    margin-top: 12px;
+    font-family: var(--hz-font-body);
+    font-weight: 400;
+    font-size: clamp(16px, 1.6vw, 18px);
     color: var(--hz-mid-gray);
-    line-height: 1.5;
+    line-height: 1.6;
+    max-width: 640px;
   }
   .hz-section__aside {
     flex-shrink: 0;
@@ -82,7 +88,11 @@ const {
   .hz-section__body { }
 
   @media (max-width: 720px) {
-    .hz-section__head { flex-direction: column; }
+    .hz-section__head {
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 14px;
+    }
     .hz-section__aside { width: 100%; }
   }
 </style>

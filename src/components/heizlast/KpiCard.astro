@@ -55,21 +55,26 @@ const Tag = href ? 'a' : 'div';
   .hz-kpi {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 16px 18px;
+    gap: 6px;
+    padding: 18px 20px;
+    min-height: 104px;
     border-radius: var(--hz-radius-md);
     border: 1px solid var(--hz-border);
-    background: var(--hz-off-white);
+    background: var(--hz-white);
     transition: border-color var(--hz-transition), box-shadow var(--hz-transition), transform var(--hz-transition);
   }
   .hz-kpi--link { cursor: pointer; text-decoration: none; }
-  .hz-kpi--link:hover { border-color: var(--hz-navy-light); box-shadow: var(--hz-shadow-sm); }
+  .hz-kpi--link:hover {
+    border-color: var(--hz-navy-light);
+    box-shadow: var(--hz-shadow-md);
+    transform: translateY(-1px);
+  }
 
   .hz-kpi__label {
     font-family: var(--hz-font-heading);
     font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--hz-mid-gray);
   }
@@ -78,14 +83,14 @@ const Tag = href ? 'a' : 'div';
     align-items: baseline;
     gap: 6px;
     color: var(--hz-navy);
+    margin-top: auto;
   }
   .hz-kpi__value {
     font-family: var(--hz-font-heading);
     font-weight: 700;
-    /* Phase 9 / Block M1 — fluide KPI-Zahl */
-    font-size: clamp(24px, 2.2vw, 30px);
+    font-size: clamp(26px, 2.4vw, 32px);
     line-height: 1.05;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
   .hz-kpi__unit {
     font-family: var(--hz-font-heading);
@@ -103,25 +108,28 @@ const Tag = href ? 'a' : 'div';
   .hz-kpi__delta--negative { color: var(--hz-red); }
   .hz-kpi__delta--neutral  { color: var(--hz-mid-gray); }
   .hz-kpi__caption {
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--hz-mid-gray);
     margin-top: 2px;
+    line-height: 1.45;
   }
 
   /* Hero-Variante — fuer Executive Summary */
   .hz-kpi--hero {
-    padding: clamp(22px, 3vw, 30px);
+    padding: clamp(24px, 3vw, 32px);
+    min-height: 148px;
     background: var(--hz-white);
     border: 1px solid var(--hz-border);
     border-top: 3px solid var(--hz-red);
-    border-radius: 2px;
+    border-radius: var(--hz-radius-md);
+    box-shadow: var(--hz-shadow-sm);
   }
   .hz-kpi--hero .hz-kpi__label {
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--hz-red);
   }
   .hz-kpi--hero .hz-kpi__value {
-    font-size: clamp(34px, 4.8vw, 52px);
+    font-size: clamp(36px, 5vw, 56px);
     color: var(--hz-navy);
   }
   .hz-kpi--hero .hz-kpi__unit {
@@ -135,19 +143,19 @@ const Tag = href ? 'a' : 'div';
   /* Grid-Utility fuer Kachel-Gruppen */
   .hz-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--hz-gap-card, 16px);
   }
   .hz-kpi-grid--hero {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--hz-gap-card, 20px);
   }
   @media (max-width: 520px) {
     .hz-kpi-grid,
     .hz-kpi-grid--hero { grid-template-columns: 1fr; }
-    .hz-kpi { padding: 14px 16px; }
-    .hz-kpi__value { font-size: 24px; }
-    .hz-kpi--hero { padding: 20px; }
-    .hz-kpi--hero .hz-kpi__value { font-size: 30px; }
+    .hz-kpi { padding: 16px 18px; min-height: 0; }
+    .hz-kpi__value { font-size: 26px; }
+    .hz-kpi--hero { padding: 22px; min-height: 0; }
+    .hz-kpi--hero .hz-kpi__value { font-size: 32px; }
   }
 </style>
