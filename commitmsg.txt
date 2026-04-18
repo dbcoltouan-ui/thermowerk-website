@@ -1,32 +1,30 @@
-Phase 10 Block 2: Sections 2-6 + Diagramm + PrintCover + Modals (Port)
+Phase 10 Block 3: Cutover auf v2-Komponenten-Suite
 
-- src/components/heizlast-v2/sections/Section2Heizlast.astro: vier Methoden
-  (verbrauch/messung/bstd/override) als <details name="heizlast-method">,
-  plus Sanierungs-Addon und Plausi-Quercheck.
-- src/components/heizlast-v2/sections/Section3Warmwasser.astro: Gate
-  warmwasser.active, Radio-Segment (personen|direkt|messung), drei Panes,
-  Verluste-Grid mit vier OverrideFields (deltaT, speicher, zirk, ausstoss).
-- src/components/heizlast-v2/sections/Section4Zuschlaege.astro: Sperrzeit-Gate
-  mit toff-OverrideField + Qas-Block mit Pool/Lueftung separat.
-- src/components/heizlast-v2/sections/Section5Speicher.astro: WW-Gate (wwActive)
-  + Puffer-Gate (pufferActive), jeweils mit Recommend-Zeile fuer roh + gerundet.
-- src/components/heizlast-v2/sections/Section5aDiagramm.astro: Chart.js-
-  Leistungsdiagramm (4 Datasets: Gebaeude/WP/Auslegung/Bivalenz), Stuetzpunkte
-  editierbar, Reset-Button, meta-Zeile mit Live-Werten.
-- src/components/heizlast-v2/sections/Section6Projekt.astro: Summary-Grid
-  mit data-hz-sum-Slots, Hero-Ergebnis (Qh), vier Save-Actions inkl.
-  data-hz-auth-only, Status-Pill, Projekt-Notiz.
-- src/components/heizlast-v2/PrintCover.astro: Deckblatt fuer PDF-Export
-  mit data-print-slot-Bindings.
-- src/components/heizlast-v2/LoginModal.astro: Passwort-Dialog, zwei Ansichten
-  (signin/signout) mit modal-backdrop aus Mockup-CSS.
-- src/components/heizlast-v2/ProjectsModal.astro: wide-Variante, Toolbar +
-  vier Zustaende (loading/empty/error/list), Liste per Glue-JS gefuellt.
-- src/components/heizlast-v2/ExportModal.astro: Dateiname + Inhalt-Checkboxen
-  (8 parts) + Format-Radio (pdf|json).
+- src/pages/heizlast.astro: komplett neu geschrieben (~700 Zeilen).
+  Imports jetzt aus src/components/heizlast-v2/ und
+  ../layouts/HeizlastLayout.astro. Inline topbar mit brand +
+  project-tag + login-trigger. Mount-Order: PrintCover -> topbar ->
+  Section 1-4 -> Section5aDiagramm -> Section5Speicher ->
+  Section6Projekt -> 3 Modale. Glue-JS an v2-Selektoren angepasst:
+  Zimmer als .z-table tbody mit 7 Spalten (col-num|col-area|col-chk|
+  col-act), Sanierung als .measure-row, Perioden als .period
+  .period-{verbrauch|messung|bstd}. Methodenwahl ueber nativen
+  <details name="heizlast-method"> Exclusive-Accordion (toggle-Event
+  -> methodsEnabled Record). Gate-/Addon-Sync via
+  requestAnimationFrame. WW-Panes per data-active="true" Attribut.
+  Notes-Dot toggelt .has-content. Focus-Trap auf .modal,
+  Login-Form #f-login-pw, Export-Form #f-export-name +
+  name="part-*" + name="export-fmt". beforeunload erhalten.
+- src/layouts/HeizlastLayoutV2.astro -> HeizlastLayout.astro
+  (alte v1-Datei geloescht, dann via move /y umbenannt).
+  Print-CSS Zeile 1278: #sektion-diagramm -> #sektion-5a.
+- src/components/heizlast/ komplett geloescht (v1-Suite):
+  Section1Gebaeude..Section7Projekt, ExecutiveSummary, InfoBox,
+  KpiCard, Toggle, SectionNotes, LeistungsDiagramm, LoginModal,
+  ProjectsModal, ExportModal, PrintCover, OverrideField,
+  SectionWrapper.
 
-Alle Komponenten nutzen die Mockup-CSS-Klassen aus HeizlastLayoutV2.astro
-(.section, .gate, .method, .field, .btn, .diag, .summary, .result-hero,
-.save-actions, .print-cover, .modal-backdrop, .modal, .projects-list,
-.project-card, .status-badge, .export-fieldset). lib/heizlast/* bleibt
-unveraendert. Tests weiterhin gruen (49 + 33).
+Tests weiterhin gruen: 49 Rechenkern + 43 State-Integration.
+FWS-Aufgabe 2: Qhl = 12.5453 kW (Referenz 12.55, Tol 0.02).
+
+Damit ist Phase 10 (kompletter v2-Port, drei Bloecke) abgeschlossen.
