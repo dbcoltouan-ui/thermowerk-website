@@ -1,6 +1,6 @@
-Favicon: SVG-Logo in beiden Layouts + PNG-Fallback
+Heizlast-Header: echter Thermowerk-Logo statt Mockup-Platzhalter
 
-- HeizlastLayout.astro: kaputter /img/favicon.png Verweis ersetzt durch
-  logo-thermowerk.svg + logo.png als alternate
-- Layout.astro: Favicon-Links ergaenzt (vorher keiner gesetzt)
-- Browser-Tab zeigt jetzt auf allen Seiten das Thermowerk-Logo
+- heizlast.astro: brand__mark (schwarzer Kreis + roter Punkt) + "THERMOWERK"-Text
+  ersetzt durch <img src="/img/logo.png" alt="Thermowerk">
+- HeizlastLayout.astro: neue Regel .brand__logo (height 36px, auto width, max 200px)
+  Legacy-Selektoren .brand__mark/.brand__name auf display:none
