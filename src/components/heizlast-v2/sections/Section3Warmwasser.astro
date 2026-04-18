@@ -1,0 +1,167 @@
+---
+// Section 3 v2 — Warmwasser
+// Port aus Mockup (Zeilen ~2259–2479).
+// Gate steuert warmwasser.active; darin Radio-Segment fuer warmwasser.method,
+// drei Panes (personen|direkt|messung) und Verluste-Grid.
+
+import SectionWrapper from '../SectionWrapper.astro';
+import Gate from '../Gate.astro';
+import Notes from '../Notes.astro';
+import OverrideField from '../OverrideField.astro';
+---
+<SectionWrapper
+  anchor="sektion-3"
+  title="Warmwasser"
+  intro="Liefert die Wärmepumpe auch das Warmwasser? Wenn ja, wird der Tagesbedarf in den Auslegungswert <strong>Q<sub>h</sub></strong> einberechnet. Die Rechnung wählt zwischen <strong>Personen-Modell</strong>, <strong>direkter Eingabe</strong> (Liter/Tag) oder <strong>Zählermessung</strong>."
+>
+
+  <Gate
+    id="gate-ww"
+    bindPath="warmwasser.active"
+    title="Warmwasseraufbereitung über die Wärmepumpe"
+    meta={'Q<sub>w</sub> = <span data-kpi="qw">–</span> kW'}
+    openDefault={true}
+  >
+    {/* Methode waehlen */}
+    <div class="field">
+      <label class="field__label">Rechenmodell</label>
+      <div class="seg" role="tablist" data-hz-ww-method-seg>
+        <label class="seg__option">
+          <input type="radio" name="ww-method" value="personen" data-hz-bind="warmwasser.method" data-hz-type="string" />
+          <span>Personen-Modell</span>
+        </label>
+        <label class="seg__option">
+          <input type="radio" name="ww-method" value="direkt" data-hz-bind="warmwasser.method" data-hz-type="string" />
+          <span>Direkte Eingabe</span>
+        </label>
+        <label class="seg__option">
+          <input type="radio" name="ww-method" value="messung" data-hz-bind="warmwasser.method" data-hz-type="string" />
+          <span>Zählermessung</span>
+        </label>
+      </div>
+    </div>
+
+    {/* Panes */}
+    <div class="panes">
+
+      {/* Personen-Modell */}
+      <div class="pane" data-hz-ww-pane="personen">
+        <div class="grid grid--2">
+          <div class="field">
+            <label class="field__label" for="f-ww-personen-anf">Personen-Anforderung (A<sub>nf</sub>)</label>
+            <div class="input-group">
+              <input class="input" id="f-ww-personen-anf" type="number" data-hz-bind="warmwasser.personen.0.anf" data-hz-type="number" />
+              <span class="input-group__unit">Wh / (L·Tag)</span>
+            </div>
+            <p class="field__hint">
+              Typisch 120 Wh / (L·Tag) fuer Haushalte (SIA 385/2).
+            </p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f-ww-personen-vwui">Tagesbedarf pro Person (V<sub>wui</sub>)</label>
+            <div class="input-group">
+              <input class="input" id="f-ww-personen-vwui" type="number" data-hz-bind="warmwasser.personen.0.vwui" data-hz-type="number" />
+              <span class="input-group__unit">L / (Person·Tag)</span>
+            </div>
+            <p class="field__hint">
+              Tagesbedarf pro Person bei 40 °C (Richtwert: 40 L · SIA 385/2).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Direkte Eingabe */}
+      <div class="pane" data-hz-ww-pane="direkt">
+        <div class="grid grid--2">
+          <div class="field">
+            <label class="field__label" for="f-ww-direkt-vwu">Warmwasser-Menge pro Tag</label>
+            <div class="input-group">
+              <input class="input" id="f-ww-direkt-vwu" type="number" placeholder="z. B. 160" data-hz-bind="warmwasser.direkt.vwuPerTag" data-hz-type="number" />
+              <span class="input-group__unit">L / Tag</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label">Zapftemperatur</label>
+            <div class="input-group">
+              <input class="input" type="number" value="40" disabled />
+              <span class="input-group__unit">°C</span>
+            </div>
+            <p class="field__hint">Feste Referenz-Zapftemperatur 40 °C.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messung */}
+      <div class="pane" data-hz-ww-pane="messung">
+        <div class="grid grid--2">
+          <div class="field">
+            <label class="field__label" for="f-ww-mess-tag">Tagesbedarf gemessen</label>
+            <div class="input-group">
+              <input class="input" id="f-ww-mess-tag" type="number" placeholder="z. B. 8.5" step="0.1" data-hz-bind="warmwasser.messung.qwwTagKWh" data-hz-type="number" />
+              <span class="input-group__unit">kWh / Tag</span>
+            </div>
+            <p class="field__hint">Gemessener Warmwasser-Energiebedarf in kWh pro Tag.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {/* Delta-T + Verluste */}
+    <div class="field">
+      <label class="field__label">Temperatur &amp; Verluste</label>
+      <div class="grid grid--3">
+        <OverrideField
+          id="f-ww-deltaT"
+          label="ΔT Kaltwasser → Warmwasser"
+          chip="Standard · 45 K"
+          unit="K"
+          bindPath="warmwasser.deltaTOverride"
+          overridePath="warmwasser.deltaT"
+          hint="ΔT zwischen Kaltwasser-Zulauf und Zapftemperatur. Physik-Default: 45 K."
+        />
+        <OverrideField
+          id="f-ww-sp"
+          label="Speicherverluste"
+          chip="Standard · 10 %"
+          unit="%"
+          bindPath="warmwasser.speicherProzent"
+          overridePath="warmwasser.speicher"
+          hint="Typisch 5 – 15 % · Quelle FWS § 8"
+        />
+        <OverrideField
+          id="f-ww-zi"
+          label="Zirkulationsverluste"
+          chip="Standard · 0 %"
+          unit="%"
+          bindPath="warmwasser.zirkProzent"
+          overridePath="warmwasser.zirk"
+          hint="0 – 20 % · nur bei Zirkulationsleitung"
+        />
+        <OverrideField
+          id="f-ww-au"
+          label="Ausstossverluste"
+          chip="Standard · 15 %"
+          unit="%"
+          bindPath="warmwasser.ausstossProzent"
+          overridePath="warmwasser.ausstoss"
+          hint="10 – 20 % · Rohrleitungsnetz"
+        />
+      </div>
+    </div>
+
+    {/* Ergebnis */}
+    <div class="inline-result">
+      <span>Warmwasser-Leistung <span class="symbol">Q<sub>w</sub></span></span>
+      <span><span class="inline-result__value" data-kpi="qw">–</span><span class="inline-result__unit">kW</span></span>
+    </div>
+
+  </Gate>
+
+  <Notes
+    sectionKey="sektion3"
+    label="Notiz zu Warmwasser"
+    placeholder="Freitext zu Warmwasser-Annahmen, Bewohnerprofil, Messbasis."
+  />
+
+</SectionWrapper>

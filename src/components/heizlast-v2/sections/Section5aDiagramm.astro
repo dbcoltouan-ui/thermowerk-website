@@ -1,0 +1,403 @@
+---
+// Section 5a v2 — Leistungsdiagramm
+// Port aus Mockup (Zeilen ~2722-2860) + existierende Chart.js-Logik aus v1.
+// Datasets: Gebaeude-Heizkennlinie (rot), WP-Kennlinie (navy), Auslegungspunkt (rot),
+// Bivalenzpunkt (gruen). Controls: Modell-Variante, thetaGT, thetaNe, Reset.
+// Stuetzpunkte editierbar per <details>.
+
+import SectionWrapper from '../SectionWrapper.astro';
+import Notes from '../Notes.astro';
+---
+<SectionWrapper
+  anchor="sektion-5a"
+  title="Leistungsdiagramm"
+  intro="Gegenüberstellung von <strong>Gebäude-Heizkennlinie</strong> (rot) und <strong>Wärmepumpen-Kennlinie</strong> (navy) über die Aussentemperatur. Der <strong>Bivalenzpunkt</strong> markiert, ab welcher Aussentemperatur die Wärmepumpe alleine genügend Leistung liefert."
+>
+  <div class="diag">
+
+    <div class="diag__controls">
+      <div class="field">
+        <label class="field__label" for="f-wp-model">Wärmepumpen-Modell</label>
+        <select class="select" id="f-wp-model">
+          <option value="klein">klein — ≈ 6 kW bei A2 / W35</option>
+          <option value="mittel" selected>mittel — ≈ 9 kW bei A2 / W35</option>
+          <option value="gross">gross — ≈ 12 kW bei A2 / W35</option>
+          <option value="custom">Eigene Werte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label">Heizgrenze θ<sub>GT</sub></label>
+        <div class="input-group">
+          <input class="input" id="f-theta-gt" type="number" step="0.5" min="0" max="20" value="15" />
+          <span class="input-group__unit">°C</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label">Normtemperatur θ<sub>ne</sub></label>
+        <div class="input-group">
+          <input class="input" id="f-theta-ne" type="number" step="0.5" min="-25" max="0" value="-8" />
+          <span class="input-group__unit">°C</span>
+        </div>
+      </div>
+      <button class="btn btn--ghost" type="button" id="hz-diag-reset">Reset</button>
+    </div>
+
+    <div class="diag__canvas-wrap">
+      <canvas id="hz-diag-canvas" aria-label="Heizkennlinien-Diagramm" role="img"></canvas>
+    </div>
+
+    <div class="diag__legend">
+      <span class="diag__legend-item"><span class="diag__legend-swatch" style="background: #c8372d;"></span> Gebäude-Heizkennlinie</span>
+      <span class="diag__legend-item"><span class="diag__legend-swatch" style="background: #1B2A4A;"></span> WP-Kennlinie bei W35</span>
+      <span class="diag__legend-item"><span class="diag__legend-swatch diag__legend-swatch--dot" style="background: #c8372d;"></span> Auslegungspunkt</span>
+      <span class="diag__legend-item"><span class="diag__legend-swatch diag__legend-swatch--dot" style="background: #4CA366;"></span> Bivalenzpunkt</span>
+    </div>
+
+    <div class="diag__meta" id="hz-diag-meta">
+      <div class="diag__meta-item" data-diag-cell="qhl">
+        <span class="diag__meta-label">Q<sub>hl</sub> bei θ<sub>ne</sub></span>
+        <span class="diag__meta-value"><span data-diag-value>–</span><span class="diag__meta-unit">kW</span></span>
+      </div>
+      <div class="diag__meta-item" data-diag-cell="qh">
+        <span class="diag__meta-label">Q<sub>h</sub> (Auslegung)</span>
+        <span class="diag__meta-value"><span data-diag-value>–</span><span class="diag__meta-unit">kW</span></span>
+      </div>
+      <div class="diag__meta-item" data-diag-cell="biv">
+        <span class="diag__meta-label">Bivalenzpunkt</span>
+        <span class="diag__meta-value"><span data-diag-value>–</span><span class="diag__meta-unit">°C</span></span>
+      </div>
+    </div>
+
+    <details class="addon" style="margin-top: var(--s-5);">
+      <summary class="addon__head">
+        <svg class="addon__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+        <span class="addon__title">Stützpunkte anpassen</span>
+      </summary>
+      <div class="addon__body">
+        <p class="section__intro" style="margin-top: 0;">
+          Werte aus Hersteller-Datenblatt (A-Wert = Lufttemperatur, Leistung in kW bei Vorlauf 35 °C).
+          Bei manueller Änderung schaltet die Variante automatisch auf „Eigene Werte".
+        </p>
+        <div class="grid" id="hz-diag-points" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px 14px;">
+          <!-- wird per JS befuellt -->
+        </div>
+      </div>
+    </details>
+
+  </div>
+
+  <Notes
+    sectionKey="sektion5"
+    label="Notiz zum Leistungsdiagramm"
+    placeholder="Gewähltes Modell, Abweichung vom Auslegungspunkt, Hinweise für die Offerte."
+  />
+
+</SectionWrapper>
+
+<script>
+  // ============================================================
+  // Leistungsdiagramm — Chart.js Binding (v2, Mockup-CSS)
+  // ============================================================
+  import { Chart, registerables } from 'chart.js';
+  import { heizlastState } from '../../../lib/heizlast/state.ts';
+  import { heizlastCompute } from '../../../lib/heizlast/compute.ts';
+
+  Chart.register(...registerables);
+
+  type Point = { theta: number; kw: number };
+  const MODELS: Record<string, Point[]> = {
+    klein: [
+      { theta: -15, kw: 3.6 },
+      { theta: -7, kw: 4.8 },
+      { theta: 2, kw: 5.9 },
+      { theta: 7, kw: 7.0 },
+      { theta: 12, kw: 7.8 },
+    ],
+    mittel: [
+      { theta: -15, kw: 5.4 },
+      { theta: -7, kw: 7.2 },
+      { theta: 2, kw: 9.0 },
+      { theta: 7, kw: 10.5 },
+      { theta: 12, kw: 11.7 },
+    ],
+    gross: [
+      { theta: -15, kw: 7.2 },
+      { theta: -7, kw: 9.6 },
+      { theta: 2, kw: 12.0 },
+      { theta: 7, kw: 14.0 },
+      { theta: 12, kw: 15.6 },
+    ],
+  };
+
+  let currentModel: keyof typeof MODELS | 'custom' = 'mittel';
+  let currentPoints: Point[] = MODELS.mittel.map((p) => ({ ...p }));
+  let chart: Chart | null = null;
+
+  const canvas = document.getElementById('hz-diag-canvas') as HTMLCanvasElement | null;
+  const modelSelect = document.getElementById('f-wp-model') as HTMLSelectElement | null;
+  const tgtInput = document.getElementById('f-theta-gt') as HTMLInputElement | null;
+  const tneInput = document.getElementById('f-theta-ne') as HTMLInputElement | null;
+  const resetBtn = document.getElementById('hz-diag-reset') as HTMLButtonElement | null;
+  const pointsEl = document.getElementById('hz-diag-points') as HTMLElement | null;
+  const metaEl = document.getElementById('hz-diag-meta') as HTMLElement | null;
+
+  if (canvas) {
+    initChart();
+    renderPointsForm();
+    wireEvents();
+    heizlastCompute.subscribe(() => updateChart());
+    heizlastState.subscribe(() => updateChart());
+  }
+
+  function fmt(n: number | null | undefined, d = 2): string {
+    if (n == null || !isFinite(n)) return '–';
+    return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function getTgt(): number { return Number(tgtInput?.value ?? 15) || 15; }
+  function getTne(): number { return Number(tneInput?.value ?? -8) || -8; }
+
+  function wpAt(theta: number, pts: Point[]): number {
+    const sorted = [...pts].sort((a, b) => a.theta - b.theta);
+    if (sorted.length === 0) return 0;
+    if (theta <= sorted[0].theta) {
+      const a = sorted[0], b = sorted[1] ?? sorted[0];
+      if (b.theta === a.theta) return a.kw;
+      return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+    }
+    if (theta >= sorted[sorted.length - 1].theta) {
+      const b = sorted[sorted.length - 1], a = sorted[sorted.length - 2] ?? b;
+      if (b.theta === a.theta) return b.kw;
+      return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+    }
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const a = sorted[i], b = sorted[i + 1];
+      if (theta >= a.theta && theta <= b.theta) {
+        if (b.theta === a.theta) return a.kw;
+        return a.kw + ((b.kw - a.kw) / (b.theta - a.theta)) * (theta - a.theta);
+      }
+    }
+    return 0;
+  }
+
+  function buildingAt(theta: number, qhl: number, tne: number, tgt: number): number {
+    if (tgt === tne) return qhl;
+    const slope = qhl / (tne - tgt);
+    return Math.max(0, slope * (theta - tgt));
+  }
+
+  function bivalenzpunkt(qhl: number, tne: number, tgt: number, pts: Point[]): { theta: number; kw: number } | null {
+    if (!qhl || qhl <= 0) return null;
+    const f = (theta: number) => buildingAt(theta, qhl, tne, tgt) - wpAt(theta, pts);
+    let lo = tne, hi = tgt;
+    let flo = f(lo), fhi = f(hi);
+    if (flo === 0) return { theta: lo, kw: buildingAt(lo, qhl, tne, tgt) };
+    if (fhi === 0) return { theta: hi, kw: buildingAt(hi, qhl, tne, tgt) };
+    if (flo * fhi > 0) return null;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      const fmid = f(mid);
+      if (Math.abs(fmid) < 1e-4) return { theta: mid, kw: buildingAt(mid, qhl, tne, tgt) };
+      if (flo * fmid < 0) { hi = mid; fhi = fmid; }
+      else { lo = mid; flo = fmid; }
+    }
+    const mid = (lo + hi) / 2;
+    return { theta: mid, kw: buildingAt(mid, qhl, tne, tgt) };
+  }
+
+  function initChart() {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Gebaeude-Heizkennlinie',
+            borderColor: '#c8372d',
+            backgroundColor: 'rgba(200, 55, 45, 0.08)',
+            borderWidth: 2.5,
+            pointRadius: 0,
+            tension: 0,
+            data: [],
+          },
+          {
+            label: 'WP-Kennlinie (bei W35)',
+            borderColor: '#1B2A4A',
+            backgroundColor: 'rgba(27, 42, 74, 0.08)',
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointBackgroundColor: '#1B2A4A',
+            tension: 0.25,
+            data: [],
+          },
+          {
+            label: 'Auslegungspunkt',
+            borderColor: '#c8372d',
+            backgroundColor: '#c8372d',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointStyle: 'rectRot',
+            showLine: false,
+            data: [],
+          },
+          {
+            label: 'Bivalenzpunkt',
+            borderColor: '#4CA366',
+            backgroundColor: '#4CA366',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointStyle: 'circle',
+            showLine: false,
+            data: [],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 2,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1B2A4A',
+            titleFont: { family: 'Inter, sans-serif', weight: 600 },
+            bodyFont: { family: 'Inter, sans-serif' },
+            padding: 10,
+            callbacks: {
+              label: (ctx) => {
+                const p = ctx.parsed as { x: number; y: number };
+                return `${ctx.dataset.label}: ${p.y.toFixed(2)} kW bei ${p.x.toFixed(1)} °C`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Aussentemperatur θ (°C)', font: { family: 'Inter, sans-serif', size: 12, weight: 600 }, color: '#1B2A4A' },
+            grid: { color: 'rgba(27, 42, 74, 0.06)' },
+            ticks: { color: '#6B7280', font: { family: 'Inter, sans-serif' } },
+          },
+          y: {
+            title: { display: true, text: 'Leistung (kW)', font: { family: 'Inter, sans-serif', size: 12, weight: 600 }, color: '#1B2A4A' },
+            grid: { color: 'rgba(27, 42, 74, 0.06)' },
+            ticks: { color: '#6B7280', font: { family: 'Inter, sans-serif' } },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+    updateChart();
+  }
+
+  function renderPointsForm() {
+    if (!pointsEl) return;
+    pointsEl.innerHTML = currentPoints.map((p, idx) => `
+      <div class="field" data-diag-idx="${idx}">
+        <label class="field__label">Stützpunkt ${idx + 1}</label>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="input-group">
+            <input class="input" type="number" step="0.5" data-diag-field="theta" value="${p.theta}" />
+            <span class="input-group__unit">°C</span>
+          </div>
+          <div class="input-group">
+            <input class="input" type="number" step="0.1" min="0" data-diag-field="kw" value="${p.kw}" />
+            <span class="input-group__unit">kW</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateChart() {
+    if (!chart) return;
+    const compute = heizlastCompute.get();
+    const qhl = compute.qhlKorr?.value ?? null;
+    const qh = compute.qh?.value ?? null;
+
+    const tgt = getTgt();
+    const tne = getTne();
+    const xMin = Math.min(tne - 2, -15);
+    const xMax = Math.max(tgt + 3, 15);
+
+    const gebaeude = qhl != null ? [{ x: tne, y: qhl }, { x: tgt, y: 0 }] : [];
+    const wp = [...currentPoints].sort((a, b) => a.theta - b.theta).map((p) => ({ x: p.theta, y: p.kw }));
+    const auslegung = qh != null ? [{ x: tne, y: qh }] : [];
+    const biv = qhl != null ? bivalenzpunkt(qhl, tne, tgt, currentPoints) : null;
+    const bivData = biv ? [{ x: biv.theta, y: biv.kw }] : [];
+
+    chart.data.datasets[0].data = gebaeude as any;
+    chart.data.datasets[1].data = wp as any;
+    chart.data.datasets[2].data = auslegung as any;
+    chart.data.datasets[3].data = bivData as any;
+
+    (chart.options.scales as any).x.min = xMin;
+    (chart.options.scales as any).x.max = xMax;
+
+    chart.update('none');
+
+    if (metaEl) {
+      const cellQhl = metaEl.querySelector('[data-diag-cell="qhl"] [data-diag-value]');
+      const cellQh = metaEl.querySelector('[data-diag-cell="qh"] [data-diag-value]');
+      const cellBiv = metaEl.querySelector('[data-diag-cell="biv"] [data-diag-value]');
+      const cellBivUnit = metaEl.querySelector('[data-diag-cell="biv"] .diag__meta-unit');
+      if (cellQhl) cellQhl.textContent = qhl != null ? fmt(qhl) : '–';
+      if (cellQh) cellQh.textContent = qh != null ? fmt(qh) : '–';
+      if (cellBiv) cellBiv.textContent = biv ? fmt(biv.theta, 1) : '–';
+      if (cellBivUnit) cellBivUnit.textContent = biv ? `°C · ${fmt(biv.kw)} kW` : '°C';
+    }
+  }
+
+  function wireEvents() {
+    if (modelSelect) {
+      modelSelect.addEventListener('change', () => {
+        const val = modelSelect.value as keyof typeof MODELS | 'custom';
+        if (val === 'custom') {
+          currentModel = 'custom';
+        } else if (val in MODELS) {
+          currentModel = val;
+          currentPoints = MODELS[val].map((p) => ({ ...p }));
+          renderPointsForm();
+        }
+        updateChart();
+      });
+    }
+    if (tgtInput) tgtInput.addEventListener('input', () => updateChart());
+    if (tneInput) tneInput.addEventListener('input', () => updateChart());
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        currentModel = 'mittel';
+        currentPoints = MODELS.mittel.map((p) => ({ ...p }));
+        if (modelSelect) modelSelect.value = 'mittel';
+        if (tgtInput) tgtInput.value = '15';
+        if (tneInput) tneInput.value = '-8';
+        renderPointsForm();
+        updateChart();
+      });
+    }
+    if (pointsEl) {
+      pointsEl.addEventListener('input', (ev) => {
+        const t = ev.target as HTMLElement;
+        if (!t || typeof t.closest !== 'function') return;
+        const row = t.closest('[data-diag-idx]') as HTMLElement | null;
+        if (!row) return;
+        const idxRaw = row.getAttribute('data-diag-idx');
+        const field = t.getAttribute('data-diag-field');
+        if (idxRaw == null || !field) return;
+        const idx = Number(idxRaw);
+        const val = Number((t as HTMLInputElement).value);
+        if (!currentPoints[idx]) return;
+        if (field === 'theta') currentPoints[idx].theta = isFinite(val) ? val : currentPoints[idx].theta;
+        else if (field === 'kw') currentPoints[idx].kw = isFinite(val) && val >= 0 ? val : currentPoints[idx].kw;
+        currentModel = 'custom';
+        if (modelSelect && modelSelect.value !== 'custom') modelSelect.value = 'custom';
+        updateChart();
+      });
+    }
+  }
+</script>

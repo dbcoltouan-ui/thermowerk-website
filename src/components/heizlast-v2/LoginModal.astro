@@ -1,0 +1,100 @@
+---
+// LoginModal v2 — Passwort-Dialog (Cloud-Zugang).
+// Port aus Mockup (Zeilen ~3076-3100).
+// Zwei Ansichten: data-hz-login-view="signin|signout".
+---
+<div
+  class="modal-backdrop"
+  id="hz-login-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="hz-login-modal-title"
+  hidden
+>
+  <div class="modal" data-hz-modal-stop>
+    <div class="modal__head">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="8.5" cy="7" r="4"/>
+        <polyline points="17 11 19 13 23 9"/>
+      </svg>
+      <span class="modal__title" id="hz-login-modal-title">Anmelden</span>
+      <button class="modal__close" type="button" data-hz-modal-dismiss aria-label="Schliessen">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {/* Signin-Ansicht */}
+    <div class="modal__body" data-hz-login-view="signin">
+      <p class="section__intro" style="margin-top: 0;">
+        Anmelden, um Projekte in der Cloud zu speichern und auf mehreren Geräten
+        zu nutzen. Lokale Projekte bleiben auch ohne Login erhalten.
+      </p>
+      <form id="hz-login-form" autocomplete="off">
+        <div class="field">
+          <label class="field__label" for="f-login-pw">Projekt-Passwort</label>
+          <input class="input" id="f-login-pw" type="password" placeholder="••••••••" autocomplete="current-password" required />
+          <p class="field__hint">Gemeinsames Passwort für alle Cloud-Projekte der Thermowerk.</p>
+        </div>
+        <div class="modal__error" id="hz-login-error" hidden aria-live="polite"></div>
+      </form>
+    </div>
+
+    {/* Signout-Ansicht */}
+    <div class="modal__body" data-hz-login-view="signout" hidden>
+      <p class="section__intro" style="margin-top: 0;">
+        Sie sind angemeldet. Cloud-Projekte können gespeichert, geladen und
+        gelöscht werden. Beim Abmelden wird der Auth-Cookie gelöscht; lokal
+        gespeicherte Eingaben bleiben erhalten.
+      </p>
+      <div class="modal__error" id="hz-logout-error" hidden aria-live="polite"></div>
+    </div>
+
+    <div class="modal__foot">
+      <button class="btn btn--ghost" type="button" data-hz-modal-dismiss>Abbrechen</button>
+      <button class="btn btn--primary" type="button" id="hz-login-submit" data-hz-login-view="signin">Anmelden</button>
+      <button class="btn btn--danger-ghost" type="button" id="hz-logout-submit" data-hz-login-view="signout" hidden>Abmelden</button>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  /* Modal-Backdrop (global fuer alle Modals) */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 26, 51, 0.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: hz-modal-fade 160ms ease-out;
+  }
+  .modal-backdrop[hidden] { display: none !important; }
+
+  @keyframes hz-modal-fade {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  /* Die .modal, .modal__head, .modal__close, .modal__body, .modal__foot
+     Klassen sind bereits in HeizlastLayoutV2.astro definiert. */
+
+  /* Modal-Error-Block */
+  .modal__error {
+    margin-top: 10px;
+    background: var(--accent-tint);
+    color: var(--accent-ink);
+    border: 1px solid #f0c8c2;
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    font-size: 13.5px;
+  }
+
+  body.hz-modal-open { overflow: hidden; }
+</style>

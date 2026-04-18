@@ -1,0 +1,112 @@
+---
+// Section 5 v2 — Speicher
+// Port aus Mockup (Zeilen ~2601–2719).
+// Zwei Gates: WW-Speicher (speicher.wwActive) + Puffer (speicher.pufferActive).
+// "Recommend"-Zeile zeigt Roh-Wert + marktueblich gerundeten Wert.
+
+import SectionWrapper from '../SectionWrapper.astro';
+import Gate from '../Gate.astro';
+import Notes from '../Notes.astro';
+import OverrideField from '../OverrideField.astro';
+---
+<SectionWrapper
+  anchor="sektion-5"
+  title="Speicher"
+  intro="Dimensionierung des Warmwasser-Speichers und — falls vorhanden — des Heizungspuffers. Der Rechenwert wird jeweils auf die <strong>marktübliche Staffelung</strong> aufgerundet, damit die Auslegung nie zu klein ist."
+>
+
+  {/* WW-Speicher */}
+  <Gate
+    id="gate-wwspeicher"
+    bindPath="speicher.wwActive"
+    title="Warmwasser-Speicher auslegen"
+    meta={'≈ <span data-kpi="wwSpeicher">–</span> L'}
+    openDefault={true}
+  >
+    <div class="grid grid--2">
+      <OverrideField
+        label="Speicher-Solltemperatur (Austritt)"
+        chip="Standard · 60 °C"
+        unit="°C"
+        bindPath="speicher.wwTStoAus"
+        overridePath="speicher.wwTAustritt"
+        hint="Legionellen-Hygiene: mind. 55 °C. Standard FWS: 60 °C."
+      />
+      <OverrideField
+        label="Kaltwasser-Eintrittstemperatur"
+        chip="Standard · 10 °C"
+        unit="°C"
+        bindPath="speicher.wwTStoEinOverride"
+        overridePath="speicher.wwTEintritt"
+        hint="Referenzwert Kaltwasser: 10 °C."
+      />
+    </div>
+
+    <div class="recommend">
+      <span class="recommend__label">
+        Berechnungswert <strong class="recommend__raw" data-hz-sum="wwSpeicherRoh">–</strong>
+      </span>
+      <span>
+        Empfehlung
+        <span class="recommend__rec">
+          <span data-hz-sum="wwSpeicher">–</span><span class="recommend__rec-unit">L — marktübliche Staffelung</span>
+        </span>
+      </span>
+    </div>
+  </Gate>
+
+  {/* Puffer */}
+  <Gate
+    id="gate-puffer"
+    bindPath="speicher.pufferActive"
+    title="Heizungspuffer einbauen"
+    meta={'≈ <span data-kpi="puffer">–</span> L'}
+    openDefault={true}
+  >
+    <div class="grid grid--2">
+      <div class="field">
+        <label class="field__label" for="f-puf-method">Auslegungsmethode</label>
+        <select class="select" id="f-puf-method" data-hz-bind="speicher.pufferMethod" data-hz-type="string">
+          <option value="abtau">Abtau — Standard CH</option>
+          <option value="sperrzeit">Sperrzeit-Reserve (EVU-gesperrt)</option>
+          <option value="takt">Takt-Vermeidung</option>
+          <option value="err">Fehler-Überbrückung</option>
+        </select>
+        <p class="field__hint">
+          In CH am häufigsten: <strong>Abtau</strong> (Luft-Wasser-WP).
+          Für EVU-gesperrte Anlagen <strong>Sperrzeit-Reserve</strong>.
+        </p>
+      </div>
+      <div class="field">
+        <label class="field__label">
+          Temperaturspreizung
+          <span class="chip">Standard · 5 K</span>
+        </label>
+        <div class="input-group">
+          <input class="input" type="number" step="1" data-hz-bind="speicher.pufferDeltaT" data-hz-type="number" />
+          <span class="input-group__unit">K</span>
+        </div>
+        <p class="field__hint">ΔT zwischen Vor- und Rücklauf während Abtau / Sperrzeit.</p>
+      </div>
+    </div>
+
+    <div class="recommend">
+      <span class="recommend__label">
+        Berechnungswert <strong class="recommend__raw" data-hz-sum="pufferRoh">–</strong>
+      </span>
+      <span>
+        Empfehlung
+        <span class="recommend__rec">
+          <span data-hz-sum="puffer">–</span><span class="recommend__rec-unit">L — marktübliche Staffelung</span>
+        </span>
+      </span>
+    </div>
+  </Gate>
+
+  <Notes
+    sectionKey="sektion5"
+    label="Notiz zu Speicher"
+    placeholder="Hersteller-Präferenz, Raum-Situation im Technikraum, bereits vorhandene Komponenten."
+  />
+
+</SectionWrapper>
