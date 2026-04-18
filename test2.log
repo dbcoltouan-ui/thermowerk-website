@@ -35,7 +35,7 @@ PERSISTIERUNG — Unbekannte Version wird abgelehnt
 PERSISTIERUNG — SSR-Safety
 ============================================================
   ✓ saveNow/load/clear crashen nicht ohne window
-  ✓ STORAGE_KEY hat Version-Suffix  ist=thermowerk.heizlast.state.v1
+  ✓ STORAGE_KEY hat Version-Suffix  ist=thermowerk.heizlast.state.v2
 
 ============================================================
 INTEGRATION — WW-Speicher folgt CH-WP-Marktstaffelung
@@ -73,9 +73,27 @@ PERSISTIERUNG — Migration alter RaumInput (Block E)
   ✓ Migration: sumRaumFlaechenNetto.beheizt === 32  ist=32  soll=32
 
 ============================================================
+PERSISTIERUNG — v1 → v2 Migration (Paket B)
+============================================================
+  ✓ v1→v2: State akzeptiert (nicht null)
+  ✓ v1→v2: version === 2  ist=2  soll=2
+  ✓ v1→v2: verbrauch.perioden ist Array
+  ✓ v1→v2: 1 migrierte Periode (aus ba=3500)  ist=1  soll=1
+  ✓ v1→v2: periode.wert === 3500  ist=3500  soll=3500
+  ✓ v1→v2: alle 3 Sanierungen datum=null, zeitpunkt=geplant
+  ✓ v1→v2: Anzahl Sanierungen erhalten (3)  ist=3  soll=3
+  ✓ v1→v2: Qhl_raw nach Migration ≈ 12.55 kW (tol 0.10 wegen Schaltjahr)  ist=12.5051  soll=12.5500
+
+============================================================
+INTEGRATION — § 4 Perioden + vergangene/geplante Sanierung (Ho=10.5)
+============================================================
+  ✓ §4 Qhl_ist (qhlRaw, nach vergangener San., Ho=10.5)  ist=10.0243  soll=10.0240
+  ✓ §4 Qhl_zukunft (qhlKorr, nach geplanter San. -20%)  ist=8.0194  soll=8.0190
+
+============================================================
 ZUSAMMENFASSUNG (Phase 3)
 ============================================================
-  Bestanden: 33
+  Bestanden: 43
   Fehler:    0
 
   ✓ Alle Integrations-Tests erfolgreich.

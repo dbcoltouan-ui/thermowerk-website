@@ -1,18 +1,18 @@
-fix(heizlast): TDZ-Fehler in heizlast.astro - Modal-Refs vor uiState.subscribe deklarieren
+fix(heizlast): compute chain live — methodsEnabled.verbrauch default + OverrideField zeigt Defaults
 
-Nach dem v2-Port liefen keine Funktionen auf /heizlast (keine Bindings,
-kein Compute, keine Save-Buttons sichtbar, Lage-Auswahl fuellte Tvoll
-nicht). Build war gruen - reiner Runtime-Fehler beim Modul-Init.
+- createDefaultState(): methodsEnabled.verbrauch=true (war false).
+  Grund: Section2Heizlast rendert M1 mit openDefault=true, aber der
+  Browser feuert kein toggle-Event auf SSR-Initialstand. Folge: Compute
+  fiel immer auf qhlBauperiode zurueck, User-Eingaben im Verbrauch-Block
+  (Ba, Perioden) erreichten den aktiven Methoden-Branch nicht.
 
-Root Cause: uiState.subscribe(...) feuert den Callback sofort beim
-Registrieren. Der Callback ruft refreshLoginView(), das auf loginModal
-zugreift - deklariert war loginModal aber ~50 Zeilen spaeter als const,
-damit ausserhalb der Temporal Dead Zone. Ergebnis: ReferenceError beim
-ersten Modul-Aufruf, der die gesamte Glue-Kette kippte.
+- bindings.ts syncDomFromState: Wenn bindPath null/leer und der Wrapper
+  ein [data-hz-override-field] ist und der User nichts ueberschrieben hat,
+  zeigen wir resolveDefault(state, overridePath). Damit erscheint
+  Tvoll live aus Lage + Nutzungsprofil, deltaT aus PHYSIK, WW-Verluste
+  aus FWS-Defaults etc. — und Lage-Wechsel aktualisiert das Feld sofort.
 
-Fix: die drei Modal-Refs (loginModal, projectsModal, exportModal) vor
-den uiState.subscribe-Block gezogen; duplizierte Deklarationen an der
-alten Stelle entfernt.
+- resolveDefault-Import in bindings.ts.
 
-Tests: 49 Rechenkern + 43 State-Integration weiterhin gruen.
-FWS-Aufgabe 2 -> Qhl = 12.5453 kW (Referenz 12.55, tol 0.02).
+Tests: 49 Rechenkern + 43 State-Integration weiterhin gruen. FWS-Aufgabe 2
+Qhl = 12.5453 kW (Referenz 12.55, Tol 0.02).

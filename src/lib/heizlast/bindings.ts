@@ -32,7 +32,7 @@
 //   Bei clearOverride() via Reset-Button (siehe OverrideField.astro) wird die
 //   Klasse wieder entfernt und das Feld zeigt den Default-Wert.
 
-import { heizlastState, isDirty, setOverride, isOverridden } from './state.ts';
+import { heizlastState, isDirty, setOverride, isOverridden, resolveDefault } from './state.ts';
 import type { HeizlastState } from './state.ts';
 
 type BindType = 'number' | 'string' | 'boolean';
@@ -211,7 +211,11 @@ export function bootBindings(root: ParentNode = document): () => void {
 
 /** Liest aktuelle State-Werte und schreibt sie in alle data-hz-bind-Elemente.
  *  Paket D / E: Das aktuell fokussierte Element wird uebersprungen —
- *  verhindert iOS-Tastatur-Kollaps und Komma-Verlust beim Tippen. */
+ *  verhindert iOS-Tastatur-Kollaps und Komma-Verlust beim Tippen.
+ *
+ *  Override-Felder: Wenn der gebundene Wert null/leer ist und nicht als Override
+ *  markiert, zeigen wir den resolveDefault-Wert (z. B. tvoll aus Lage + Profil)
+ *  an, damit der User den berechneten Default sieht statt eines leeren Feldes. */
 export function syncDomFromState(root: ParentNode = document): void {
   if (typeof window === 'undefined') return;
   const state = heizlastState.get();
@@ -221,8 +225,18 @@ export function syncDomFromState(root: ParentNode = document): void {
     if (el === active) return; // fokussiertes Feld nie ueberschreiben (iOS-Fix)
     const m = meta(el);
     if (!m) return;
-    const value = getPath(state, m.path);
+    let value = getPath(state, m.path);
     if (value === undefined) return;
+
+    // Override-Field-Display: null/leer + nicht overridden → Default anzeigen
+    if ((value === null || value === '') && m.type === 'number') {
+      const ovrPath = overridePathOf(el);
+      if (ovrPath && !isOverridden(state, ovrPath)) {
+        const def = resolveDefault(state, ovrPath);
+        if (def != null) value = def;
+      }
+    }
+
     if (el instanceof HTMLInputElement && el.type === 'radio') {
       el.checked = String(value) === el.value;
       return;

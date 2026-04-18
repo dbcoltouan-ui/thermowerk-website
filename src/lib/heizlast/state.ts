@@ -336,7 +336,10 @@ export function createDefaultState(): HeizlastState {
 
     heizlast: {
       methodsEnabled: {
-        verbrauch: false,
+        // Verbrauch ist default-aktiv, damit die sichtbar geöffnete M1-Karte
+        // (Method `openDefault={true}`) auch im Compute-Pfad zieht. Browser-
+        // `toggle`-Events feuern nicht auf SSR-Initialstand, deshalb hier setzen.
+        verbrauch: true,
         messung: false,
         bstd: false,
         override: false,
