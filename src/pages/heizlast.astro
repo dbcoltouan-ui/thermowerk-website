@@ -887,6 +887,12 @@ import PrintCover from '../components/heizlast-v2/PrintCover.astro';
     if (loginLabel) loginLabel.textContent = auth ? 'Abmelden' : 'Anmelden';
   }
 
+  // Modal-Refs VOR uiState.subscribe, sonst TDZ in refreshLoginView().
+  // (uiState.subscribe feuert die Callback sofort beim Registrieren.)
+  const loginModal = document.getElementById('hz-login-modal') as HTMLElement | null;
+  const projectsModal = document.getElementById('hz-projects-modal') as HTMLElement | null;
+  const exportModal = document.getElementById('hz-export-modal') as HTMLElement | null;
+
   let lastCloudSaveSeen: number | null = null;
   uiState.subscribe((u) => {
     refreshCloudButtons(u.isAuthenticated);
@@ -938,9 +944,7 @@ import PrintCover from '../components/heizlast-v2/PrintCover.astro';
   // ------------------------------------------------------------
   // 13. Modal-Infrastruktur
   // ------------------------------------------------------------
-  const loginModal = document.getElementById('hz-login-modal') as HTMLElement | null;
-  const projectsModal = document.getElementById('hz-projects-modal') as HTMLElement | null;
-  const exportModal = document.getElementById('hz-export-modal') as HTMLElement | null;
+  // Modal-Refs wurden oben (vor uiState.subscribe) bereits deklariert.
 
   let lastTrigger: HTMLElement | null = null;
 

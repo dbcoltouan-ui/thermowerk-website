@@ -1,11 +1,18 @@
-Heizlast-Fixes: Logo-Groesse, Chart-Tooltip, Mobile-Worttrennung
+fix(heizlast): TDZ-Fehler in heizlast.astro - Modal-Refs vor uiState.subscribe deklarieren
 
-- Logo Desktop von 36 auf 56px, Brand-Row Padding von 22/18 auf 8/8 →
-  Logo fuellt Header fast aus, nur minimaler Abstand oben/unten
-- Logo Mobile von 36 auf 40px, Brand-Row Padding 6px (war 16/12)
-- Chart-Tooltip: interaction.intersect=true + events=[mousemove,mouseout,click]
-  → Tooltip erscheint nur noch bei direkter Beruehrung einer Linie/Punkt,
-  nicht mehr bei zufaelligem Scroll ueber das Diagramm
-- Mobile-Worttrennung: overflow-wrap:anywhere als Fallback fuer lange Woerter
-  (Warmwasseraufbereitung etc.), Headings/Buttons bleiben bei break-word
-- field__input + input-group: min-width:0 damit Flex-Kinder schrumpfen koennen
+Nach dem v2-Port liefen keine Funktionen auf /heizlast (keine Bindings,
+kein Compute, keine Save-Buttons sichtbar, Lage-Auswahl fuellte Tvoll
+nicht). Build war gruen - reiner Runtime-Fehler beim Modul-Init.
+
+Root Cause: uiState.subscribe(...) feuert den Callback sofort beim
+Registrieren. Der Callback ruft refreshLoginView(), das auf loginModal
+zugreift - deklariert war loginModal aber ~50 Zeilen spaeter als const,
+damit ausserhalb der Temporal Dead Zone. Ergebnis: ReferenceError beim
+ersten Modul-Aufruf, der die gesamte Glue-Kette kippte.
+
+Fix: die drei Modal-Refs (loginModal, projectsModal, exportModal) vor
+den uiState.subscribe-Block gezogen; duplizierte Deklarationen an der
+alten Stelle entfernt.
+
+Tests: 49 Rechenkern + 43 State-Integration weiterhin gruen.
+FWS-Aufgabe 2 -> Qhl = 12.5453 kW (Referenz 12.55, tol 0.02).
