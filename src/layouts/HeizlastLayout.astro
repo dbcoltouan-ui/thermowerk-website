@@ -68,12 +68,12 @@ const {
       --hz-transition: 180ms ease;
       --hz-header-height: 76px;
 
-      /* Phase 10 / Paket D3 — großzügigerer Content-Korridor.
-         Auf breiten Bildschirmen bis 1120 px Inhaltsbreite,
-         auf schmaleren Displays respekt­volles Abfallen über
-         92 vw. Gibt dem Rechner sichtbare Ränder ohne zu eng
-         zu wirken. */
-      --hz-container-max: min(92vw, 1120px);
+      /* Phase 10 / Paket D4 — schmalerer Content-Korridor.
+         Bewusst engere Inhaltsbreite als die Marketing-Seite,
+         damit der Rechner als fokussiertes Arbeitswerkzeug
+         wirkt. Auf 1440–1920 px entstehen klar sichtbare
+         Außenränder; Mobile bleibt über 86 vw flexibel. */
+      --hz-container-max: min(86vw, 980px);
       --hz-gap-section: clamp(56px, 7vw, 96px);
       --hz-gap-row: clamp(16px, 2.2vw, 28px);
       --hz-gap-card: clamp(12px, 1.4vw, 20px);
@@ -202,20 +202,41 @@ const {
     .hz-scope .hz-field[data-size="md"] .hz-field__input-with-unit { max-width: 280px; }
     .hz-scope .hz-field[data-size="lg"] .hz-field__input-with-unit { max-width: 420px; }
     .hz-scope .hz-field[data-size="full"] .hz-field__input-with-unit { max-width: 100%; }
-    /* Grids: max-content damit Felder nicht aufgezogen werden (H/K).
-       hz-grid-2/3 nutzen max-content — Whitespace rechts bei schmalen Feldern.
-       hz-grid-4 nutzt 1fr (gleichmässige 4-Spalten, z.B. Projekt-Kopf). */
+    /* Phase 10 / Paket D4 — alle Grids auf gleichmäßige 1fr-Spalten.
+       Jedes Feld bekommt dieselbe Zellbreite; Input füllt die Zelle
+       zu 100 %. Dadurch liegen Label und Inputkanten auf sauberen
+       Fluchten. data-size wird innerhalb von Grid-Zellen ignoriert
+       (siehe Override weiter unten); außerhalb bleibt data-size
+       wirksam (einzelne Felder). */
     .hz-scope .hz-grid-2 {
-      display: grid; grid-template-columns: repeat(2, minmax(0, max-content));
-      gap: 14px var(--hz-gap-row); justify-content: start;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px var(--hz-gap-row);
     }
     .hz-scope .hz-grid-3 {
-      display: grid; grid-template-columns: repeat(3, minmax(0, max-content));
-      gap: 14px var(--hz-gap-row); justify-content: start;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px var(--hz-gap-row);
     }
     .hz-scope .hz-grid-4 {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 12px var(--hz-gap-row);
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px var(--hz-gap-row);
+    }
+    /* Innerhalb eines Grids füllen Inputs die Zelle komplett — data-size
+       und die intrinsischen Feldbreiten-Limits werden hier bewusst außer
+       Kraft gesetzt, damit Fluchten entstehen. */
+    .hz-scope .hz-grid-2 > .hz-field,
+    .hz-scope .hz-grid-3 > .hz-field,
+    .hz-scope .hz-grid-4 > .hz-field { max-width: 100%; min-width: 0; }
+    .hz-scope .hz-grid-2 > .hz-field .hz-field__input,
+    .hz-scope .hz-grid-3 > .hz-field .hz-field__input,
+    .hz-scope .hz-grid-4 > .hz-field .hz-field__input,
+    .hz-scope .hz-grid-2 > .hz-field select.hz-field__input,
+    .hz-scope .hz-grid-3 > .hz-field select.hz-field__input,
+    .hz-scope .hz-grid-4 > .hz-field select.hz-field__input,
+    .hz-scope .hz-grid-2 > .hz-field .hz-field__input-with-unit,
+    .hz-scope .hz-grid-3 > .hz-field .hz-field__input-with-unit,
+    .hz-scope .hz-grid-4 > .hz-field .hz-field__input-with-unit {
+      max-width: 100% !important;
+      width: 100%;
     }
     @media (max-width: 780px) {
       .hz-scope .hz-grid-4 { grid-template-columns: repeat(2, 1fr); }
