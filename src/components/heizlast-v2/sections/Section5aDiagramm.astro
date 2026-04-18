@@ -260,10 +260,14 @@ import Notes from '../Notes.astro';
         responsive: true,
         maintainAspectRatio: false,
         aspectRatio: 2,
-        interaction: { mode: 'index', intersect: false },
+        interaction: { mode: 'nearest', intersect: true, axis: 'xy' },
+        events: ['mousemove', 'mouseout', 'click'],
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: true,
+            mode: 'nearest',
+            intersect: true,
             backgroundColor: '#1B2A4A',
             titleFont: { family: 'Inter, sans-serif', weight: 600 },
             bodyFont: { family: 'Inter, sans-serif' },

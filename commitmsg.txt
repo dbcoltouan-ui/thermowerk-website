@@ -1,6 +1,11 @@
-Heizlast-Header: echter Thermowerk-Logo statt Mockup-Platzhalter
+Heizlast-Fixes: Logo-Groesse, Chart-Tooltip, Mobile-Worttrennung
 
-- heizlast.astro: brand__mark (schwarzer Kreis + roter Punkt) + "THERMOWERK"-Text
-  ersetzt durch <img src="/img/logo.png" alt="Thermowerk">
-- HeizlastLayout.astro: neue Regel .brand__logo (height 36px, auto width, max 200px)
-  Legacy-Selektoren .brand__mark/.brand__name auf display:none
+- Logo Desktop von 36 auf 56px, Brand-Row Padding von 22/18 auf 8/8 →
+  Logo fuellt Header fast aus, nur minimaler Abstand oben/unten
+- Logo Mobile von 36 auf 40px, Brand-Row Padding 6px (war 16/12)
+- Chart-Tooltip: interaction.intersect=true + events=[mousemove,mouseout,click]
+  → Tooltip erscheint nur noch bei direkter Beruehrung einer Linie/Punkt,
+  nicht mehr bei zufaelligem Scroll ueber das Diagramm
+- Mobile-Worttrennung: overflow-wrap:anywhere als Fallback fuer lange Woerter
+  (Warmwasseraufbereitung etc.), Headings/Buttons bleiben bei break-word
+- field__input + input-group: min-width:0 damit Flex-Kinder schrumpfen koennen

@@ -116,7 +116,7 @@ const {
       border-bottom: 1px solid var(--ink-200);
     }
     .topbar__brand-row {
-      padding: 22px var(--stripe-pad) 18px;
+      padding: 8px var(--stripe-pad);
       display: flex; align-items: center; gap: 14px;
       border-bottom: 1px solid var(--ink-100);
     }
@@ -132,10 +132,14 @@ const {
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink-900); }
     .brand__logo {
       display: block;
-      height: 36px;
+      height: 56px;
       width: auto;
-      max-width: 200px;
+      max-width: 280px;
       object-fit: contain;
+    }
+    @media (max-width: 720px) {
+      .brand__logo { height: 40px; max-width: 200px; }
+      .topbar__brand-row { padding: 6px var(--stripe-pad); }
     }
     /* Legacy-Klassen (Mockup-Platzhalter) — falls irgendwo noch referenziert, unsichtbar */
     .brand__mark, .brand__name { display: none; }
@@ -1209,8 +1213,14 @@ const {
       :root { --stripe-pad: 20px; --s-10: 48px; --s-9: 40px; }
       .grid--2, .grid--3 { grid-template-columns: 1fr; }
       .col-span-2, .col-span-full { grid-column: auto; }
-      .topbar__brand-row { padding: 16px var(--stripe-pad) 12px; }
+      .topbar__brand-row { padding: 6px var(--stripe-pad); }
       .brand__sub { display: none; }
+      /* Mobile: aggressivere Worttrennung damit lange Woerter nie ueberlaufen */
+      .hz-scope, .hz-scope * { overflow-wrap: anywhere; }
+      .hz-scope h1, .hz-scope h2, .hz-scope h3,
+      .section__title, .section__subline,
+      .field__label, .btn span, .summary__label { overflow-wrap: break-word; }
+      .field__input, .input-group input { min-width: 0; }
       .topbar__action-row { gap: 6px; height: auto; padding-top: 8px; padding-bottom: 8px; flex-wrap: wrap; }
       .actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
       .actions .btn span { display: none; }
