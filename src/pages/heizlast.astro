@@ -102,7 +102,7 @@ import PrintCover from '../components/heizlast-v2/PrintCover.astro';
     subscribeAutoSave,
     hardReset,
   } from '../lib/heizlast/storage.ts';
-  import { bootBindings, syncDomFromState } from '../lib/heizlast/bindings.ts';
+  import { bootBindings, syncDomFromState, setPath } from '../lib/heizlast/bindings.ts';
   import { clearOverride, resolveDefault } from '../lib/heizlast/state.ts';
   import {
     SANIERUNGS_MASSNAHMEN,
@@ -138,8 +138,9 @@ import PrintCover from '../components/heizlast-v2/PrintCover.astro';
     return v == null ? null : String(v);
   };
 
-  // OverrideField-Reset-Button: Klick -> Default in Input schreiben,
-  // ohne setOverride(true) zu triggern (Events sind synthetisch).
+  // OverrideField-Reset-Button: setzt den gebundenen State-Wert auf null
+  // UND entfernt den Override-Flag. syncDomFromState schreibt danach den
+  // resolveDefault-Wert ins Input (weil override-flag = false).
   if (!(window as any).__hzOvrResetBound) {
     (window as any).__hzOvrResetBound = true;
     document.addEventListener('click', (ev) => {
@@ -149,17 +150,14 @@ import PrintCover from '../components/heizlast-v2/PrintCover.astro';
       if (!btn) return;
       const wrapper = btn.closest('[data-hz-override-field]') as HTMLElement | null;
       if (!wrapper) return;
-      const path = wrapper.getAttribute('data-hz-override-field');
-      if (!path) return;
-      (window as any).__hzClearOverride(path);
-      const def = (window as any).__hzResolveDefault(path);
+      const ovrPath = wrapper.getAttribute('data-hz-override-field');
+      if (!ovrPath) return;
       const input = wrapper.querySelector<HTMLInputElement>('input[data-hz-bind]');
-      if (input && def != null) {
-        input.value = String(def);
-        // Synthetische Events — bindings.ts erkennt sie und ruft NICHT setOverride.
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      }
+      const bindPath = input?.getAttribute('data-hz-bind') ?? ovrPath;
+      // 1) State-Wert auf null zuruecksetzen (data-hz-bind-Pfad).
+      heizlastState.set(setPath(heizlastState.get(), bindPath, null));
+      // 2) Override-Flag entfernen — sync zeigt dann den Default.
+      clearOverride(ovrPath);
     });
   }
 

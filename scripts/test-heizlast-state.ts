@@ -49,6 +49,7 @@ s.gebaeude.bauperiode = '1971_80';
 s.gebaeude.ebf = 270;
 s.gebaeude.tvollProfil = 'wohnen_mitWW';
 s.gebaeude.tvollOverride = 2000;
+s.overrides['gebaeude.tvoll'] = true;
 
 s.heizlast.methodsEnabled = { verbrauch: true, messung: false, bstd: false, override: false };
 s.heizlast.verbrauch.energietraeger = 'oel';
@@ -262,6 +263,7 @@ const v1Rohdaten: any = {
   gebaeude: { ...fws2Base.gebaeude, ebf: 270, tvollOverride: 2000 },
   warmwasser: { ...fws2Base.warmwasser, deltaTOverride: 50, speicherProzent: 10, zirkProzent: 0, ausstossProzent: 15 },
   zuschlaege: { ...fws2Base.zuschlaege, sperrzeitActive: true, toff: 2 },
+  overrides: { 'gebaeude.tvoll': true },
 };
 const v1Json = JSON.stringify(v1Rohdaten);
 const migV1 = deserializeState(v1Json);
@@ -294,6 +296,7 @@ s4.gebaeude.lage = 'mittelland';
 s4.gebaeude.bauperiode = '1971_80';
 s4.gebaeude.ebf = 150;
 s4.gebaeude.tvollOverride = 2000;
+s4.overrides['gebaeude.tvoll'] = true;
 s4.heizlast.methodsEnabled = { verbrauch: true, messung: false, bstd: false, override: false };
 s4.heizlast.verbrauch.energietraeger = 'oel';
 s4.heizlast.verbrauch.etaOverride = 0.85;

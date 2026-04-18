@@ -214,6 +214,71 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
       }
     }
     // Paket C / Block I: wohneinheiten entfernt — Feld wird beim Laden ignoriert (TypeScript).
+    // Sanity-Sweep: implausible Legacy-Werte verwerfen, damit kaputte localStorage-
+    // Stände sich nicht in die Rechnung schleichen (Bug aus fruehen Chats:
+    // tvollOverride = -20, zirkProzent = 4844 etc.).
+    const isFiniteNum = (x: any): boolean => typeof x === 'number' && Number.isFinite(x);
+    const clampToRangeOrNull = (x: any, lo: number, hi: number): number | null => {
+      if (!isFiniteNum(x)) return null;
+      if (x < lo || x > hi) return null;
+      return x;
+    };
+    if (obj.gebaeude && typeof obj.gebaeude === 'object') {
+      if (obj.gebaeude.tvollOverride !== null && obj.gebaeude.tvollOverride !== undefined) {
+        const tv = clampToRangeOrNull(obj.gebaeude.tvollOverride, 500, 3500);
+        if (tv === null) {
+          obj.gebaeude.tvollOverride = null;
+          if (obj.overrides && typeof obj.overrides === 'object') {
+            delete obj.overrides['gebaeude.tvoll'];
+          }
+        }
+      }
+      const ebf = Number(obj.gebaeude.ebf);
+      if (!isFiniteNum(ebf) || ebf < 1 || ebf > 10000) {
+        obj.gebaeude.ebf = 150;
+      }
+    }
+    if (obj.warmwasser && typeof obj.warmwasser === 'object') {
+      for (const key of ['speicherProzent', 'zirkProzent', 'ausstossProzent'] as const) {
+        const cleaned = clampToRangeOrNull(obj.warmwasser[key], 0, 100);
+        if (cleaned === null && obj.warmwasser[key] !== null && obj.warmwasser[key] !== undefined) {
+          obj.warmwasser[key] = null;
+          const ovrKey = 'warmwasser.' + (key === 'speicherProzent' ? 'speicher' : key === 'zirkProzent' ? 'zirk' : 'ausstoss');
+          if (obj.overrides && typeof obj.overrides === 'object') delete obj.overrides[ovrKey];
+        }
+      }
+      if (obj.warmwasser.deltaTOverride !== null && obj.warmwasser.deltaTOverride !== undefined) {
+        const dt = clampToRangeOrNull(obj.warmwasser.deltaTOverride, 10, 80);
+        if (dt === null) {
+          obj.warmwasser.deltaTOverride = null;
+          if (obj.overrides && typeof obj.overrides === 'object') delete obj.overrides['warmwasser.deltaT'];
+        }
+      }
+    }
+    if (obj.zuschlaege && typeof obj.zuschlaege === 'object') {
+      const toff = Number(obj.zuschlaege.toff);
+      if (!isFiniteNum(toff) || toff < 0 || toff > 12) obj.zuschlaege.toff = 2;
+      const qp = Number(obj.zuschlaege.qasPool);
+      if (!isFiniteNum(qp) || qp < 0 || qp > 20) obj.zuschlaege.qasPool = 0;
+      const ql = Number(obj.zuschlaege.qasLueftung);
+      if (!isFiniteNum(ql) || ql < 0 || ql > 20) obj.zuschlaege.qasLueftung = 0;
+    }
+    if (obj.speicher && typeof obj.speicher === 'object') {
+      const dt = Number(obj.speicher.pufferDeltaT);
+      if (!isFiniteNum(dt) || dt < 1 || dt > 30) obj.speicher.pufferDeltaT = 5;
+      if (obj.speicher.wwTStoAus !== null && obj.speicher.wwTStoAus !== undefined) {
+        const t = clampToRangeOrNull(obj.speicher.wwTStoAus, 40, 90);
+        if (t === null) obj.speicher.wwTStoAus = null;
+      }
+      if (obj.speicher.wwTStoEinOverride !== null && obj.speicher.wwTStoEinOverride !== undefined) {
+        const t = clampToRangeOrNull(obj.speicher.wwTStoEinOverride, 2, 30);
+        if (t === null) obj.speicher.wwTStoEinOverride = null;
+      }
+    }
+    if (obj.heizlast?.verbrauch) {
+      const va = Number(obj.heizlast.verbrauch.vwuAbzug);
+      if (!isFiniteNum(va) || va < 0 || va > 2000) obj.heizlast.verbrauch.vwuAbzug = 0;
+    }
     // Phase 9 / Block E: RaumInput um flaecheDirekt + beheizt erweitert.
     // Alte Eintraege ohne die neuen Felder bekommen beheizt=true (Default)
     // und flaecheDirekt=null; laenge/breite werden zu number|null normalisiert.

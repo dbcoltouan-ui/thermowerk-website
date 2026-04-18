@@ -81,15 +81,40 @@ function setPathObj(obj: any, parts: string[], value: unknown): any {
   return clone;
 }
 
-function coerce(rawValue: string | boolean, type: BindType): unknown {
+/** Koerziert DOM-Wert in den deklarierten Typ.
+ *  - Leere Number-Inputs mit Override-Wrapper → null (Feld zeigt Default).
+ *  - Leere Number-Inputs ohne Override-Wrapper → 0 (Legacy-Verhalten).
+ *  - Min/Max-Attribute werden bei number-Typen respektiert (Clamp).
+ *  - Komma als Dezimaltrenner wird akzeptiert. */
+function coerce(rawValue: string | boolean, type: BindType, el?: HTMLElement): unknown {
   if (type === 'boolean') {
     return typeof rawValue === 'boolean' ? rawValue : rawValue === 'true' || rawValue === 'on' || rawValue === '1';
   }
   if (type === 'number') {
     if (typeof rawValue === 'boolean') return rawValue ? 1 : 0;
-    if (rawValue === '' || rawValue == null) return 0;
+    if (rawValue === '' || rawValue == null) {
+      // Override-Felder: leerer Input soll null werden (Feld faellt auf Default zurueck).
+      if (el && el.closest && el.closest('[data-hz-override-field]')) return null;
+      return 0;
+    }
     const n = Number(String(rawValue).replace(',', '.'));
-    return Number.isFinite(n) ? n : 0;
+    if (!Number.isFinite(n)) return 0;
+    // Min/Max aus HTML-Attribut clampen (schuetzt vor -20 im Tvoll u. ae.).
+    if (el instanceof HTMLInputElement) {
+      const minAttr = el.getAttribute('min');
+      const maxAttr = el.getAttribute('max');
+      let v = n;
+      if (minAttr != null && minAttr !== '') {
+        const mn = Number(minAttr);
+        if (Number.isFinite(mn) && v < mn) v = mn;
+      }
+      if (maxAttr != null && maxAttr !== '') {
+        const mx = Number(maxAttr);
+        if (Number.isFinite(mx) && v > mx) v = mx;
+      }
+      return v;
+    }
+    return n;
   }
   return String(rawValue ?? '');
 }
@@ -175,7 +200,7 @@ export function bootBindings(root: ParentNode = document): () => void {
     } else {
       raw = readDom(target);
     }
-    const coerced = coerce(raw, m.type);
+    const coerced = coerce(raw, m.type, target);
     const state = heizlastState.get();
     const current = getPath(state, m.path);
     if (current === coerced) return;
@@ -228,8 +253,11 @@ export function syncDomFromState(root: ParentNode = document): void {
     let value = getPath(state, m.path);
     if (value === undefined) return;
 
-    // Override-Field-Display: null/leer + nicht overridden → Default anzeigen
-    if ((value === null || value === '') && m.type === 'number') {
+    // Override-Field-Display: wenn das Feld zu einem Override-Wrapper gehoert
+    // und der Override-Flag NICHT gesetzt ist, zeigen wir IMMER den Default
+    // (unabhaengig vom gespeicherten Wert). Erst wenn der User das Feld
+    // anfasst, wird `setOverride(true)` gesetzt und sein Wert uebernommen.
+    if (m.type === 'number') {
       const ovrPath = overridePathOf(el);
       if (ovrPath && !isOverridden(state, ovrPath)) {
         const def = resolveDefault(state, ovrPath);

@@ -1,6 +1,6 @@
 // Thermowerk Heizlast — Derived Compute-Store
 import { computed } from 'nanostores';
-import { heizlastState } from './state.ts';
+import { heizlastState, isOverridden } from './state.ts';
 import type { HeizlastState, SanierungsMassnahme, VerbrauchPeriode, MessungPeriode, BstdPeriode } from './state.ts';
 
 import {
@@ -162,7 +162,20 @@ export interface ComputeResult {
 }
 
 function resolveTvoll(s: HeizlastState): number {
-  if (s.gebaeude.tvollOverride != null) return s.gebaeude.tvollOverride;
+  // Nur wenn der User explizit einen Override gesetzt hat UND der Wert
+  // in einem PLAUSIBLEN Bereich liegt (500 h/a .. 3500 h/a), ziehen wir ihn.
+  // Sonst IMMER Richtwert aus Profil + Lage — verhindert, dass alte
+  // tvollOverride-Werte (z. B. -20 aus buggy UI) in die Rechnung schwappen.
+  const ovr = s.gebaeude.tvollOverride;
+  if (
+    isOverridden(s, 'gebaeude.tvoll') &&
+    typeof ovr === 'number' &&
+    Number.isFinite(ovr) &&
+    ovr >= 500 &&
+    ovr <= 3500
+  ) {
+    return ovr;
+  }
   return tvollRichtwert(s.gebaeude.tvollProfil, s.gebaeude.lage);
 }
 

@@ -118,6 +118,9 @@ import OverrideField from '../OverrideField.astro';
           unit="K"
           bindPath="warmwasser.deltaTOverride"
           overridePath="warmwasser.deltaT"
+          min={10}
+          max={80}
+          step="1"
           hint="ΔT zwischen Kaltwasser-Zulauf und Zapftemperatur. Physik-Default: 45 K."
         />
         <OverrideField
@@ -127,6 +130,9 @@ import OverrideField from '../OverrideField.astro';
           unit="%"
           bindPath="warmwasser.speicherProzent"
           overridePath="warmwasser.speicher"
+          min={0}
+          max={100}
+          step="1"
           hint="Typisch 5 – 15 % · Quelle FWS § 8"
         />
         <OverrideField
@@ -136,6 +142,9 @@ import OverrideField from '../OverrideField.astro';
           unit="%"
           bindPath="warmwasser.zirkProzent"
           overridePath="warmwasser.zirk"
+          min={0}
+          max={100}
+          step="1"
           hint="0 – 20 % · nur bei Zirkulationsleitung"
         />
         <OverrideField
@@ -145,6 +154,9 @@ import OverrideField from '../OverrideField.astro';
           unit="%"
           bindPath="warmwasser.ausstossProzent"
           overridePath="warmwasser.ausstoss"
+          min={0}
+          max={100}
+          step="1"
           hint="10 – 20 % · Rohrleitungsnetz"
         />
       </div>

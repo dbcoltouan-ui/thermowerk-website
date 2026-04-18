@@ -30,6 +30,9 @@ import OverrideField from '../OverrideField.astro';
         unit="°C"
         bindPath="speicher.wwTStoAus"
         overridePath="speicher.wwTAustritt"
+        min={40}
+        max={90}
+        step="1"
         hint="Legionellen-Hygiene: mind. 55 °C. Standard FWS: 60 °C."
       />
       <OverrideField
@@ -38,6 +41,9 @@ import OverrideField from '../OverrideField.astro';
         unit="°C"
         bindPath="speicher.wwTStoEinOverride"
         overridePath="speicher.wwTEintritt"
+        min={2}
+        max={30}
+        step="1"
         hint="Referenzwert Kaltwasser: 10 °C."
       />
     </div>
@@ -83,7 +89,7 @@ import OverrideField from '../OverrideField.astro';
           <span class="chip">Standard · 5 K</span>
         </label>
         <div class="input-group">
-          <input class="input" type="number" step="1" data-hz-bind="speicher.pufferDeltaT" data-hz-type="number" />
+          <input class="input" type="number" step="1" min="1" max="30" data-hz-bind="speicher.pufferDeltaT" data-hz-type="number" />
           <span class="input-group__unit">K</span>
         </div>
         <p class="field__hint">ΔT zwischen Vor- und Rücklauf während Abtau / Sperrzeit.</p>

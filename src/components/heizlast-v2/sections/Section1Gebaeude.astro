@@ -107,7 +107,7 @@ const TVOLL_PROFILE: Array<{ id: 'wohnen_ohneWW' | 'wohnen_mitWW' | 'gewerbe_abs
         </label>
         <div class="ebf__row">
           <div class="input-group">
-            <input class="input" id="f-ebf" type="number" step="1" data-hz-bind="gebaeude.ebf" data-hz-type="number" />
+            <input class="input" id="f-ebf" type="number" step="1" min="1" max="10000" data-hz-bind="gebaeude.ebf" data-hz-type="number" />
             <span class="input-group__unit">m²</span>
           </div>
           <button
@@ -199,6 +199,8 @@ const TVOLL_PROFILE: Array<{ id: 'wohnen_ohneWW' | 'wohnen_mitWW' | 'gewerbe_abs
         bindPath="gebaeude.tvollOverride"
         overridePath="gebaeude.tvoll"
         step="10"
+        min={500}
+        max={3500}
         hint="Wird aus Nutzungsprofil und Lage vorbelegt. Beim Überschreiben erscheint ein Reset-Pfeil, der den Standardwert wiederherstellt."
       />
     </div>

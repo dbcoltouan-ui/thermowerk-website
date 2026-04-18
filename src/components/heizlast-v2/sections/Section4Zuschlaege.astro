@@ -31,6 +31,8 @@ import OverrideField from '../OverrideField.astro';
         unit="h / Tag"
         bindPath="zuschlaege.toff"
         step="1"
+        min={0}
+        max={12}
         hint="Üblich in CH: 2 h für EVU-gesperrte Anlagen (Tagtarif), 3 h für stark regulierte Netze."
       />
       <div class="field">
@@ -68,7 +70,7 @@ import OverrideField from '../OverrideField.astro';
           <span class="symbol">Q<sub>as,Pool</sub></span>
         </label>
         <div class="input-group">
-          <input class="input" id="f-qas-pool" type="number" step="0.1" data-hz-bind="zuschlaege.qasPool" data-hz-type="number" />
+          <input class="input" id="f-qas-pool" type="number" step="0.1" min="0" max="20" data-hz-bind="zuschlaege.qasPool" data-hz-type="number" />
           <span class="input-group__unit">kW</span>
         </div>
         <p class="field__hint">Richtwert: Pool 1 – 3 kW.</p>
@@ -79,7 +81,7 @@ import OverrideField from '../OverrideField.astro';
           <span class="symbol">Q<sub>as,Lüft</sub></span>
         </label>
         <div class="input-group">
-          <input class="input" id="f-qas-lueftung" type="number" step="0.1" data-hz-bind="zuschlaege.qasLueftung" data-hz-type="number" />
+          <input class="input" id="f-qas-lueftung" type="number" step="0.1" min="0" max="20" data-hz-bind="zuschlaege.qasLueftung" data-hz-type="number" />
           <span class="input-group__unit">kW</span>
         </div>
         <p class="field__hint">Richtwert: Lüftung mit WRG 0.3 – 0.8 kW.</p>
