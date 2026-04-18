@@ -1,0 +1,87 @@
+
+============================================================
+AUFGABE 1A — EFH, Öl 2800 l/a, η 0.85, toff 2 h
+============================================================
+  ✓ Qn  ist=24990.0000  soll=24990.0000  (Δ=0.0000, tol=1)
+  ✓ Qhl  ist=12.4950  soll=12.5000  (Δ=-0.0050, tol=0.05)
+  ✓ Qoff (toff=2h)  ist=1.1359  soll=1.1400  (Δ=-0.0041, tol=0.05)
+  ✓ Qh  ist=13.6309  soll=13.6400  (Δ=-0.0091, tol=0.05)
+
+============================================================
+AUFGABE 1B — Bivalent Gas + Hartholz
+============================================================
+  ✓ Qn gesamt  ist=33295.0000  soll=33295.0000  (Δ=0.0000, tol=5)
+  ✓ Qhl  ist=16.6475  soll=16.6500  (Δ=-0.0025, tol=0.05)
+  ✓ Qoff (toff=4h)  ist=3.3295  soll=3.3300  (Δ=-0.0005, tol=0.02)
+  ✓ Qh  ist=19.9770  soll=19.9800  (Δ=-0.0030, tol=0.02)
+
+============================================================
+AUFGABE 2 — EFH 1975, Öl 3500 l/a inkl. WW (KRITISCHER REGRESSIONS-TEST)
+============================================================
+  ✓ Qn (H+WW)  ist=29400.0000  soll=29400.0000  (Δ=0.0000, tol=1)
+  ✓ Qn,WW  ist=4309.4333  soll=4309.0000  (Δ=0.4333, tol=5)
+  ✓ Qn,H  ist=25090.5667  soll=25091.0000  (Δ=-0.4333, tol=10)
+  ✓ Qhl ⭐  ist=12.5453  soll=12.5500  (Δ=-0.0047, tol=0.02)
+  ✓ spez. W/m²  ist=46.4640  soll=46.5000  (Δ=-0.0360, tol=0.5)
+  ✓ Qoff  ist=1.7922  soll=1.7900  (Δ=0.0022, tol=0.02)
+  ✓ Qw  ist=0.5120  soll=0.5100  (Δ=0.0020, tol=0.02)
+  ✓ Qh,WP  ist=14.8495  soll=14.8500  (Δ=-0.0005, tol=0.05)
+  ✓ Qhl,neu (mit Sanierung)  ist=8.8294  soll=8.8000  (Δ=0.0294, tol=0.05)
+  ✓ Qoff,neu  ist=1.2613  soll=1.2600  (Δ=0.0013, tol=0.02)
+  ✓ Qw,neu  ist=0.5210  soll=0.5200  (Δ=0.0010, tol=0.05)
+  ✓ Qh,WP,neu  ist=10.6117  soll=10.5800  (Δ=0.0317, tol=0.1)
+
+============================================================
+AUFGABE 3 — MFH Minergie-P, 11 Whg
+============================================================
+  ✓ Qn,WW geschätzt  ist=33209.5706  soll=33210.0000  (Δ=-0.4294, tol=20)
+  ✓ Qhl Messung  ist=11.5000  soll=11.5000  (Δ=0.0000, tol=0.05)
+  ✓ spez W/m²  ist=6.2773  soll=6.2800  (Δ=-0.0027, tol=0.1)
+  ℹ Plausibilität: ROT – Deutlich unter Band – Vollaststunden-Methode möglicherweise ungenau (Minergie-P, Leichtbau, hoher Glasanteil).
+  ✓ Qw  ist=5.6554  soll=5.6400  (Δ=0.0154, tol=0.05)
+
+============================================================
+AUFGABE 4 — S/W-WP mit Betriebsstundenzähler
+============================================================
+  ✓ Qn,H (Betriebsstd)  ist=16800.0000  soll=16800.0000  (Δ=0.0000, tol=1)
+  ✓ Qhl  ist=8.4000  soll=8.4000  (Δ=0.0000, tol=0.05)
+  ✓ Qn,WW  ist=4955.8483  soll=4956.0000  (Δ=-0.1517, tol=5)
+  ✓ Qw  ist=0.6066  soll=0.6000  (Δ=0.0066, tol=0.02)
+  ✓ Qh,WP  ist=9.0066  soll=9.0000  (Δ=0.0066, tol=0.02)
+  ✓ Qk  ist=9.1429  soll=9.1400  (Δ=0.0029, tol=0.02)
+  ✓ spez. Entzugsleistung  ist=57.1429  soll=57.1000  (Δ=0.0429, tol=0.1)
+  ℹ Sonden-Beurteilung: GELB – Grenzwertig – langjährige Sole-Temp.-Überwachung empfohlen.
+
+============================================================
+EIGENES BEISPIEL — „Referenzhaus Moosseedorf" (Vorwärts)
+============================================================
+  ✓ Qn brutto (inkl. WW)  ist=23400.0000  soll=23400.0000  (Δ=0.0000, tol=1)
+  ✓ Qn,WW  ist=4848.1125  soll=4848.1000  (Δ=0.0125, tol=0.2)
+  ✓ Qn,H (Heizung netto)  ist=18551.8875  soll=18551.9000  (Δ=-0.0125, tol=0.5)
+  ✓ Qhl  ist=9.2759  soll=9.2760  (Δ=-0.0001, tol=0.005)
+  ✓ spez. W/m²  ist=61.8396  soll=61.8400  (Δ=-0.0004, tol=0.05)
+  ✓ Ampel = rot (erwartet, Verbrauch passt nicht zur angegebenen Bauperiode)
+  ✓ QWW/Tag  ist=13.2825  soll=13.2826  (Δ=-0.0001, tol=0.005)
+  ✓ td (Zwischenwert)  ist=1.4319  soll=1.4319  (Δ=0.0000, tol=0.002)
+  ✓ Qw  ist=0.5886  soll=0.5880  (Δ=0.0006, tol=0.005)
+  ✓ Qoff  ist=0.8433  soll=0.8433  (Δ=-0.0000, tol=0.005)
+  ✓ Qh gesamt  ist=10.7078  soll=10.7070  (Δ=0.0008, tol=0.005)
+  ✓ VW,Sto (roh)  ist=227.7000  soll=227.7000  (Δ=-0.0000, tol=0.2)
+  ℹ VW,Sto gerundet (10-L): 230 l (erwartet 230)
+
+============================================================
+EIGENES BEISPIEL — Rückrechnung (Invertierbarkeits-Check)
+============================================================
+  ✓ Rück: Qn,H = Qhl · tvoll  ist=18552.0000  soll=18552.0000  (Δ=0.0000, tol=1)
+  ✓ Rück: Qn brutto = Qn,H + Qn,WW  ist=23400.1000  soll=23400.1000  (Δ=0.0000, tol=0.5)
+  ✓ Rück: Ba = Qn / (Ho · η)  ist=2500.0107  soll=2500.0100  (Δ=0.0007, tol=0.5)
+  ✓ Rück: QWW/Tag = VW,Sto · cp · ΔT / 3600  ist=13.2825  soll=13.2825  (Δ=0.0000, tol=0.005)
+  ✓ Rück: Qhl = Qh − Qw − Qoff  ist=9.2757  soll=9.2760  (Δ=-0.0003, tol=0.005)
+
+============================================================
+ZUSAMMENFASSUNG
+============================================================
+  Bestanden: 49
+  Fehler:    0
+
+  ✓ Alle Tests erfolgreich.

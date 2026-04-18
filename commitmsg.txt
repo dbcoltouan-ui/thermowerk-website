@@ -1,8 +1,16 @@
-Phase 9 / Bundle 2 abgeschlossen: Doku (HANDOFF-PHASE-16 + CLAUDE.md)
+Phase 10 / Paket C: UI-Cleanup (Defaults, Toggles, Methoden-UX, EBF, Header)
 
-- HANDOFF-PHASE-16.md neu: Copy-Paste-Prompt fuer naechste Session,
-  Statusbericht aller vier Bloecke L/M1/M2/M, offene manuelle
-  Abnahme-Punkte, optionale Folge-Themen.
-- CLAUDE.md hat die vier Bundle-2-Eintraege chronologisch gesetzt.
-- Code unveraendert — reine Doku.
-- Tests weiterhin 49 + 33 gruen.
+A: OverrideField zeigt aufgeloeste Defaults direkt (tvoll, deltaT, Speichertemperaturen)
+B: WW-Sektion kollabiert vollstaendig wenn Toggle OFF (body.hz-ww-off Pattern)
+C: Speicher - WW-Speicher folgt warmwasser.active; Puffer: Ja/Nein-Toggle (body.hz-puffer-on)
+D: Section2 - Radio-Tab-UI (Verbrauch/Betriebsstunden/Override); Messung im bstd-Panel integriert; Bauperiode nur als Fallback-Info; Methoden-Switches entfernt; FWS-InfoBox entfernt
+E: Sanierungen - Titel aktualisiert, kein Sanierungsabzug-Toggle (auto-aktiv bei Eintraegen)
+F: Kicker-Linie, Aside-KpiCards und alle InfoBoxen entfernt (SectionWrapper + alle Sektionen)
+G: Section4 in zwei Bloecke aufgeteilt: (1) Sperrzeit Toggle+toff, (2) Pool+Lueftung als separate kW-Felder mit Qas-Autosumme
+H: EBF-Zimmerliste direkt unter EBF-Feld als details-Accordion; kein Uebernehmen-Button; immer Auto-EBF; Beheizt -> Unbeheizt invertiert
+I: Wohneinheiten aus State, Section1, Section7 und Storage-Migration entfernt
+J: Projektname-Mitte aus Header entfernt; Header-Grid vereinfacht auf auto auto
+K: Daten-loeschen-Button mit Confirm in Section7; Neues-Projekt-Confirm vereinfacht
+L: Doppeltitel durch Kicker-Entfernung geprueft und bereinigt
+
+Tests: 49 + 33 gruen

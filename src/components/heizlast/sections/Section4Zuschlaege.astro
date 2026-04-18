@@ -1,35 +1,24 @@
 ---
 // Section 4 — Zuschlaege (M6)
-// Phase 9 / Block D:
-// - Sperrzeit per Ja/Nein-Switch (toff-Feld + FWS-Faktoren nur sichtbar wenn aktiv).
-// - Qas = Zuschlag fuer verbundene Systeme (Lueftung, Pool, Solar). Feld immer
-//   sichtbar, wird automatisch addiert sobald Wert > 0. Kein Aktiv-Toggle mehr.
+// Paket C / Block G: Zwei klare Blöcke.
+//   Block 1: Sperrzeit (Ja/Nein + toff). Chips-Liste entfernt (kein Korrekturfaktor-Text).
+//   Block 2: Verbundene Systeme — Pool (kW) und Lüftung (kW), Summe → qas.
+// F: Kein Kicker, keine Aside-KPIs, keine InfoBox.
 
 import SectionWrapper from '../SectionWrapper.astro';
-import InfoBox from '../InfoBox.astro';
-import KpiCard from '../KpiCard.astro';
 import SectionNotes from '../SectionNotes.astro';
 import OverrideField from '../OverrideField.astro';
-import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
 ---
 <SectionWrapper
   id="sektion-4"
-  kicker="04 - Zuschläge"
   title="Zuschläge"
-  subline="Sperrzeit-Zuschlag (Qoff) und Zuschlag für verbundene Systeme (Qas)."
+  subline="Sperrzeit durch den Energieversorger und verbundene Systeme."
   tone="off"
 >
-  <slot name="aside" slot="aside">
-    <div class="hz-kpi-grid" style="grid-template-columns: 1fr; min-width: 240px;">
-      <KpiCard label="Qoff" value="—" unit="kW" caption="Sperrzeit-Zuschlag" data-kpi="qoff" />
-    </div>
-  </slot>
 
+  <!-- Block 1: Sperrzeit -->
   <div class="hz-block">
-    <div class="hz-block__head">
-      <h3 class="hz-block__heading">Sperrzeit</h3>
-      <small class="hz-muted">Abschaltung durch den Energieversorger</small>
-    </div>
+    <h3 class="hz-block__heading">Sperrzeit — Abschaltung durch den Energieversorger</h3>
 
     <label class="hz-switch hz-sperrzeit-switch">
       <input type="checkbox" data-hz-bind="zuschlaege.sperrzeitActive" data-hz-type="boolean" />
@@ -53,59 +42,52 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
           hint="Stunden pro Tag, in denen die WP abgeschaltet wird."
         />
       </div>
-
-      <p class="hz-muted hz-sperrzeit-chips">
-        Korrekturfaktor je Sperrzeit (FWS):
-        {Object.entries(SPERRZEIT_FAKTOREN).map(([h, f]) => (
-          <span class="hz-sperrzeit-chip">{h}&nbsp;h → &times;{f.toFixed(2)}</span>
-        ))}
-      </p>
     </div>
   </div>
 
-  <div class="hz-block">
-    <div class="hz-block__head">
-      <h3 class="hz-block__heading">Qas — Verbundene Systeme</h3>
-      <small class="hz-muted">Lüftung, Pool, Solar – optional</small>
-    </div>
-
-    <label class="hz-field" style="max-width: 280px;">
-      <span class="hz-field__label">Zuschlag</span>
-      <div class="hz-field__input-with-unit">
-        <input class="hz-field__input" type="number" step="0.1" min="0"
-          data-hz-bind="zuschlaege.qas" data-hz-type="number" />
-        <span class="hz-field__unit">kW</span>
+  <!-- Block 2: Verbundene Systeme (Qas) -->
+  <div class="hz-block" style="margin-top: 24px;">
+    <h3 class="hz-block__heading">Verbundene Systeme (optional)</h3>
+    <p class="hz-muted" style="font-size: 13.5px; margin-bottom: 14px;">
+      Systeme, die mit der Wärmepumpe mitversorgt werden. Leer oder 0 = kein Zuschlag.
+    </p>
+    <div class="hz-grid-3">
+      <label class="hz-field">
+        <span class="hz-field__label">Pool</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="0.1" min="0"
+            data-hz-bind="zuschlaege.qasPool" data-hz-type="number"
+            placeholder="0" />
+          <span class="hz-field__unit">kW</span>
+        </div>
+        <small class="hz-muted">Richtwert 1–3 kW</small>
+      </label>
+      <label class="hz-field">
+        <span class="hz-field__label">Wohnungslüftung</span>
+        <div class="hz-field__input-with-unit">
+          <input class="hz-field__input" type="number" step="0.1" min="0"
+            data-hz-bind="zuschlaege.qasLueftung" data-hz-type="number"
+            placeholder="0" />
+          <span class="hz-field__unit">kW</span>
+        </div>
+        <small class="hz-muted">Richtwert 0.3–0.8 kW</small>
+      </label>
+      <div class="hz-field">
+        <span class="hz-field__label">Qas (Summe)</span>
+        <div class="hz-qas-sum">
+          <span class="hz-qas-sum__val" data-kpi="qas">—</span>
+          <span class="hz-qas-sum__unit">kW</span>
+        </div>
+        <small class="hz-muted">wird automatisch in Qh addiert sobald &gt; 0</small>
       </div>
-      <small class="hz-muted">0 oder leer = kein Zuschlag. Richtwerte: Pool 1–3 kW, grosse Wohnungslüftung 0.3–0.8 kW.</small>
-    </label>
+    </div>
   </div>
-
-  <InfoBox title="Begriffe" icon="help">
-    <dl class="hz-info__grid">
-      <div><dt>Qoff</dt><dd>Sperrzeit-Aufschlag auf Qhl (FWS-Faktortabelle).</dd></div>
-      <div><dt>Qas</dt><dd>Zuschlag für verbundene Systeme (Lüftung, Pool, Solar).</dd></div>
-    </dl>
-  </InfoBox>
 
   <SectionNotes sectionKey="sektion4" sectionLabel="Sektion 4 (Zuschläge)" />
 </SectionWrapper>
 
 <style is:global>
   .hz-sperrzeit-switch { margin-bottom: 4px; }
-
-  .hz-sperrzeit-chips { margin-top: 10px; font-size: 13.5px; }
-
-  .hz-sperrzeit-chip {
-    display: inline-block;
-    margin: 4px 6px 0 0;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: var(--hz-blue-tint);
-    color: var(--hz-navy);
-    font-size: 12px;
-    font-family: var(--hz-font-heading);
-    font-weight: 600;
-  }
 
   .hz-block__head {
     display: flex;
@@ -114,9 +96,21 @@ import { SPERRZEIT_FAKTOREN } from '../../../lib/heizlast/constants.ts';
     margin-bottom: 10px;
   }
 
-  /* Sperrzeit-Block nur sichtbar, wenn der Hauptschalter an ist.
-     Wird in heizlast.astro per body.hz-sperrzeit-on gesteuert. */
+  /* Sperrzeit-Block nur sichtbar, wenn der Hauptschalter an ist. */
   body:not(.hz-sperrzeit-on) .hz-sperrzeit-block {
     display: none;
   }
+
+  /* Qas-Summen-Anzeige */
+  .hz-qas-sum {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    padding: 10px 14px;
+    border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
+    background: var(--hz-off-white);
+  }
+  .hz-qas-sum__val {
+    font-family: var(--hz-font-heading); font-weight: 700;
+    font-size: 18px; color: var(--hz-navy);
+  }
+  .hz-qas-sum__unit { font-size: 13px; color: var(--hz-mid-gray); }
 </style>

@@ -204,7 +204,7 @@ const {
     }
     .hz-topbar__inner {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto auto;
       align-items: center;
       gap: clamp(12px, 2vw, 20px);
       width: 100%; max-width: var(--hz-container-max); margin: 0 auto;
@@ -309,17 +309,13 @@ const {
     @media (max-width: 640px) {
       :root { --hz-header-height: 60px; }
       .hz-topbar__inner {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto auto;
+        justify-content: space-between;
         gap: 8px;
         padding: 8px clamp(10px, 4vw, 16px);
       }
       /* Phase 9 / Block M — Logo-Proportionen stabiler auf Mobile */
       .hz-brand__logo { height: 32px; width: auto; }
-      .hz-topbar__project {
-        padding: 0 8px;
-      }
-      .hz-topbar__project-name { font-size: 13.5px; }
-      .hz-topbar__project-meta { font-size: 11.5px; }
       .hz-topbar__actions { gap: 4px; }
       .hz-topbar__actions .hz-btn-icon {
         padding: 7px;
@@ -479,11 +475,6 @@ const {
       <a href="/" class="hz-brand" aria-label="Zur Thermowerk-Startseite">
         <img src="/img/logo.png" alt="Thermowerk" class="hz-brand__logo" />
       </a>
-
-      <div class="hz-topbar__project" aria-live="polite">
-        <span class="hz-topbar__project-name" data-hz-header-project>Neues Projekt</span>
-        <span class="hz-topbar__project-meta" data-hz-header-meta>Heizlast-Rechner</span>
-      </div>
 
       <div class="hz-topbar__actions">
         <button

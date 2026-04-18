@@ -117,6 +117,13 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
         }
       }
     }
+    // Paket C / Block G: qasPool + qasLueftung wurden neu eingefuehrt.
+    // Alte States ohne diese Felder bekommen 0.
+    if (obj.zuschlaege && typeof obj.zuschlaege === 'object') {
+      if (typeof obj.zuschlaege.qasPool !== 'number') obj.zuschlaege.qasPool = 0;
+      if (typeof obj.zuschlaege.qasLueftung !== 'number') obj.zuschlaege.qasLueftung = 0;
+    }
+    // Paket C / Block I: wohneinheiten entfernt — Feld wird beim Laden ignoriert (TypeScript).
     // Phase 9 / Block E: RaumInput um flaecheDirekt + beheizt erweitert.
     // Alte Eintraege ohne die neuen Felder bekommen beheizt=true (Default)
     // und flaecheDirekt=null; laenge/breite werden zu number|null normalisiert.

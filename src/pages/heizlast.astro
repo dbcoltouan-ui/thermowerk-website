@@ -120,10 +120,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   // ------------------------------------------------------------
   const raumList = document.getElementById('hz-raum-list');
   const raumSumEl = document.getElementById('hz-raum-sum-value');
-  const raumSumBhEl = document.getElementById('hz-raum-sum-beheizt');
-  const raumSumUhEl = document.getElementById('hz-raum-sum-unbeheizt');
+  const raumSumDetailEl = document.getElementById('hz-raum-sum-detail');
   const raumAddBtn = document.getElementById('hz-raum-add');
-  const raumApplyBtn = document.getElementById('hz-raum-apply');
 
   function renderRaumList() {
     if (!raumList) return;
@@ -136,19 +134,25 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
         const a = raumFlaeche(r);
         const hatDirekt = r.flaecheDirekt != null && r.flaecheDirekt > 0;
         const beheizt = r.beheizt !== false;
+        const unbeheizt = !beheizt;
         const laengeVal = r.laenge == null ? '' : r.laenge;
         const breiteVal = r.breite == null ? '' : r.breite;
         const direktVal = r.flaecheDirekt == null ? '' : r.flaecheDirekt;
+        // Placeholder: zeigt L×B Berechnung wenn verfügbar
+        const lbCalc = (r.laenge != null && r.breite != null && r.laenge > 0 && r.breite > 0)
+          ? fmt(r.laenge * r.breite, 1)
+          : 'm²';
+        const direktPlaceholder = hatDirekt ? '' : lbCalc;
         return `
           <div class="hz-raum-row" data-raum-id="${r.id}" data-direkt="${hatDirekt}" data-beheizt="${beheizt}">
             <input type="text" placeholder="z. B. Wohnzimmer" data-raum-field="name" value="${escapeHtml(r.name)}" />
             <input type="number" step="0.1" min="0" placeholder="m" data-raum-field="laenge" value="${laengeVal}" />
             <input type="number" step="0.1" min="0" placeholder="m" data-raum-field="breite" value="${breiteVal}" />
-            <input type="number" step="0.1" min="0" placeholder="m²" data-raum-field="flaecheDirekt" value="${direktVal}" />
-            <span class="hz-raum-flaeche">${a > 0 ? fmt(a, 2) + ' m²' : '—'}</span>
-            <label class="hz-raum-beheizt" title="Zählt in die Netto-EBF">
-              <input type="checkbox" data-raum-field="beheizt" ${beheizt ? 'checked' : ''} />
-            </label>
+            <input type="number" step="0.1" min="0" placeholder="${direktPlaceholder}" data-raum-field="flaecheDirekt" value="${direktVal}" />
+            <span class="hz-raum-flaeche${a > 0 ? '' : ''}">${a > 0 ? fmt(a, 1) + ' m²' : '—'}</span>
+            <div class="hz-raum-unbeheizt" title="Nicht beheizt — zählt nicht in Netto-EBF">
+              <input type="checkbox" data-raum-field="unbeheizt" ${unbeheizt ? 'checked' : ''} />
+            </div>
             <button type="button" class="hz-raum-remove" aria-label="Entfernen" data-raum-remove>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
             </button>
@@ -158,10 +162,13 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     }
     const agg = sumRaumFlaechenNetto(raeume);
     if (raumSumEl) raumSumEl.textContent = fmt(agg.netto, 1);
-    if (raumSumBhEl) raumSumBhEl.textContent = fmt(agg.beheizt, 1);
-    if (raumSumUhEl) raumSumUhEl.textContent = fmt(agg.unbeheizt, 1);
-    // Live-Modus: Netto-Summe direkt in EBF schreiben.
-    if (s.gebaeude.raeumeAktiv && agg.netto > 0) {
+    if (raumSumDetailEl) {
+      raumSumDetailEl.textContent = agg.unbeheizt > 0
+        ? `(unbeheizt: ${fmt(agg.unbeheizt, 1)} m² abgezogen)`
+        : '';
+    }
+    // H: Netto-Summe immer direkt in EBF schreiben (kein Live-Modus-Toggle mehr)
+    if (agg.netto > 0) {
       if (Math.abs(s.gebaeude.ebf - agg.netto) > 0.05) {
         heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: agg.netto });
       }
@@ -169,14 +176,6 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   }
 
   if (raumAddBtn) raumAddBtn.addEventListener('click', () => addRaum(''));
-  if (raumApplyBtn) raumApplyBtn.addEventListener('click', () => {
-    const s = heizlastState.get();
-    const agg = sumRaumFlaechenNetto(s.gebaeude.raeume);
-    if (agg.netto > 0) {
-      heizlastState.setKey('gebaeude', { ...s.gebaeude, ebf: agg.netto });
-      isDirty.set(true);
-    }
-  });
 
   function parseRaumNumber(value: string): number | null {
     if (value === '' || value == null) return null;
@@ -194,7 +193,7 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     const id = row.getAttribute('data-raum-id');
     const field = t.getAttribute('data-raum-field');
     if (!id || !field) return;
-    if (field === 'beheizt') return; // change-Handler kümmert sich
+    if (field === 'unbeheizt') return; // change-Handler kümmert sich
     const value = (t as HTMLInputElement).value;
     if (field === 'name') updateRaum(id, { name: value });
     else if (field === 'laenge') updateRaum(id, { laenge: parseRaumNumber(value) });
@@ -208,9 +207,10 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     if (!row) return;
     const id = row.getAttribute('data-raum-id');
     const field = t.getAttribute('data-raum-field');
-    if (!id || field !== 'beheizt') return;
+    if (!id || field !== 'unbeheizt') return;
     const checked = (t as HTMLInputElement).checked;
-    updateRaum(id, { beheizt: checked });
+    // "Unbeheizt" checked = room is NOT heated → beheizt = false
+    updateRaum(id, { beheizt: !checked });
   });
   document.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;
@@ -380,13 +380,48 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   });
 
   // ------------------------------------------------------------
-  // 6. M2-Methodenwahl: Phase 9 / Block B - entfernt.
-  //    Der Methoden-Enum (state.heizlast.method) wurde durch den Record
-  //    state.heizlast.methodsEnabled ersetzt. Jede Methode hat jetzt einen
-  //    eigenen Ja/Nein-Switch (Checkbox mit data-hz-bind), den bindings.ts
-  //    automatisch schreibt - kein zusaetzlicher Glue hier.
-  //    Bauperiode laeuft immer als Fallback (siehe compute.ts).
+  // 6. M2-Methodenwahl: Paket C / Block D — Radio-Tab-UI
+  //    Drei Radios (verbrauch / bstd / override) steuern Panel-Sichtbarkeit
+  //    und schreiben methodsEnabled in den State.
+  //    Bauperiode läuft immer als Fallback.
   // ------------------------------------------------------------
+  function activeMethodFromState(s: ReturnType<typeof heizlastState.get>): string {
+    const e = s.heizlast.methodsEnabled;
+    if (e && e.override) return 'override';
+    if (e && (e.bstd || e.messung)) return 'bstd';
+    return 'verbrauch';
+  }
+
+  function syncMethodPanels(s: ReturnType<typeof heizlastState.get>) {
+    const activeMethod = activeMethodFromState(s);
+    // Sync radio selection
+    const radios = document.querySelectorAll<HTMLInputElement>('input[name="hz-method-radio"]');
+    radios.forEach((radio) => {
+      radio.checked = radio.value === activeMethod;
+    });
+    // Show/hide panels
+    document.querySelectorAll('[data-method-panel]').forEach((el) => {
+      const panel = el as HTMLElement;
+      const isActive = panel.getAttribute('data-method-panel') === activeMethod;
+      panel.hidden = !isActive;
+    });
+  }
+
+  // Radio-Change: User wählt Methode → State aktualisieren
+  document.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || (t as HTMLInputElement).name !== 'hz-method-radio') return;
+    const val = (t as HTMLInputElement).value;
+    const s = heizlastState.get();
+    const newEnabled = {
+      verbrauch: val === 'verbrauch',
+      bstd: val === 'bstd',
+      messung: val === 'bstd', // Messung ist Alternative im bstd-Panel
+      override: val === 'override',
+    };
+    heizlastState.setKey('heizlast', { ...s.heizlast, methodsEnabled: newEnabled });
+    isDirty.set(true);
+  });
 
   // ------------------------------------------------------------
   // 7. WW-Panes (nur aktive Methode sichtbar)
@@ -394,13 +429,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
   function syncWwPanes() {
     const s = heizlastState.get();
     const method = s.warmwasser.method;
-    const active = Boolean(s.warmwasser.active);
     document.querySelectorAll('[data-ww-pane]').forEach((el) => {
       const isActive = el.getAttribute('data-ww-pane') === method;
       el.classList.toggle('is-active', isActive);
-    });
-    document.querySelectorAll('#sektion-3').forEach((sec) => {
-      sec.classList.toggle('hz-ww-off', !active);
     });
   }
 
@@ -468,28 +499,17 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setKpi('qwwTag', fmt(r.qwwTagVal?.value));
     setKpi('vwu', fmtInt(r.vwu?.value));
     setKpi('qoff', fmt(r.qoff?.value));
-    // Block D: Qas wird automatisch addiert, sobald ein Wert > 0 vorliegt.
-    const qasKw = Number(s.zuschlaege.qas);
-    const qasEff = Number.isFinite(qasKw) && qasKw > 0 ? qasKw : 0;
+    // G: Qas = Pool + Lüftung; automatisch summiert und in State zurückgeschrieben
+    const qasPool = Number(s.zuschlaege.qasPool) || 0;
+    const qasLueftung = Number(s.zuschlaege.qasLueftung) || 0;
+    const qasEff = qasPool + qasLueftung;
+    if (Math.abs((Number(s.zuschlaege.qas) || 0) - qasEff) > 0.001) {
+      heizlastState.setKey('zuschlaege', { ...s.zuschlaege, qas: qasEff });
+    }
     setKpi('qas', fmt(qasEff));
     setKpi('qh', fmt(r.qh?.value));
     setKpi('wwSpeicher', fmtInt(r.wwSpeicherGerundet));
     setKpi('puffer', fmtInt(r.pufferGerundet));
-
-    // Header: Projektinfo (Name + Meta-Zeile: Kunde · Adresse)
-    const headerName = document.querySelector('[data-hz-header-project]') as HTMLElement | null;
-    const headerMeta = document.querySelector('[data-hz-header-meta]') as HTMLElement | null;
-    if (headerName) {
-      const name = (s.projectName && s.projectName.trim()) || 'Neues Projekt';
-      if (headerName.textContent !== name) headerName.textContent = name;
-    }
-    if (headerMeta) {
-      const parts = [] as string[];
-      if (s.customerName && s.customerName.trim()) parts.push(s.customerName.trim());
-      if (s.address && s.address.trim()) parts.push(s.address.trim());
-      const meta = parts.length ? parts.join(' · ') : 'Heizlast-Rechner';
-      if (headerMeta.textContent !== meta) headerMeta.textContent = meta;
-    }
 
     // Zusammenfassung (Section 7)
     setSum('projectName', s.projectName || '—');
@@ -500,7 +520,6 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     setSum('lage', labelLage(s.gebaeude.lage));
     setSum('bauperiode', labelBauperiode(s.gebaeude.bauperiode));
     setSum('ebf', fmt(s.gebaeude.ebf, 0));
-    setSum('wohneinheiten', String(s.gebaeude.wohneinheiten || 1));
     setSum('tvoll', fmtInt(r.tvoll));
     setSum('qhl', fmt(r.qhlKorr?.value));
     setSum('qw', fmt(r.qw?.value));
@@ -523,6 +542,16 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
 
     // Block D: Body-Klasse gated den sichtbaren Sperrzeit-Block in Section 4.
     document.body.classList.toggle('hz-sperrzeit-on', !!s.zuschlaege.sperrzeitActive);
+
+    // B: WW-Content sichtbar/versteckt je nach warmwasser.active
+    document.body.classList.toggle('hz-ww-off', !s.warmwasser.active);
+    // WW-Speicher-Karte folgt ebenfalls (Section 6 hat .hz-ww-storage)
+
+    // C: Puffer-Block sichtbar wenn pufferActive
+    document.body.classList.toggle('hz-puffer-on', !!s.speicher.pufferActive);
+
+    // D: Methoden-Panels — aktive Panel einblenden, andere ausblenden
+    syncMethodPanels(s);
   }
 
   renderAll();
@@ -1004,30 +1033,26 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     openExportModal(btn);
   });
 
-  // Phase 9 / Block I: Neues Projekt mit vollstaendigem Confirm-Dialog + Export-Option
+  // Neues Projekt: einfacher Confirm-Dialog
   document.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement | null;
     if (!t) return;
     const btn = t.closest('[data-hz-action="new-project"]') as HTMLButtonElement | null;
     if (!btn) return;
-    const u = uiState.get();
-    const parts = [
-      'Aktuelles Projekt verwerfen? Eingaben gehen verloren.',
-    ];
-    if (u.isAuthenticated && isDirty.get()) {
-      parts.push('Aktuelle Änderungen wurden noch nicht in der Cloud gespeichert.');
-    }
-    parts.push('OK = Neues Projekt · Abbrechen + Export nochmal: zuerst "Abbrechen" klicken, dann Export verwenden.');
-    const doReset = confirm(parts.join('\n\n'));
-    if (!doReset) {
-      // Zweite Bestaetigung: direkt exportieren?
-      if (confirm('Projekt vorher exportieren (PDF oder JSON)?')) {
-        openExportModal(btn);
-      }
-      return;
-    }
+    if (!confirm('Neues Projekt starten? Aktuelle Eingaben gehen verloren.')) return;
     hardReset();
     setStatus('idle', 'Neues Projekt.');
+  });
+
+  // Daten löschen (K): clears localStorage state mit Bestätigung
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement | null;
+    if (!t) return;
+    const btn = t.closest('[data-hz-action="delete-data"]') as HTMLButtonElement | null;
+    if (!btn) return;
+    if (!confirm('Alle Eingaben löschen und auf Standardwerte zurücksetzen?')) return;
+    hardReset();
+    setStatus('idle', 'Daten gelöscht.');
   });
 
   // Phase 9 / Block I: beforeunload-Warnung, wenn ungespeicherte Aenderungen in der Cloud stehen

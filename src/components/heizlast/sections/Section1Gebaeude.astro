@@ -1,15 +1,9 @@
 ---
 // Section 1 — Projekt-Kopf + Gebaeude & Standort (M1)
-// - Oben ein schmaler Projekt-Block (Name, Anschrift, Kunde) damit sofort
-//   klar ist, um welches Projekt es geht.
-// - Darunter die eigentlichen Gebaeudedaten (Typ, Lage, Bauperiode, EBF,
-//   Wohneinheiten, tvoll-Profil, tvoll-Override).
-// - Aufklappbarer EBF-Helper: Zimmerliste mit Laenge x Breite -> Summe.
-// - Info-Box: Abkuerzungen erklaert.
-// - Phase 8: Projekt-Block auf Blue-tint statt Navy, keine tvoll-Side-Box.
+// Paket C: Wohneinheiten entfernt (I), EBF-Helfer umgebaut (H),
+//          InfoBox "Abkuerzungen" entfernt (F), kein Kicker mehr (F via SectionWrapper).
 
 import SectionWrapper from '../SectionWrapper.astro';
-import InfoBox from '../InfoBox.astro';
 import Toggle from '../Toggle.astro';
 import SectionNotes from '../SectionNotes.astro';
 import OverrideField from '../OverrideField.astro';
@@ -17,7 +11,6 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
 ---
 <SectionWrapper
   id="sektion-1"
-  kicker="01 - Projekt & Gebäude"
   title="Projekt & Gebäudedaten"
   subline="Projekt-Eckdaten und Stammdaten des Gebäudes als Grundlage der Berechnung."
   first
@@ -27,7 +20,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   <div class="hz-proj">
     <div class="hz-proj__title-row">
       <h3 class="hz-proj__heading">Projekt</h3>
-      <p class="hz-proj__hint hz-muted">Projekt-Bezeichnung und Anschrift. Weitere Angaben (Kunde, Notizen) im Abschlussblock.</p>
+      <p class="hz-proj__hint hz-muted">Projekt-Bezeichnung und Anschrift.</p>
     </div>
     <div class="hz-grid-2">
       <label class="hz-field">
@@ -88,8 +81,8 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
       <label class="hz-field">
         <span class="hz-field__label">Lage</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.lage" data-hz-type="string">
-          <option value="mittelland">Mittelland (unter 800 m ü. M.)</option>
-          <option value="hoehe">Ab 800 m ü. M.</option>
+          <option value="mittelland">Mittelland (unter 800 m ü. M.)</option>
+          <option value="hoehe">Ab 800 m ü. M.</option>
         </select>
       </label>
       <label class="hz-field">
@@ -102,32 +95,59 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
       </label>
     </div>
 
-    <div class="hz-grid-3">
-      <label class="hz-field">
-        <span class="hz-field__label">Energiebezugsfläche EBF</span>
-        <div class="hz-field__input-with-unit">
-          <input
-            class="hz-field__input"
-            type="number"
-            step="1"
-            min="10"
-            data-hz-bind="gebaeude.ebf"
-            data-hz-type="number"
-          />
-          <span class="hz-field__unit">m²</span>
-        </div>
-      </label>
-      <label class="hz-field">
-        <span class="hz-field__label">Wohneinheiten</span>
-        <input
-          class="hz-field__input"
-          type="number"
-          step="1"
-          min="1"
-          data-hz-bind="gebaeude.wohneinheiten"
-          data-hz-type="number"
-        />
-      </label>
+    <div class="hz-grid-3" style="margin-top: 14px;">
+      <!-- EBF + direkt darunter Zimmer-Helfer -->
+      <div>
+        <label class="hz-field">
+          <span class="hz-field__label">Energiebezugsfläche EBF</span>
+          <div class="hz-field__input-with-unit">
+            <input
+              class="hz-field__input"
+              id="hz-ebf-input"
+              type="number"
+              step="1"
+              min="10"
+              data-hz-bind="gebaeude.ebf"
+              data-hz-type="number"
+            />
+            <span class="hz-field__unit">m²</span>
+          </div>
+        </label>
+
+        <!-- Zimmer / Flächen-Helfer (H: direkt unter EBF, immer verfügbar) -->
+        <details class="hz-raum-details" id="hz-raum-details">
+          <summary class="hz-raum-summary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            Zimmer / Flächen
+          </summary>
+
+          <div class="hz-raum-body">
+            <div class="hz-raum-header">
+              <span>Bezeichnung</span>
+              <span>Länge (m)</span>
+              <span>Breite (m)</span>
+              <span>Fläche (m²)</span>
+              <span>Unbeheizt</span>
+              <span></span>
+            </div>
+            <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
+              <p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>
+            </div>
+            <div class="hz-raum-footer">
+              <button type="button" class="hz-btn hz-btn-ghost hz-btn--sm" id="hz-raum-add">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Zimmer hinzufügen
+              </button>
+              <span class="hz-raum-sum-line">
+                <span class="hz-muted">Netto-EBF:</span>
+                <strong id="hz-raum-sum-value">0.0</strong> m²
+                <span class="hz-muted" id="hz-raum-sum-detail"></span>
+              </span>
+            </div>
+          </div>
+        </details>
+      </div>
+
       <label class="hz-field">
         <span class="hz-field__label">Nutzungsprofil (tvoll)</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.tvollProfil" data-hz-type="string">
@@ -140,84 +160,25 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           ))}
         </select>
       </label>
-    </div>
 
-    <!-- tvoll mit Auto-Default + Override (Phase 9 / Block A + B) -->
-    <div class="hz-grid-3">
+      <!-- tvoll mit Auto-Default + Override (Phase 9 / Block A + B) -->
       <OverrideField
-        label="Vollbetriebsstunden"
-        symbol="tvoll · h/a"
+        label="Vollbetriebsstunden tvoll"
+        symbol="h/a"
         id="hz-tvoll"
         bindPath="gebaeude.tvollOverride"
         overridePath="gebaeude.tvoll"
-        defaultValue={1900}
+        defaultValue={2300}
         unit="h/a"
         source="FWS"
         type="number"
         step={50}
         min={1000}
         max={3500}
-        hint="Richtwert aus Profil + Lage."
+        hint="Richtwert aus Profil + Lage. Wird automatisch angepasst."
       />
     </div>
   </div>
-
-  <!-- EBF aus Zimmermassen berechnen -->
-  <Toggle label="EBF aus Zimmermassen berechnen" caption="Helfer" id="hz-ebf-helper">
-    <p class="hz-muted" style="margin-bottom: 10px;">
-      Pro Zimmer entweder Länge × Breite eintragen oder die Fläche direkt
-      angeben (letztere hat Vorrang). Unbeheizte Räume (Checkbox „Beheizt" aus)
-      werden nicht in die Netto-EBF einbezogen, sondern separat ausgewiesen.
-      <strong>Übernehmen</strong> schreibt die Netto-EBF in das Feld oben,
-      <strong>Live</strong> aktualisiert sie bei jeder Änderung.
-    </p>
-
-    <div class="hz-raum-header">
-      <span>Bezeichnung</span>
-      <span>Länge</span>
-      <span>Breite</span>
-      <span>Fläche direkt</span>
-      <span>Fläche</span>
-      <span>Beheizt</span>
-      <span></span>
-    </div>
-    <div id="hz-raum-list" class="hz-raum-list" aria-live="polite">
-      <p class="hz-muted hz-raum-empty">Noch keine Zimmer erfasst.</p>
-    </div>
-
-    <div class="hz-raum-actions">
-      <button type="button" class="hz-btn hz-btn-ghost" id="hz-raum-add">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Zimmer hinzufügen
-      </button>
-      <div class="hz-raum-actions__right">
-        <label class="hz-raum-live">
-          <input type="checkbox" data-hz-bind="gebaeude.raeumeAktiv" data-hz-type="boolean" />
-          <span>Live-Modus (EBF automatisch übernehmen)</span>
-        </label>
-        <div class="hz-raum-sum">
-          <span class="hz-raum-sum__part">beheizt: <strong id="hz-raum-sum-beheizt">0.0</strong> m²</span>
-          <span class="hz-raum-sum__sep">·</span>
-          <span class="hz-raum-sum__part">abgezogen (unbeheizt): <strong id="hz-raum-sum-unbeheizt">0.0</strong> m²</span>
-          <span class="hz-raum-sum__sep">·</span>
-          <span class="hz-raum-sum__part hz-raum-sum__netto">Netto-EBF: <strong id="hz-raum-sum-value">0.0</strong> m²</span>
-        </div>
-        <button type="button" class="hz-btn hz-btn-dark" id="hz-raum-apply">
-          In EBF übernehmen
-        </button>
-      </div>
-    </div>
-  </Toggle>
-
-  <!-- Info-Box -->
-  <InfoBox title="Abkürzungen erklärt" icon="help" subtitle="Begriffe dieser Sektion">
-    <dl class="hz-info__grid">
-      <div><dt>EBF</dt><dd>Energiebezugsfläche — beheizte Nutzfläche des Gebäudes (SIA&nbsp;380/1).</dd></div>
-      <div><dt>tvoll</dt><dd>Vollbetriebsstunden pro Jahr, aus FWS-Tabelle. Wird als Default-Nenner für Qhl genutzt.</dd></div>
-      <div><dt>Bauperiode</dt><dd>Liefert Default-Kennwerte (kWh/m²·a, W/m²) falls keine Verbrauchsdaten vorliegen.</dd></div>
-      <div><dt>Mittelland / Höhe</dt><dd> &lt;800 m ü. M. bzw. ≥ 800 m — beeinflusst tvoll.</dd></div>
-    </dl>
-  </InfoBox>
 
   <SectionNotes sectionKey="sektion1" sectionLabel="Sektion 1 (Projekt &amp; Gebäude)" />
 </SectionWrapper>
@@ -312,86 +273,108 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     background: var(--hz-off-white);
   }
 
-  /* Zimmer-Helper */
+  /* Zimmer-Helfer (Paket C / H) — als <details> direkt unter EBF */
+  .hz-raum-details {
+    margin-top: 8px;
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-sm);
+    background: var(--hz-off-white);
+    overflow: hidden;
+  }
+  .hz-raum-summary {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: var(--hz-font-heading); font-weight: 600; font-size: 13.5px;
+    color: var(--hz-navy);
+    list-style: none;
+    user-select: none;
+  }
+  .hz-raum-summary::-webkit-details-marker { display: none; }
+  .hz-raum-summary:hover { background: var(--hz-blue-tint); }
+  .hz-raum-body {
+    padding: 10px 12px 12px;
+    border-top: 1px solid var(--hz-border);
+    background: var(--hz-white);
+  }
+
   .hz-raum-header, .hz-raum-row {
     display: grid;
-    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 58px 44px;
-    gap: 10px;
+    grid-template-columns: 1.8fr 1fr 1fr 1.1fr 64px 40px;
+    gap: 8px;
     align-items: center;
   }
   .hz-raum-header {
-    padding: 0 4px 8px;
-    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0 4px 6px;
+    font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--hz-mid-gray); font-weight: 600;
     border-bottom: 1px solid var(--hz-border);
   }
   .hz-raum-row {
-    padding: 8px 4px;
+    padding: 7px 4px;
     border-bottom: 1px dashed var(--hz-border);
   }
   .hz-raum-row input[type="text"], .hz-raum-row input[type="number"] {
-    padding: 8px 10px;
+    padding: 7px 9px;
     border: 1px solid var(--hz-border); border-radius: var(--hz-radius-sm);
     background: var(--hz-white);
-    font-family: var(--hz-font-body); font-size: 14.5px;
+    font-family: var(--hz-font-body); font-size: 14px;
+    width: 100%; min-width: 0;
   }
   .hz-raum-row input:focus { outline: 0; border-color: var(--hz-navy); box-shadow: 0 0 0 3px rgba(27,42,74,0.08); }
-  /* Wenn flaecheDirekt gesetzt ist, bekommt die Zeile `data-direkt="true"` und
-     Länge/Breite werden visuell gedämpft (aber bleiben bedienbar). */
+  /* Wenn flaecheDirekt gesetzt ist, L/B visuell gedämpft */
   .hz-raum-row[data-direkt="true"] input[data-raum-field="laenge"],
   .hz-raum-row[data-direkt="true"] input[data-raum-field="breite"] {
-    opacity: 0.45;
-    background: var(--hz-off-white);
+    opacity: 0.4; background: var(--hz-off-white);
   }
-  .hz-raum-row[data-beheizt="false"] { background: rgba(200, 200, 210, 0.12); }
-  .hz-raum-flaeche { font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); }
-  .hz-raum-beheizt {
+  /* Unbeheizt-Zeile: leichter grauer Hintergrund */
+  .hz-raum-row[data-beheizt="false"] { background: rgba(200, 200, 210, 0.10); }
+  /* hz-raum-flaeche: desktop hidden (flaecheDirekt input is col 4),
+     only shown on mobile via grid-area below */
+  .hz-raum-row .hz-raum-flaeche { display: none; }
+  .hz-raum-row .hz-raum-flaeche.is-derived { color: var(--hz-mid-gray); font-weight: 400; }
+  .hz-raum-unbeheizt {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 12px; color: var(--hz-mid-gray);
   }
-  .hz-raum-beheizt input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--hz-navy); }
+  .hz-raum-unbeheizt input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--hz-navy); }
   .hz-raum-remove {
-    border: 0; background: transparent; padding: 6px;
+    border: 0; background: transparent; padding: 5px;
     color: var(--hz-mid-gray); border-radius: var(--hz-radius-sm);
   }
   .hz-raum-remove:hover { color: var(--hz-red); background: var(--hz-red-soft); }
-  .hz-raum-empty { padding: 16px 0; font-style: italic; }
-  .hz-raum-list { margin: 6px 0; }
-  .hz-raum-actions {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    margin-top: 14px; flex-wrap: wrap;
-  }
-  .hz-raum-actions__right { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .hz-raum-live { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--hz-mid-gray); }
-  .hz-raum-live input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--hz-navy); }
-  .hz-raum-sum {
-    display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
-    font-size: 14px; color: var(--hz-navy);
-  }
-  .hz-raum-sum strong { font-family: var(--hz-font-heading); font-size: 16px; }
-  .hz-raum-sum__sep { color: var(--hz-mid-gray); }
-  .hz-raum-sum__netto strong { color: var(--hz-navy); }
+  .hz-raum-empty { padding: 12px 0; font-style: italic; font-size: 13.5px; }
+  .hz-raum-list { margin: 4px 0; }
 
-  @media (max-width: 820px) {
-    .hz-raum-header, .hz-raum-row {
-      grid-template-columns: 1.2fr 0.8fr 0.8fr 0.9fr 0.9fr auto 44px;
-    }
+  .hz-raum-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    margin-top: 10px; flex-wrap: wrap;
   }
+  .hz-raum-sum-line {
+    font-size: 13.5px; color: var(--hz-navy);
+    display: inline-flex; align-items: baseline; gap: 5px;
+  }
+  .hz-raum-sum-line strong { font-family: var(--hz-font-heading); font-size: 15px; }
+
+  .hz-btn--sm { font-size: 13.5px; padding: 7px 14px; }
+
+  /* Mobile-Anpassungen Zimmer-Tabelle */
   @media (max-width: 640px) {
     .hz-raum-header { display: none; }
     .hz-raum-row {
-      grid-template-columns: 1fr 1fr auto 44px;
+      grid-template-columns: 1fr 1fr 40px;
       grid-template-areas:
-        "name name beheizt remove"
-        "laenge breite direkt direkt"
-        "flaeche flaeche flaeche flaeche";
-      gap: 8px;
+        "name name remove"
+        "laenge breite unbeheizt"
+        "flaeche flaeche flaeche";
+      gap: 6px;
     }
     .hz-raum-row input[data-raum-field="name"] { grid-area: name; }
     .hz-raum-row input[data-raum-field="laenge"] { grid-area: laenge; }
     .hz-raum-row input[data-raum-field="breite"] { grid-area: breite; }
-    .hz-raum-row input[data-raum-field="flaecheDirekt"] { grid-area: direkt; }
-    .hz-raum-row .hz-raum-flaeche { grid-area: flaeche; }
-    .hz-raum-row .hz-raum-beheizt { grid-area: beheizt; }
+    .hz-raum-row input[data-raum-field="flaecheDirekt"] { display: none; }
+    .hz-raum-row .hz-raum-flaeche { display: block; grid-area: flaeche; text-align: left; font-family: var(--hz-font-heading); font-weight: 600; color: var(--hz-navy); font-size: 13.5px; }
+    .hz-raum-row .hz-raum-unbeheizt { grid-area: unbeheizt; justify-content: flex-end; }
     .hz-raum-row .hz-raum-remove { grid-area: remove; }
   }
 </style>

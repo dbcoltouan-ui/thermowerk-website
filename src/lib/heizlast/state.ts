@@ -86,7 +86,6 @@ export interface GebaeudeState {
   lage: Lage;
   bauperiode: string; // ID aus constants.BAUPERIODEN
   ebf: number; // m²
-  wohneinheiten: number;
   tvollProfil: TvollProfil;
   /** Override der Vollbetriebsstunden. null = Richtwert aus tvollRichtwert verwenden. */
   tvollOverride: number | null;
@@ -159,6 +158,10 @@ export interface ZuschlaegeState {
    *  Migrations-Gruenden erhalten. */
   qasActive: boolean;
   qas: number; // kW Zuschlag fuer verbundene Systeme (Lueftung, Pool u. Ae.)
+  /** Paket C / Block G — Pool-Leistung (kW). Zusammen mit qasLueftung automatisch in qas summiert. */
+  qasPool: number;
+  /** Paket C / Block G — Lueftungs-Leistung (kW). Zusammen mit qasPool automatisch in qas summiert. */
+  qasLueftung: number;
 }
 
 export interface SpeicherState {
@@ -268,7 +271,6 @@ export function createDefaultState(): HeizlastState {
       lage: 'mittelland',
       bauperiode: '1971_80',
       ebf: 180,
-      wohneinheiten: 1,
       tvollProfil: 'wohnen_mitWW',
       tvollOverride: null,
       raeume: [],
@@ -319,6 +321,8 @@ export function createDefaultState(): HeizlastState {
       toff: 2,
       qasActive: false,
       qas: 0,
+      qasPool: 0,
+      qasLueftung: 0,
     },
 
     speicher: {
