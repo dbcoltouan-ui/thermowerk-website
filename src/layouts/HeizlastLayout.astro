@@ -67,7 +67,7 @@ const {
          Container skaliert mit dem Viewport, aber nie über 960 px.
          Das sorgt auf breiten Bildschirmen (1440–1920 px) fuer ruhige
          Raender links/rechts. */
-      --hz-container-max: min(92vw, 960px);
+      --hz-container-max: min(86vw, 860px); /* Paket D / A+I */
       --hz-gap-section: clamp(56px, 8svh, 88px);
       --hz-gap-row: clamp(16px, 2.2vw, 28px);
       --hz-gap-card: clamp(10px, 1.4vw, 18px);
@@ -144,30 +144,70 @@ const {
        breit werden. Ueber `[data-size]` laesst sich jede Zelle fein-
        justieren. Mobile-Default bleibt full-width via Phase-8-Regel. */
     :root {
-      --hz-input-max-number: 240px;
-      --hz-input-max-select: 320px;
-      --hz-input-max-unit: 220px;
+      /* Paket D / K — engere Feldbreiten, Text-Token neu */
+      --hz-input-max-number: 220px;
+      --hz-input-max-select: 280px;
+      --hz-input-max-unit: 200px;
+      --hz-input-max-text: 520px;
     }
-    .hz-scope .hz-field__input-with-unit { max-width: var(--hz-input-max-unit); }
-    .hz-scope .hz-field:not([data-size]) > .hz-field__input[type="number"] { max-width: var(--hz-input-max-number); }
-    .hz-scope .hz-field:not([data-size]) > select.hz-field__input { max-width: var(--hz-input-max-select); }
-    .hz-scope .hz-field[data-size="xs"] .hz-field__input,
+    /* Paket D / K — Globale Eingabe-Breiten-Governance.
+       Alle Inputs sind standardmässig auf --hz-input-max-number begrenzt.
+       Selects bekommen --hz-input-max-select, Textareas --hz-input-max-text.
+       data-size="xs|sm|md|lg|full" überschreibt pro Feld.
+       input-with-unit-Wrapper ist inline-flex und begrenzt auf --hz-input-max-unit.
+       Mobile: alle Felder full-width via Media-Query. */
+    .hz-scope .hz-field { max-width: 100%; }
+    .hz-scope .hz-field__input { width: 100%; max-width: var(--hz-input-max-number); }
+    .hz-scope select.hz-field__input { max-width: var(--hz-input-max-select); }
+    .hz-scope textarea.hz-field__input { max-width: var(--hz-input-max-text); }
+    /* data-size overrides */
+    .hz-scope .hz-field[data-size="xs"] .hz-field__input  { max-width: 120px; }
+    .hz-scope .hz-field[data-size="sm"] .hz-field__input  { max-width: 180px; }
+    .hz-scope .hz-field[data-size="md"] .hz-field__input  { max-width: 280px; }
+    .hz-scope .hz-field[data-size="lg"] .hz-field__input  { max-width: 420px; }
+    .hz-scope .hz-field[data-size="full"] .hz-field__input { max-width: 100%; }
+    /* data-size for selects */
+    .hz-scope .hz-field[data-size="xs"] select.hz-field__input  { max-width: 120px; }
+    .hz-scope .hz-field[data-size="sm"] select.hz-field__input  { max-width: 180px; }
+    .hz-scope .hz-field[data-size="md"] select.hz-field__input  { max-width: 280px; }
+    .hz-scope .hz-field[data-size="lg"] select.hz-field__input  { max-width: 420px; }
+    .hz-scope .hz-field[data-size="full"] select.hz-field__input { max-width: 100%; }
+    /* input-with-unit */
+    .hz-scope .hz-field__input-with-unit { display: inline-flex; max-width: var(--hz-input-max-unit); }
+    .hz-scope .hz-field__input-with-unit > input { flex: 1 1 auto; max-width: 100%; }
     .hz-scope .hz-field[data-size="xs"] .hz-field__input-with-unit { max-width: 120px; }
-    .hz-scope .hz-field[data-size="sm"] .hz-field__input,
     .hz-scope .hz-field[data-size="sm"] .hz-field__input-with-unit { max-width: 180px; }
-    .hz-scope .hz-field[data-size="md"] .hz-field__input,
     .hz-scope .hz-field[data-size="md"] .hz-field__input-with-unit { max-width: 280px; }
-    .hz-scope .hz-field[data-size="lg"] .hz-field__input,
     .hz-scope .hz-field[data-size="lg"] .hz-field__input-with-unit { max-width: 420px; }
-    .hz-scope .hz-field[data-size="full"] .hz-field__input,
     .hz-scope .hz-field[data-size="full"] .hz-field__input-with-unit { max-width: 100%; }
+    /* Grids: max-content damit Felder nicht aufgezogen werden (H/K).
+       hz-grid-2/3 nutzen max-content — Whitespace rechts bei schmalen Feldern.
+       hz-grid-4 nutzt 1fr (gleichmässige 4-Spalten, z.B. Projekt-Kopf). */
+    .hz-scope .hz-grid-2 {
+      display: grid; grid-template-columns: repeat(2, minmax(0, max-content));
+      gap: 14px var(--hz-gap-row); justify-content: start;
+    }
+    .hz-scope .hz-grid-3 {
+      display: grid; grid-template-columns: repeat(3, minmax(0, max-content));
+      gap: 14px var(--hz-gap-row); justify-content: start;
+    }
+    .hz-scope .hz-grid-4 {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px var(--hz-gap-row);
+    }
+    @media (max-width: 780px) {
+      .hz-scope .hz-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 720px) {
+      .hz-scope .hz-grid-2, .hz-scope .hz-grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .hz-scope .hz-grid-4 { grid-template-columns: 1fr; }
       .hz-scope .hz-field__input-with-unit,
       .hz-scope .hz-field .hz-field__input,
       .hz-scope .hz-field[data-size] .hz-field__input,
-      .hz-scope .hz-field[data-size] .hz-field__input-with-unit {
-        max-width: 100%;
-      }
+      .hz-scope .hz-field[data-size] .hz-field__input-with-unit,
+      .hz-scope .hz-field[data-size] select.hz-field__input { max-width: 100%; }
     }
     .hz-stack > * + * { margin-top: 12px; }
     .hz-muted { color: var(--hz-mid-gray); }
@@ -208,13 +248,13 @@ const {
       align-items: center;
       gap: clamp(12px, 2vw, 20px);
       width: 100%; max-width: var(--hz-container-max); margin: 0 auto;
-      padding: 10px clamp(12px, 3vw, 24px);
+      padding: 10px clamp(16px, 3vw, 24px); /* D: gleiche Innenabstaende wie .hz-container */
     }
     .hz-brand {
       display: inline-flex; align-items: center; gap: 10px;
       flex: 0 0 auto;
     }
-    .hz-brand__logo { height: 30px; width: auto; }
+    .hz-brand__logo { height: 30px; width: auto; object-fit: contain; } /* C */
 
     /* Header-Projekt-Info (Mitte) */
     .hz-topbar__project {
@@ -314,8 +354,8 @@ const {
         gap: 8px;
         padding: 8px clamp(10px, 4vw, 16px);
       }
-      /* Phase 9 / Block M — Logo-Proportionen stabiler auf Mobile */
-      .hz-brand__logo { height: 32px; width: auto; }
+      /* Paket D / C — Logo-Proportionen stabil auf Mobile */
+      .hz-brand__logo { height: 32px; width: auto; object-fit: contain; }
       .hz-topbar__actions { gap: 4px; }
       .hz-topbar__actions .hz-btn-icon {
         padding: 7px;
@@ -324,11 +364,14 @@ const {
       }
     }
 
-    /* Phase 9 / Block M — Mobile-Polish: konservative Worttrennung,
-       keine mid-word-Breaks. Sublines und Sektions-Titel bekommen
-       text-wrap: balance, damit Umbrueche nicht ungluecklich fallen. */
+    /* Paket D / B — Auto-Hyphenation. Browser trennt ab 8 Zeichen,
+       min 3 vor/nach Trennstrich. Besser als manual, da Browser
+       Sprachwoerterbuch kennt. overflow-wrap: break-word verhindert
+       Overflow bei langen Tokens. */
     .hz-scope {
-      hyphens: manual;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      hyphenate-limit-chars: 8 3 3;
       overflow-wrap: break-word;
       word-break: normal;
     }

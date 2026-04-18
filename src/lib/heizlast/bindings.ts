@@ -209,12 +209,16 @@ export function bootBindings(root: ParentNode = document): () => void {
   };
 }
 
-/** Liest aktuelle State-Werte und schreibt sie in alle data-hz-bind-Elemente. */
+/** Liest aktuelle State-Werte und schreibt sie in alle data-hz-bind-Elemente.
+ *  Paket D / E: Das aktuell fokussierte Element wird uebersprungen —
+ *  verhindert iOS-Tastatur-Kollaps und Komma-Verlust beim Tippen. */
 export function syncDomFromState(root: ParentNode = document): void {
   if (typeof window === 'undefined') return;
   const state = heizlastState.get();
+  const active = document.activeElement;
   const nodes = root.querySelectorAll<HTMLElement>('[data-hz-bind]');
   nodes.forEach((el) => {
+    if (el === active) return; // fokussiertes Feld nie ueberschreiben (iOS-Fix)
     const m = meta(el);
     if (!m) return;
     const value = getPath(state, m.path);

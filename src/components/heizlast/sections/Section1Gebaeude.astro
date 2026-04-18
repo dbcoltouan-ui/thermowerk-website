@@ -16,24 +16,24 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   first
 >
 
-  <!-- Projekt-Block -->
+  <!-- Projekt-Block (Paket D / J: 4-Spalten-Layout) -->
   <div class="hz-proj">
     <div class="hz-proj__title-row">
       <h3 class="hz-proj__heading">Projekt</h3>
       <p class="hz-proj__hint hz-muted">Projekt-Bezeichnung und Anschrift.</p>
     </div>
-    <div class="hz-grid-2">
-      <label class="hz-field">
+    <div class="hz-grid-4">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Projektname</span>
         <input
           class="hz-field__input"
           type="text"
-          placeholder="z. B. EFH Meier Moosseedorf"
+          placeholder="z. B. EFH Meier"
           data-hz-bind="projectName"
           data-hz-type="string"
         />
       </label>
-      <label class="hz-field">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Anschrift</span>
         <input
           class="hz-field__input"
@@ -43,18 +43,18 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           data-hz-type="string"
         />
       </label>
-      <label class="hz-field">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Kunde</span>
         <input
           class="hz-field__input"
           type="text"
-          placeholder="Name der Bauherrschaft"
+          placeholder="Bauherrschaft"
           data-hz-bind="customerName"
           data-hz-type="string"
         />
       </label>
-      <label class="hz-field">
-        <span class="hz-field__label">Projektstatus</span>
+      <label class="hz-field" data-size="sm">
+        <span class="hz-field__label">Status</span>
         <select class="hz-field__input" data-hz-bind="status" data-hz-type="string">
           <option value="arbeit">In Arbeit</option>
           <option value="offeriert">Offeriert</option>
@@ -66,11 +66,13 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     </div>
   </div>
 
-  <!-- Gebaeudedaten -->
+  <!-- Gebaeudedaten (Paket D / J: Zeile 1 = Typ/Lage/Bauperiode/EBF, Zeile 2 = Profil/tvoll) -->
   <div class="hz-block">
     <h3 class="hz-block__heading">Gebäude &amp; Standort</h3>
-    <div class="hz-grid-3">
-      <label class="hz-field">
+
+    <!-- Zeile 1: 4 Spalten -->
+    <div class="hz-grid-4">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Gebäudetyp</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.typ" data-hz-type="string">
           <option value="efh">Einfamilienhaus (EFH)</option>
@@ -78,14 +80,14 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           <option value="buero">Büro / Gewerbe</option>
         </select>
       </label>
-      <label class="hz-field">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Lage</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.lage" data-hz-type="string">
-          <option value="mittelland">Mittelland (unter 800 m ü. M.)</option>
+          <option value="mittelland">Mittelland (≤ 800 m ü. M.)</option>
           <option value="hoehe">Ab 800 m ü. M.</option>
         </select>
       </label>
-      <label class="hz-field">
+      <label class="hz-field" data-size="sm">
         <span class="hz-field__label">Bauperiode</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.bauperiode" data-hz-type="string">
           {BAUPERIODEN.map((b) => (
@@ -93,13 +95,11 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           ))}
         </select>
       </label>
-    </div>
 
-    <div class="hz-grid-3" style="margin-top: 14px;">
-      <!-- EBF + direkt darunter Zimmer-Helfer -->
+      <!-- EBF + Zimmer-Helfer -->
       <div>
         <label class="hz-field">
-          <span class="hz-field__label">Energiebezugsfläche EBF</span>
+          <span class="hz-field__label">EBF</span>
           <div class="hz-field__input-with-unit">
             <input
               class="hz-field__input"
@@ -114,7 +114,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           </div>
         </label>
 
-        <!-- Zimmer / Flächen-Helfer (H: direkt unter EBF, immer verfügbar) -->
+        <!-- Zimmer / Flächen-Helfer (direkt unter EBF) -->
         <details class="hz-raum-details" id="hz-raum-details">
           <summary class="hz-raum-summary">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
@@ -147,8 +147,11 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
           </div>
         </details>
       </div>
+    </div>
 
-      <label class="hz-field">
+    <!-- Zeile 2: Nutzungsprofil + tvoll (max-content Columns) -->
+    <div class="hz-grid-2" style="margin-top: 14px;">
+      <label class="hz-field" data-size="md">
         <span class="hz-field__label">Nutzungsprofil (tvoll)</span>
         <select class="hz-field__input" data-hz-bind="gebaeude.tvollProfil" data-hz-type="string">
           {VOLLASTSTUNDEN.filter((r) => r.lage === 'mittelland').map((r) => (
@@ -194,7 +197,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     border-radius: var(--hz-radius-lg);
   }
   .hz-proj__title-row {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    display: flex; align-items: baseline; justify-content: flex-start; gap: 16px; /* H: kein space-between */
     margin-bottom: 14px; flex-wrap: wrap;
   }
   .hz-proj__heading {
@@ -226,15 +229,10 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
     color: var(--hz-navy); margin: 0 0 14px;
   }
 
-  /* Input-Felder (generisch) */
-  .hz-grid-2 {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px 18px;
-  }
-  .hz-grid-3 {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px 18px;
-  }
+  /* Input-Felder (generisch) — Basisregeln hier; .hz-scope-Regeln in HeizlastLayout
+     haben hoehere Spezifitaet und definieren max-content-Verhalten. */
+  .hz-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); gap: 14px 18px; justify-content: start; }
+  .hz-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, max-content)); gap: 14px 18px; justify-content: start; }
   .hz-grid-3 + .hz-grid-3 { margin-top: 14px; }
 
   .hz-field { display: flex; flex-direction: column; gap: 6px; }
@@ -347,7 +345,7 @@ import { VOLLASTSTUNDEN, BAUPERIODEN } from '../../../lib/heizlast/constants.ts'
   .hz-raum-list { margin: 4px 0; }
 
   .hz-raum-footer {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    display: flex; align-items: center; justify-content: flex-start; gap: 12px; /* H: kompakt */
     margin-top: 10px; flex-wrap: wrap;
   }
   .hz-raum-sum-line {

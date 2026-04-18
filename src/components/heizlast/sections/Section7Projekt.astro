@@ -162,7 +162,7 @@ import SectionNotes from '../SectionNotes.astro';
     font-size: clamp(26px, 3.5vw, 34px); color: var(--hz-navy); line-height: 1.1;
   }
 
-  /* Endergebnis-Karte (Phase 9 / Block F) */
+  /* Endergebnis-Karte (Phase 9 / Block F; Paket D / G: max-width damit Zahlen kompakt bleiben) */
   .hz-endresult {
     padding: 22px 24px 20px;
     background: var(--hz-white);
@@ -170,6 +170,7 @@ import SectionNotes from '../SectionNotes.astro';
     border-top: 3px solid var(--hz-red);
     border-radius: 2px;
     margin-bottom: 16px;
+    max-width: 560px; /* G: Endergebnis-Block nicht auf volle Container-Breite ziehen */
   }
   .hz-endresult__title {
     font-family: var(--hz-font-heading); font-weight: 700; color: var(--hz-navy);

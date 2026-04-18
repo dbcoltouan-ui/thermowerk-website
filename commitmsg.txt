@@ -1,16 +1,13 @@
-Phase 10 / Paket C: UI-Cleanup (Defaults, Toggles, Methoden-UX, EBF, Header)
+Phase 10 / Paket D: Layout-Polish + Mobile-Bugs (Desktop-Raender, Logo, Tastatur-Fix)
 
-A: OverrideField zeigt aufgeloeste Defaults direkt (tvoll, deltaT, Speichertemperaturen)
-B: WW-Sektion kollabiert vollstaendig wenn Toggle OFF (body.hz-ww-off Pattern)
-C: Speicher - WW-Speicher folgt warmwasser.active; Puffer: Ja/Nein-Toggle (body.hz-puffer-on)
-D: Section2 - Radio-Tab-UI (Verbrauch/Betriebsstunden/Override); Messung im bstd-Panel integriert; Bauperiode nur als Fallback-Info; Methoden-Switches entfernt; FWS-InfoBox entfernt
-E: Sanierungen - Titel aktualisiert, kein Sanierungsabzug-Toggle (auto-aktiv bei Eintraegen)
-F: Kicker-Linie, Aside-KpiCards und alle InfoBoxen entfernt (SectionWrapper + alle Sektionen)
-G: Section4 in zwei Bloecke aufgeteilt: (1) Sperrzeit Toggle+toff, (2) Pool+Lueftung als separate kW-Felder mit Qas-Autosumme
-H: EBF-Zimmerliste direkt unter EBF-Feld als details-Accordion; kein Uebernehmen-Button; immer Auto-EBF; Beheizt -> Unbeheizt invertiert
-I: Wohneinheiten aus State, Section1, Section7 und Storage-Migration entfernt
-J: Projektname-Mitte aus Header entfernt; Header-Grid vereinfacht auf auto auto
-K: Daten-loeschen-Button mit Confirm in Section7; Neues-Projekt-Confirm vereinfacht
-L: Doppeltitel durch Kicker-Entfernung geprueft und bereinigt
+A+I: --hz-container-max auf min(86vw, 860px) reduziert
+B: hyphens: auto + hyphenate-limit-chars fuer bessere Mobile-Worttrennung
+C: Logo object-fit: contain auf Desktop und Mobile
+D: Topbar-Innenabstand auf clamp(16px, 3vw, 24px) — deckt sich mit .hz-container
+E: syncDomFromState ueberspringt document.activeElement (iOS-Tastatur-Fix)
+G: .hz-endresult max-width: 560px — Qh-Block sitzt kompakt
+H: .hz-proj__title-row + .hz-raum-footer von space-between auf flex-start
+J: Section 1 auf hz-grid-4 umgebaut (4-Spalten Projekt + Gebaeude)
+K: Globale Input-Breiten-Governance in HeizlastLayout (max-content Grids, data-size-Tokens, Input-max-widths)
 
 Tests: 49 + 33 gruen
