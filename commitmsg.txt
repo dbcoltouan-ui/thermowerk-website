@@ -1,5 +1,6 @@
-Heizlast: noindex/nofollow + robots.txt (Seite aus SEO ausschliessen)
+Favicon: SVG-Logo in beiden Layouts + PNG-Fallback
 
-- HeizlastLayout.astro: meta robots noindex/nofollow/noarchive/nosnippet + googlebot-Tag
-- public/robots.txt: Disallow /heizlast + /heizlast/
-- Design + Funktionalitaet unveraendert
+- HeizlastLayout.astro: kaputter /img/favicon.png Verweis ersetzt durch
+  logo-thermowerk.svg + logo.png als alternate
+- Layout.astro: Favicon-Links ergaenzt (vorher keiner gesetzt)
+- Browser-Tab zeigt jetzt auf allen Seiten das Thermowerk-Logo
