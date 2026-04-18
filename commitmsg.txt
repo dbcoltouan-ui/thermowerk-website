@@ -1,1 +1,1 @@
-Phase 10 / Paket D2: Container schmaler, Feld-Fluchten, Header-Buttons, Notizen-Fix
+chore: test-state-out.log aus Git entfernen + gitignore

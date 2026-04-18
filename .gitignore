@@ -13,3 +13,4 @@ _backup-*.zip
 # Test-Run Logs (nicht versionieren)
 test-out.log
 test-state.log
+test-state-out.log
