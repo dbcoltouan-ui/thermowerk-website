@@ -1,0 +1,26 @@
+---
+// SectionWrapper v2 — Port aus mockups/section-1.html.
+// Nutzt .section / .section__head / .section__title / .section__intro.
+// Bewusst schlank, Inhalt kommt via <slot />. Kein eigenes CSS — alle
+// Styles liegen global in HeizlastLayoutV2.astro.
+
+interface Props {
+  id?: string;
+  title: string;
+  intro?: string | null;
+  /** Unterstreicht die Section-Nummer als `sektion-X`-Anker. */
+  anchor?: string;
+}
+
+const { id, title, intro = null, anchor } = Astro.props;
+const sectionId = id ?? anchor ?? undefined;
+---
+<section class="section" id={sectionId}>
+  <header class="section__head">
+    <h1 class="section__title">{title}</h1>
+  </header>
+
+  {intro && <p class="section__intro" set:html={intro} />}
+
+  <slot />
+</section>

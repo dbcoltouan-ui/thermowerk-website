@@ -1,0 +1,44 @@
+---
+// Notes v2 — aufklappbarer Freitext-Block pro Sektion.
+// Port aus Mockup .notes. Der rote Dot (.notes__dot) zeigt, dass die
+// Notiz Inhalt hat; wird im Script beim Binding-Init gesetzt.
+
+import type { NotizenKey } from '../../lib/heizlast/state.ts';
+
+interface Props {
+  /** Slot-Key (sektion1, sektion2, ..., projekt). */
+  sectionKey: NotizenKey;
+  /** Sichtbare Ueberschrift. */
+  label?: string;
+  /** Placeholder fuer das Textarea. */
+  placeholder?: string;
+  /** Initial offen? */
+  openDefault?: boolean;
+}
+
+const {
+  sectionKey,
+  label = 'Notiz',
+  placeholder = 'Freitext für diese Sektion. Wird auf Wunsch in den PDF-Export übernommen.',
+  openDefault = false,
+} = Astro.props;
+
+const bindPath = `notizen.${sectionKey}.text`;
+---
+<details class="notes" data-hz-note-slot={sectionKey} open={openDefault}>
+  <summary class="notes__summary">
+    <svg class="icon notes__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+    <span class="notes__dot" aria-hidden="true"></span>
+    <span>{label}</span>
+  </summary>
+  <div class="notes__body">
+    <textarea
+      class="textarea"
+      placeholder={placeholder}
+      data-hz-bind={bindPath}
+      data-hz-type="string"
+    ></textarea>
+  </div>
+</details>

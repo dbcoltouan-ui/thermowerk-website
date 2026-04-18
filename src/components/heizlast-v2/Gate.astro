@@ -1,0 +1,46 @@
+---
+// Gate v2 — Ja/Nein-Toggle als <details>. Uebernommen aus Mockup .gate.
+// Wird via data-hz-bind am inneren <input type="checkbox"> verdrahtet —
+// das trigger-Attribut `open` kommt aus der State-Binding-Schicht.
+
+interface Props {
+  /** Ueberschrift des Gates, z. B. "Warmwasseraufbereitung ueber die Waermepumpe". */
+  title: string;
+  /** Meta-Info rechts oben (z. B. "Qw ≈ 0.58 kW"). Darf HTML enthalten. */
+  meta?: string | null;
+  /** State-Pfad fuer den Ja/Nein-Zustand (z. B. "warmwasser.active"). */
+  bindPath: string;
+  /** Initial-Zustand — wird im Script beim Boot ohnehin mit Store synchronisiert. */
+  openDefault?: boolean;
+  /** Kicker-Intro innerhalb des Gates. Optional. */
+  intro?: string | null;
+  /** ID des `details`-Elements (optional). */
+  id?: string;
+}
+
+const { title, meta = null, bindPath, openDefault = false, intro = null, id } = Astro.props;
+---
+<details class="gate" id={id} open={openDefault} data-hz-gate-path={bindPath}>
+  <summary class="gate__head">
+    <span class="gate__toggle" aria-hidden="true"></span>
+    <span class="gate__state" data-hz-gate-state>{openDefault ? 'Ja' : 'Nein'}</span>
+    <span class="gate__title">{title}</span>
+    {meta && <span class="gate__meta" set:html={meta} />}
+  </summary>
+
+  {/* Hidden checkbox traegt die Store-Bindung — wird ausserhalb des summary platziert,
+      damit ein Klick auf die Summary nicht versehentlich den Checkbox-Zustand
+      ueberschreibt. Der Boot-Code synchronisiert `details.open` mit dem Checkbox-Wert. */}
+  <input
+    type="checkbox"
+    hidden
+    data-hz-bind={bindPath}
+    data-hz-type="boolean"
+    data-hz-gate-input
+  />
+
+  <div class="gate__body">
+    {intro && <p class="gate__intro" set:html={intro} />}
+    <slot />
+  </div>
+</details>

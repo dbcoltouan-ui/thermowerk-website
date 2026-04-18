@@ -1,0 +1,115 @@
+---
+// OverrideField v2 — Input + optionaler Reset-Pfeil.
+// Port aus Mockup .field mit Chip "Standard · …" und .field__reset.
+//
+// Verhalten (Phase 9 / Block A):
+//  - Wrapper traegt `data-hz-override-field={overridePath}` + `data-default={…}`.
+//  - Das <input> ist immer editierbar und traegt `data-hz-bind={bindPath}`.
+//  - Reset-Pfeil ist per CSS nur sichtbar, wenn der Wrapper `.is-overridden` hat.
+//    Die Klasse wird von `syncOverrideClasses()` in bindings.ts gesetzt, sobald
+//    `state.overrides[overridePath] === true`.
+//  - Klick auf den Reset-Pfeil ruft `window.__hzClearOverride(overridePath)`
+//    + `window.__hzResolveDefault(overridePath)` und feuert synthetische
+//    input/change-Events, damit die Binding-Schicht den neuen Default uebernimmt
+//    (ohne `setOverride(true)` aufzurufen, weil die Events `ev.isTrusted === false`
+//    sind).
+
+interface Props {
+  id?: string;
+  label: string;
+  /** Symbol (optional). HTML erlaubt, z. B. "t<sub>voll</sub>". */
+  symbol?: string | null;
+  /** Chip-Text rechts neben dem Label (z. B. "Standard · FWS"). */
+  chip?: string | null;
+  /** Einheit rechts im Input (z. B. "h / a", "°C", "kW"). */
+  unit?: string | null;
+  /** Pfad im State fuer das Feld (z. B. "gebaeude.tvoll"). */
+  bindPath: string;
+  /** Pfad fuer den Override-Flag. Default = bindPath. */
+  overridePath?: string;
+  /** Anzeige-Hint unter dem Input. */
+  hint?: string | null;
+  /** Optional: step fuer number-Inputs. */
+  step?: number | string;
+  /** Optional: Min/Max. */
+  min?: number | string;
+  max?: number | string;
+  /** Default-Wert fuer serverseitiges Pre-Rendering (wird beim Boot von State ueberschrieben). */
+  defaultValue?: number | string | null;
+  /** Platzhalter fuer leere Felder. */
+  placeholder?: string;
+  /** Typ (number | text). Standard: number. */
+  type?: 'number' | 'text';
+}
+
+const {
+  id,
+  label,
+  symbol = null,
+  chip = null,
+  unit = null,
+  bindPath,
+  overridePath,
+  hint = null,
+  step,
+  min,
+  max,
+  defaultValue = null,
+  placeholder,
+  type = 'number',
+} = Astro.props;
+
+const ovrPath = overridePath ?? bindPath;
+const inputId = id ?? `f-${bindPath.replace(/\./g, '-')}`;
+const bindType = type === 'number' ? 'number' : 'string';
+---
+<div
+  class="field"
+  data-hz-override-field={ovrPath}
+  data-default={defaultValue ?? ''}
+>
+  <label class="field__label" for={inputId}>
+    {label}
+    {symbol && <span class="symbol" set:html={symbol} />}
+    {chip && <span class="chip">{chip}</span>}
+  </label>
+
+  {unit ? (
+    <div class="input-group">
+      <input
+        class="input"
+        id={inputId}
+        type={type}
+        step={step}
+        min={min}
+        max={max}
+        placeholder={placeholder}
+        value={defaultValue ?? ''}
+        data-hz-bind={bindPath}
+        data-hz-type={bindType}
+      />
+      <span class="input-group__unit" set:html={unit} />
+      <button class="field__reset" type="button" aria-label="Auf Standardwert zurücksetzen" data-hz-override-reset>
+        <svg class="icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+      </button>
+    </div>
+  ) : (
+    <input
+      class="input"
+      id={inputId}
+      type={type}
+      step={step}
+      min={min}
+      max={max}
+      placeholder={placeholder}
+      value={defaultValue ?? ''}
+      data-hz-bind={bindPath}
+      data-hz-type={bindType}
+    />
+  )}
+
+  {hint && <p class="field__hint" set:html={hint} />}
+</div>

@@ -1,0 +1,54 @@
+---
+// Method v2 — exklusive Methoden-Karte als <details name="heizlast-method">.
+// Port aus Mockup .method. Das `name`-Attribut macht aus den Karten eine
+// exklusive Accordion-Gruppe (Chrome 120+, FF 119+, Safari 17.2+).
+//
+// Hinweis zu State: Die Methode selbst (verbrauch|messung|bstd|override) wird
+// ueber `state.heizlast.methodsEnabled.<method>` im Script (heizlast.astro)
+// gesteuert — wir setzen `open` initial passend und das Script reagiert auf
+// das "toggle"-Event, um die einzelnen Enables zu spiegeln.
+
+interface Props {
+  /** Kurz-Identifier (verbrauch | messung | bstd | override). */
+  method: 'verbrauch' | 'messung' | 'bstd' | 'override';
+  /** Anzeige-Kuerzel in der Karte (M1, M2, …). */
+  num: string;
+  /** Klartext-Titel (z. B. "Brennstoffverbrauch"). */
+  title: string;
+  /** Badge-Text rechts neben dem Titel (z. B. "empfohlen"). */
+  badge?: string | null;
+  /** Status-Zeile rechts (z. B. "2 Perioden · Qhl = 12.55 kW"). HTML erlaubt. */
+  status?: string | null;
+  /** Initial-Geoeffnet? Regel: genau EINE Methode darf initial offen sein. */
+  openDefault?: boolean;
+}
+
+const { method, num, title, badge = null, status = null, openDefault = false } = Astro.props;
+---
+<details
+  class="method"
+  name="heizlast-method"
+  data-hz-method={method}
+  open={openDefault}
+>
+  <summary class="method__head">
+    <svg class="method__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+    <span class="method__num">{num}</span>
+    <span class="method__title">
+      {title}
+      {badge && (
+        <span style="color: var(--ink-400); font-weight: 400; font-size: var(--fs-sm); margin-left: 6px;">
+          {badge}
+        </span>
+      )}
+    </span>
+    {status && <span class="method__status" data-hz-method-status set:html={status} />}
+    {!status && <span class="method__status" data-hz-method-status>nicht verwendet</span>}
+  </summary>
+
+  <div class="method__body">
+    <slot />
+  </div>
+</details>

@@ -1,15 +1,20 @@
-Phase 10 / Paket D5 - Sichtbare Seitenstreifen
+Phase 10 Block 1: HeizlastLayoutV2 + Primitives + Section1 (Port)
 
-Zwei Aenderungen, damit der Content-Korridor als schmalere weisse
-Flaeche mit grauen Seitenstreifen erkennbar ist:
+- src/layouts/HeizlastLayoutV2.astro: komplettes neues Layout mit Mockup-CSS
+  (--ink-*, --accent, --stripe-max, Inter-Font, zweizeiliger Topbar, Print-CSS,
+  Responsive, Auth-Sichtbarkeit, .is-hidden-Utility).
+- src/components/heizlast-v2/SectionWrapper.astro: schlanker Section-Wrapper.
+- src/components/heizlast-v2/Gate.astro: Ja/Nein-Gate als <details> mit
+  verstecktem Checkbox fuer State-Binding.
+- src/components/heizlast-v2/Method.astro: exklusive Methoden-Karte als
+  <details name="heizlast-method">.
+- src/components/heizlast-v2/Notes.astro: aufklappbarer Notiz-Block mit
+  data-hz-note-slot-Binding.
+- src/components/heizlast-v2/OverrideField.astro: Input mit Chip + Reset-Pfeil,
+  kompatibel mit bindings.ts/Phase 9 Block A.
+- src/components/heizlast-v2/Plausi.astro: collapsible Plausi-Quercheck.
+- src/components/heizlast-v2/sections/Section1Gebaeude.astro: Projekt +
+  Gebaeude + Zimmer-Helfer + Notiz.
 
-1. HeizlastLayout.astro: .hz-scope background von #FFFFFF auf #EAECF1
-   (dezentes Grau statt reinem Weiss).
-
-2. SectionWrapper.astro: Hintergrundfarbe wandert vom .hz-section-
-   Element auf den inneren .hz-container. Sektion wird transparent,
-   Container bekommt weiss/off-white, Radius, subtilen Schatten und
-   mehr Padding. Dadurch liegt der Content als ruhige Karte auf dem
-   grauen Body.
-
-Tests bleiben gruen (49 + 33).
+Alte /heizlast bleibt funktional (HeizlastLayout.astro + sections/ unveraendert).
+Tests unveraendert gruen (49 + 33), weil lib/heizlast/* nicht angefasst.
