@@ -1,13 +1,15 @@
-Phase 10 / Paket D4 - Container schmaler + Grid-Fluchten
+Phase 10 / Paket D5 - Sichtbare Seitenstreifen
 
-Zwei gezielte Aenderungen in src/layouts/HeizlastLayout.astro:
+Zwei Aenderungen, damit der Content-Korridor als schmalere weisse
+Flaeche mit grauen Seitenstreifen erkennbar ist:
 
-1. --hz-container-max von min(92vw, 1120px) auf min(86vw, 980px).
-   Klar sichtbarer Aussenrand auf 1440-1920 px Bildschirmen.
+1. HeizlastLayout.astro: .hz-scope background von #FFFFFF auf #EAECF1
+   (dezentes Grau statt reinem Weiss).
 
-2. .hz-grid-2/3 von repeat(N, max-content) auf repeat(N, 1fr).
-   Inputs innerhalb von Grids fuellen die Zelle (max-width !important).
-   Dadurch liegen Label- und Input-Kanten auf gemeinsamen Fluchten.
-   data-size bleibt fuer Felder ausserhalb von Grids wirksam.
+2. SectionWrapper.astro: Hintergrundfarbe wandert vom .hz-section-
+   Element auf den inneren .hz-container. Sektion wird transparent,
+   Container bekommt weiss/off-white, Radius, subtilen Schatten und
+   mehr Padding. Dadurch liegt der Content als ruhige Karte auf dem
+   grauen Body.
 
 Tests bleiben gruen (49 + 33).

@@ -52,16 +52,25 @@ const {
 </section>
 
 <style is:global>
+  /* Phase 10 / Paket D5 — Hintergrundfarbe wandert vom Section-Element
+     auf den inneren .hz-container. Dadurch ist die Sektion selbst
+     transparent (zeigt Body-Grau), und der weiße "Content-Korridor"
+     steht als schmalere Fläche sichtbar links und rechts eingefasst. */
   .hz-section {
     padding: var(--hz-gap-section, clamp(56px, 7vw, 96px)) 0;
+    background: transparent;
+  }
+  .hz-section > .hz-container {
     background: var(--hz-white);
-    border-top: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-lg);
+    padding-top: clamp(36px, 5vw, 56px);
+    padding-bottom: clamp(36px, 5vw, 56px);
+    box-shadow: var(--hz-shadow-sm);
   }
   .hz-section--first {
-    border-top: 0;
-    padding-top: clamp(48px, 7svh, 80px);
+    padding-top: clamp(24px, 4svh, 48px);
   }
-  .hz-section--off { background: var(--hz-off-white); }
+  .hz-section--off > .hz-container { background: var(--hz-off-white); }
 
   .hz-section__head {
     display: flex; align-items: flex-start; justify-content: space-between; gap: 32px;

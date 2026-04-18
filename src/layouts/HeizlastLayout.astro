@@ -87,7 +87,11 @@ const {
     .hz-scope {
       font-family: var(--hz-font-body);
       color: var(--hz-dark);
-      background: var(--hz-white);
+      /* Phase 10 / Paket D5 — Body bekommt einen dezenten Grauton,
+         damit der weiße Content-Korridor als eigenständige Fläche
+         sichtbar wird. Links und rechts entstehen vertikale Streifen
+         in Hintergrundgrau, die das Eingabe-Tool visuell eingrenzen. */
+      background: #EAECF1;
       /* Phase 9 / Block M1 — leicht fluide Body-Schrift */
       font-size: clamp(15.5px, 0.35vw + 14.8px, 17px);
       line-height: 1.6;
