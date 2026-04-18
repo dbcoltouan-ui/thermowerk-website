@@ -54,6 +54,15 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     sumRaumFlaechen,
     sumRaumFlaechenNetto,
     raumFlaeche,
+    addVerbrauchPeriode,
+    removeVerbrauchPeriode,
+    updateVerbrauchPeriode,
+    addMessungPeriode,
+    removeMessungPeriode,
+    updateMessungPeriode,
+    addBstdPeriode,
+    removeBstdPeriode,
+    updateBstdPeriode,
   } from '../lib/heizlast/state.ts';
   import { heizlastCompute } from '../lib/heizlast/compute.ts';
   import {
@@ -238,18 +247,26 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
       sanList.innerHTML = '<p class="hz-muted hz-san__empty">Noch keine Massnahme gewählt.</p>';
       return;
     }
-    sanList.innerHTML = items.map((m) => `
+    sanList.innerHTML = items.map((m) => {
+      const datum = m.datum || '';
+      const zeitpunkt = m.zeitpunkt || 'geplant';
+      return `
       <div class="hz-san__row" data-san-id="${m.id}">
         <span class="hz-san__row-label">${escapeHtml(m.label)}</span>
-        <div class="hz-field__input-with-unit" style="max-width: 140px;">
+        <div class="hz-field__input-with-unit" style="max-width: 130px;">
           <input type="number" step="1" min="0" max="100" data-san-field="einsparungProzent" value="${m.einsparungProzent}" />
           <span class="hz-field__unit">%</span>
         </div>
+        <input type="date" data-san-field="datum" value="${escapeHtml(datum)}" title="Datum der Sanierung" />
+        <select data-san-field="zeitpunkt" title="Zeitpunkt der Sanierung">
+          <option value="geplant" ${zeitpunkt === 'geplant' ? 'selected' : ''}>geplant</option>
+          <option value="vergangen" ${zeitpunkt === 'vergangen' ? 'selected' : ''}>vergangen</option>
+        </select>
         <button type="button" class="hz-san__remove" aria-label="Entfernen" data-san-remove>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         </button>
       </div>
-    `).join('');
+    `}).join('');
   }
 
   if (sanAddBtn && sanSelect) {
@@ -264,6 +281,8 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
         id: preset.id,
         label: preset.label,
         einsparungProzent: preset.default,
+        datum: null as null,
+        zeitpunkt: 'geplant' as const,
       }];
       heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next, sanierungActive: true });
       isDirty.set(true);
@@ -278,11 +297,37 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     if (!row) return;
     const id = row.getAttribute('data-san-id');
     const field = t.getAttribute('data-san-field');
-    if (!id || field !== 'einsparungProzent') return;
-    const value = Number((t as HTMLInputElement).value) || 0;
+    if (!id || !field) return;
+    const s = heizlastState.get();
+    if (field === 'einsparungProzent') {
+      const value = Number((t as HTMLInputElement).value) || 0;
+      const next = s.heizlast.sanierungMassnahmen.map((m) =>
+        m.id === id ? { ...m, einsparungProzent: value } : m,
+      );
+      heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
+      isDirty.set(true);
+    } else if (field === 'datum') {
+      const val = (t as HTMLInputElement).value || null;
+      const next = s.heizlast.sanierungMassnahmen.map((m) =>
+        m.id === id ? { ...m, datum: val as string | null } : m,
+      );
+      heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
+      isDirty.set(true);
+    }
+  });
+  // Zeitpunkt-Select (change-Event)
+  document.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const row = t.closest('.hz-san__row') as HTMLElement | null;
+    if (!row) return;
+    const id = row.getAttribute('data-san-id');
+    const field = t.getAttribute('data-san-field');
+    if (!id || field !== 'zeitpunkt') return;
+    const val = (t as HTMLSelectElement).value as 'vergangen' | 'geplant';
     const s = heizlastState.get();
     const next = s.heizlast.sanierungMassnahmen.map((m) =>
-      m.id === id ? { ...m, einsparungProzent: value } : m,
+      m.id === id ? { ...m, zeitpunkt: val } : m,
     );
     heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
     isDirty.set(true);
@@ -300,6 +345,143 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     const next = s.heizlast.sanierungMassnahmen.filter((m) => m.id !== id);
     heizlastState.setKey('heizlast', { ...s.heizlast, sanierungMassnahmen: next });
     isDirty.set(true);
+  });
+
+  // ------------------------------------------------------------
+  // 5a. Perioden-Listen (Verbrauch / Bstd / Messung) — Phase 10 / Paket B
+  // ------------------------------------------------------------
+  const vpList = document.getElementById('hz-vp-list');
+  const vpInfo = document.getElementById('hz-vp-info');
+  const vpAddBtn = document.getElementById('hz-vp-add');
+  const bpList = document.getElementById('hz-bp-list');
+  const bpInfo = document.getElementById('hz-bp-info');
+  const bpAddBtn = document.getElementById('hz-bp-add');
+  const mpList = document.getElementById('hz-mp-list');
+  const mpInfo = document.getElementById('hz-mp-info');
+  const mpAddBtn = document.getElementById('hz-mp-add');
+
+  function periodeTagezwischen(von: string, bis: string): number {
+    if (!von || !bis) return 0;
+    return Math.round((new Date(bis).getTime() - new Date(von).getTime()) / 86400000);
+  }
+
+  const SVG_REMOVE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+
+  function periodeInfoText(perioden: Array<{vonDatum: string; bisDatum: string; wert: number}>): string {
+    if (perioden.length === 0) return '';
+    let tage = 0; let wert = 0;
+    let hasShort = false; let hasOverlap = false;
+    const sorted = [...perioden].sort((a, b) => a.vonDatum.localeCompare(b.vonDatum));
+    for (let i = 0; i < sorted.length; i++) {
+      const t = periodeTagezwischen(sorted[i].vonDatum, sorted[i].bisDatum);
+      if (t < 30) hasShort = true;
+      if (i > 0 && sorted[i].vonDatum < sorted[i - 1].bisDatum) hasOverlap = true;
+      if (t > 0) { tage += t; wert += sorted[i].wert; }
+    }
+    const aequiv = tage > 0 ? (wert * 365 / tage) : 0;
+    let txt = `${tage} Tage total · Jahresäquiv.: ${fmt(aequiv, 0)}`;
+    if (hasOverlap) txt += ' ⚠ Überlappende Perioden!';
+    else if (hasShort) txt += ' ⚠ Periode < 30 Tage';
+    return txt;
+  }
+
+  function renderPeriodenList(
+    container: HTMLElement | null,
+    infoEl: HTMLElement | null,
+    perioden: Array<any>,
+    dataAttr: string,
+    valueField: string,
+    valueLabel: string,
+    emptyMsg: string,
+  ) {
+    if (!container) return;
+    if (perioden.length === 0) {
+      container.innerHTML = `<p class="hz-muted hz-perioden-empty" style="font-style:italic;font-size:13px;">${emptyMsg}</p>`;
+      if (infoEl) infoEl.textContent = '';
+      return;
+    }
+    container.innerHTML = perioden.map((p: any, idx: number) => {
+      const tage = periodeTagezwischen(p.vonDatum, p.bisDatum);
+      const wert = p[valueField] ?? 0;
+      return `
+        <div class="hz-perioden-row" data-${dataAttr}-idx="${idx}" data-${dataAttr}-id="${p.id}">
+          <input type="date" data-p-field="vonDatum" value="${escapeHtml(p.vonDatum)}" />
+          <input type="date" data-p-field="bisDatum" value="${escapeHtml(p.bisDatum)}" />
+          <input type="number" step="any" min="0" data-p-field="${valueField}" value="${wert}" title="${valueLabel}" />
+          <span class="hz-perioden-tage">${tage > 0 ? tage + ' d' : '—'}</span>
+          <button type="button" class="hz-san__remove" aria-label="Entfernen" data-${dataAttr}-remove>${SVG_REMOVE}</button>
+        </div>
+      `;
+    }).join('');
+    if (infoEl) {
+      const mapped = perioden.map((p: any) => ({ vonDatum: p.vonDatum, bisDatum: p.bisDatum, wert: p[valueField] ?? 0 }));
+      infoEl.textContent = periodeInfoText(mapped);
+    }
+  }
+
+  function renderVpList() {
+    const perioden = heizlastState.get().heizlast.verbrauch.perioden || [];
+    renderPeriodenList(vpList, vpInfo, perioden, 'vp', 'wert', 'Verbrauch', 'Kein Perioden-Eintrag — Einzelwert Ba wird verwendet.');
+  }
+  function renderBpList() {
+    const perioden = heizlastState.get().heizlast.bstd.perioden || [];
+    renderPeriodenList(bpList, bpInfo, perioden, 'bp', 'stunden', 'Stunden', 'Kein Perioden-Eintrag — Einzelwerte werden verwendet.');
+  }
+  function renderMpList() {
+    const perioden = heizlastState.get().heizlast.messung.perioden || [];
+    renderPeriodenList(mpList, mpInfo, perioden, 'mp', 'wertKWh', 'kWh', 'Kein Perioden-Eintrag — Jahreswert wird verwendet.');
+  }
+
+  // Add-Buttons
+  if (vpAddBtn) vpAddBtn.addEventListener('click', () => addVerbrauchPeriode());
+  if (bpAddBtn) bpAddBtn.addEventListener('click', () => addBstdPeriode());
+  if (mpAddBtn) mpAddBtn.addEventListener('click', () => addMessungPeriode());
+
+  // Event-Delegation für Perioden-Inputs (input-Event)
+  document.addEventListener('input', (ev) => {
+    const t = ev.target as HTMLInputElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const field = t.getAttribute('data-p-field');
+    if (!field) return;
+    const vpRow = t.closest('[data-vp-id]') as HTMLElement | null;
+    if (vpRow) {
+      const id = vpRow.getAttribute('data-vp-id')!;
+      const val = field === 'wert' ? (parseFloat(t.value) || 0) : t.value;
+      updateVerbrauchPeriode(id, { [field]: val } as any);
+    }
+    const bpRow = t.closest('[data-bp-id]') as HTMLElement | null;
+    if (bpRow) {
+      const id = bpRow.getAttribute('data-bp-id')!;
+      const val = field === 'stunden' ? (parseFloat(t.value) || 0) : t.value;
+      updateBstdPeriode(id, { [field]: val } as any);
+    }
+    const mpRow = t.closest('[data-mp-id]') as HTMLElement | null;
+    if (mpRow) {
+      const id = mpRow.getAttribute('data-mp-id')!;
+      const val = field === 'wertKWh' ? (parseFloat(t.value) || 0) : t.value;
+      updateMessungPeriode(id, { [field]: val } as any);
+    }
+  });
+
+  // Event-Delegation für Perioden-Remove (click-Event)
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (!t || typeof t.closest !== 'function') return;
+    const vpBtn = t.closest('[data-vp-remove]') as HTMLElement | null;
+    if (vpBtn) {
+      const row = vpBtn.closest('[data-vp-id]') as HTMLElement | null;
+      if (row) removeVerbrauchPeriode(row.getAttribute('data-vp-id')!);
+    }
+    const bpBtn = t.closest('[data-bp-remove]') as HTMLElement | null;
+    if (bpBtn) {
+      const row = bpBtn.closest('[data-bp-id]') as HTMLElement | null;
+      if (row) removeBstdPeriode(row.getAttribute('data-bp-id')!);
+    }
+    const mpBtn = t.closest('[data-mp-remove]') as HTMLElement | null;
+    if (mpBtn) {
+      const row = mpBtn.closest('[data-mp-id]') as HTMLElement | null;
+      if (row) removeMessungPeriode(row.getAttribute('data-mp-id')!);
+    }
   });
 
   // ------------------------------------------------------------
@@ -536,6 +718,9 @@ import PrintCover from '../components/heizlast/PrintCover.astro';
     renderRaumList();
     renderSanList();
     renderPeList();
+    renderVpList();
+    renderBpList();
+    renderMpList();
 
     // Panes / Methoden
     syncWwPanes();

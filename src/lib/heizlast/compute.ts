@@ -1,7 +1,7 @@
 // Thermowerk Heizlast — Derived Compute-Store
 import { computed } from 'nanostores';
 import { heizlastState } from './state.ts';
-import type { HeizlastState } from './state.ts';
+import type { HeizlastState, SanierungsMassnahme, VerbrauchPeriode, MessungPeriode, BstdPeriode } from './state.ts';
 
 import {
   qnAusVerbrauch,
@@ -28,6 +28,114 @@ import {
 } from './calculations.ts';
 import { BRENNWERTE, WIRKUNGSGRADE, PHYSIK } from './constants.ts';
 import type { CalcResult } from './types.ts';
+
+// ---------------------------------------------------------------
+// Phase 10 / Paket B — Perioden-Algorithmus (§ 3)
+// ---------------------------------------------------------------
+
+/** Anzahl Tage zwischen zwei ISO-Datumstrings (bisDatum exklusiv). */
+function tagezwischen(vonDatum: string, bisDatum: string): number {
+  const von = new Date(vonDatum).getTime();
+  const bis = new Date(bisDatum).getTime();
+  return Math.round((bis - von) / 86400000);
+}
+
+/** Internes Struktur für einen Perioden-Wert nach Ist-Zustand-Rekonstruktion. */
+interface PeriodeWert {
+  vonDatum: string;
+  bisDatum: string;
+  wert: number;
+}
+
+/**
+ * Aggregiert eine Perioden-Liste zum Jahresäquivalent (365 Tage).
+ * Gibt null zurück wenn die Liste leer ist oder Überlappungen enthält.
+ * § 3.1
+ */
+function aggregierePerioden(liste: PeriodeWert[]): number | null {
+  if (liste.length === 0) return null;
+
+  // Sortieren nach vonDatum
+  const sorted = [...liste].sort((a, b) => a.vonDatum.localeCompare(b.vonDatum));
+
+  // Überlappungen prüfen
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].vonDatum < sorted[i - 1].bisDatum) return null; // Überlappung
+  }
+
+  let tage_total = 0;
+  let wert_total = 0;
+  for (const p of sorted) {
+    const t = tagezwischen(p.vonDatum, p.bisDatum);
+    if (t <= 0) continue;
+    tage_total += t;
+    wert_total += p.wert;
+  }
+
+  if (tage_total <= 0) return null;
+  return wert_total * 365 / tage_total;
+}
+
+/**
+ * Bringt einen Perioden-Messwert auf den Ist-Zustand (nach allen vergangenen
+ * Sanierungen). Sanierungen innerhalb der Periode werden per Sub-Perioden-Split
+ * herausgerechnet. § 3.2
+ */
+function periodeAufIstZustand(
+  p: PeriodeWert,
+  san_vergangen: SanierungsMassnahme[],
+): PeriodeWert {
+  if (san_vergangen.length === 0) return p;
+
+  const L = tagezwischen(p.vonDatum, p.bisDatum);
+  if (L <= 0) return p;
+
+  // Sanierungen relativ zur Periode klassifizieren
+  const in_periode = san_vergangen.filter(
+    (s) => s.datum! > p.vonDatum && s.datum! < p.bisDatum,
+  );
+  const nach_periode = san_vergangen.filter((s) => s.datum! >= p.bisDatum);
+
+  // Keine In-Periode-Sanierungen: Vereinfachter Pfad
+  if (in_periode.length === 0) {
+    if (nach_periode.length === 0) return p;
+    const F_nach = nach_periode.reduce(
+      (f, s) => f * (1 - s.einsparungProzent / 100), 1.0,
+    );
+    return { ...p, wert: p.wert * F_nach };
+  }
+
+  // Sub-Perioden bilden (aufsteigend sortiert — san_vergangen ist bereits sortiert)
+  const grenzen = [p.vonDatum, ...in_periode.map((s) => s.datum!), p.bisDatum];
+
+  // Kumulative Split-Faktoren
+  const F: number[] = [1.0];
+  let F_kum = 1.0;
+  for (const s of in_periode) {
+    F_kum *= 1 - s.einsparungProzent / 100;
+    F.push(F_kum);
+  }
+
+  // Nenner = Σ(L_j · F_j)
+  let nenner = 0;
+  for (let j = 0; j < F.length; j++) {
+    const L_j = tagezwischen(grenzen[j], grenzen[j + 1]);
+    nenner += L_j * F[j];
+  }
+  if (nenner <= 0) return p;
+
+  // Vor-Sanierungs-Wert rekonstruieren
+  const wert_pre = p.wert * L / nenner;
+
+  // Auf Post-In-Periode-Zustand bringen
+  const wert_post = wert_pre * F[F.length - 1];
+
+  // Nach-Periode-Sanierungen anwenden
+  const F_nach = nach_periode.reduce(
+    (f, s) => f * (1 - s.einsparungProzent / 100), 1.0,
+  );
+  return { ...p, wert: wert_post * F_nach };
+}
 
 export interface ComputeResult {
   tvoll: number;
@@ -75,12 +183,34 @@ function gebaeudetypNumerisch(s: HeizlastState): 'efh' | 'mfh' {
 // Hierarchie in `computeQhlRaw` arbeitet die aktivierten Methoden in fester
 // Reihenfolge ab: override > bstd > messung > verbrauch > bauperiode.
 
-function qhlVerbrauch(s: HeizlastState, tvoll: number): CalcResult | null {
+function qhlVerbrauch(
+  s: HeizlastState,
+  tvoll: number,
+  san_vergangen: SanierungsMassnahme[],
+): CalcResult | null {
   const v = s.heizlast.verbrauch;
   const brenn = BRENNWERTE[v.energietraeger];
-  if (!brenn || !v.ba || v.ba <= 0 || !tvoll) return null;
+  if (!brenn || !tvoll) return null;
+
+  let ba_jahr: number;
+  const perioden = v.perioden || [];
+
+  if (perioden.length > 0) {
+    // Perioden auf Ist-Zustand bringen und aggregieren
+    const perioden_ist: PeriodeWert[] = perioden.map((p) =>
+      periodeAufIstZustand({ vonDatum: p.vonDatum, bisDatum: p.bisDatum, wert: p.wert }, san_vergangen),
+    );
+    const agg = aggregierePerioden(perioden_ist);
+    if (agg === null || agg <= 0) return null;
+    ba_jahr = agg;
+  } else {
+    // Legacy-Fallback: Einzelwert
+    if (!v.ba || v.ba <= 0) return null;
+    ba_jahr = v.ba;
+  }
+
   const eta = resolveEta(s);
-  const qnBrutto = qnAusVerbrauch(v.ba, brenn.ho, eta, {
+  const qnBrutto = qnAusVerbrauch(ba_jahr, brenn.ho, eta, {
     label: brenn.label,
     trennerEinheit: brenn.verbrauchEinheit,
   });
@@ -101,16 +231,54 @@ function qhlVerbrauch(s: HeizlastState, tvoll: number): CalcResult | null {
   return qhlAusQn(qnHeiz, tvoll);
 }
 
-function qhlMessung(s: HeizlastState, tvoll: number): CalcResult | null {
-  const qn = s.heizlast.messung.qnPerJahr;
-  if (!qn || qn <= 0 || !tvoll) return null;
-  return qhlAusQn(qn, tvoll);
+function qhlMessung(
+  s: HeizlastState,
+  tvoll: number,
+  san_vergangen: SanierungsMassnahme[],
+): CalcResult | null {
+  if (!tvoll) return null;
+  const perioden = s.heizlast.messung.perioden || [];
+
+  let qn_jahr: number;
+  if (perioden.length > 0) {
+    const perioden_ist: PeriodeWert[] = perioden.map((p) =>
+      periodeAufIstZustand({ vonDatum: p.vonDatum, bisDatum: p.bisDatum, wert: p.wertKWh }, san_vergangen),
+    );
+    const agg = aggregierePerioden(perioden_ist);
+    if (agg === null || agg <= 0) return null;
+    qn_jahr = agg;
+  } else {
+    const qn = s.heizlast.messung.qnPerJahr;
+    if (!qn || qn <= 0) return null;
+    qn_jahr = qn;
+  }
+
+  return qhlAusQn(qn_jahr, tvoll);
 }
 
-function qhlBstd(s: HeizlastState, tvoll: number): CalcResult | null {
+function qhlBstd(
+  s: HeizlastState,
+  tvoll: number,
+  san_vergangen: SanierungsMassnahme[],
+): CalcResult | null {
   const b = s.heizlast.bstd;
-  if (!b.stundenGesamt || !b.jahre || !b.qhWP || !tvoll) return null;
-  const qnRes = qnAusBetriebsstunden(b.stundenGesamt, b.jahre, b.qhWP);
+  if (!b.qhWP || !tvoll) return null;
+  const perioden = b.perioden || [];
+
+  let stunden_pro_jahr: number;
+  if (perioden.length > 0) {
+    const perioden_ist: PeriodeWert[] = perioden.map((p) =>
+      periodeAufIstZustand({ vonDatum: p.vonDatum, bisDatum: p.bisDatum, wert: p.stunden }, san_vergangen),
+    );
+    const agg = aggregierePerioden(perioden_ist);
+    if (agg === null || agg <= 0) return null;
+    stunden_pro_jahr = agg;
+  } else {
+    if (!b.stundenGesamt || !b.jahre) return null;
+    stunden_pro_jahr = b.stundenGesamt / b.jahre;
+  }
+
+  const qnRes = qnAusBetriebsstunden(stunden_pro_jahr, 1, b.qhWP);
   return qhlAusQn(qnRes.value, tvoll);
 }
 
@@ -131,28 +299,36 @@ function qhlOverride(s: HeizlastState): CalcResult | null {
 }
 
 /**
- * Phase 9 / Block B — Auto-Erkennung in fester Reihenfolge. Die erste
- * aktivierte Methode, die ein gueltiges Ergebnis liefert, gewinnt.
+ * Phase 9 / Block B — Auto-Erkennung in fester Reihenfolge.
+ * Phase 10 / Paket B — Vergangene Sanierungen werden für Perioden-Rekonstruktion
+ * extrahiert und an die Methoden-Funktionen übergeben (§ 3.3).
  * Reihenfolge: override → bstd → messung → verbrauch → bauperiode.
- * `bauperiode` laeuft immer als Fallback, auch wenn im Record nichts aktiv
- * ist — solange Lage, Bauperiode und EBF gesetzt sind.
  */
 function computeQhlRaw(s: HeizlastState, tvoll: number): CalcResult | null {
   const m = s.heizlast.methodsEnabled;
+
+  // Vergangene Sanierungen für Perioden-Rekonstruktion (§ 3.2)
+  const allMassnahmen = s.heizlast.sanierungActive
+    ? (s.heizlast.sanierungMassnahmen || [])
+    : [];
+  const san_vergangen: SanierungsMassnahme[] = allMassnahmen
+    .filter((san) => san.zeitpunkt === 'vergangen' && !!san.datum)
+    .sort((a, b) => (a.datum! < b.datum! ? -1 : 1));
+
   if (m?.override) {
     const r = qhlOverride(s);
     if (r) return r;
   }
   if (m?.bstd) {
-    const r = qhlBstd(s, tvoll);
+    const r = qhlBstd(s, tvoll, san_vergangen);
     if (r) return r;
   }
   if (m?.messung) {
-    const r = qhlMessung(s, tvoll);
+    const r = qhlMessung(s, tvoll, san_vergangen);
     if (r) return r;
   }
   if (m?.verbrauch) {
-    const r = qhlVerbrauch(s, tvoll);
+    const r = qhlVerbrauch(s, tvoll, san_vergangen);
     if (r) return r;
   }
   return qhlBauperiode(s, tvoll);
@@ -163,7 +339,12 @@ function computeQhlKorr(s: HeizlastState, qhlRaw: CalcResult | null): CalcResult
   if (!s.heizlast.sanierungActive) return qhlRaw;
   const massnahmen = s.heizlast.sanierungMassnahmen;
   if (!massnahmen || massnahmen.length === 0) return qhlRaw;
-  return qhlNachSanierung(qhlRaw.value, massnahmen);
+  // Phase 10 / Paket B: Nur geplante Sanierungen (oder ohne Datum) werden hier
+  // multiplikativ angewendet. Vergangene wurden bereits in der Perioden-Rekonstruktion
+  // berücksichtigt. Objekte ohne `datum`-Feld (Altdaten) werden wie geplant behandelt.
+  const san_geplant = massnahmen.filter((m) => m.zeitpunkt === 'geplant' || !m.datum);
+  if (san_geplant.length === 0) return qhlRaw;
+  return qhlNachSanierung(qhlRaw.value, san_geplant);
 }
 
 function computePlausi(s: HeizlastState, qhlKorr: CalcResult | null): CalcResult | null {

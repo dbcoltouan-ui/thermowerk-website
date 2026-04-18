@@ -85,7 +85,7 @@ heizlastState.set({
     ...s2.heizlast,
     sanierungActive: true,
     sanierungMassnahmen: [
-      { id: 'fenster', label: 'Fenstersanierung', einsparungProzent: 15 },
+      { id: 'fenster', label: 'Fenstersanierung', einsparungProzent: 15, datum: null, zeitpunkt: 'geplant' },
     ],
   },
 });
@@ -137,7 +137,7 @@ try {
   crashed = true;
 }
 check('saveNow/load/clear crashen nicht ohne window', !crashed);
-check('STORAGE_KEY hat Version-Suffix', STORAGE_KEY_CURRENT.endsWith('.v1'), STORAGE_KEY_CURRENT);
+check('STORAGE_KEY hat Version-Suffix', STORAGE_KEY_CURRENT.endsWith('.v2'), STORAGE_KEY_CURRENT);
 
 // 7. WW-Speicher-Rundung (Phase 9 / Block J: marktrealistische Staffelung)
 section('INTEGRATION \u2014 WW-Speicher folgt CH-WP-Marktstaffelung');
@@ -230,6 +230,89 @@ if (altMigriert) {
   check('Migration: sumRaumFlaechenNetto.unbeheizt === 0', aggMig.unbeheizt === 0, aggMig.unbeheizt, 0);
   check('Migration: sumRaumFlaechenNetto.beheizt === 32', aggMig.beheizt === 32, aggMig.beheizt, 32);
 }
+
+// 10. v1 → v2 Migration (Paket B)
+section('PERSISTIERUNG \u2014 v1 \u2192 v2 Migration (Paket B)');
+
+const fws2Base = createDefaultState();
+const v1Rohdaten: any = {
+  ...fws2Base,
+  version: 1,
+  heizlast: {
+    ...fws2Base.heizlast,
+    verbrauch: {
+      energietraeger: 'oel',
+      ba: 3500,
+      etaOverride: 0.80,
+      etaWirkungsgradId: null,
+      inklWW: true,
+      vwuAbzug: 160,
+      // KEIN perioden-Feld (simuliert v1-State)
+    },
+    messung: { qnPerJahr: 0 },
+    bstd: { stundenGesamt: 0, jahre: 0, qhWP: 8 },
+    methodsEnabled: { verbrauch: true, messung: false, bstd: false, override: false },
+    sanierungActive: true,
+    sanierungMassnahmen: [
+      { id: 'f', label: 'Fenster', einsparungProzent: 10 },
+      { id: 'd', label: 'Dach', einsparungProzent: 20 },
+      { id: 'k', label: 'Keller', einsparungProzent: 5 },
+    ],
+  },
+  gebaeude: { ...fws2Base.gebaeude, ebf: 270, tvollOverride: 2000 },
+  warmwasser: { ...fws2Base.warmwasser, deltaTOverride: 50, speicherProzent: 10, zirkProzent: 0, ausstossProzent: 15 },
+  zuschlaege: { ...fws2Base.zuschlaege, sperrzeitActive: true, toff: 2 },
+};
+const v1Json = JSON.stringify(v1Rohdaten);
+const migV1 = deserializeState(v1Json);
+check('v1\u2192v2: State akzeptiert (nicht null)', migV1 !== null);
+if (migV1) {
+  check('v1\u2192v2: version === 2', migV1.version === 2, migV1.version, 2);
+  check('v1\u2192v2: verbrauch.perioden ist Array', Array.isArray(migV1.heizlast.verbrauch.perioden));
+  check('v1\u2192v2: 1 migrierte Periode (aus ba=3500)', migV1.heizlast.verbrauch.perioden.length === 1, migV1.heizlast.verbrauch.perioden.length, 1);
+  check('v1\u2192v2: periode.wert === 3500', migV1.heizlast.verbrauch.perioden[0]?.wert === 3500, migV1.heizlast.verbrauch.perioden[0]?.wert, 3500);
+  const allGeplant = migV1.heizlast.sanierungMassnahmen.every((m: any) => m.zeitpunkt === 'geplant' && m.datum === null);
+  check('v1\u2192v2: alle 3 Sanierungen datum=null, zeitpunkt=geplant', allGeplant);
+  check('v1\u2192v2: Anzahl Sanierungen erhalten (3)', migV1.heizlast.sanierungMassnahmen.length === 3, migV1.heizlast.sanierungMassnahmen.length, 3);
+  // Qhl nach Migration muss ungefaehr gleich bleiben (Toleranz 0.10 wegen Schaltjahr-Periode 2024: 366 Tage)
+  replaceState(migV1);
+  const rMig = runCascade(heizlastState.get());
+  close('v1\u2192v2: Qhl_raw nach Migration \u2248 12.55 kW (tol 0.10 wegen Schaltjahr)', rMig.qhlRaw?.value ?? 0, 12.55, 0.10);
+}
+
+// 11. \u00a7 4 Integrationstest — Perioden + Sanierungs-Timeline (Paket B)
+section('INTEGRATION \u2014 \u00a7\u20094 Perioden + vergangene/geplante Sanierung (Ho=10.5)');
+// Objekt: EFH Mittelland, EBF 150 m\u00b2, tvoll 2000 h, \u00d6l, \u03b7 0.85, kein WW-Abzug
+// Perioden: p1 2023-01-01..2024-01-01 Ba=2500 l; p2 2024-01-01..2025-01-01 Ba=2200 l
+// S1: Fenstertausch 15 %, vergangen, datum 2023-07-01 (innerhalb p1)
+// S2: Dachsanierung  20 %, geplant,  datum 2025-09-01
+// Erwartete Werte (Handrechnung mit Ho=10.5 statt 10.0 aus Spec):
+//   ba_jahr \u2248 2246.3 l/a, Qn \u2248 20048 kWh/a, Qhl_ist \u2248 10.024 kW, Qhl_zukunft \u2248 8.019 kW
+const s4 = createDefaultState();
+s4.gebaeude.typ = 'efh';
+s4.gebaeude.lage = 'mittelland';
+s4.gebaeude.bauperiode = '1971_80';
+s4.gebaeude.ebf = 150;
+s4.gebaeude.tvollOverride = 2000;
+s4.heizlast.methodsEnabled = { verbrauch: true, messung: false, bstd: false, override: false };
+s4.heizlast.verbrauch.energietraeger = 'oel';
+s4.heizlast.verbrauch.etaOverride = 0.85;
+s4.heizlast.verbrauch.etaWirkungsgradId = null;
+s4.heizlast.verbrauch.inklWW = false;
+s4.heizlast.verbrauch.perioden = [
+  { id: 'p1', vonDatum: '2023-01-01', bisDatum: '2024-01-01', wert: 2500 },
+  { id: 'p2', vonDatum: '2024-01-01', bisDatum: '2025-01-01', wert: 2200 },
+];
+s4.heizlast.sanierungActive = true;
+s4.heizlast.sanierungMassnahmen = [
+  { id: 's1', label: 'Fenstertausch', einsparungProzent: 15, datum: '2023-07-01', zeitpunkt: 'vergangen' as const },
+  { id: 's2', label: 'Dachsanierung', einsparungProzent: 20, datum: '2025-09-01', zeitpunkt: 'geplant' as const },
+];
+s4.zuschlaege.sperrzeitActive = false;
+replaceState(s4);
+const r4 = runCascade(heizlastState.get());
+close('\u00a74 Qhl_ist (qhlRaw, nach vergangener San., Ho=10.5)', r4.qhlRaw?.value ?? 0, 10.024, 0.05);
+close('\u00a74 Qhl_zukunft (qhlKorr, nach geplanter San. -20%)', r4.qhlKorr?.value ?? 0, 8.019, 0.05);
 
 console.log(`\n${'='.repeat(60)}\nZUSAMMENFASSUNG (Phase 3)\n${'='.repeat(60)}`);
 console.log(`  Bestanden: ${passed}`);

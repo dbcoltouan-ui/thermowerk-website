@@ -24,7 +24,7 @@ import type { Gebaeudetyp, Lage, TvollProfil } from './types.ts';
 // ---------------------------------------------------------------
 
 /** Aktuelle State-Version. Bei breaking changes hochzählen + Migration in storage.ts ergänzen. */
-export const STATE_VERSION = 1 as const;
+export const STATE_VERSION = 2 as const;
 
 /**
  * Phase 9 / Block B — Methodenwahl ist weggefallen. Statt einer Enum gibt es jetzt
@@ -41,6 +41,50 @@ export interface HeizlastMethodsEnabled {
   override: boolean;
 }
 
+// ============================================================================
+// Perioden-Modell (Phase 10 / Paket B — neu)
+// ============================================================================
+
+/**
+ * Datumsbereich einer Messperiode.
+ * - `vonDatum` inklusiv (00:00 dieses Tages), `bisDatum` exklusiv.
+ * - ISO-Format YYYY-MM-DD (keine Zeitzone — CH lokal).
+ */
+export interface DatumsRange {
+  vonDatum: string; // '2024-01-01'
+  bisDatum: string; // '2025-01-01'
+}
+
+export interface VerbrauchPeriode extends DatumsRange {
+  id: string;
+  /** Brennstoff/Energie-Menge in der Einheit des Energieträgers. */
+  wert: number;
+  /** Optionale User-Notiz. */
+  notiz?: string;
+}
+
+export interface MessungPeriode extends DatumsRange {
+  id: string;
+  /** Gemessene Nutzenergie in kWh — absolut für die Periode, nicht annualisiert. */
+  wertKWh: number;
+  notiz?: string;
+}
+
+export interface BstdPeriode extends DatumsRange {
+  id: string;
+  /** Aufgelaufene Betriebsstunden (Differenz, nicht kumuliert). */
+  stunden: number;
+  notiz?: string;
+}
+
+/**
+ * Zeitpunkt einer Sanierung:
+ * - 'vergangen'  — bereits umgesetzt. Falls in einer Messperiode, wird der
+ *   Messwert rekonstruiert (compute.ts § 3.2).
+ * - 'geplant'    — kommt noch. Reduziert Qhl klassisch multiplikativ.
+ */
+export type SanierungsZeitpunkt = 'vergangen' | 'geplant';
+
 export type WarmwasserMethod = 'personen' | 'direkt' | 'messung';
 
 export type PufferMethod = 'abtau' | 'takt' | 'err' | 'sperrzeit';
@@ -56,6 +100,10 @@ export interface SanierungsMassnahme {
   id: string;
   label: string;
   einsparungProzent: number; // 0–100
+  /** Phase 10 / Paket B. YYYY-MM-DD. null → als 'geplant' behandelt. */
+  datum: string | null;
+  /** Phase 10 / Paket B. Default 'geplant'. */
+  zeitpunkt: SanierungsZeitpunkt;
 }
 
 export interface PersonenEinheitInput {
@@ -97,22 +145,31 @@ export interface GebaeudeState {
 
 export interface VerbrauchState {
   energietraeger: string; // ID aus constants.BRENNWERTE
+  /** Legacy-Fallback: greift nur wenn `perioden.length === 0`. */
   ba: number; // Verbrauch in Einheit des Trägers (l/a, m³/a, kg/a, kWh/a, …)
   /** null = Default-η aus Wirkungsgrad-Tabelle. */
   etaOverride: number | null;
   etaWirkungsgradId: string | null; // null = manuelle Eingabe
   inklWW: boolean;
   vwuAbzug: number; // l/d, nur relevant wenn inklWW=true
+  /** Phase 10 / Paket B. Leer = Einzelwert aus `ba` wird verwendet. */
+  perioden: VerbrauchPeriode[];
 }
 
 export interface MessungState {
+  /** Legacy-Fallback. */
   qnPerJahr: number; // kWh/a
+  /** Phase 10 / Paket B. */
+  perioden: MessungPeriode[];
 }
 
 export interface BstdState {
+  /** Legacy-Fallback. */
   stundenGesamt: number;
   jahre: number;
   qhWP: number; // kW
+  /** Phase 10 / Paket B. Stunden-Zuwachssumme pro Abschnitt (keine kumulierten Zähler). */
+  perioden: BstdPeriode[];
 }
 
 export interface OverrideMethodState {
@@ -291,9 +348,10 @@ export function createDefaultState(): HeizlastState {
         etaWirkungsgradId: 'oel_bestand',
         inklWW: true,
         vwuAbzug: 200,
+        perioden: [],
       },
-      messung: { qnPerJahr: 18000 },
-      bstd: { stundenGesamt: 6000, jahre: 3, qhWP: 8.5 },
+      messung: { qnPerJahr: 18000, perioden: [] },
+      bstd: { stundenGesamt: 6000, jahre: 3, qhWP: 8.5, perioden: [] },
       override: { qhl: 10 },
 
       sanierungActive: false,
@@ -624,4 +682,129 @@ export function clearOverride(path: string): void {
 /** Prueft, ob ein Feld vom User ueberschrieben wurde. */
 export function isOverridden(state: HeizlastState, path: string): boolean {
   return Boolean(state.overrides?.[path]);
+}
+
+// ---------------------------------------------------------------
+// Helper: Verbrauch-Perioden (Phase 10 / Paket B)
+// ---------------------------------------------------------------
+
+function makePeriodeId(prefix: string): string {
+  return prefix + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+}
+
+/** Fügt eine Verbrauch-Periode ans Ende der Liste. */
+export function addVerbrauchPeriode(): void {
+  const h = heizlastState.get().heizlast;
+  const perioden = h.verbrauch.perioden || [];
+  const last = perioden[perioden.length - 1];
+  const vonDatum = last ? last.bisDatum : currentYearStart();
+  const bisDatum = nextYearStart(vonDatum);
+  const next: VerbrauchPeriode[] = [
+    ...perioden,
+    { id: makePeriodeId('vp'), vonDatum, bisDatum, wert: 0 },
+  ];
+  heizlastState.setKey('heizlast', { ...h, verbrauch: { ...h.verbrauch, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Entfernt eine Verbrauch-Periode. */
+export function removeVerbrauchPeriode(id: string): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.verbrauch.perioden || []).filter((p) => p.id !== id);
+  heizlastState.setKey('heizlast', { ...h, verbrauch: { ...h.verbrauch, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Aktualisiert Felder einer Verbrauch-Periode. */
+export function updateVerbrauchPeriode(id: string, patch: Partial<VerbrauchPeriode>): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.verbrauch.perioden || []).map((p) => (p.id === id ? { ...p, ...patch } : p));
+  heizlastState.setKey('heizlast', { ...h, verbrauch: { ...h.verbrauch, perioden: next } });
+  isDirty.set(true);
+}
+
+// ---------------------------------------------------------------
+// Helper: Messung-Perioden (Phase 10 / Paket B)
+// ---------------------------------------------------------------
+
+/** Fügt eine Messung-Periode ans Ende der Liste. */
+export function addMessungPeriode(): void {
+  const h = heizlastState.get().heizlast;
+  const perioden = h.messung.perioden || [];
+  const last = perioden[perioden.length - 1];
+  const vonDatum = last ? last.bisDatum : currentYearStart();
+  const bisDatum = nextYearStart(vonDatum);
+  const next: MessungPeriode[] = [
+    ...perioden,
+    { id: makePeriodeId('mp'), vonDatum, bisDatum, wertKWh: 0 },
+  ];
+  heizlastState.setKey('heizlast', { ...h, messung: { ...h.messung, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Entfernt eine Messung-Periode. */
+export function removeMessungPeriode(id: string): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.messung.perioden || []).filter((p) => p.id !== id);
+  heizlastState.setKey('heizlast', { ...h, messung: { ...h.messung, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Aktualisiert Felder einer Messung-Periode. */
+export function updateMessungPeriode(id: string, patch: Partial<MessungPeriode>): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.messung.perioden || []).map((p) => (p.id === id ? { ...p, ...patch } : p));
+  heizlastState.setKey('heizlast', { ...h, messung: { ...h.messung, perioden: next } });
+  isDirty.set(true);
+}
+
+// ---------------------------------------------------------------
+// Helper: Betriebsstunden-Perioden (Phase 10 / Paket B)
+// ---------------------------------------------------------------
+
+/** Fügt eine Bstd-Periode ans Ende der Liste. */
+export function addBstdPeriode(): void {
+  const h = heizlastState.get().heizlast;
+  const perioden = h.bstd.perioden || [];
+  const last = perioden[perioden.length - 1];
+  const vonDatum = last ? last.bisDatum : currentYearStart();
+  const bisDatum = nextYearStart(vonDatum);
+  const next: BstdPeriode[] = [
+    ...perioden,
+    { id: makePeriodeId('bp'), vonDatum, bisDatum, stunden: 0 },
+  ];
+  heizlastState.setKey('heizlast', { ...h, bstd: { ...h.bstd, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Entfernt eine Bstd-Periode. */
+export function removeBstdPeriode(id: string): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.bstd.perioden || []).filter((p) => p.id !== id);
+  heizlastState.setKey('heizlast', { ...h, bstd: { ...h.bstd, perioden: next } });
+  isDirty.set(true);
+}
+
+/** Aktualisiert Felder einer Bstd-Periode. */
+export function updateBstdPeriode(id: string, patch: Partial<BstdPeriode>): void {
+  const h = heizlastState.get().heizlast;
+  const next = (h.bstd.perioden || []).map((p) => (p.id === id ? { ...p, ...patch } : p));
+  heizlastState.setKey('heizlast', { ...h, bstd: { ...h.bstd, perioden: next } });
+  isDirty.set(true);
+}
+
+// ---------------------------------------------------------------
+// Datum-Utilities
+// ---------------------------------------------------------------
+
+/** Ergibt '2024-01-01' für das aktuelle Jahr. */
+function currentYearStart(): string {
+  const y = new Date().getFullYear();
+  return `${y}-01-01`;
+}
+
+/** Gibt das Startdatum des Folgejahres von vonDatum. */
+function nextYearStart(vonDatum: string): string {
+  const y = parseInt(vonDatum.slice(0, 4), 10) + 1;
+  return `${y}-01-01`;
 }

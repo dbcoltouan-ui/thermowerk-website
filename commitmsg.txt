@@ -1,13 +1,9 @@
-Phase 10 / Paket D: Layout-Polish + Mobile-Bugs (Desktop-Raender, Logo, Tastatur-Fix)
+Phase 10 / Paket B: Perioden + Sanierungs-Timeline implementiert
 
-A+I: --hz-container-max auf min(86vw, 860px) reduziert
-B: hyphens: auto + hyphenate-limit-chars fuer bessere Mobile-Worttrennung
-C: Logo object-fit: contain auf Desktop und Mobile
-D: Topbar-Innenabstand auf clamp(16px, 3vw, 24px) — deckt sich mit .hz-container
-E: syncDomFromState ueberspringt document.activeElement (iOS-Tastatur-Fix)
-G: .hz-endresult max-width: 560px — Qh-Block sitzt kompakt
-H: .hz-proj__title-row + .hz-raum-footer von space-between auf flex-start
-J: Section 1 auf hz-grid-4 umgebaut (4-Spalten Projekt + Gebaeude)
-K: Globale Input-Breiten-Governance in HeizlastLayout (max-content Grids, data-size-Tokens, Input-max-widths)
-
-Tests: 49 + 33 gruen
+- state.ts: STATE_VERSION 1->2, neue Typen VerbrauchPeriode/MessungPeriode/BstdPeriode/SanierungsZeitpunkt, SanierungsMassnahme um datum+zeitpunkt erweitert, perioden-Arrays in VerbrauchState/MessungState/BstdState, Helper add/remove/update fuer alle drei Perioden-Typen
+- storage.ts: migrateV1toV2() gemaess Spec 5.2 (perioden aus Einzelwerten ableiten, sanierungen bekommen datum=null/zeitpunkt=geplant), bootFromStorage prueft Legacy-v1-Key als Fallback
+- compute.ts: aggregierePerioden(), periodeAufIstZustand(), period-aware qhlVerbrauch/qhlMessung/qhlBstd, computeQhlRaw trennt vergangene/geplante Sanierungen, computeQhlKorr wendet nur geplante an
+- Section2Heizlast.astro: Perioden-Tabellen in Verbrauch/Bstd/Messung-Panels, datum+zeitpunkt-Felder in Sanierungs-Zeilen
+- heizlast.astro: renderVpList/renderBpList/renderMpList + Event-Delegation fuer Perioden, renderAll() ruft alle drei auf, renderSanList() mit datum-Input und zeitpunkt-Select
+- test-heizlast-state.ts: STORAGE_KEY v1->v2 Fix, sanierungMassnahmen um datum/zeitpunkt ergaenzt, neuer v1->v2-Migrationstest (8 Checks), neuer Sec4-Integrationstest 2 Perioden + vergangene/geplante San. Qhl_ist=10.024/Qhl_zukunft=8.019 (Ho=10.5)
+- Tests: 49 + 43 gruen

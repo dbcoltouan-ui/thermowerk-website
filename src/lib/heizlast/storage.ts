@@ -20,6 +20,7 @@ import { heizlastState, isDirty, STATE_VERSION, createDefaultState } from './sta
 import type { HeizlastState } from './state.ts';
 
 const STORAGE_KEY = `thermowerk.heizlast.state.v${STATE_VERSION}`;
+const LEGACY_STORAGE_KEY_V1 = 'thermowerk.heizlast.state.v1';
 const LEGACY_KEYS = [
   // Mögliche Keys aus dem alten Rechner — werden entfernt, nicht migriert.
   'thermowerkHeizlast',
@@ -52,12 +53,81 @@ export function deserializeState(raw: string): HeizlastState | null {
   }
 }
 
+// ---------------------------------------------------------------
+// Phase 10 / Paket B — v1 → v2 Migration
+// ---------------------------------------------------------------
+
+/**
+ * Transformiert einen v1-State in v2-Struktur:
+ * - Perioden aus Einzelwerten ableiten (Einzelwert bleibt als Fallback erhalten)
+ * - Sanierungen erhalten datum=null + zeitpunkt='geplant'
+ */
+function migrateV1toV2(alt: any): any {
+  const obj = JSON.parse(JSON.stringify(alt)); // deepClone
+  obj.version = 2;
+
+  // Verbrauch: Perioden aus ba ableiten (wenn ba > 0)
+  if (obj.heizlast && typeof obj.heizlast.verbrauch === 'object') {
+    if (!Array.isArray(obj.heizlast.verbrauch.perioden)) {
+      const ba = Number(obj.heizlast.verbrauch.ba);
+      obj.heizlast.verbrauch.perioden = (ba > 0)
+        ? [{ id: 'p-migrated-verbrauch', vonDatum: '2024-01-01', bisDatum: '2025-01-01', wert: ba, notiz: 'Migriert aus v1 (datumsloser Einzelwert)' }]
+        : [];
+    }
+  }
+
+  // Messung: Perioden aus qnPerJahr ableiten
+  if (obj.heizlast && typeof obj.heizlast.messung === 'object') {
+    if (!Array.isArray(obj.heizlast.messung.perioden)) {
+      const qn = Number(obj.heizlast.messung.qnPerJahr);
+      obj.heizlast.messung.perioden = (qn > 0)
+        ? [{ id: 'p-migrated-messung', vonDatum: '2024-01-01', bisDatum: '2025-01-01', wertKWh: qn, notiz: 'Migriert aus v1' }]
+        : [];
+    }
+  }
+
+  // Bstd: Perioden aus stundenGesamt + jahre ableiten
+  if (obj.heizlast && typeof obj.heizlast.bstd === 'object') {
+    if (!Array.isArray(obj.heizlast.bstd.perioden)) {
+      const h = Number(obj.heizlast.bstd.stundenGesamt);
+      const j = Number(obj.heizlast.bstd.jahre);
+      if (h > 0 && j > 0) {
+        const jahrEnde = 2025;
+        const jahrStart = jahrEnde - Math.round(j);
+        obj.heizlast.bstd.perioden = [{
+          id: 'p-migrated-bstd',
+          vonDatum: `${jahrStart}-01-01`,
+          bisDatum: `${jahrEnde}-01-01`,
+          stunden: h,
+          notiz: `Migriert aus v1 (${j} Jahre kumuliert)`,
+        }];
+      } else {
+        obj.heizlast.bstd.perioden = [];
+      }
+    }
+  }
+
+  // Sanierungen: alle bekommen datum=null, zeitpunkt='geplant'
+  if (obj.heizlast && Array.isArray(obj.heizlast.sanierungMassnahmen)) {
+    obj.heizlast.sanierungMassnahmen = obj.heizlast.sanierungMassnahmen.map((s: any) => ({
+      ...s,
+      datum: s.datum ?? null,
+      zeitpunkt: s.zeitpunkt ?? 'geplant',
+    }));
+  }
+
+  return obj;
+}
+
 /**
  * Migriert alte State-Formate auf die aktuelle Version.
- * Aktuell gibt es nur v1 — bei späteren Versionen hier ergänzen:
- *   if (obj.version === 1 && STATE_VERSION === 2) { obj = migrateV1toV2(obj); }
  */
 function migrateIfNeeded(obj: any): HeizlastState | null {
+  // v1 → v2
+  if (obj.version === 1) {
+    obj = migrateV1toV2(obj);
+  }
+
   if (obj.version === STATE_VERSION) {
     // Sanfte v1-zu-v1-Migration: neuer overrides-Record seit Phase 9 / Block A.
     // Bestehende localStorage-States ohne diesen Record bekommen ein leeres
@@ -122,6 +192,26 @@ function migrateIfNeeded(obj: any): HeizlastState | null {
     if (obj.zuschlaege && typeof obj.zuschlaege === 'object') {
       if (typeof obj.zuschlaege.qasPool !== 'number') obj.zuschlaege.qasPool = 0;
       if (typeof obj.zuschlaege.qasLueftung !== 'number') obj.zuschlaege.qasLueftung = 0;
+    }
+    // Phase 10 / Paket B: perioden-Arrays absichern (falls ein v2-State ohne diese Felder existiert)
+    if (obj.heizlast && typeof obj.heizlast === 'object') {
+      if (obj.heizlast.verbrauch && !Array.isArray(obj.heizlast.verbrauch.perioden)) {
+        obj.heizlast.verbrauch.perioden = [];
+      }
+      if (obj.heizlast.messung && !Array.isArray(obj.heizlast.messung.perioden)) {
+        obj.heizlast.messung.perioden = [];
+      }
+      if (obj.heizlast.bstd && !Array.isArray(obj.heizlast.bstd.perioden)) {
+        obj.heizlast.bstd.perioden = [];
+      }
+      // Sanierungen: datum/zeitpunkt absichern
+      if (Array.isArray(obj.heizlast.sanierungMassnahmen)) {
+        obj.heizlast.sanierungMassnahmen = obj.heizlast.sanierungMassnahmen.map((s: any) => ({
+          ...s,
+          datum: s.datum !== undefined ? s.datum : null,
+          zeitpunkt: s.zeitpunkt === 'vergangen' ? 'vergangen' : 'geplant',
+        }));
+      }
     }
     // Paket C / Block I: wohneinheiten entfernt — Feld wird beim Laden ignoriert (TypeScript).
     // Phase 9 / Block E: RaumInput um flaecheDirekt + beheizt erweitert.
@@ -238,14 +328,34 @@ export function subscribeAutoSave(): () => void {
 
 /**
  * Initialer Boot: lädt letzten Stand aus localStorage (falls vorhanden) und
- * setzt den Store. Muss genau einmal pro Seite beim Laden ausgeführt werden,
- * BEVOR UI-Komponenten ihre ersten Werte rendern.
+ * setzt den Store. Prüft zuerst v2-Key, dann v1-Key (Migration).
+ * Muss genau einmal pro Seite beim Laden ausgeführt werden.
  * Gibt zurück ob ein State geladen wurde.
  */
 export function bootFromStorage(): boolean {
   if (!isBrowser()) return false;
   cleanupLegacyKeys();
-  const loaded = loadFromStorage();
+
+  // v2-Key zuerst versuchen
+  let loaded = loadFromStorage();
+
+  // Fallback: v1-Key prüfen und migrieren
+  if (!loaded) {
+    try {
+      const rawV1 = window.localStorage.getItem(LEGACY_STORAGE_KEY_V1);
+      if (rawV1) {
+        loaded = deserializeState(rawV1);
+        if (loaded) {
+          // Alten Key entfernen, migriertes State als v2 speichern
+          window.localStorage.removeItem(LEGACY_STORAGE_KEY_V1);
+          saveNow(loaded);
+        }
+      }
+    } catch {
+      /* noop — localStorage nicht verfügbar oder korrupt */
+    }
+  }
+
   if (!loaded) return false;
   heizlastState.set(loaded);
   isDirty.set(false);
