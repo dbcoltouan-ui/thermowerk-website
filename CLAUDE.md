@@ -90,10 +90,11 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → `SANITY_API_TOKEN`
 - Cloudflare Pages Functions:
-  - `functions/api/contact.js` (Kontaktformular → Sanity speichern)
+  - `functions/api/contact.js` (Kontaktformular → D1 + Resend)
   - `functions/api/heizlast-auth.js` (Login/Logout, Cookie-basiert)
   - `functions/api/heizlast-projects.js` (Projekt-Liste, Save, Load, Delete gegen D1)
-- Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien + `contactSubmission.ts`)
+- Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien)
+- Doku: `docs/` (z. B. Resend-API-Key-Screenshot)
 - Sanity-Client: `src/lib/sanity.ts` (`getAllSections()`, `getSingleton()`, `getPage()`)
 - Seed-Script: `scripts/seed-sanity.mjs`
 - Sync-Scripts: `scripts/pull.bat`, `push.bat`, `deploy.bat`, `sync-all.bat`
@@ -115,17 +116,17 @@ Bei jeder Publish-Aktion im Dataset `production` wird ein POST an den Cloudflare
 ### Cloudflare Pages Umgebungsvariablen (Production)
 - `SANITY_DATASET` = `production`
 - `SANITY_PROJECT_ID` = `wpbatz1m`
-- `SANITY_API_TOKEN` = Editor-Token (Contact-Function schreibt damit)
-- `WEB3FORMS_KEY` = Access Key für E-Mail (client-seitig genutzt)
-- D1-Binding `HEIZLAST_DB` für Heizlast-Endpoints
+- `SANITY_API_TOKEN` = Editor-Token (Sanity-Fetch in Build + ggf. Writes)
+- `RESEND_API_KEY` = API-Key für E-Mail-Versand aus `contact.js`
+- D1-Binding `DB` (Tabelle `contact_submission`) + `HEIZLAST_DB` für Heizlast-Endpoints
 - `HEIZLAST_AUTH_PASSWORD` + `HEIZLAST_COOKIE_SECRET` für Auth-Flow
 
-## Kontaktformular CRM (Hybrid-Ansatz)
-Wegen Cloudflare-zu-Cloudflare-Blockade (Error 1106, CF Functions können nicht an api.web3forms.com fetchen) wird clientseitig parallel versendet:
-1. `fetch('/api/contact')` → CF Function → speichert in Sanity (server-seitig, braucht Token)
-2. `fetch('https://api.web3forms.com/submit')` → direkt vom Browser → E-Mail
+## Kontaktformular (D1 + Resend, seit Phase 2 Migration 2026-04-21)
+Ein einziger POST aus dem Browser an `/api/contact` (siehe `src/pages/index.astro`). Die CF-Function:
+1. Speichert die Anfrage in D1-Tabelle `contact_submission` (Binding `env.DB`, Status `neu`).
+2. Schickt eine Benachrichtigung via Resend an `daniel@thermowerk.ch` (`reply-to` = Kundenmail). D1 ist der Wahrheitsanker — wenn Resend scheitert, bleibt die Anfrage trotzdem gespeichert, Mail-Status geht in die Response.
 
-`sanity/schemas/contactSubmission.ts` speichert Anfragen mit Status-Tracking (neu/bearbeitung/erledigt). Web3Forms-Key ist im Client-JS hardcoded (bei Web3Forms so vorgesehen).
+Honeypot-Feld `botcheck` bricht Spam vor dem DB-Write ab. Sanity-Schreiben + Web3Forms-Hybrid aus der alten Lösung sind entfernt.
 
 ## Git-Commit-Workflow
 
@@ -189,7 +190,7 @@ Komponenten prüfen: `logo.image && typeof logo.image === 'object' && logo.image
 - **Astro Scoped Styles erreichen keine Child-Komponenten**: Für komponentenübergreifende Styles `<style is:global>` verwenden.
 - **Sanity Portable Text**: Text extrahieren via `block.children.map(span => span.text).join('')`.
 - **SVG-Icons aus Sanity**: Als String im Feld `iconSvg`, gerendert via `set:html`.
-- **Cloudflare Error 1106**: CF Functions können keine Requests an andere CF-geschützte Domains senden. Web3Forms deshalb client-seitig.
+- **Cloudflare Error 1106 (historisch)**: CF Functions können keine Requests an andere CF-geschützte Domains senden. Deshalb wurde Web3Forms früher client-seitig aufgerufen — aktuell wird E-Mail über Resend (externe API, keine CF-Blockade) aus der Function selbst verschickt.
 
 ## Cowork-VM — Architektur-Eigenheiten
 > **Warum das wichtig ist:** Zwei wiederkehrende Probleme sind KEINE „falschen Vorgehen" eines Chats, sondern fundamentale Eigenheiten der Cowork-VM-Architektur.

@@ -1,14 +1,1 @@
-docs: Phase 7 — CLAUDE.md konsolidiert, obsolete Handoffs archiviert
-
-CLAUDE.md umgeschrieben auf Single-File-Realitaet (89 KB -> 17 KB):
-- Obsolete Astro-v2-Heizlast-Historie (Phase 1-10 + Block A-M) entfernt
-- Neue Sektion "Heizlast-Rechner — Single-File-Variante" mit Verweisen
-  auf Final Heizlast/BACKUP-GUIDE.md und CHANGELOG.md
-- Git-Workflow, Cowork-VM-Eigenheiten, Windows-Setup, Design-
-  Entscheidungen, Bekannte Fallstricke unveraendert
-
-Obsolete Handoffs aus Root nach handoffs-archive/ verschoben:
-- HANDOFF-HEIZLAST-COMPUTE-DEAD.md
-- HANDOFF-HEIZLAST-FUNKTIONSFIX.md
-- HANDOFF-HEIZLAST-REDESIGN.md
-- PROMPT-DESIGN-REBUILD.md
+chore: Website-Ordner aufraeumen - Legacy-Dateien, alte Scripts, alter Heizlast-Rechner, tote Endpoints entfernt; Resend-Doku nach docs/; CLAUDE.md an D1+Resend-Stand angepasst
