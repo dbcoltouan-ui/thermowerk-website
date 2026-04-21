@@ -22,6 +22,17 @@
     vertical-align: middle;
     letter-spacing: 0.3px;
   }
+  .local-badge {
+    display: inline-block;
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    border-radius: var(--r-xs, 4px);
+    background: var(--ink-200, #e2e8f0);
+    color: var(--ink-700, #334155);
+    margin-left: 8px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
+  }
   .projects-section-head {
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -657,7 +668,7 @@
     </div>
     <div class="modal__body">
       <div class="projects-toolbar">
-        <span class="projects-count" id="projectsCount">0 Projekte lokal gespeichert</span>
+        <span class="projects-count" id="projectsCount">0 Projekte</span>
         <button class="btn cloud-only" type="button" id="btnRefreshCloud" title="Cloud-Liste neu laden">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           <span>Aktualisieren</span>
@@ -673,11 +684,6 @@
         <input type="file" id="fileImport" accept="application/json" hidden="">
       </div>
       <div class="projects-list" id="projectsList"></div>
-      <div class="cloud-only cloud-only--block" style="margin-top: var(--s-5);">
-        <h4 class="projects-section-head">Cloud-Projekte</h4>
-        <div class="projects-count" id="cloudProjectsCount" style="margin-bottom: 8px;">0 Projekte in der Cloud</div>
-        <div class="projects-list" id="cloudProjectsList"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -1073,6 +1079,18 @@ function listProjects(){
 function writeProjects(arr){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e){}
 }
+/* Markiert das lokale Projekt als Cloud-Mirror, damit Drift-Cleanup in
+   cloudList() es entfernen kann, wenn es auf einem anderen Gerät gelöscht wurde. */
+function markLocalAsCloudMirror(id){
+  if (!id) return;
+  const arr = listProjects();
+  const i = arr.findIndex(p => p.meta && p.meta.id === id);
+  if (i < 0) return;
+  arr[i].meta = arr[i].meta || {};
+  if (arr[i].meta.cloudMirror === true) return;
+  arr[i].meta.cloudMirror = true;
+  writeProjects(arr);
+}
 async function saveProject(){
   const arr = listProjects();
   const i = arr.findIndex(p => p.meta && p.meta.id === state.meta.id);
@@ -1083,6 +1101,7 @@ async function saveProject(){
   saveActive();
   if (isAuthenticated){
     const ok = await cloudSave(false);
+    if (ok) markLocalAsCloudMirror(state.meta.id);
     toast(ok ? 'Projekt gespeichert (lokal + Cloud).' : 'Lokal gespeichert (Cloud fehlgeschlagen).');
   } else {
     toast('Projekt lokal gespeichert.');
@@ -2750,56 +2769,92 @@ function openProjectsModal(){
     cloudList().catch(()=>{});
   }
 }
-function refreshProjectsList(){
-  const arr = listProjects();
-  document.getElementById('projectsCount').textContent = `${arr.length} Projekt${arr.length===1?'':'e'} lokal gespeichert`;
-  const list = document.getElementById('projectsList');
-  if (arr.length===0){
-    list.innerHTML = '<p class="muted" style="color:var(--ink-500);">Noch keine lokal gespeicherten Projekte. Aktuelles Projekt über <em>Speichern</em> ablegen.</p>';
-  } else {
-    list.innerHTML = arr.map(p=>{
-      const name = esc(p.projekt?.name || p.meta?.name || 'Unbenannt');
-      const date = new Date(p.meta?.updated || p.meta?.created || Date.now()).toLocaleString('de-CH');
-      return `
-        <div class="proj-row" style="display:flex;align-items:center;gap:var(--s-3);padding:10px 12px;border:1px solid var(--ink-200);border-radius:var(--r-sm);margin-bottom:8px;background:var(--ink-50);">
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;color:var(--ink-900);">${name}</div>
-            <div style="font-size:var(--fs-xs);color:var(--ink-500);">Zuletzt: ${date}</div>
-          </div>
-          <button class="btn" type="button" data-load-project="${esc(p.meta.id)}" data-origin="local">Öffnen</button>
-          <button class="btn btn--danger-ghost" type="button" data-del-project="${esc(p.meta.id)}" data-origin="local">Löschen</button>
-        </div>
-      `;
-    }).join('');
+/* Baut eine konsolidierte Projekt-Liste: jedes Projekt nur EINMAL, egal ob
+   rein lokal, rein Cloud oder beides. Matching ueber meta.id <-> _id. */
+function buildMergedProjects(){
+  const locals = listProjects();
+  const localById = new Map();
+  for (const p of locals){
+    if (p && p.meta && p.meta.id) localById.set(p.meta.id, p);
   }
-  /* Cloud-Liste */
-  const cList = document.getElementById('cloudProjectsList');
-  const cCount = document.getElementById('cloudProjectsCount');
-  if (!cList || !cCount) return;
-  if (!isAuthenticated){ cList.innerHTML = ''; cCount.textContent = ''; return; }
-  cCount.textContent = `${cloudProjects.length} Projekt${cloudProjects.length===1?'':'e'} in der Cloud`;
-  if (cloudProjects.length === 0){
-    cList.innerHTML = '<p class="muted" style="color:var(--ink-500);">Noch keine Cloud-Projekte. Aktuelles Projekt über <em>In Cloud speichern als…</em> in die Cloud legen.</p>';
+  const cloudById = new Map();
+  for (const c of cloudProjects){
+    if (c && c._id) cloudById.set(c._id, c);
+  }
+  const seen = new Set();
+  const items = [];
+  /* Zuerst Cloud-Eintraege (haben reichere Metadaten) */
+  for (const c of cloudProjects){
+    if (!c || !c._id) continue;
+    const local = localById.get(c._id) || null;
+    items.push({
+      id: c._id,
+      name: c.projectName || local?.projekt?.name || local?.meta?.name || 'Unbenannt',
+      customer: c.customerName || '',
+      address: c.address || '',
+      qhl: c.qhl != null ? c.qhl : null,
+      qh:  c.qh  != null ? c.qh  : null,
+      ebf: c.ebf != null ? c.ebf : null,
+      date: c.updatedAt || local?.meta?.updated || local?.meta?.created || 0,
+      hasCloud: true,
+      hasLocal: !!local,
+    });
+    seen.add(c._id);
+  }
+  /* Danach rein lokale Eintraege */
+  for (const p of locals){
+    if (!p || !p.meta || !p.meta.id) continue;
+    if (seen.has(p.meta.id)) continue;
+    items.push({
+      id: p.meta.id,
+      name: p.projekt?.name || p.meta?.name || 'Unbenannt',
+      customer: p.projekt?.kunde || '',
+      address: p.projekt?.adresse || '',
+      qhl: null, qh: null, ebf: null,
+      date: p.meta.updated || p.meta.created || 0,
+      hasCloud: false,
+      hasLocal: true,
+    });
+  }
+  /* Neueste zuerst */
+  items.sort((a, b) => (b.date || 0) - (a.date || 0));
+  return items;
+}
+
+function refreshProjectsList(){
+  const items = buildMergedProjects();
+  const list = document.getElementById('projectsList');
+  const count = document.getElementById('projectsCount');
+  if (count){
+    count.textContent = `${items.length} Projekt${items.length===1?'':'e'}`;
+  }
+  if (items.length === 0){
+    list.innerHTML = '<p class="muted" style="color:var(--ink-500);">Noch keine gespeicherten Projekte. Aktuelles Projekt über <em>Speichern</em> ablegen.</p>';
     return;
   }
-  cList.innerHTML = cloudProjects.map(p=>{
-    const name = esc(p.projectName || 'Unbenannt');
-    const sub  = [p.customerName, p.address].filter(Boolean).map(esc).join(' · ');
-    const qhl  = p.qhl!=null ? `Q<sub>hl</sub> ${fmtKW(p.qhl)} kW` : '';
-    const qh   = p.qh!=null  ? `Q<sub>h</sub> ${fmtKW(p.qh)} kW`  : '';
-    const ebf  = p.ebf ? `EBF ${fmt(p.ebf,0)} m²` : '';
-    const meta = [qhl, qh, ebf].filter(Boolean).join(' · ');
-    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleString('de-CH') : '';
+  list.innerHTML = items.map(it => {
+    const name  = esc(it.name);
+    const badge = it.hasCloud
+      ? '<span class="cloud-badge">Cloud</span>'
+      : '<span class="local-badge">Nur lokal</span>';
+    const sub   = [it.customer, it.address].filter(Boolean).map(esc).join(' · ');
+    const parts = [];
+    if (it.qhl != null) parts.push(`Q<sub>hl</sub> ${fmtKW(it.qhl)} kW`);
+    if (it.qh  != null) parts.push(`Q<sub>h</sub> ${fmtKW(it.qh)} kW`);
+    if (it.ebf)         parts.push(`EBF ${fmt(it.ebf, 0)} m²`);
+    const meta  = parts.join(' · ');
+    const date  = it.date ? new Date(it.date).toLocaleString('de-CH') : '';
+    const origin = it.hasCloud ? 'cloud' : 'local';
     return `
       <div class="proj-row" style="display:flex;align-items:center;gap:var(--s-3);padding:10px 12px;border:1px solid var(--ink-200);border-radius:var(--r-sm);margin-bottom:8px;background:var(--ink-50);">
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;color:var(--ink-900);">${name}<span class="cloud-badge">Cloud</span></div>
-          ${sub ? `<div style="font-size:var(--fs-xs);color:var(--ink-500);">${sub}</div>` : ''}
+          <div style="font-weight:600;color:var(--ink-900);">${name}${badge}</div>
+          ${sub  ? `<div style="font-size:var(--fs-xs);color:var(--ink-500);">${sub}</div>` : ''}
           ${meta ? `<div style="font-size:var(--fs-xs);color:var(--ink-500);">${meta}</div>` : ''}
           ${date ? `<div style="font-size:var(--fs-xs);color:var(--ink-500);">Zuletzt: ${esc(date)}</div>` : ''}
         </div>
-        <button class="btn" type="button" data-load-project="${esc(p._id)}" data-origin="cloud">Öffnen</button>
-        <button class="btn btn--danger-ghost" type="button" data-del-project="${esc(p._id)}" data-origin="cloud">Löschen</button>
+        <button class="btn" type="button" data-load-project="${esc(it.id)}" data-origin="${origin}">Öffnen</button>
+        <button class="btn btn--danger-ghost" type="button" data-del-project="${esc(it.id)}" data-origin="${origin}">Löschen</button>
       </div>
     `;
   }).join('');
@@ -3468,6 +3523,17 @@ async function cloudList(){
     if (!r.ok) throw new Error('HTTP '+r.status);
     const j = await r.json();
     cloudProjects = Array.isArray(j.projects) ? j.projects : [];
+    /* Drift-Cleanup: Lokale Cloud-Mirror-Eintraege, die nicht mehr in der
+       Cloud sind (auf anderem Geraet geloescht), auch lokal entfernen.
+       Rein lokale Projekte (ohne cloudMirror-Flag) bleiben unberuehrt. */
+    const cloudIds = new Set(cloudProjects.map(p => p._id));
+    const locals = listProjects();
+    const remaining = locals.filter(p =>
+      !(p.meta && p.meta.cloudMirror === true && !cloudIds.has(p.meta.id))
+    );
+    if (remaining.length !== locals.length){
+      writeProjects(remaining);
+    }
     const mp = document.getElementById('modalProjects');
     if (mp && !mp.hidden) refreshProjectsList();
   } catch(e){
