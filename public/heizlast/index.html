@@ -701,9 +701,10 @@
       <fieldset class="export-fieldset">
         <legend>Optionale Broschüren-Inhalte</legend>
         <p class="muted" style="margin:0 0 var(--s-3); font-size:var(--fs-sm);">
-          Objektdaten, Leistungen, Sanierungen, Warmwasser, Zuschläge, Berechnungsgrundlagen und Rechenweg erscheinen automatisch — wo Werte erfasst wurden. Abwählbar sind nur die drei Empfehlungs-/Notiz-Bereiche.
+          Objektdaten, Leistungen, Sanierungen, Warmwasser, Zuschläge und Berechnungsgrundlagen erscheinen automatisch — wo Werte erfasst wurden. Abwählbar sind der detaillierte Rechenweg und die drei Empfehlungs-/Notiz-Bereiche.
         </p>
         <div class="export-options" id="exportOptions">
+          <label class="export-option"><input type="checkbox" data-key="rechenweg" checked=""><span>Detaillierter Rechenweg (Schritt-für-Schritt-Formeln)</span></label>
           <label class="export-option"><input type="checkbox" data-key="boiler" checked=""><span>Warmwasserspeicher (Boiler-Empfehlung)</span></label>
           <label class="export-option"><input type="checkbox" data-key="puffer" checked=""><span>Heizungs-Pufferspeicher (Richtwert L/W-WP)</span></label>
           <label class="export-option"><input type="checkbox" data-key="notizen" checked=""><span>Notizen (Projekt &amp; Sektionen)</span></label>
@@ -2745,6 +2746,9 @@ function closeModal(id){ document.getElementById(id).hidden = true; }
 function openProjectsModal(){
   refreshProjectsList();
   openModal('modalProjects');
+  if (isAuthenticated){
+    cloudList().catch(()=>{});
+  }
 }
 function refreshProjectsList(){
   const arr = listProjects();
@@ -3273,7 +3277,7 @@ function buildBroschure(opt){
   parts.push(buildReportHeader());
   parts.push(buildPageHead('Berechnungsgrundlagen', heute, 'subtitle'));
   parts.push(buildBerechnungsgrundlagen());
-  if (c.primary){
+  if (c.primary && opt.rechenweg !== false){
     parts.push(`<h2 class="brosch__h2">Detaillierte Berechnung</h2>`);
     parts.push(`<p class="brosch__note">Jeder Schritt zeigt Formel, eingesetzte Werte und Zwischenergebnis. Einheiten werden explizit geführt.</p>`);
     parts.push(buildRechenwegDetail(s, c));
@@ -3587,6 +3591,18 @@ loadActive();
 render();
 applyAuthUi();
 probeAuth();
+
+/* Auto-Sync der Cloud-Liste: beim Tab-Rueckkehr aktualisieren,
+   damit Aenderungen von anderen Geraeten ohne Klick sichtbar werden. */
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState !== 'visible') return;
+  if (!isAuthenticated) return;
+  cloudList().catch(()=>{});
+});
+window.addEventListener('focus', ()=>{
+  if (!isAuthenticated) return;
+  cloudList().catch(()=>{});
+});
 
 /* ======================================================
    DEBUG / TEST-HOOK
