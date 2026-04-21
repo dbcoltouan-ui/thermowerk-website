@@ -3534,8 +3534,17 @@ async function cloudDelete(id){
     if (r.status === 401){ isAuthenticated = false; applyAuthUi(); return; }
     if (!r.ok) throw new Error('HTTP '+r.status);
     cloudProjects = cloudProjects.filter(p => p._id !== id);
+    // Lokalen Eintrag mit derselben ID mit entfernen (falls vorhanden).
+    const localArr = listProjects();
+    const before = localArr.length;
+    const filtered = localArr.filter(p => !(p.meta && p.meta.id === id));
+    let alsoLocal = false;
+    if (filtered.length < before){
+      writeProjects(filtered);
+      alsoLocal = true;
+    }
     refreshProjectsList();
-    toast('Cloud-Projekt gelöscht.');
+    toast(alsoLocal ? 'Projekt gelöscht (Cloud + lokal).' : 'Cloud-Projekt gelöscht.');
   } catch(e){
     toast('Cloud-Löschen fehlgeschlagen.');
   }
