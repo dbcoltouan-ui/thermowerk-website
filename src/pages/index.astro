@@ -147,18 +147,10 @@ try {
       countObserver.observe(countEl);
     })();
 
-    /* Kontaktformular: JS-Submit → Sanity (via Function) + Web3Forms (direkt vom Browser) */
+    /* Kontaktformular: ein einziger POST an /api/contact (D1 + Resend) */
     (function() {
       var form = document.getElementById('contactForm');
       if (!form) return;
-
-      var WEB3FORMS_KEY = '4a784c79-a3b6-430e-9d53-d2d77bd9a5f7';
-      var interestLabels = {
-        waermepumpe: 'Wärmepumpe (Heizungsersatz)',
-        klimaanlage: 'Klimaanlage',
-        foerderberatung: 'Förderberatung',
-        sonstiges: 'Sonstiges'
-      };
 
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -175,37 +167,27 @@ try {
           message: form.querySelector('#message').value
         };
 
-        // 1. Sanity speichern (via Cloudflare Function)
-        var sanityPromise = fetch('/api/contact', {
+        fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
-        }).then(function(r) { return r.json(); }).catch(function() { return { success: false }; });
-
-        // 2. E-Mail via Web3Forms (direkt vom Browser – umgeht CF-Blockade)
-        var emailPromise = fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_KEY,
-            subject: 'Neue Anfrage: ' + (interestLabels[data.interest] || data.interest || 'Allgemein') + ' – ' + data.name,
-            from_name: 'Thermowerk Website',
-            name: data.name,
-            email: data.email,
-            phone: data.phone || '–',
-            interesse: interestLabels[data.interest] || data.interest || '–',
-            nachricht: data.message || '–'
+        })
+          .then(function(r) { return r.json().catch(function(){ return { success: false }; }); })
+          .then(function(res) {
+            if (res && res.success) {
+              form.style.display = 'none';
+              document.getElementById('formSuccess').style.display = 'block';
+            } else {
+              document.getElementById('formError').style.display = 'block';
+              btn.textContent = origText;
+              btn.disabled = false;
+            }
           })
-        }).then(function(r) { return r.json(); }).catch(function() { return { success: false }; });
-
-        Promise.all([sanityPromise, emailPromise]).then(function(results) {
-          form.style.display = 'none';
-          document.getElementById('formSuccess').style.display = 'block';
-        }).catch(function() {
-          document.getElementById('formError').style.display = 'block';
-          btn.textContent = origText;
-          btn.disabled = false;
-        });
+          .catch(function() {
+            document.getElementById('formError').style.display = 'block';
+            btn.textContent = origText;
+            btn.disabled = false;
+          });
       });
     })();
 

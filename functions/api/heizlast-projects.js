@@ -1,5 +1,10 @@
-// Cloudflare Pages Function: Heizlast-Projekte (Liste / Speichern / Löschen)
+// Cloudflare Pages Function: Heizlast-Projekte (Liste / Laden / Speichern / Loeschen)
+// Backend ist jetzt Cloudflare D1 (Binding env.DB, Tabelle heizlast_project).
 // Alle Endpoints erfordern den Auth-Cookie (gesetzt via /api/heizlast-auth).
+//
+// Das Response-Shape bleibt bewusst kompatibel zum alten Sanity-Client
+// (src/lib/heizlast/projects.ts): _id-Feld auf Projekten, projects:[] in der Liste,
+// project:{...} beim Einzel-GET, id beim POST, success:true beim DELETE.
 
 function checkAuth(context) {
   const cookie = context.request.headers.get('Cookie') || '';
@@ -13,186 +18,134 @@ function unauthorized() {
   });
 }
 
-function getSanityConfig(env) {
-  return {
-    token: env.SANITY_API_TOKEN,
-    projectId: env.SANITY_PROJECT_ID || 'wpbatz1m',
-    dataset: env.SANITY_DATASET || 'production',
-  };
+function jsonError(status, error) {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
-// GET /api/heizlast-projects  → Liste aller Projekte (ohne stateJson für Performance)
+function jsonOk(payload) {
+  return new Response(JSON.stringify({ success: true, ...payload }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+// D1-Row → Client-Projekt (Sanity-kompatibel: _id statt id, camelCase, stateJson als String)
+function rowToProject(row, { withState } = { withState: false }) {
+  if (!row) return null;
+  const out = {
+    _id:          row.id,
+    projectName:  row.project_name,
+    customerName: row.customer_name || '',
+    address:      row.address || '',
+    qhl:          typeof row.qhl === 'number' ? row.qhl : null,
+    qh:           typeof row.qh  === 'number' ? row.qh  : null,
+    ebf:          typeof row.ebf === 'number' ? row.ebf : null,
+    status:       row.status || 'arbeit',
+    notes:        row.notes || '',
+    createdAt:    row.created_at,
+    updatedAt:    row.updated_at,
+  };
+  if (withState) out.stateJson = row.state_json || '{}';
+  return out;
+}
+
+// GET /api/heizlast-projects              → Liste (ohne state_json)
+// GET /api/heizlast-projects?id=<uuid>    → Einzelprojekt inkl. state_json
 export async function onRequestGet(context) {
   if (!checkAuth(context)) return unauthorized();
-  const { token, projectId, dataset } = getSanityConfig(context.env);
-  if (!token) {
-    return new Response(JSON.stringify({ success: false, error: 'Kein Sanity-Token' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const db = context.env.DB;
+  if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 
   const url = new URL(context.request.url);
   const id = url.searchParams.get('id');
 
-  // Einzelnes Projekt mit stateJson (zum Laden)
-  if (id) {
-    const query = encodeURIComponent(`*[_type == "heizlastProject" && _id == "${id}"][0]`);
-    try {
-      const resp = await fetch(
-        `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await resp.json();
-      return new Response(JSON.stringify({ success: true, project: data.result }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch (err) {
-      return new Response(JSON.stringify({ success: false, error: err.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  // Liste ohne stateJson (kompakter)
-  const query = encodeURIComponent(
-    `*[_type == "heizlastProject"]|order(updatedAt desc){_id, projectName, customerName, address, qhl, qh, ebf, status, createdAt, updatedAt, notes}`
-  );
   try {
-    const resp = await fetch(
-      `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const data = await resp.json();
-    return new Response(JSON.stringify({ success: true, projects: data.result || [] }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    if (id) {
+      const row = await db.prepare(
+        `SELECT id, project_name, customer_name, address, qhl, qh, ebf, state_json,
+                status, notes, created_at, updated_at
+         FROM heizlast_project WHERE id = ? LIMIT 1`
+      ).bind(id).first();
+      return jsonOk({ project: rowToProject(row, { withState: true }) });
+    }
+
+    const { results } = await db.prepare(
+      `SELECT id, project_name, customer_name, address, qhl, qh, ebf,
+              status, notes, created_at, updated_at
+       FROM heizlast_project ORDER BY updated_at DESC`
+    ).all();
+    const projects = (results || []).map((r) => rowToProject(r, { withState: false }));
+    return jsonOk({ projects });
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError(500, 'DB-Fehler: ' + err.message);
   }
 }
 
-// POST /api/heizlast-projects  → Projekt speichern (create oder update via _id)
+// POST /api/heizlast-projects  → create-or-replace
+// Body: { id?, projectName, customerName, address, qhl, qh, ebf, stateJson, status, notes, createdAt? }
 export async function onRequestPost(context) {
   if (!checkAuth(context)) return unauthorized();
-  const { token, projectId, dataset } = getSanityConfig(context.env);
-  if (!token) {
-    return new Response(JSON.stringify({ success: false, error: 'Kein Sanity-Token' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const db = context.env.DB;
+  if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 
   try {
     const body = await context.request.json();
-    const {
-      id, projectName, customerName, address, qhl, qh, ebf, stateJson, status, notes,
-    } = body;
-
     const now = new Date().toISOString();
-    const doc = {
-      _type: 'heizlastProject',
-      projectName: projectName || 'Unbenannt',
-      customerName: customerName || '',
-      address: address || '',
-      qhl: typeof qhl === 'number' ? qhl : null,
-      qh: typeof qh === 'number' ? qh : null,
-      ebf: typeof ebf === 'number' ? ebf : null,
-      stateJson: stateJson || '{}',
-      status: status || 'arbeit',
-      notes: notes || '',
-      updatedAt: now,
-    };
 
-    let mutation;
-    if (id) {
-      mutation = { createOrReplace: { ...doc, _id: id, createdAt: body.createdAt || now } };
-    } else {
-      mutation = { create: { ...doc, createdAt: now } };
-    }
+    const id           = body.id || crypto.randomUUID();
+    const projectName  = String(body.projectName  || 'Unbenannt');
+    const customerName = String(body.customerName || '');
+    const address      = String(body.address      || '');
+    const qhl          = typeof body.qhl === 'number' ? body.qhl : null;
+    const qh           = typeof body.qh  === 'number' ? body.qh  : null;
+    const ebf          = typeof body.ebf === 'number' ? body.ebf : null;
+    const stateJson    = typeof body.stateJson === 'string' ? body.stateJson : '{}';
+    const status       = String(body.status || 'arbeit');
+    const notes        = String(body.notes  || '');
+    const createdAt    = body.createdAt || now;
 
-    const resp = await fetch(
-      `https://${projectId}.api.sanity.io/v2024-03-01/data/mutate/${dataset}?returnIds=true`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mutations: [mutation] }),
-      }
-    );
-    const data = await resp.json();
+    // UPSERT: INSERT, bei Konflikt auf PK → UPDATE (ohne created_at anzufassen)
+    await db.prepare(
+      `INSERT INTO heizlast_project
+         (id, project_name, customer_name, address, qhl, qh, ebf, state_json, status, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         project_name  = excluded.project_name,
+         customer_name = excluded.customer_name,
+         address       = excluded.address,
+         qhl           = excluded.qhl,
+         qh            = excluded.qh,
+         ebf           = excluded.ebf,
+         state_json    = excluded.state_json,
+         status        = excluded.status,
+         notes         = excluded.notes,
+         updated_at    = excluded.updated_at`
+    ).bind(
+      id, projectName, customerName, address, qhl, qh, ebf, stateJson, status, notes, createdAt, now
+    ).run();
 
-    if (data.error) {
-      return new Response(JSON.stringify({ success: false, error: data.error.description || 'Sanity-Fehler' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const newId = data.results?.[0]?.id || id;
-    return new Response(JSON.stringify({ success: true, id: newId }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonOk({ id });
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError(500, 'DB-Fehler: ' + err.message);
   }
 }
 
-// DELETE /api/heizlast-projects?id=xxx
+// DELETE /api/heizlast-projects?id=<uuid>
 export async function onRequestDelete(context) {
   if (!checkAuth(context)) return unauthorized();
-  const { token, projectId, dataset } = getSanityConfig(context.env);
-  if (!token) {
-    return new Response(JSON.stringify({ success: false, error: 'Kein Sanity-Token' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const db = context.env.DB;
+  if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 
   const url = new URL(context.request.url);
   const id = url.searchParams.get('id');
-  if (!id) {
-    return new Response(JSON.stringify({ success: false, error: 'Keine ID' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  if (!id) return jsonError(400, 'Keine ID');
 
   try {
-    const resp = await fetch(
-      `https://${projectId}.api.sanity.io/v2024-03-01/data/mutate/${dataset}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mutations: [{ delete: { id } }] }),
-      }
-    );
-    const data = await resp.json();
-    if (data.error) {
-      return new Response(JSON.stringify({ success: false, error: data.error.description }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    await db.prepare(`DELETE FROM heizlast_project WHERE id = ?`).bind(id).run();
+    return jsonOk({});
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError(500, 'DB-Fehler: ' + err.message);
   }
 }

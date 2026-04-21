@@ -1,44 +1,13 @@
-Phase 10 / Hotfix — Override-Logik gehaertet + Input-Clamping
+Phase 2: Contact-Form + Heizlast-Projects auf D1 + Resend umgestellt
 
-Diagnose auf Basis des User-Exports (Thermowerk-Heizlast-Test-23.json):
-tvollOverride=-20, zirkProzent=4844, pufferDeltaT=506, vwuAbzug=-1,
-deltaTOverride=55. Compute rechnet korrekt — mit Muell-Input. Root-
-Cause: Inputs hatten keine min/max-Grenzen, coerce() clampte nicht,
-alter Override-Wert blieb hartnaeckig erhalten.
+- functions/api/contact.js: schreibt Anfragen in D1 (contact_submission),
+  schickt Benachrichtigung via Resend an daniel@thermowerk.ch
+  (Absender noreply@, reply-to = Kundenmail). Web3Forms + Sanity raus.
 
-Fixes
------
-1. src/lib/heizlast/bindings.ts
-   - coerce() akzeptiert HTMLElement + clampt auf min/max-Attribute.
-   - Leere Number-Inputs in Override-Wrappern -> null (Feld zeigt Default).
-   - syncDomFromState: solange Override-Flag = false, wird IMMER der
-     resolveDefault gezeigt (nicht nur bei null).
+- functions/api/heizlast-projects.js: alle Sanity-Fetches durch
+  env.DB.prepare() ersetzt. GET-Liste / GET-Single / POST (UPSERT via
+  ON CONFLICT) / DELETE. Response-Shape bleibt client-kompatibel
+  (_id, projectName, projects[]).
 
-2. src/lib/heizlast/compute.ts
-   - resolveTvoll prueft jetzt isOverridden(s,'gebaeude.tvoll') UND
-     Plausibilitaets-Range 500..3500 h/a. Alte -20-Werte werden ignoriert.
-
-3. src/lib/heizlast/storage.ts
-   - Sanity-Sweep in migrateIfNeeded: implausible Werte in tvollOverride,
-     ebf, WW-Prozent, deltaT, toff, qasPool/Lueftung, pufferDeltaT,
-     Speicher-Temperaturen, vwuAbzug werden auf null/Default normalisiert.
-     Override-Flags dieser Felder werden mit entfernt. Damit wird der
-     User-State beim naechsten Laden automatisch bereinigt.
-
-4. src/pages/heizlast.astro
-   - Reset-Button schreibt nicht mehr den Default-Wert ins Input und
-     feuert Events, sondern setzt bindPath direkt auf null und ruft
-     clearOverride(). Keine Legacy-Ueberschreibung mehr.
-
-5. Sections — min/max auf kritische Inputs:
-   - Section1: Tvoll 500..3500, EBF 1..10000.
-   - Section2: vwuAbzug 0..2000, qhl-direct 0..500.
-   - Section3: deltaT 10..80, Prozente 0..100.
-   - Section4: toff 0..12, qasPool/Lueftung 0..20.
-   - Section5: WW-Speicher-Temperaturen 40..90 / 2..30, pufferDeltaT 1..30.
-
-Tests
------
-- scripts/test-heizlast.ts: 49/49 gruen (FWS-Aufgabe 2 Qhl=12.5453 kW)
-- scripts/test-heizlast-state.ts: 43/43 gruen (override-Flag jetzt
-  explizit fuer Aufgabe-2-State gesetzt, da resolveTvoll Flag-Gate nutzt)
+- src/pages/index.astro: Client-JS auf einen einzigen Fetch an
+  /api/contact konsolidiert. WEB3FORMS_KEY + zweite fetch-Kette raus.
