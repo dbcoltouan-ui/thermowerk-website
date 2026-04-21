@@ -16,5 +16,5 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding       = "DB"                       # in Functions als env.DB ansprechbar
 database_name = "thermowerk-data"
-database_id   = "REPLACE_WITH_DATABASE_ID" # <- wird nach Dashboard-Create ersetzt
+database_id   = "3182c9e5-e5d9-4dc4-9f59-fd494b72c901" # D1 "thermowerk-data", Region WEUR, angelegt 2026-04-21
 migrations_dir = "migrations"
