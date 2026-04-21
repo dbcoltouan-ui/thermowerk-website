@@ -2,9 +2,11 @@
 // Backend ist jetzt Cloudflare D1 (Binding env.DB, Tabelle heizlast_project).
 // Alle Endpoints erfordern den Auth-Cookie (gesetzt via /api/heizlast-auth).
 //
-// Das Response-Shape bleibt bewusst kompatibel zum alten Sanity-Client
-// (src/lib/heizlast/projects.ts): _id-Feld auf Projekten, projects:[] in der Liste,
-// project:{...} beim Einzel-GET, id beim POST, success:true beim DELETE.
+// Response-Shape (wird vom Single-File-HTML-Client unter /heizlast/ genutzt):
+//   GET            → { success, projects: [ { _id, projectName, customerName, address, qhl, qh, ebf, status, notes, createdAt, updatedAt } ] }
+//   GET ?id=<uuid> → { success, project: { ...inkl. stateJson } }
+//   POST           → { success, id }
+//   DELETE ?id=    → { success: true }
 
 function checkAuth(context) {
   const cookie = context.request.headers.get('Cookie') || '';

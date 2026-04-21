@@ -1,13 +1,20 @@
-Phase 2: Contact-Form + Heizlast-Projects auf D1 + Resend umgestellt
+Phase 3 + 4: Sanity-Schemas raus, alte Astro-Heizlast-Seite entfernt
 
-- functions/api/contact.js: schreibt Anfragen in D1 (contact_submission),
-  schickt Benachrichtigung via Resend an daniel@thermowerk.ch
-  (Absender noreply@, reply-to = Kundenmail). Web3Forms + Sanity raus.
+Phase 3:
+- sanity/schemas/contactSubmission.ts geloescht
+- sanity/schemas/heizlastProject.ts geloescht
+- sanity.config.ts: Imports + Sidebar-Items + Types-Liste bereinigt
 
-- functions/api/heizlast-projects.js: alle Sanity-Fetches durch
-  env.DB.prepare() ersetzt. GET-Liste / GET-Single / POST (UPSERT via
-  ON CONFLICT) / DELETE. Response-Shape bleibt client-kompatibel
-  (_id, projectName, projects[]).
+Phase 4 (alte Astro-Heizlast weg, Single-File-HTML folgt in Phase 4.5):
+- src/pages/heizlast.astro geloescht
+- src/layouts/HeizlastLayout.astro geloescht
+- src/components/heizlast-v2/ komplett geloescht
+- src/lib/heizlast/ komplett geloescht (bindings/calculations/compute/
+  constants/export/projects/state/storage/types.ts)
+- scripts/test-heizlast.ts + test-heizlast-state.ts + test-heizlast.bat geloescht
+- package.json: nanostores, @nanostores/persistent, chart.js raus
+- functions/api/heizlast-projects.js: Kommentar auf neues Client-Shape
+  aktualisiert (Single-File-HTML als Zielclient statt altem lib/heizlast)
 
-- src/pages/index.astro: Client-JS auf einen einzigen Fetch an
-  /api/contact konsolidiert. WEB3FORMS_KEY + zweite fetch-Kette raus.
+Backend bleibt: functions/api/heizlast-auth.js + functions/api/heizlast-projects.js
+(werden in Phase 4.5 vom neuen Single-File-HTML unter /heizlast/ genutzt).
