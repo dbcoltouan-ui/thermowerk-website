@@ -2,6 +2,15 @@
 
 > **WICHTIG:** Diese Datei ist die zentrale Wissensbasis für Claude. Jede neue Funktion, jedes neue Schema, jeder neue Workflow oder jede architektonische Änderung MUSS hier dokumentiert werden, sobald sie umgesetzt ist. So bleibt Claude in jeder neuen Session sofort auf dem aktuellen Stand.
 
+> **KOMMUNIKATION MIT DANIEL (WICHTIG):** Daniel ist **Laie** (kein Entwickler). Er versteht Code nicht, er versteht Terminal-Kommandos nicht automatisch, er hat kein Python installiert, er weiss nicht was ein „Commit", ein „Port" oder ein „fetch" ist. Claude muss daher:
+> - **Jeden Schritt in Klartext erklären**, bevor ein Kommando genannt wird („Wir machen jetzt X, damit Y passiert, weil Z").
+> - **Keine nackten Shell-Befehle** als Anweisung — immer mit Kontext: Wo eingeben (PowerShell / cmd / Browser), was passiert wenn's durchläuft, was passiert wenn nicht.
+> - **Test-Anweisungen immer mit „wo klicke ich hin"** — nicht „öffne `http://localhost:8080`", sondern „Doppelklick auf die Datei `index.html` im Explorer, dann passiert …".
+> - **Fachbegriffe kurz übersetzen** beim ersten Auftauchen („D1 = die Online-Datenbank von Cloudflare").
+> - **Entscheidungen als Frage formulieren**, nie als technische Option-Liste: „Soll ich A oder B machen?" statt „Wähle zwischen `--flag=a` und `--flag=b`".
+> - **Bei Commits und technischen Aktionen selbstständig durchführen** — Daniel muss nichts selbst in Terminals eintippen. Nur Tests (Klicks im Browser) laufen bei ihm.
+> - **Knapp antworten bei Routine-Schritten**, ausführlich nur wenn Daniel fragt oder etwas Neues/Ungewöhnliches ansteht (User-Präferenz: „Bei Erledigung der Promts immer knapp antworten").
+
 > **HANDOFF-KONVENTION:** Jede Handoff-Datei (`HANDOFF-PHASE-N.md`) muss **ganz oben** einen fertigen Copy-Paste-Prompt für den nächsten Chat enthalten (als ```-Block). Der Prompt verweist auf die jeweilige Handoff-Datei, nennt den aktuellen Stand, listet die zu lesenden Dokumente in Reihenfolge und gibt konkrete erste Schritte. Claude übergibt diesen Prompt am Ende einer Phase immer auch direkt im Chat, damit Daniel ihn 1:1 kopieren kann — ohne die Datei erst öffnen zu müssen.
 
 > **AKTUELLES OFFENES PROJEKT: Heizlastrechner-Redesign** — Siehe `HANDOFF-HEIZLAST-REDESIGN.md` im Projekt-Root. Das Backend steht (Sanity-Schema, Cloudflare Functions, Auth, Env-Vars), aber der Frontend-Teil unter `/heizlast` wird komplett neu aufgebaut. Bei neuer Session zu diesem Thema zuerst `HANDOFF-HEIZLAST-REDESIGN.md` lesen.
