@@ -1,0 +1,20 @@
+# Cloudflare Wrangler Config fuer thermowerk-website
+# Angelegt 2026-04-21 in Phase 1 des MIGRATION-GAMEPLAN.
+#
+# Der Astro-Build laeuft weiterhin ueber Cloudflare Pages (Git-Integration),
+# wrangler wird hier nur fuer D1-Verwaltung genutzt:
+#   wrangler d1 execute thermowerk-data --file=migrations/0001_contact_submission.sql
+#   wrangler d1 execute thermowerk-data --file=migrations/0002_heizlast_project.sql
+#   wrangler d1 execute thermowerk-data --command="SELECT COUNT(*) FROM contact_submission"
+
+name = "thermowerk-website"
+compatibility_date = "2026-04-21"
+pages_build_output_dir = "dist"
+
+# D1-Binding fuer Cloudflare Pages Functions unter /functions/api/*
+# Nach Daniel die database_id im Dashboard erzeugt hat, hier eintragen.
+[[d1_databases]]
+binding       = "DB"                       # in Functions als env.DB ansprechbar
+database_name = "thermowerk-data"
+database_id   = "REPLACE_WITH_DATABASE_ID" # <- wird nach Dashboard-Create ersetzt
+migrations_dir = "migrations"
