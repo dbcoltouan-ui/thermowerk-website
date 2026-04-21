@@ -1,16 +1,14 @@
-heizlast: Projekte-Modal konsolidieren + Remote-Delete-Drift
+docs: Phase 7 — CLAUDE.md konsolidiert, obsolete Handoffs archiviert
 
-- Eine einzige Projekt-Liste im Modal statt getrennter lokal/Cloud-Listen.
-- Matching ueber meta.id <-> _id: jedes Projekt nur einmal sichtbar.
-- Badge "Cloud" (synchronisiert) oder "Nur lokal" (nur lokal vorhanden).
-- Neue Hilfsfunktion markLocalAsCloudMirror: markiert lokale Snapshots
-  beim Speichern (Cloud OK) mit meta.cloudMirror=true.
-- cloudList() macht nach dem Fetch Drift-Cleanup: lokale Mirror-Eintraege,
-  die nicht mehr in der Cloud sind (auf anderem Geraet geloescht),
-  werden lokal entfernt. Rein lokale Projekte bleiben.
-- HTML: zweiter Listen-Block (cloud-only--block) entfernt.
-- refreshProjectsList baut via buildMergedProjects die vereinte Liste.
-- Click-Routing unveraendert: origin="cloud" -> cloudLoad/cloudDelete,
-  origin="local" -> loadProject/deleteProject.
+CLAUDE.md umgeschrieben auf Single-File-Realitaet (89 KB -> 17 KB):
+- Obsolete Astro-v2-Heizlast-Historie (Phase 1-10 + Block A-M) entfernt
+- Neue Sektion "Heizlast-Rechner — Single-File-Variante" mit Verweisen
+  auf Final Heizlast/BACKUP-GUIDE.md und CHANGELOG.md
+- Git-Workflow, Cowork-VM-Eigenheiten, Windows-Setup, Design-
+  Entscheidungen, Bekannte Fallstricke unveraendert
 
-Deployed: public/heizlast/index.html gespiegelt.
+Obsolete Handoffs aus Root nach handoffs-archive/ verschoben:
+- HANDOFF-HEIZLAST-COMPUTE-DEAD.md
+- HANDOFF-HEIZLAST-FUNKTIONSFIX.md
+- HANDOFF-HEIZLAST-REDESIGN.md
+- PROMPT-DESIGN-REBUILD.md
