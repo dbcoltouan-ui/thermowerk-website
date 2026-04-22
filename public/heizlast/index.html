@@ -1712,6 +1712,58 @@ function renderSection2(){
   return sec;
 }
 
+/* Kompakter WW-Quellen-Editor unterhalb des Toggles in Sektion 2.
+   Ermöglicht Auswahl Direkt (l/d) oder nach Personen — State wird mit
+   Sektion 3 geteilt (warmwasser.modus, VW_u, personen, lProPerson, Preset).
+   Detail-Parameter (ΔT, Verlustfaktoren) bleiben in Sektion 3. */
+function renderVerbrauchInklWWDetails(s){
+  if (!s.heizung.verbrauchInklWW) return '';
+  const isPers = s.warmwasser.modus === 'personen';
+  const presets = WW_PERSON_PRESETS;
+  const effV = effectiveVWu(s);
+  return `
+    <div class="ww-incl__details" style="margin-top:var(--s-3); padding:var(--s-3); background:var(--ink-50,#f5f6f8); border-radius:8px;">
+      <div class="seg" style="margin-bottom:var(--s-3);">
+        <label class="seg__option"><input type="radio" name="wwmodus_v" value="direkt"   data-path="warmwasser.modus" ${!isPers?'checked':''}/><span>Direkt (l/d)</span></label>
+        <label class="seg__option"><input type="radio" name="wwmodus_v" value="personen" data-path="warmwasser.modus" ${isPers?'checked':''}/><span>Nach Personen</span></label>
+      </div>
+      ${isPers ? `
+        <div class="grid grid--2">
+          <div class="field">
+            <label class="field__label">Anzahl Personen</label>
+            <div class="input-group"><input class="input" type="number" min="1" step="1" data-path="warmwasser.personen" value="${esc(s.warmwasser.personen)}"/><span class="input-group__unit">P</span></div>
+          </div>
+          <div class="field">
+            <label class="field__label">Bedarf pro Person (SIA 385/2)</label>
+            <select class="select" data-path="warmwasser.lProPersonPreset">
+              ${presets.map(p=>`<option value="${p.key}" ${s.warmwasser.lProPersonPreset===p.key?'selected':''}>${p.label}${p.lPd!=null?` (${p.lPd} l/P·d)`:''}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label class="field__label">l/(P·d) bei 60 °C</label>
+            <div class="input-group" style="max-width:200px;"><input class="input" type="number" min="10" max="200" step="1" data-path="warmwasser.lProPerson" value="${esc(s.warmwasser.lProPerson)}"/><span class="input-group__unit">l/P·d</span></div>
+            <p class="field__hint">Richtwerte: sparsam ~30, normal ~40, Komfort ~55 l/(P·d).</p>
+          </div>
+        </div>
+      ` : `
+        <div class="grid grid--2">
+          <div class="field">
+            <label class="field__label">Nutzvolumen V<sub>W,u</sub></label>
+            <div class="input-group"><input class="input" type="number" data-path="warmwasser.VW_u" value="${esc(s.warmwasser.VW_u)}"/><span class="input-group__unit">l/d</span></div>
+            <p class="field__hint">Richtwert EFH: 150–200 l/d.</p>
+          </div>
+          <div class="field"></div>
+        </div>
+      `}
+      <p class="field__hint" style="margin-top:var(--s-2); color:var(--ink-500);">Effektiv genutzt: <strong>${fmt(effV,0)} l/d</strong>. ΔT (50 K) und Verlustfaktoren (Speicher / Zirkulation / Ausstoss) kommen aus Sektion 3; Standardwerte passen für typische EFH.</p>
+    </div>
+  `;
+}
+
+function renderVerbrauchInklWW(s){
+  return `<label class="chk"><input type="checkbox" data-path="heizung.verbrauchInklWW" ${s.heizung.verbrauchInklWW?'checked':''}/><span class="chk__box"></span><span><strong>Verbrauch enthält Warmwasser-Erzeugung</strong> — wird von der Heizlast abgezogen</span></label>${renderVerbrauchInklWWDetails(s)}`;
+}
+
 function renderMethodVerbrauch(s){
   const periods = s.heizung.perioden.map((p,i)=>renderPeriodRow(p,i)).join('');
 
@@ -1733,8 +1785,8 @@ function renderMethodVerbrauch(s){
           <span>Methode aktiv nutzen</span>
         </label>
 
-        <div class="ww-incl" data-on="${s.heizung.verbrauchInklWW}">
-          <label class="chk"><input type="checkbox" data-path="heizung.verbrauchInklWW" ${s.heizung.verbrauchInklWW?'checked':''}/><span class="chk__box"></span><span><strong>Verbrauch enthält Warmwasser-Erzeugung</strong> — wird in Sektion 3 automatisch abgezogen</span></label>
+        <div class="ww-incl" id="wwInclWrap" data-on="${s.heizung.verbrauchInklWW}">
+          ${renderVerbrauchInklWW(s)}
         </div>
 
         <div class="periods__head" style="grid-template-columns:1fr 115px 115px 120px 1fr 90px 28px;">
@@ -2320,15 +2372,21 @@ function onInput(e){
   if (/^heizung\.perioden\[\d+\]\.(von|bis)$/.test(path)){
     (state.heizung.sanierungen||[]).forEach((_,mi)=>rebuildMeasureRow(mi));
   }
-  /* Spezialfall: WW-Modus Umschalter */
+  /* Spezialfall: WW-Modus Umschalter (betrifft Sektion 3 + kompakten Block Sektion 2) */
   if (path === 'warmwasser.modus'){
     rebuildWWBody();
+    rebuildVerbrauchInklWW();
   }
-  /* Spezialfall: WW-l/P-Preset */
+  /* Spezialfall: WW-l/P-Preset (betrifft Sektion 3 + kompakten Block Sektion 2) */
   if (path === 'warmwasser.lProPersonPreset'){
     const p = WW_PERSON_PRESETS.find(x=>x.key===state.warmwasser.lProPersonPreset);
     if (p && p.lPd!=null){ state.warmwasser.lProPerson = p.lPd; saveActive(); }
     rebuildWWBody();
+    rebuildVerbrauchInklWW();
+  }
+  /* Spezialfall: Verbrauch-Inkl-WW-Toggle → kompakten Quelle-Editor ein/ausblenden */
+  if (path === 'heizung.verbrauchInklWW'){
+    rebuildVerbrauchInklWW();
   }
   /* Live-Sync: Änderung an Zimmer-Feldern → EBF neu berechnen (vor updateDerived) */
   if (/^objekt\.zimmer\[\d+\]\.(laenge|breite|tiefe|flaeche_direkt|unbeheizt|einbezogen)$/.test(path)){
@@ -2435,6 +2493,17 @@ function rebuildWWBody(){
   const host = document.querySelector('#sec-3 .gate__body');
   if (!host) return;
   host.innerHTML = renderWWBodyInner(state);
+}
+
+/* Kompakter WW-Quellen-Editor in Sektion 2 (unter dem Verbrauch-Toggle).
+   Wird aufgerufen bei Toggle-Wechsel (Show/Hide Details), Modus-Wechsel
+   (Direkt ↔ Personen) und Preset-Wechsel (l/P·d). Focus-Loss bei Text-Inputs
+   tritt nicht auf, weil VW_u, personen und lProPerson keinen Rebuild triggern. */
+function rebuildVerbrauchInklWW(){
+  const wrap = document.getElementById('wwInclWrap');
+  if (!wrap) return;
+  wrap.setAttribute('data-on', state.heizung.verbrauchInklWW ? 'true' : 'false');
+  wrap.innerHTML = renderVerbrauchInklWW(state);
 }
 
 /* Targeted update — keine DOM-Struktur-Änderungen, nur Text/innerHTML volatiler Zonen.

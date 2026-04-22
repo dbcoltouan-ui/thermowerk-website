@@ -1,11 +1,17 @@
-heizlast: Rechenweg-Export zeigt WW-Abzug korrekt
+heizlast: kompakter WW-Quellen-Editor in Sektion 2
 
-Im Export-Rechenweg (Schritt 4) wurde der Subtrahend der Formel
-"Qn,H = Qn - Qn,WW = ... - 0 = ..." aus der gegateten compute()-Groesse
-c.QnWW gezogen, die bei Sektion 3 AUS immer 0 ist - obwohl der Abzug
-rechnerisch korrekt ueber primary.QnWW (aus computeQnWWRaw) erfolgte.
+Unter dem Toggle "Verbrauch enthaelt Warmwasser-Erzeugung" oeffnet sich
+jetzt ein kompakter Block mit Modus-Wahl (Direkt l/d oder nach Personen)
+und den entsprechenden Input-Feldern (VW_u bzw. Personen + l/P*d + SIA
+385/2 Preset). Live-Anzeige der effektiv genutzten Tagesmenge darunter.
 
-Fix: Export nutzt jetzt primary.QnWW statt c.QnWW, damit Formel-Anzeige
-und Endzahl konsistent sind.
+State wird mit Sektion 3 geteilt - beide Editoren bleiben synchron,
+egal wo editiert wird. Detail-Parameter (Delta T, Verlustfaktoren)
+bleiben in Sektion 3 um den Block kompakt zu halten.
 
-Kosmetik - keine Rechenauswirkung.
+Neue Funktionen: renderVerbrauchInklWW, renderVerbrauchInklWWDetails,
+rebuildVerbrauchInklWW. onInput-Hooks fuer heizung.verbrauchInklWW,
+warmwasser.modus, warmwasser.lProPersonPreset ergaenzt.
+
+Kein Focus-Loss bei Text-Eingaben (VW_u, personen, lProPerson triggern
+keinen Rebuild, nur updateDerived).
