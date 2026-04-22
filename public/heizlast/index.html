@@ -3023,7 +3023,7 @@ function buildRechenwegDetail(s, c){
       <div class="brosch__calc-step">
         <div class="brosch__calc-title">4 · Heizanteil Q<sub>n,H</sub></div>
         ${inclWW
-          ? `<span class="brosch__calc-formula">Q<sub>n,H</sub> = Q<sub>n</sub> − Q<sub>n,WW</sub> = ${fmtKWh(primary.Qn)} − ${fmtKWh(c.QnWW)} = <strong>${fmtKWh(primary.QnH)} kWh/a</strong></span>`
+          ? `<span class="brosch__calc-formula">Q<sub>n,H</sub> = Q<sub>n</sub> − Q<sub>n,WW</sub> = ${fmtKWh(primary.Qn)} − ${fmtKWh(primary.QnWW)} = <strong>${fmtKWh(primary.QnH)} kWh/a</strong></span>`
           : `<span class="brosch__calc-formula">Q<sub>n,H</sub> = <strong>${fmtKWh(primary.QnH)} kWh/a</strong>${primary.key==='verbrauch'?' (Verbrauch enthält kein WW)':''}</span>`}
       </div>
     `);
