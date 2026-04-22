@@ -2349,6 +2349,19 @@ function onInput(e){
     rebuildPeriodRow(i);
     saveActive();
   }
+  /* Spezialfall: Sanierung-Preset geändert → FWS-Mitte als proz übernehmen
+     (ausser 'other' = Individuell, dort bleibt der vom User getippte Wert). */
+  const mSp = path.match(/^heizung\.sanierungen\[(\d+)\]\.preset$/);
+  if (mSp){
+    const idx = +mSp[1];
+    const key = state.heizung.sanierungen[idx]?.preset;
+    const p = SANIERUNG_PRESETS.find(x=>x.key===key);
+    if (p && p.key !== 'other'){
+      state.heizung.sanierungen[idx].proz = p.proz;
+      saveActive();
+    }
+    rebuildMeasureRow(idx);
+  }
   /* Spezialfall: Sanierung-Zeitpunkt → Row neu aufbauen (Zeit-Block ein/ausblenden) */
   const mZt = path.match(/^heizung\.sanierungen\[(\d+)\]\.zeitpunkt$/);
   if (mZt){

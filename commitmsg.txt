@@ -1,10 +1,10 @@
-heizlast: Effektives V_W,u in Sektion 3 nur noch in Personen-Modus + live
+heizlast: Sanierung-Preset setzt proz automatisch auf FWS-Mitte
 
-Im Direkt-Modus war das readonly-Feld 'Effektives V_W,u' identisch
-zum Eingabefeld 'Nutzvolumen' — redundant. Wird dort jetzt
-ausgeblendet.
+Beim Wechsel des Preset-Dropdowns (Fenster/Dach/Fassade/Kellerdecke/
+KWL) wird der Einsparungs-% automatisch auf den FWS-Mittelwert aus
+Schneider 2014 gesetzt: Fenster 15, Dach 12, Fassade 32, Keller 10,
+KWL 8 %. Preset 'Individuell' laesst den vom User getippten Wert
+unveraendert.
 
-Im Personen-Modus bleibt es stehen (dort ist es tatsaechlich das
-Produkt Personen x l/P.d) und aktualisiert sich jetzt live, statt
-erst nach komplettem Rebuild. Gleicher targeted-DOM-Update wie beim
-Sektion-2-Hint (wwInclEffV), neue id: wwEffVInput.
+Vorher blieb 15 % stehen, egal welches Preset gewaehlt war - dadurch
+waren die Einsparungen haeufig nicht FWS-konform.
