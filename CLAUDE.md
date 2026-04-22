@@ -15,10 +15,10 @@
 
 ## Heizlast-Rechner — Single-File-Variante (aktueller Stand 2026-04-21)
 
-> **Überblick:** Der alte Astro-v2-Rechner unter `/heizlast` ist entfernt. Stattdessen läuft jetzt ein **Single-File-HTML-Rechner** (~184 KB) aus dem parallelen Ordner `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`. Dieser wird für das Live-Deploy 1:1 nach `thermowerk-website/public/heizlast/` kopiert — keine Astro-Komponenten, kein Build-Schritt für den Rechner selbst.
+> **Überblick:** Der alte Astro-v2-Rechner unter `/heizlast` ist entfernt. Stattdessen läuft jetzt ein **Single-File-HTML-Rechner** (~184 KB) aus dem konsolidierten Master-Ordner `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\` (seit 2026-04-22; vorher `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`). Dieser wird für das Live-Deploy 1:1 nach `thermowerk-website/public/heizlast/` kopiert — keine Astro-Komponenten, kein Build-Schritt für den Rechner selbst.
 
 ### Projekt-Struktur
-- **Entwicklung & Bearbeitung:** `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\index.html`
+- **Entwicklung & Bearbeitung:** `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\index.html`
 - **Live-Deploy:** `C:\Users\Daniel\Documents\thermowerk-website\public\heizlast\index.html` (+ `style.css`, `img/`)
 - **Backend-Endpoints bleiben im Website-Repo aktiv:** `functions/api/heizlast-auth.js` + `functions/api/heizlast-projects.js` (bedienen jetzt den Single-File-Rechner statt Astro).
 - **Datenbank:** Cloudflare D1 (`thermowerk-data`, Region WEUR) — unverändert.
@@ -32,18 +32,18 @@
 - `reference/BEISPIELRECHNUNG.md`, `FWS-RECHENWEGE.md` — Rechenweg-Dokumentation
 
 ### Backup/Restore-Infrastruktur (Phase 6, 2026-04-21)
-Ordner `Final Heizlast\scripts\` enthält vier Skripte:
-- `backup.ps1` + `backup.bat` — legt ZIP mit Zeitstempel in `Final Heizlast\Backup\` an
+Ordner `Thermowerk\Final Heizlast\scripts\` enthält vier Skripte:
+- `backup.ps1` + `backup.bat` — legt ZIP mit Zeitstempel in `Thermowerk\Final Heizlast\Backup\` an
 - `restore.ps1` + `restore.bat` — interaktive Auswahl aus vorhandenen Backups, legt vorher automatisch Safety-Snapshot an
 
 **Claude kann beide Skripte direkt ausführen:**
 ```
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\scripts\backup.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\scripts\backup.ps1"
 ```
 
 **Daniel:** Doppelklick auf `backup.bat` oder `restore.bat` im Explorer.
 
-**Wann Backup machen:** vor grösseren Eingriffen am Rechenkern, UI-Refactorings, State-Migrationen, Live-Deploys mit mehr als einem Bugfix. NICHT nötig bei reinen Text-/CSS-Feinschliff-Änderungen. Siehe `Final Heizlast\BACKUP-GUIDE.md` für Details.
+**Wann Backup machen:** vor grösseren Eingriffen am Rechenkern, UI-Refactorings, State-Migrationen, Live-Deploys mit mehr als einem Bugfix. NICHT nötig bei reinen Text-/CSS-Feinschliff-Änderungen. Siehe `Thermowerk\Final Heizlast\BACKUP-GUIDE.md` für Details.
 
 ### Cloud-Sync-Eigenheiten (Phase 4.5 + 2026-04-21)
 - **localStorage-Keys:** `thermowerk-heizlast-projects-v1` (Projekt-Liste) + `thermowerk-heizlast-active-v1` (aktuelles Projekt).
@@ -57,12 +57,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\Daniel\Documen
 Export-Modal bietet vier abwählbare Elemente: Rechenweg (Default an), drei Notiz-Bereiche. Alles andere ist immer im Export enthalten.
 
 ### Workflow: Änderung am Single-File-Rechner → Live
-1. Backup (wenn grösserer Eingriff): `Final Heizlast\scripts\backup.ps1` laufen lassen.
-2. Edit in `Final Heizlast\index.html`.
-3. Testen: Doppelklick auf `Final Heizlast\index.html` im Explorer (lokal öffnen).
+1. Backup (wenn grösserer Eingriff): `Thermowerk\Final Heizlast\scripts\backup.ps1` laufen lassen.
+2. Edit in `Thermowerk\Final Heizlast\index.html`.
+3. Testen: Doppelklick auf `Thermowerk\Final Heizlast\index.html` im Explorer (lokal öffnen).
 4. Kopie auf Live: `thermowerk-website\public\heizlast\index.html` überschreiben (via Copy-Item oder Write-Tool).
 5. Commit + Push (`thermowerk-website`-Repo) → Cloudflare baut automatisch.
-6. Eintrag im `Final Heizlast\CHANGELOG.md` ergänzen.
+6. Eintrag im `Thermowerk\Final Heizlast\CHANGELOG.md` ergänzen.
 
 ---
 
@@ -86,7 +86,7 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Seitenaufbau + JS: `src/pages/index.astro`
 - Impressum: `src/pages/impressum.astro` (eigenständige Seite mit eigenem Header/Topbar/Footer inline, lädt Sanity-Daten via `getPage()`)
 - Datenschutz: `src/pages/datenschutz.astro` (gleiche Struktur wie Impressum)
-- Heizlast-Rechner (Live-Kopie): `public/heizlast/index.html` — wird aus `Final Heizlast\` synchronisiert
+- Heizlast-Rechner (Live-Kopie): `public/heizlast/index.html` — wird aus `Thermowerk\Final Heizlast\` synchronisiert
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → `SANITY_API_TOKEN`
 - Cloudflare Pages Functions:

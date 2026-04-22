@@ -1,1 +1,14 @@
-chore: Website-Ordner aufraeumen - Legacy-Dateien, alte Scripts, alter Heizlast-Rechner, tote Endpoints entfernt; Resend-Doku nach docs/; CLAUDE.md an D1+Resend-Stand angepasst
+heizlast: fix WW-Toggle bei Projekten ohne WP-WW-Erzeugung
+
+Der Toggle "Verbrauch enthaelt Warmwasser-Erzeugung" in Sektion 2 wirkte
+nur, wenn in Sektion 3 zusaetzlich die WP-WW-Erzeugung aktiviert war.
+Bei Projekten mit separatem WW-Boiler (Sektion 3 AUS) blieb der Abzug
+stumm, das Ergebnis aenderte sich beim An/Abhaken nicht.
+
+Neue Hilfsfunktion computeQnWWRaw berechnet die WW-Jahresenergie aus den
+Sektion-3-Eingaben ohne das WP-WW-Gate. computeQnWW bleibt als gegatetes
+Wrapper fuer Q_w, Speichervolumen und Summary. computeMethodVerbrauch
+nutzt jetzt die ungegatete Variante fuer den Abzug.
+
+Export-Rechenweg zeigt Schritt 3 (Q_n,WW) und 4 (Q_n,H = Q_n - Q_n,WW)
+auch dann, wenn Sektion 3 AUS ist aber der Toggle greift.

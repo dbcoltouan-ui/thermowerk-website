@@ -1135,6 +1135,15 @@ function newProject(){
 
 /* ======================================================
    RECHENKERN — FWS-Kaskade
+   ======================================================
+   MERKER (Phase 4.6, optional, nicht eingeplant):
+   Dieser Block ist Kandidat für eine Extraktion in ein
+   eigenständiges Modul `calc.mjs`. Sinnvoll, sobald
+   `heizlast-full.html` (volle Heizlast SIA 384.201) oder
+   `vergleich.html` (FWS ↔ Voll-Heizlast) dazukommen — dann
+   teilen sich alle Rechner denselben Kern, `test-calc-v3.mjs`
+   testet gegen das Modul statt gegen diesen Inline-Code.
+   Details: siehe CHANGELOG.md → „Offene Optionen".
    ====================================================== */
 function periodDays(p){
   /* Anzahl Tage zwischen Von/Bis; leer oder invalid → 365 (Standard-Jahr) */
@@ -1202,8 +1211,13 @@ function effectiveVWu(s){
   return num(s.warmwasser.VW_u);
 }
 
-function computeQnWW(s){
-  if (!s.warmwasser.aktiv) return 0;
+/* Rohe WW-Jahresenergie aus den Eingaben in Sektion 3 — ohne Gate.
+   Wird sowohl für den Abzug aus dem Brennstoff-Verbrauch (Sektion 2, Toggle
+   „Verbrauch enthält WW") als auch — nur bei Sektion-3-AN — für Q_w / Speicher
+   verwendet. Der Abzug darf NICHT am WP-WW-Gate hängen: die Frage „enthielt der
+   historische Verbrauch bereits WW?" ist unabhängig davon, ob die neue WP in
+   Zukunft WW macht oder ein separater Boiler dafür zuständig ist. */
+function computeQnWWRaw(s){
   const V = effectiveVWu(s);
   if (V<=0) return 0;
   const cp = 4.2;              // kJ/(kg·K)
@@ -1214,6 +1228,13 @@ function computeQnWW(s){
                * (1 + num(s.warmwasser.zirkulation)/100)
                * (1 + num(s.warmwasser.ausstoss)/100);
   return base * factor;
+}
+
+/* Qn,WW für Sektion-3-gebundene Auswertungen (Q_w, Speicher, Summary).
+   Liefert 0, wenn die WP selbst kein WW erzeugt (Gate AUS). */
+function computeQnWW(s){
+  if (!s.warmwasser.aktiv) return 0;
+  return computeQnWWRaw(s);
 }
 
 function tvollAuto(s){
@@ -1230,7 +1251,9 @@ function computeMethodVerbrauch(s){
   if (!s.heizung.verbrauchAktiv) return null;
   const Qn = computeQnVerbrauch(s);
   if (Qn<=0) return null;
-  const QnWW = s.heizung.verbrauchInklWW ? computeQnWW(s) : 0;
+  /* WW-Abzug aus dem historischen Verbrauch: unabhängig vom WP-WW-Gate
+     (Sektion 3). Siehe computeQnWWRaw. */
+  const QnWW = s.heizung.verbrauchInklWW ? computeQnWWRaw(s) : 0;
   const QnH = Math.max(0, Qn - QnWW);
   const tv = effectiveTvoll(s);
   const Qhl_roh = tv>0 ? QnH / tv : 0;
@@ -2952,8 +2975,12 @@ function buildRechenwegDetail(s, c){
     `);
   }
 
-  /* 3 — Warmwasser Q_n,WW */
-  if (s.warmwasser.aktiv){
+  /* 3 — Warmwasser Q_n,WW (auch anzeigen, wenn Sektion 3 AUS ist aber der
+     Verbrauch-Toggle aktiv ist — damit der Abzug im Rechenweg nachvollziehbar
+     bleibt, bevor in Schritt 4 Q_n,H = Q_n − Q_n,WW gebildet wird). */
+  const showWWStep = s.warmwasser.aktiv
+    || (s.heizung.verbrauchInklWW && primary && primary.key==='verbrauch' && primary.QnWW > 0);
+  if (showWWStep){
     const V = effectiveVWu(s);
     const cp = 4.2, dT = num(s.warmwasser.dT)||50;
     const perDay = V*cp*dT/3600;
@@ -2988,7 +3015,10 @@ function buildRechenwegDetail(s, c){
 
   /* 4 — Q_n,H Heizanteil */
   if (primary){
-    const inclWW = s.heizung.verbrauchInklWW && primary.key==='verbrauch' && s.warmwasser.aktiv;
+    /* Abzug wird im Rechenweg ausgewiesen, sobald der Toggle gesetzt ist und
+       die Methode „Verbrauch" primär ist — unabhängig vom WP-WW-Gate
+       (Sektion 3), damit auch Projekte ohne WP-WW den Abzug sichtbar machen. */
+    const inclWW = s.heizung.verbrauchInklWW && primary.key==='verbrauch' && primary.QnWW > 0;
     out.push(`
       <div class="brosch__calc-step">
         <div class="brosch__calc-title">4 · Heizanteil Q<sub>n,H</sub></div>
