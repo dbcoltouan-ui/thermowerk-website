@@ -1,10 +1,10 @@
-heizlast: 'Effektiv genutzt' im Sektion-2-WW-Editor live aktualisieren
+heizlast: Effektives V_W,u in Sektion 3 nur noch in Personen-Modus + live
 
-Der kompakte WW-Quellen-Editor unter dem Toggle zeigte die
-l/d-Anzeige ('Effektiv genutzt: X l/d') stale, weil der Rebuild
-nur an warmwasser.modus / lProPersonPreset / verbrauchInklWW
-gehaengt war. Beim Tippen in VW_u, personen oder lProPerson
-blieb der Wert auf dem letzten Render-Stand.
+Im Direkt-Modus war das readonly-Feld 'Effektives V_W,u' identisch
+zum Eingabefeld 'Nutzvolumen' — redundant. Wird dort jetzt
+ausgeblendet.
 
-Fix: Targeted DOM-Update via id='wwInclEffV', ohne Full-Rebuild
-(sonst Focus-Verlust im Eingabefeld).
+Im Personen-Modus bleibt es stehen (dort ist es tatsaechlich das
+Produkt Personen x l/P.d) und aktualisiert sich jetzt live, statt
+erst nach komplettem Rebuild. Gleicher targeted-DOM-Update wie beim
+Sektion-2-Hint (wwInclEffV), neue id: wwEffVInput.

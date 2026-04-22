@@ -2066,11 +2066,13 @@ function renderWWBodyInner(s){
         <div class="input-group"><input class="input" type="number" data-path="warmwasser.dT" value="${esc(s.warmwasser.dT)}"/><span class="input-group__unit">K</span></div>
         <p class="field__hint">Standard 50 K (Kaltwasser 10 °C → WW 60 °C)</p>
       </div>
+      ${isPers ? `
       <div class="field">
         <label class="field__label">Effektives V<sub>W,u</sub></label>
-        <div class="input-group" style="background:var(--bg-subtle);"><input class="input" type="text" readonly value="${fmtNum(effV,0)} l/d"/></div>
-        <p class="field__hint">Eingang in die Berechnung</p>
+        <div class="input-group" style="background:var(--bg-subtle);"><input class="input" type="text" readonly id="wwEffVInput" value="${fmtNum(effV,0)} l/d"/></div>
+        <p class="field__hint">Personen × l/(P·d) — Eingang in die Berechnung</p>
       </div>
+      ` : `<div class="field"></div>`}
       <div class="field">
         <label class="field__label">Speicherverluste</label>
         <div class="input-group"><input class="input" type="number" data-path="warmwasser.speicherverluste" value="${esc(s.warmwasser.speicherverluste)}"/><span class="input-group__unit">%</span></div>
@@ -2388,11 +2390,15 @@ function onInput(e){
   if (path === 'heizung.verbrauchInklWW'){
     rebuildVerbrauchInklWW();
   }
-  /* Live-Update: „Effektiv genutzt" im kompakten Sektion-2-Block refreshen,
-     ohne den ganzen Block neu zu rendern (sonst Focus-Verlust beim Tippen). */
+  /* Live-Update: „Effektiv genutzt" im kompakten Sektion-2-Block +
+     „Effektives V_W,u" Readonly-Feld in Sektion 3 refreshen, ohne den ganzen
+     Block neu zu rendern (sonst Focus-Verlust beim Tippen). */
   if (path === 'warmwasser.VW_u' || path === 'warmwasser.personen' || path === 'warmwasser.lProPerson'){
-    const eff = document.getElementById('wwInclEffV');
-    if (eff) eff.textContent = `${fmt(effectiveVWu(state),0)} l/d`;
+    const effStr = `${fmt(effectiveVWu(state),0)} l/d`;
+    const eff2 = document.getElementById('wwInclEffV');
+    if (eff2) eff2.textContent = effStr;
+    const eff3 = document.getElementById('wwEffVInput');
+    if (eff3) eff3.value = effStr;
   }
   /* Live-Sync: Änderung an Zimmer-Feldern → EBF neu berechnen (vor updateDerived) */
   if (/^objekt\.zimmer\[\d+\]\.(laenge|breite|tiefe|flaeche_direkt|unbeheizt|einbezogen)$/.test(path)){
