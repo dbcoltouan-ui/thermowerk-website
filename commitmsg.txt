@@ -1,17 +1,10 @@
-heizlast: kompakter WW-Quellen-Editor in Sektion 2
+heizlast: 'Effektiv genutzt' im Sektion-2-WW-Editor live aktualisieren
 
-Unter dem Toggle "Verbrauch enthaelt Warmwasser-Erzeugung" oeffnet sich
-jetzt ein kompakter Block mit Modus-Wahl (Direkt l/d oder nach Personen)
-und den entsprechenden Input-Feldern (VW_u bzw. Personen + l/P*d + SIA
-385/2 Preset). Live-Anzeige der effektiv genutzten Tagesmenge darunter.
+Der kompakte WW-Quellen-Editor unter dem Toggle zeigte die
+l/d-Anzeige ('Effektiv genutzt: X l/d') stale, weil der Rebuild
+nur an warmwasser.modus / lProPersonPreset / verbrauchInklWW
+gehaengt war. Beim Tippen in VW_u, personen oder lProPerson
+blieb der Wert auf dem letzten Render-Stand.
 
-State wird mit Sektion 3 geteilt - beide Editoren bleiben synchron,
-egal wo editiert wird. Detail-Parameter (Delta T, Verlustfaktoren)
-bleiben in Sektion 3 um den Block kompakt zu halten.
-
-Neue Funktionen: renderVerbrauchInklWW, renderVerbrauchInklWWDetails,
-rebuildVerbrauchInklWW. onInput-Hooks fuer heizung.verbrauchInklWW,
-warmwasser.modus, warmwasser.lProPersonPreset ergaenzt.
-
-Kein Focus-Loss bei Text-Eingaben (VW_u, personen, lProPerson triggern
-keinen Rebuild, nur updateDerived).
+Fix: Targeted DOM-Update via id='wwInclEffV', ohne Full-Rebuild
+(sonst Focus-Verlust im Eingabefeld).

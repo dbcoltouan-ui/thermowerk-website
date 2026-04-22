@@ -1755,7 +1755,7 @@ function renderVerbrauchInklWWDetails(s){
           <div class="field"></div>
         </div>
       `}
-      <p class="field__hint" style="margin-top:var(--s-2); color:var(--ink-500);">Effektiv genutzt: <strong>${fmt(effV,0)} l/d</strong>. ΔT (50 K) und Verlustfaktoren (Speicher / Zirkulation / Ausstoss) kommen aus Sektion 3; Standardwerte passen für typische EFH.</p>
+      <p class="field__hint" style="margin-top:var(--s-2); color:var(--ink-500);">Effektiv genutzt: <strong id="wwInclEffV">${fmt(effV,0)} l/d</strong>. ΔT (50 K) und Verlustfaktoren (Speicher / Zirkulation / Ausstoss) kommen aus Sektion 3; Standardwerte passen für typische EFH.</p>
     </div>
   `;
 }
@@ -2387,6 +2387,12 @@ function onInput(e){
   /* Spezialfall: Verbrauch-Inkl-WW-Toggle → kompakten Quelle-Editor ein/ausblenden */
   if (path === 'heizung.verbrauchInklWW'){
     rebuildVerbrauchInklWW();
+  }
+  /* Live-Update: „Effektiv genutzt" im kompakten Sektion-2-Block refreshen,
+     ohne den ganzen Block neu zu rendern (sonst Focus-Verlust beim Tippen). */
+  if (path === 'warmwasser.VW_u' || path === 'warmwasser.personen' || path === 'warmwasser.lProPerson'){
+    const eff = document.getElementById('wwInclEffV');
+    if (eff) eff.textContent = `${fmt(effectiveVWu(state),0)} l/d`;
   }
   /* Live-Sync: Änderung an Zimmer-Feldern → EBF neu berechnen (vor updateDerived) */
   if (/^objekt\.zimmer\[\d+\]\.(laenge|breite|tiefe|flaeche_direkt|unbeheizt|einbezogen)$/.test(path)){
