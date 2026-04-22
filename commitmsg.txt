@@ -1,12 +1,21 @@
-heizlast: Q_h-Highlightzeile im Export deutlich hervorheben
+heizlast: Preset <-> manueller Wert synchron halten (3 Stellen)
 
-Die Auslegungsleistung Q_h war in der Leistungstabelle zwar farbig
-hinterlegt, aber mit nur 10.5 pt im gleichen Rhythmus wie die
-anderen Zeilen (9.5 pt) kaum unterscheidbar. Als Kernergebnis ging
-sie optisch unter.
+Vorher musste man bei Abweichungen zwischen Preset und Eingabe
+manuell 'Eigener Wert' waehlen bzw. das Feld leeren. Jetzt
+synchronisiert der Rechner beides automatisch an drei Stellen:
 
-Fix:
-- Label 13 pt / 800
-- Zahl 17 pt / 800 (doppelt so gross wie die anderen Zeilen)
-- Padding vergroessert, zusaetzlicher Top-Spacer via transparent
-  border, damit die Zeile abhebt.
+1) Wirkungsgrad eta (heizung.perioden[i]):
+   - Dropdown gewechselt -> etaValue wird geleert, Preset greift
+   - etaValue getippt -> Preset springt auf 'Eigener Wert'
+
+2) WW Bedarf pro Person (warmwasser.lProPerson / Preset):
+   - lProPerson getippt und weicht vom Preset ab -> Preset auf
+     'Eigener Wert' (beide Dropdowns: Sektion 2 + Sektion 3)
+
+3) Sanierungs-Einsparung (heizung.sanierungen[i].proz / preset):
+   - proz getippt und weicht vom Preset-Mittelwert ab -> Preset
+     auf 'Individuell'
+
+Alle Aenderungen per Targeted-DOM-Update, damit Input-Fokus
+beim Tippen nicht verloren geht (nur Preset-Dropdowns werden
+voll rebuilt).

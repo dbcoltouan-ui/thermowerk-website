@@ -2399,6 +2399,55 @@ function onInput(e){
     rebuildWWBody();
     rebuildVerbrauchInklWW();
   }
+  /* Spezialfall: η-Preset direkt gewechselt → Override-Wert leeren, damit Preset greift */
+  const mEp = path.match(/^heizung\.perioden\[(\d+)\]\.etaPreset$/);
+  if (mEp){
+    const i = +mEp[1];
+    const p = state.heizung.perioden[i];
+    if (p.etaPreset !== 'custom' && String(p.etaValue||'').trim() !== ''){
+      p.etaValue = '';
+      saveActive();
+    }
+    rebuildPeriodRow(i);
+  }
+  /* Spezialfall: η-Wert manuell getippt → Preset auf 'Eigener Wert' umschalten
+     (nur Dropdown-Value aendern, kein Rebuild — sonst Focus-Verlust im Input). */
+  const mEv = path.match(/^heizung\.perioden\[(\d+)\]\.etaValue$/);
+  if (mEv){
+    const i = +mEv[1];
+    const p = state.heizung.perioden[i];
+    const val = String(p.etaValue||'').trim();
+    if (val !== '' && p.etaPreset !== 'custom'){
+      p.etaPreset = 'custom';
+      saveActive();
+      const sel = document.querySelector(`[data-path="heizung.perioden[${i}].etaPreset"]`);
+      if (sel) sel.value = 'custom';
+    }
+  }
+  /* Spezialfall: WW l/P manuell getippt, weicht vom Preset ab → Preset auf 'custom'. */
+  if (path === 'warmwasser.lProPerson'){
+    const cur = state.warmwasser.lProPersonPreset;
+    const curP = WW_PERSON_PRESETS.find(x=>x.key===cur);
+    const typed = Number(state.warmwasser.lProPerson);
+    if (cur !== 'custom' && curP && curP.lPd!=null && Number(curP.lPd) !== typed){
+      state.warmwasser.lProPersonPreset = 'custom';
+      saveActive();
+      document.querySelectorAll('[data-path="warmwasser.lProPersonPreset"]').forEach(sel => sel.value = 'custom');
+    }
+  }
+  /* Spezialfall: Sanierungs-% manuell getippt, weicht vom Preset ab → Preset auf 'other' (Individuell). */
+  const mSpProz = path.match(/^heizung\.sanierungen\[(\d+)\]\.proz$/);
+  if (mSpProz){
+    const i = +mSpProz[1];
+    const m = state.heizung.sanierungen[i];
+    const curP = SANIERUNG_PRESETS.find(x=>x.key===m.preset);
+    if (m.preset !== 'other' && curP && Number(curP.proz) !== Number(m.proz)){
+      m.preset = 'other';
+      saveActive();
+      const sel = document.querySelector(`[data-path="heizung.sanierungen[${i}].preset"]`);
+      if (sel) sel.value = 'other';
+    }
+  }
   /* Spezialfall: Verbrauch-Inkl-WW-Toggle → kompakten Quelle-Editor ein/ausblenden */
   if (path === 'heizung.verbrauchInklWW'){
     rebuildVerbrauchInklWW();
