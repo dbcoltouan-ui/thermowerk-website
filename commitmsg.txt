@@ -1,10 +1,12 @@
-heizlast: Sanierung-Preset setzt proz automatisch auf FWS-Mitte
+heizlast: Q_h-Highlightzeile im Export deutlich hervorheben
 
-Beim Wechsel des Preset-Dropdowns (Fenster/Dach/Fassade/Kellerdecke/
-KWL) wird der Einsparungs-% automatisch auf den FWS-Mittelwert aus
-Schneider 2014 gesetzt: Fenster 15, Dach 12, Fassade 32, Keller 10,
-KWL 8 %. Preset 'Individuell' laesst den vom User getippten Wert
-unveraendert.
+Die Auslegungsleistung Q_h war in der Leistungstabelle zwar farbig
+hinterlegt, aber mit nur 10.5 pt im gleichen Rhythmus wie die
+anderen Zeilen (9.5 pt) kaum unterscheidbar. Als Kernergebnis ging
+sie optisch unter.
 
-Vorher blieb 15 % stehen, egal welches Preset gewaehlt war - dadurch
-waren die Einsparungen haeufig nicht FWS-konform.
+Fix:
+- Label 13 pt / 800
+- Zahl 17 pt / 800 (doppelt so gross wie die anderen Zeilen)
+- Padding vergroessert, zusaetzlicher Top-Spacer via transparent
+  border, damit die Zeile abhebt.
