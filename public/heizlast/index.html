@@ -286,10 +286,10 @@
       <span class="input-group__unit">mn³</span>
     </div>
     <select class="select" data-path="heizung.perioden[0].etaPreset" title="Wirkungsgrad-Preset (FWS)">
-      <option value="brennwert" selected="">Brennwert (neu, kond.) (η 0.92)</option><option value="alt_ohneWW">älter, ohne WW (η 0.82)</option><option value="alt_mitWW">älter, mit WW (η 0.72)</option><option value="custom">Eigener Wert…</option>
+      <option value="brennwert" selected="">neueres Modell, kondensierend (η 0.95)</option><option value="alt_ohneWW">älter, ohne WW (η 0.85)</option><option value="alt_mitWW">älter, mit WW (η 0.75)</option><option value="custom">Eigener Wert…</option>
     </select>
     <div class="input-group">
-      <input class="input" type="number" min="0" max="1.5" step="0.01" data-path="heizung.perioden[0].etaValue" value="" placeholder="0.92" title="Eigener η-Wert (überschreibt Preset)">
+      <input class="input" type="number" min="0" max="1.5" step="0.01" data-path="heizung.perioden[0].etaValue" value="" placeholder="0.95" title="Eigener η-Wert (überschreibt Preset)">
     </div>
     <button class="btn btn--ghost" type="button" data-del-period="0" title="Löschen">×</button>
   </div></div>
@@ -765,18 +765,18 @@ const FIRMA = {
 };
 
 const HEIZWERT = {
-  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Ho: 10.5,
+  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Ho: 9.91,  useHi: true,
     etaPresets: [
-      { key:'brennwert',   label:'Brennwert (neu, kond.)',    eta:0.92 },
-      { key:'alt_ohneWW',  label:'älter, ohne WW',            eta:0.82 },
-      { key:'alt_mitWW',   label:'älter, mit WW',             eta:0.72 },
+      { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
+      { key:'alt_ohneWW',  label:'älter, ohne WW',            eta:0.85 },
+      { key:'alt_mitWW',   label:'älter, mit WW',             eta:0.75 },
       { key:'custom',      label:'Eigener Wert…',             eta:null }
     ] },
-  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Ho: 10.4,
+  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Ho: 10.04, useHi: true,
     etaPresets: [
-      { key:'brennwert',   label:'Brennwert (neu, kond.)',    eta:0.92 },
-      { key:'alt_ohneWW',  label:'älter, ohne WW',            eta:0.82 },
-      { key:'alt_mitWW',   label:'älter, mit WW',             eta:0.72 },
+      { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
+      { key:'alt_ohneWW',  label:'älter, ohne WW',            eta:0.85 },
+      { key:'alt_mitWW',   label:'älter, mit WW',             eta:0.75 },
       { key:'custom',      label:'Eigener Wert…',             eta:null }
     ] },
   pellets:   { name: 'Pellets',              unit: 'kg',    Ho: 5.3,
@@ -3077,7 +3077,7 @@ function buildRechenwegDetail(s, c){
           <ul class="brosch__calc-list">
             <li>Mess-Menge = <code>${fmt(menge,1)} ${h.unit}</code>${p.von&&p.bis?` · Zeitraum <code>${esc(p.von)} … ${esc(p.bis)}</code> = <code>${d} d</code>`:` · Annahme <code>365 d</code>`}</li>
             ${scaled?`<li>Annualisierung: ${fmt(menge,1)} × (365/${d}) = <code>${fmt(annual,1)} ${h.unit}/a</code></li>`:`<li>Annualisierte Menge = <code>${fmt(annual,1)} ${h.unit}/a</code> (volles Jahr)</li>`}
-            <li>Heizwert H<sub>o</sub> = <code>${h.Ho} kWh/${h.unit}</code></li>
+            <li>Heizwert H<sub>${h.useHi?'i':'o'}</sub> = <code>${h.Ho} kWh/${h.unit}</code></li>
             <li>Wirkungsgrad η = <code>${fmt(eta,3)}</code>${p.etaValue?' (Override)':` (Preset „${esc((h.etaPresets||[]).find(x=>x.key===p.etaPreset)?.label||p.etaPreset)}")`}</li>
           </ul>
           <span class="brosch__calc-formula">Q<sub>n,${i+1}</sub> = ${fmt(annual,1)} × ${h.Ho} × ${fmt(eta,3)} = <strong>${fmtKWh(Qn_i)} kWh/a</strong></span>
@@ -3087,7 +3087,7 @@ function buildRechenwegDetail(s, c){
     out.push(`
       <div class="brosch__calc-step">
         <div class="brosch__calc-title">2 · Brennstoff-Verbrauch → Q<sub>n</sub> (Bruttoenergie)</div>
-        <span class="brosch__calc-formula">Q<sub>n</sub> = Σ [ Menge × (365 / T<sub>Mess</sub>) × H<sub>o</sub> × η ]</span>
+        <span class="brosch__calc-formula">Q<sub>n</sub> = Σ [ Menge × (365 / T<sub>Mess</sub>) × H<sub>i/o</sub> × η ]</span>
         ${rows}
         <div class="brosch__calc-result">Σ Q<sub>n</sub> = ${fmtKWh(primary.Qn)} kWh/a</div>
       </div>
@@ -3462,7 +3462,7 @@ function buildSpeicherTable(s, c, opt){
 
 function buildBerechnungsgrundlagen(){
   return `
-    <p class="brosch__note">Die Heizlast wurde nach dem Verbrauchsverfahren gemäss FWS (Schweizer Wärmepumpen-Fachvereinigung) ermittelt. Leistungszuschläge für Sperrzeiten und Warmwasserbereitung folgen denselben Grundlagen.</p>
+    <p class="brosch__note">Die Heizlast wurde nach dem Verbrauchsverfahren gemäss FWS (Schweizer Wärmepumpen-Fachvereinigung) ermittelt — nach FWS Modul 3 in WPSM-Konvention (Heizwert H<sub>i</sub> für Öl und Gas, GCV/Brennwert für Holz/Pellets). Leistungszuschläge für Sperrzeiten und Warmwasserbereitung folgen denselben Grundlagen.</p>
     <p class="brosch__note">Weitere Grundlagen: SIA 384/1:2022 (Heizlast in Gebäuden), SIA 385/1:2020 und 385/2 (Warmwasseranlagen). Speichervolumen nach FWS §10, Wärmetauscher-Dimensionierung nach §11. Der Heizungs-Pufferspeicher ist als Richtwert aus SWKI BT 102-01 und VDI 4645 abgeleitet.</p>
     <p class="brosch__footnote">Die berechneten Werte basieren auf den vom Kunden/Planer zur Verfügung gestellten Angaben (Brennstoffverbrauch, Gebäudekennwerte, Sanierungszustand). Abweichungen im Nutzerverhalten oder in der Gebäudehülle können das Ergebnis beeinflussen.</p>
   `;
