@@ -1519,6 +1519,14 @@ body.modal-open { overflow: hidden; }
 #modalExport .modal__foot .btn { min-width: 120px; }
 #modalExport .field__hint { margin-bottom: var(--s-3); }
 
+
+/* S7 — Mobile-Sticky-Fix: Topbar+Stepper beide sticky kollidieren auf
+   Mobile (Stepper schiebt Topbar mit beim Scroll). Stepper auf Mobile nicht
+   sticky → bleibt im normalen Document-Flow, Topbar ist die einzige sticky. */
+@media (max-width: 768px) {
+  .stepper { position: static !important; top: auto !important; }
+}
+
 </style>
 </head>
 <body>
@@ -4232,7 +4240,7 @@ function renderHeizlast(s){
   <section class="section" id="sec-heizlast">
     <header class="section__head">
       <span class="section__num">Schritt 2</span>
-      <h2 class="section__title">Norm-Heizlast Q<sub>hl</sub></h2>
+      <h2 class="section__title">Heizlast nach Verbrauch (FWS)</h2>
     </header>
     <p class="section__intro">
       Heizlast aus <strong>Brennstoffverbrauch</strong> (empfohlen), <strong>Betriebsstunden</strong> oder
@@ -4659,13 +4667,28 @@ const LAYERS_FOR_TYP = {
   dach:  ['tragschicht', 'daemmung'],
   boden: ['tragschicht', 'daemmung']
 };
-const LAYER_LABELS = {
-  putzInnen:    'Innenputz',
-  tragschicht:  'Tragschicht / Innenmauer',
-  daemmung:     'Dämmung / Hohlraum',
-  aussenschale: 'Aussenschale (Doppelmauerwerk)',
-  putzAussen:   'Aussenputz'
+/** Bauteil-spezifische Layer-Bezeichnungen (Wand vs. Dach vs. Boden). */
+const LAYER_LABELS_BY_TYP = {
+  wand: {
+    putzInnen:    'Innenputz',
+    tragschicht:  'Tragschicht (Mauerwerk / Holzbau)',
+    daemmung:     'Dämmung / Hohlraum',
+    aussenschale: 'Aussenschale (bei Doppelmauerwerk)',
+    putzAussen:   'Aussenputz / Verputz'
+  },
+  dach: {
+    tragschicht:  'Sparren / Holz-Tragwerk',
+    daemmung:     'Wärmedämmung (Zwischensparren / Aufsparren)'
+  },
+  boden: {
+    tragschicht:  'Bodenplatte / Tragschicht',
+    daemmung:     'Bodendämmung (Perimeter / Unterzement)'
+  }
 };
+function layerLabel(typ, slot){
+  return (LAYER_LABELS_BY_TYP[typ] && LAYER_LABELS_BY_TYP[typ][slot]) || slot;
+}
+const LAYER_LABELS = LAYER_LABELS_BY_TYP.wand; // Backwards-Compat (falls noch referenziert)
 
 /** Tür-Fallback-Tabelle (data/u-werte.json hat keine Tür-Daten). */
 const TUER_U_BY_BK = {
@@ -5096,7 +5119,7 @@ function renderLayerEditor(pathPrefix, b, state){
     const dCm    = res && res.d != null ? fmt(res.d * 100, 1) : '–';
     return `
     <div class="layer-row">
-      <span class="layer-row__name">${esc(LAYER_LABELS[slot])}</span>
+      <span class="layer-row__name">${esc(layerLabel(typ, slot))}</span>
       <div class="layer-row__mat">
         ${select(`${pathPrefix}.layers.${slot}.mat`, cfg.mat || 'auto', MATERIAL_CATALOG[slot])}
       </div>
@@ -5477,7 +5500,7 @@ function renderErgebnis(s){
     </header>
     <p class="section__intro">
       WP-Auslegungsleistung Q<sub>h</sub> = Q<sub>hl</sub> + Q<sub>w</sub> + Q<sub>off</sub> + Q<sub>as</sub>.
-      ${detail ? '<br><strong>Detail-Modus aktiv:</strong> Norm-Heizlast (raumweise, EN 12831) wird parallel zum FWS-Verbrauchswert angezeigt.' : ''}
+      ${detail ? '<br><strong>Detail-Modus aktiv:</strong> Heizlast nach Gebäudehülle (raumweise, EN 12831) wird parallel zur Verbrauchs-Heizlast (FWS) angezeigt.' : ''}
     </p>
     <div class="cockpit" id="cockpit">
       <div class="kpi kpi--hero">
@@ -5486,7 +5509,7 @@ function renderErgebnis(s){
         <div class="kpi__sub" id="kpi-Qh-sub">—</div>
       </div>
       <div class="kpi">
-        <div class="kpi__label">Q<sub>hl</sub> · Norm-Heizlast</div>
+        <div class="kpi__label">Heizlast nach Verbrauch (FWS)</div>
         <div><span class="kpi__value" id="kpi-Qhl">0.00</span><span class="kpi__unit">kW</span></div>
         <div class="kpi__sub" id="kpi-Qhl-sub">—</div>
       </div>
@@ -5511,12 +5534,12 @@ function renderErgebnis(s){
     ${detail ? `
     <div class="block" id="detailCockpit">
       <div class="block__head">
-        <h3 class="block__title">Auslegung-Cockpit · Norm vs. Verbrauch</h3>
-        <span class="block__hint">EN 12831 raumweise vs. FWS-Verbrauchs-Heizlast</span>
+        <h3 class="block__title">Auslegung-Cockpit · Hülle vs. Verbrauch</h3>
+        <span class="block__hint">Heizlast aus Gebäudehülle (EN 12831) gegen Heizlast aus Verbrauch (FWS)</span>
       </div>
       <div class="cockpit">
         <div class="kpi kpi--hero kpi--detail">
-          <div class="kpi__label">Q<sub>hl,Norm</sub> · Norm-Heizlast (Detail)</div>
+          <div class="kpi__label">Heizlast nach Gebäudehülle (EN 12831)</div>
           <div><span class="kpi__value" id="kpi-QhlNorm">0.00</span><span class="kpi__unit">kW</span></div>
           <div class="kpi__sub" id="kpi-QhlNorm-sub">—</div>
         </div>
@@ -5531,14 +5554,14 @@ function renderErgebnis(s){
           <div class="kpi__sub" id="kpi-phiRest-sub">—</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Q<sub>hl,FWS</sub> · Verbrauch</div>
+          <div class="kpi__label">Heizlast nach Verbrauch (FWS)</div>
           <div><span class="kpi__value" id="kpi-QhlFWS">0.00</span><span class="kpi__unit">kW</span></div>
-          <div class="kpi__sub">FWS-Methode (parallel)</div>
+          <div class="kpi__sub">parallel berechnet</div>
         </div>
       </div>
       <div class="cockpit cockpit--vergleich" style="margin-top:var(--s-3);">
         <div class="kpi kpi--vergleich">
-          <div class="kpi__label">Abweichung Norm ↔ Verbrauch</div>
+          <div class="kpi__label">Abweichung Hülle ↔ Verbrauch</div>
           <div><span class="kpi__value" id="kpi-vergleichProz">–</span><span class="kpi__unit">%</span></div>
           <div class="kpi__sub">
             <span class="ampel" id="kpi-vergleichAmpel"><span class="ampel__dot"></span><span>—</span></span>
@@ -5795,27 +5818,16 @@ function onInputChange(ev){
   else value = el.value;
   _set(path, value);
 
-  // S7-Auto-Switch: Dropdown-Preset ↔ manueller Override-Wert synchron halten.
-  // Sobald User einen eigenen Wert tippt → Preset auf "Eigener Wert".
-  // Sobald User einen Preset wählt → Override-Feld leeren.
+  // S7-Auto-Switch (State-only-Pfad): Bei Preset-Wechsel im Dropdown den
+  // zugehörigen Override-Wert leeren. Bei Override-Eingabe wird die Variant
+  // weiter UNTEN per direktem DOM-Update auf 'eigener' / 'custom' gesetzt
+  // (kein _set → kein Rebuild → kein Focus-Loss beim Tippen).
   let m;
-  // (a) Wirkungsgrad eta pro Periode
-  if ((m = path.match(/^heizung\.perioden\[(\d+)\]\.etaValue$/)) && value !== '' && value != null && Number(value) > 0){
-    _set(`heizung.perioden[${m[1]}].etaPreset`, 'custom');
-  }
   if ((m = path.match(/^heizung\.perioden\[(\d+)\]\.etaPreset$/)) && value !== 'custom'){
     _set(`heizung.perioden[${m[1]}].etaValue`, '');
   }
-  // (b) Hülle: u_user (Override) ↔ variant
-  if ((m = path.match(/^detail\.huelle\.([a-zA-Z]+)\.u_user$/)) && value !== '' && value != null && Number(value) > 0){
-    _set(`detail.huelle.${m[1]}.variant`, 'eigener');
-  }
   if ((m = path.match(/^detail\.huelle\.([a-zA-Z]+)\.variant$/)) && value !== 'eigener'){
     _set(`detail.huelle.${m[1]}.u_user`, '');
-  }
-  // (c) Räume-Bauteil: u_override → variant
-  if ((m = path.match(/^detail\.raeume\[(\d+)\]\.bauteile\[(\d+)\]\.u_override$/)) && value !== '' && value != null && Number(value) > 0){
-    _set(`detail.raeume[${m[1]}].bauteile[${m[2]}].variant`, 'eigener');
   }
 
   // S7: Strukturelle Bauteil-Änderungen (Typ/Variante/Anschluss/Dach-Form/
@@ -5823,26 +5835,53 @@ function onInputChange(ev){
   // die sichtbaren Felder ändern (Override-Input ↔ Readout, Anschluss ↔ Dach-
   // Form ↔ Fenster-Rahmen). Bauperiode/Sanierungsstand wirken auch auf alle
   // Bauteil-Lookups → Rebuild ebenfalls.
-  if (/\.bauteile\[\d+\]\.(typ|variant|anschluss|dach_variant|fenster_gen|fenster_rahmen|layers\.[a-zA-Z]+\.mat)$/.test(path) ||
+  if (/\.bauteile\[\d+\]\.(typ|variant|anschluss|dach_variant|fenster_gen|fenster_rahmen|layers\.[a-zA-Z]+\.(mat|d_cm))$/.test(path) ||
       path === 'objekt.bauperiode' || path === 'objekt.sanierungsstand' ||
-      /^detail\.huelle\.[a-zA-Z]+\.(variant|layers\.[a-zA-Z]+\.mat)$/.test(path)){
+      /^detail\.huelle\.[a-zA-Z]+\.(variant|layers\.[a-zA-Z]+\.(mat|d_cm))$/.test(path)){
     setTimeout(() => {
       const st = _getState ? _getState() : null;
       if (st){
         rebuildRooms(st);
-        // Hülle ebenfalls neu rendern, falls offen
         const huelleBlock = document.getElementById('sec-huelle');
         if (huelleBlock) rebuildHuelleBauteile(st);
+        // S7-Kritisch: setState() forciert subscribe → compute → Cockpit-KPIs.
+        // Ohne diesen Push aktualisiert sich Q_hl-Hülle nicht zuverlässig
+        // wenn Material/Dicke gewechselt wird (Export war richtig, UI hing).
+        try {
+          const stateMod = window.__heizlast;
+          if (stateMod && typeof stateMod.setState === 'function') stateMod.setState(stateMod.getState());
+        } catch(_){}
       }
     }, 0);
   }
-  // S7-Auto-Switch: bei eta-Preset/Override Wechsel auch den Period-Render
-  // updaten, damit das andere Feld visuell mit dem State synchron ist.
-  if (/^heizung\.perioden\[\d+\]\.(etaPreset|etaValue)$/.test(path)){
+  // S7-Auto-Switch: bei Preset-Wechsel (Dropdown) Periods rebuilden, damit
+  // η-Override-Feld zurückgesetzt sichtbar ist. NICHT bei jeder Tasten-
+  // Eingabe in etaValue — sonst geht der Focus verloren und User kann nicht
+  // tippen.
+  if (/^heizung\.perioden\[\d+\]\.etaPreset$/.test(path)){
     setTimeout(() => {
       const st = _getState ? _getState() : null;
       if (st) rebuildPeriods(st);
     }, 0);
+  }
+  // Wenn User in etaValue tippt, das Preset-Dropdown direkt im DOM auf
+  // 'custom' setzen (ohne Rebuild → Focus bleibt erhalten).
+  const mEtaV = path.match(/^heizung\.perioden\[(\d+)\]\.etaValue$/);
+  if (mEtaV && value !== '' && value != null && Number(value) > 0){
+    const sel = document.querySelector(`[data-path="heizung.perioden[${mEtaV[1]}].etaPreset"]`);
+    if (sel && sel.value !== 'custom') sel.value = 'custom';
+  }
+  // Gleiche Logik für Hülle u_user → variant-Dropdown direkt umstellen
+  const mHU = path.match(/^detail\.huelle\.([a-zA-Z]+)\.u_user$/);
+  if (mHU && value !== '' && value != null && Number(value) > 0){
+    const sel = document.querySelector(`[data-path="detail.huelle.${mHU[1]}.variant"]`);
+    if (sel && sel.value !== 'eigener') sel.value = 'eigener';
+  }
+  // Räume-Bauteil u_override → Variant-Dropdown
+  const mBU = path.match(/^detail\.raeume\[(\d+)\]\.bauteile\[(\d+)\]\.u_override$/);
+  if (mBU && value !== '' && value != null && Number(value) > 0){
+    const sel = document.querySelector(`[data-path="detail.raeume[${mBU[1]}].bauteile[${mBU[2]}].variant"]`);
+    if (sel && sel.value !== 'eigener') sel.value = 'eigener';
   }
 }
 

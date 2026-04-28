@@ -1,19 +1,40 @@
-Heizlast S7 - Export im FWS-Broschueren-Stil portiert
+Heizlast S7 - Quick-Bugs: Mobile-Sticky, eta-Eingabe, Layer-Labels, KPI-Refresh + Naming
 
-* export.mjs komplett neu geschrieben - portiert die FWS-Broschueren-Builder
-  (buildReportHeader, buildPageHead, buildKundschaftTable, buildObjekt-
-  datenTable, buildLeistungenTable mit Q_h-Highlight, buildSpeicherTable,
-  buildBerechnungsgrundlagen, buildRechenwegDetail mit 8 Schritten + Formeln,
-  buildNotizenBlock).
-* Detail-Modus-Erweiterung: buildDetailCockpitTable (Norm vs. Verbrauch
-  mit Ampel + Hinweis), buildHuelleTable, buildRaeumeTable mit Phi pro Raum,
-  buildGeraeteTable mit WP-Eckwerten, buildFoerderTable mit Bund/Kanton +
-  Baubewilligung-Box.
-* PDF-Pfad: window.open + Iframe-Fallback (ohne Pop-up-Block-Probleme).
-* Brosch-CSS jetzt komplett inline in BROSCH_CSS-Konstante mit Hex-Farben
-  (Navy #1B2A4A, Accent #D93025) - HTML-Export ist standalone, ohne externe
-  Stylesheet-Dependencies.
-* Layout: 2-Blatt-Bericht (Auslegung + Berechnung), Detail-Modus erzeugt
-  zusaetzliche Bloecke fuer Huelle/Raeume und Foerderung.
-* Q_h-Highlight-Zeile in Leistungen-Tabelle in Brand-Red mit weisser
-  Schrift - genau wie das alte FWS.
+Naming klarer:
+* "Norm-Heizlast Q_hl" -> "Heizlast nach Verbrauch (FWS)" (top KPI + Section
+  4-Title) - das ist die Verbrauchs-Heizlast, nicht "Norm".
+* "Q_hl,Norm Detail" -> "Heizlast nach Gebaeudehuelle (EN 12831)" (Detail-
+  Cockpit Hero-KPI).
+* "Abweichung Norm <-> Verbrauch" -> "Abweichung Huelle <-> Verbrauch".
+* Cockpit-Block-Title: "Auslegung-Cockpit Norm vs. Verbrauch" ->
+  "Auslegung-Cockpit Huelle vs. Verbrauch".
+
+eta-Eingabe entblockt:
+* Bisheriger Bug: rebuildPeriods auf jedem Tasten-Event in etaValue ->
+  Focus-Loss, User konnte nichts tippen. Ausserdem _set('etaPreset',
+  'custom') hat zusaetzlich rebuild getriggert.
+* Fix: Auto-Switch fuer Override-Eingabe nur per direktem DOM-Update
+  des Dropdowns (kein _set, kein Rebuild). rebuildPeriods nur noch
+  bei Preset-Wechsel im Dropdown selbst.
+* Gleiche Logik fuer Huelle u_user und Raeume-Bauteil u_override.
+
+Layer-Labels Bauteil-spezifisch:
+* LAYER_LABELS_BY_TYP statt globale Map. Wand: Innenputz/Tragschicht
+  Mauerwerk/Daemmung-Hohlraum/Aussenschale/Aussenputz. Dach: Sparren/
+  Holz-Tragwerk + Waermedaemmung Zwischensparren. Boden: Bodenplatte +
+  Bodendaemmung Perimeter.
+* "Tragschicht / Innenmauer" verwirrte beim Dach - jetzt korrekt
+  "Sparren / Holz-Tragwerk" fuer Dach.
+
+Material-Wechsel triggert UI-Update:
+* User-Symptom: Export rechnet korrekt, aber Cockpit-Anzeige aendert sich
+  nicht bei Material/Dicke-Wechsel. Zusaetzlicher setState-Push nach
+  rebuildRooms/rebuildHuelle stellt sicher, dass subscribe -> compute ->
+  updateCockpit zuverlaessig laeuft.
+* Path-Trigger jetzt auch fuer .d_cm (Dicke-Aenderung) - vorher nur
+  .mat (Material-Aenderung) im Trigger.
+
+Mobile-Sticky-Topbar:
+* Bug: beim Mobile-Scroll lief der Stepper sticky-mit, drueckte die
+  Topbar zur Haelfte aus dem View. Fix: Stepper unter 768px nicht-
+  sticky -> nur die Topbar bleibt oben fixiert.
