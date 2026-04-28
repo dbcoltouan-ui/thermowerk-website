@@ -7874,7 +7874,7 @@ function renderFoerderSec(s, c){
       <td>${esc(p.name)}</td>
       <td>${esc(p.beitrag?.text || '—')}</td>
       <td>${betr != null && betr > 0 ? '≈ CHF ' + fmt(betr,0) : '—'}</td>
-      <td>${esc((p.bedingungen || []).join('; ')) || '—'}</td>
+      <td>${esc(Array.isArray(p.bedingungen) ? p.bedingungen.join('; ') : (p.bedingungen || '')) || '—'}</td>
     </tr>`;
   }).join('');
   // Baubewilligung

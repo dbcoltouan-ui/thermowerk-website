@@ -1,37 +1,6 @@
-Heizlast S7 - Quick-Bugs: Stepper, WW-VL, Export, Modal, Auto-Switch
+Heizlast S7 - Export-Bug: bedingungen ist String statt Array
 
-Stepper-Container:
-* .stepper__inner hatte padding 0 horizontal, was das .container-padding
-  ueberschrieben hat - dadurch ragten die Step-Karten links ueber die
-  anderen Container hinaus. Fix: padding var(--s-3) var(--s-5) explizit.
-
-WW-Vorlauf in Stammdaten:
-* T_VL,WW (Vorlauf Warmwasser) wird nur noch angezeigt wenn
-  warmwasser.aktiv = true. Kein WW via WP -> Feld weg.
-
-Export-Robustheit:
-* doExport() jetzt komplett in try/catch mit klarem Fehler-Alert -
-  silent failures verhindern.
-* PDF-Pfad: window.open + Fallback auf hidden-iframe + srcdoc, wenn
-  Pop-ups blockiert sind. Print-Dialog sollte jetzt zuverlaessig kommen.
-* computeFullCalc nutzt jetzt enrichRaeumeWithResolvedUFrt - gleiche
-  Norm-Heizlast wie im Live-Cockpit (vorher konnten Werte differieren,
-  weil Export ohne Bauteil-Aufloesung rechnete).
-
-Modal-Layout:
-* .modal__head und .modal__foot bekommen flex-shrink: 0, .modal__body
-  bekommt min-height: 0 - dadurch wird Body korrekt scrollbar ohne den
-  Header/Footer abzuschneiden.
-* Export-Modal panel auf 560px erweitert + footer wraps korrekt mit
-  min-width 120px pro Button.
-
-Auto-Switch Dropdown <-> Override:
-* Wirkungsgrad eta pro Periode: User tippt manuellen Wert -> Preset
-  springt auf "Eigener Wert"; User waehlt Preset -> manueller Wert wird
-  geleert.
-* Huelle u_user <-> variant: gleiche Logik (Override-Wert -> variant
-  'eigener'; Variante-Wechsel -> u_user leeren).
-* Raeume-Bauteil u_override -> variant 'eigener' (rebuild der Raum-
-  Liste triggert visuellen Sync).
-* Period-Liste rebuilt bei eta-Aenderung, damit Dropdown + Input
-  visuell synchron bleiben.
+* In foerderungen.json haben einige Programme p.bedingungen als String
+  statt Array - der Code hat blind (p.bedingungen || []).join('; ')
+  aufgerufen, was bei String-Werten "join is not a function" wirft.
+* Fix: Array.isArray-Check, fallback to direct String-Output.
