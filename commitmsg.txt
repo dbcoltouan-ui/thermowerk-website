@@ -1,13 +1,18 @@
-Heizlast S7 - Topbar: Logo (logo alt.png) ohne Anschrift, Container-Bug fix
+Heizlast S7 - Pro-Kreis VL/RL + Mobile-Topbar-Fix
 
-* Logo (public/img/logo alt.png) wird jetzt nach public/heizlast/img/Logo.png
-  gespiegelt und via relativem Pfad ./img/Logo.png eingebunden — kein
-  externer Asset-Request, kein Cache-Problem.
-* Anschrift entfernt — Logo allein reicht (User-Wunsch). Sub-Title
-  "Heizlast-Auslegung" rechts daneben bleibt.
-* Topbar-Layout-Bug: Brand-Row und Action-Row hatten Padding direkt am
-  flex-Container, was bei Container-Klasse (max-width 1100px) inkonsistent
-  zur App-Main-Container-Breite war (links uebersteh, rechts buendig).
-  Refactor: full-width-Outer-Row + .topbar__inner mit max-width 1100px,
-  margin: 0 auto und padding — gleicher Centering-Mechanismus wie der
-  rest der Seite, jetzt buendig auf beiden Seiten.
+Verteilung:
+* Heizkreise haben jetzt eigene Heizflaechen-Typ + tVL + tRL pro Kreis.
+  Plausibilitaets-Check pro Heizflaeche nutzt die Kreis-spezifischen
+  Werte (via kreis_id-Lookup) statt nur global. Fallback auf
+  Global-Block, wenn Kreis-Werte leer.
+* Hint-Box zeigt: "WP-Auslegungs-Vorlauf = max. T_VL aller Kreise" -
+  weil die WP IMMER auf den hoechsten Vorlauf ausgelegt wird (limitiert
+  COP/JAZ). Bei FBH+HK-Mix faengt der Bestand-Vorlauf den hoechsten ab.
+
+Mobile-Topbar:
+* Auf iOS war beim Scrollen am oberen Rand ein durchsichtiger Streifen
+  zu sehen (Rubber-Band-Effekt zeigt Page-BG hinter sticky-topbar).
+  Fix: html { background: var(--ink-0) } sodass der Overscroll-Hintergrund
+  weiss ist; topbar bekommt zusaetzlich padding-top: env(safe-area-inset-top)
+  fuer iOS-Notch-Geraete; .topbar__brand-row und .topbar__action-row
+  bekommen explizit background:var(--ink-0).

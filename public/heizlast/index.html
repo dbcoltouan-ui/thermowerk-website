@@ -75,7 +75,12 @@
 /* ---- Reset / Base ---- */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Mobile-Fix: iOS-Rubber-Band-Effekt soll nicht den Hintergrund hinter
+     der Sticky-Topbar zeigen — html-Background sicherstellen. */
+  background: var(--ink-0);
+}
 body {
   font-family: var(--ff);
   font-size:   var(--fs-md);
@@ -113,9 +118,12 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   top: 0;
   z-index: 30;
   box-shadow: var(--shadow-sm);
+  /* Mobile-Fix: Safe-Area-Inset abdecken (iOS Notch) + opakes Bg auch bei
+     Rubber-Band/Overscroll. Beide Sub-Rows bekommen explizite Bg-Color. */
+  padding-top: env(safe-area-inset-top, 0);
 }
-.topbar__brand-row { border-bottom: 1px solid var(--ink-100); }
-.topbar__action-row { /* leer — Inhalt im Inner-Container */ }
+.topbar__brand-row { border-bottom: 1px solid var(--ink-100); background: var(--ink-0); }
+.topbar__action-row { background: var(--ink-0); }
 .topbar__inner {
   max-width: 1100px;
   margin: 0 auto;
@@ -1367,6 +1375,22 @@ body.modal-open { overflow: hidden; }
 }
 .room__notes { margin-top: var(--s-3); }
 .room__notes textarea { width: 100%; }
+
+
+/* S7 — Heizkreis-Zeile mit pro-Kreis VL/RL: Flex-Wrap, kompakt */
+.kreis-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: end;
+  padding: var(--s-2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s-2);
+  background: var(--ink-50);
+}
+.kreis-row .field { margin-bottom: 0; }
+.kreis-row .field__label { font-size: var(--fs-xs); color: var(--ink-500); }
 
 </style>
 </head>
@@ -4693,13 +4717,28 @@ function renderVerteilung(s){
 }
 
 function renderKreisRow(k, idx){
+  const typeOpts = Object.entries(HEIZFLAECHE_LABELS);
+  const tvl = (k.tVL != null && k.tVL !== '') ? k.tVL : '';
+  const trl = (k.tRL != null && k.tRL !== '') ? k.tRL : '';
   return `
   <div class="kreis-row" data-kreis-idx="${idx}">
-    <div class="field" style="flex:1;">
-      <label class="field__label">Kreis ${idx + 1}</label>
+    <div class="field" style="flex:2; min-width:140px;">
+      <label class="field__label">Kreis ${idx + 1} · Name</label>
       ${input('text', `detail.verteilung.heizkreise[${idx}].name`, k.name, 'z. B. EG, OG, Bad…')}
     </div>
+    <div class="field" style="min-width:130px;">
+      <label class="field__label">Heizflächen-Typ</label>
+      ${select(`detail.verteilung.heizkreise[${idx}].typ`, k.typ || 'fbh', typeOpts)}
+    </div>
     <div class="field" style="min-width:90px;">
+      <label class="field__label">T<sub>VL</sub></label>
+      <div class="input-group">${inputNumRaw(`detail.verteilung.heizkreise[${idx}].tVL`, tvl, 1, 0, '35')}<span class="input-group__unit">°C</span></div>
+    </div>
+    <div class="field" style="min-width:90px;">
+      <label class="field__label">T<sub>RL</sub></label>
+      <div class="input-group">${inputNumRaw(`detail.verteilung.heizkreise[${idx}].tRL`, trl, 1, 0, '28')}<span class="input-group__unit">°C</span></div>
+    </div>
+    <div class="field" style="min-width:80px;">
       <label class="field__label">ID</label>
       ${input('text', `detail.verteilung.heizkreise[${idx}].id`, k.id, 'k1')}
     </div>
@@ -5102,7 +5141,9 @@ function attachStaticHandlers(root, stepperEl, getState){
       const st = getState();
       const ks = ((st.detail && st.detail.verteilung && st.detail.verteilung.heizkreise) || []).slice();
       const num = ks.length + 1;
-      ks.push({ id: 'k' + num, name: 'Heizkreis ' + num });
+      // Default-VL/RL aus dem Global-Block übernehmen, Typ leer (User wählt).
+      const g = st?.detail?.verteilung?.global || {};
+      ks.push({ id: 'k' + num, name: 'Heizkreis ' + num, typ: g.typ || 'fbh', tVL: g.tVL_neu || 35, tRL: g.tRL_neu || 28 });
       _set('detail.verteilung.heizkreise', ks);
       return;
     }
@@ -5351,17 +5392,36 @@ function updateVerteilungSection(s, c){
   const det = s.detail || {};
   const vert = det.verteilung || {};
   const raeume = det.raeume || [];
+  const kreise = vert.heizkreise || [];
   const detailLoad = c && c.detail;
-  // Pro Heizfläche: Plausi-Faktor & Ampel
-  const tVL = Number(vert.global?.tVL_neu) || 35;
-  const tRL = Number(vert.global?.tRL_neu) || (tVL - 7);
+  // S7-Update: pro Heizfläche wird die Kreis-spezifische VL/RL verwendet,
+  // wenn die Heizfläche einem Kreis zugeordnet ist und der Kreis tVL/tRL hat.
+  // Sonst Fallback auf globale Verteilungs-Werte.
+  const tVL_g = Number(vert.global?.tVL_neu) || 35;
+  const tRL_g = Number(vert.global?.tRL_neu) || (tVL_g - 7);
+  const kreisLookup = {};
+  kreise.forEach(k => { if (k && k.id) kreisLookup[k.id] = k; });
+  const vlForHf = (h) => {
+    const k = h.kreis_id ? kreisLookup[h.kreis_id] : null;
+    const tvl = (k && Number(k.tVL) > 0) ? Number(k.tVL) : tVL_g;
+    const trl = (k && Number(k.tRL) > 0) ? Number(k.tRL) : (tvl - (tVL_g - tRL_g));
+    return { tvl, trl };
+  };
+  // Max-VL für WP-Auslegung
+  const allVLs = kreise.map(k => Number(k.tVL) || 0).filter(v => v > 0);
+  const tVL_max = allVLs.length ? Math.max(...allVLs, tVL_g) : tVL_g;
+  const hintEl = document.getElementById('verteilungGlobalHint');
+  if (hintEl){
+    hintEl.innerHTML = kreise.length > 1
+      ? `<strong>WP-Auslegungs-Vorlauf = max. T<sub>VL</sub> aller Kreise = ${fmt(tVL_max, 0)} °C</strong> — die WP wird auf den höchsten Vorlauf ausgelegt (limitiert COP/JAZ). Pro Kreis individuell setzen, wenn FBH+HK gemischt.`
+      : `Auslegungs-Vorlauf <strong>${fmt(tVL_max, 0)} °C</strong> · Rücklauf <strong>${fmt(tRL_g, 0)} °C</strong>. Mit mehreren Kreisen pro-Kreis-Werte setzen — der höchste zählt für die WP.`;
+  }
   for (let i = 0; i < raeume.length; i++){
     const r = raeume[i] || {};
     const tInnen = Number(r.theta_int) || 20;
     const hflaechen = r.heizflaechen || [];
     const rRes = (detailLoad && detailLoad.roomResults) ? detailLoad.roomResults[i] : null;
     const phiHL = rRes ? Number(rRes.phiHL) || 0 : 0;
-    // Gewichte
     const gewichte = hflaechen.map(h => {
       const ref = REF_AUSLEGUNG[h.typ];
       return (ref ? ref.q_W_pro_m2 : 0) * (Number(h.A) || 0);
@@ -5371,9 +5431,10 @@ function updateVerteilungSection(s, c){
     for (let j = 0; j < hflaechen.length; j++){
       const h = hflaechen[j];
       const phi_anteil = (sumG > 0) ? phiHL * (gewichte[j] / sumG) : (hflaechen.length > 0 ? phiHL / hflaechen.length : 0);
+      const { tvl, trl } = vlForHf(h);
       const pl = plausibilitaetHeizflaeche({
         phiHL_raum: phi_anteil, A_heizflaeche: Number(h.A) || 0,
-        typ: h.typ, tVL_neu: tVL, tRL_neu: tRL, tInnen
+        typ: h.typ, tVL_neu: tvl, tRL_neu: trl, tInnen
       });
       const span = document.querySelector(`[data-plausi-hf="${i}-${j}"]`);
       if (span){
