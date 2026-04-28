@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "erstellt": "2026-04-22",
+  "quelle_primaer": "Perplexity-Pro-Research 2026-04-22",
+  "quelle_sekundaer": "Wissensbasis B_Gebaeudehuelle_UWerte.md Tab. 3.3 (Materialien) — λ-Werte identisch im Toleranzbereich",
+  "plausibilitaetsnote": "Dämmstoff- und Material-λ-Werte aus Perplexity stimmen mit DIN-4108-/SIA-180-/Hersteller-Literatur überein. n50-Klassen sind an SIA 180 / DIN 4108-7 / EnEV-Grenzen orientiert.",
+  "daemmstoffLambda": {
+    "eps": {
+      "lambda": 0.035, "lambda_min": 0.034, "lambda_max": 0.04,
+      "rohdichte_min": 15, "rohdichte_max": 20,
+      "bemerkung": "Expandierter Polystyrol-Hartschaum EPS WLG/WLS 035-040, Fassaden- und Flachdachdämmung."
+    },
+    "xps": {
+      "lambda": 0.035, "lambda_min": 0.032, "lambda_max": 0.04,
+      "rohdichte_min": 30, "rohdichte_max": 45,
+      "bemerkung": "Extrudierter Polystyrol-Hartschaum XPS für Perimeter- und Flachdachdämmung."
+    },
+    "mineralwolle_stein": {
+      "lambda": 0.037, "lambda_min": 0.034, "lambda_max": 0.045,
+      "rohdichte_min": 30, "rohdichte_max": 150,
+      "bemerkung": "Steinwolle-Dämmplatten und -Matten für Dach, Fassade und Trennwände."
+    },
+    "mineralwolle_glas": {
+      "lambda": 0.035, "lambda_min": 0.032, "lambda_max": 0.04,
+      "rohdichte_min": 10, "rohdichte_max": 50,
+      "bemerkung": "Glaswolle-Dämmstoffe für Leichtbauwände und Dachkonstruktionen."
+    },
+    "pur_pir": {
+      "lambda": 0.024, "lambda_min": 0.022, "lambda_max": 0.028,
+      "rohdichte_min": 30, "rohdichte_max": 40,
+      "bemerkung": "PUR/PIR-Hartschaumplatten WLS 024-028, häufig mit Alukaschierung."
+    },
+    "holzfaser": {
+      "lambda": 0.038, "lambda_min": 0.037, "lambda_max": 0.04,
+      "rohdichte_min": 50, "rohdichte_max": 60,
+      "bemerkung": "Flexible Holzfaser-Dämmmatten und -platten für Dach und Holzrahmenbau."
+    },
+    "zellulose": {
+      "lambda": 0.038, "lambda_min": 0.038, "lambda_max": 0.04,
+      "rohdichte_min": 30, "rohdichte_max": 60,
+      "bemerkung": "Zellulose-Einblasdämmung (recyceltes Zeitungspapier)."
+    },
+    "schaumglas": {
+      "lambda": 0.036, "lambda_min": 0.036, "lambda_max": 0.045,
+      "rohdichte_min": 90, "rohdichte_max": 120,
+      "bemerkung": "Schaumglasplatten für Perimeter, Flachdach und Bodenplatten."
+    },
+    "vakuumdaemmung": {
+      "lambda": 0.007, "lambda_min": 0.007, "lambda_max": 0.008,
+      "rohdichte_min": 180, "rohdichte_max": 210,
+      "bemerkung": "Vakuum-Isolationspaneele (VIP) für hochgedämmte Sonderdetails."
+    }
+  },
+  "materialLambda": {
+    "vollziegel": { "lambda": 0.79, "lambda_min": 0.7, "lambda_max": 0.9, "bemerkung": "Vollziegelmauerwerk, typische Wärmeleitfähigkeit um 0,7–0,8 W/mK." },
+    "hochlochziegel": { "lambda": 0.29, "lambda_min": 0.18, "lambda_max": 0.36, "bemerkung": "Hochlochziegel unbewehrt, Defaultwert 0,29 W/mK, optimierte Werte ab ca. 0,17 W/mK." },
+    "kalksandstein": { "lambda": 0.8, "lambda_min": 0.8, "lambda_max": 1.0, "bemerkung": "Kalksandstein ρ≈1600 kg/m³ mit λ≈0,8 W/mK." },
+    "porenbeton_300": { "lambda": 0.09, "lambda_min": 0.083, "lambda_max": 0.1, "bemerkung": "Porenbeton Rohdichteklasse 0,35–0,40 (ca. 300–350 kg/m³) mit λ≈0,083–0,10 W/mK." },
+    "porenbeton_400": { "lambda": 0.11, "lambda_min": 0.1, "lambda_max": 0.12, "bemerkung": "Porenbeton ρ≈0,40–0,50 (ca. 400–500 kg/m³) λ≈0,10–0,12 W/mK." },
+    "porenbeton_500": { "lambda": 0.13, "lambda_min": 0.12, "lambda_max": 0.16, "bemerkung": "Porenbeton ρ≈0,50–0,60 λ≈0,13–0,16 W/mK." },
+    "porenbeton_600": { "lambda": 0.16, "lambda_min": 0.14, "lambda_max": 0.17, "bemerkung": "Porenbeton ρ≈0,60–0,70 λ≈0,14–0,17 W/mK." },
+    "beton": { "lambda": 1.7, "lambda_min": 1.4, "lambda_max": 2.1, "bemerkung": "Normalbeton λ im Bereich 1,4–2,1 W/mK." },
+    "stahlbeton": { "lambda": 2.3, "lambda_min": 2.3, "lambda_max": 2.5, "bemerkung": "Stahlbeton mit Bewehrungsanteil ~1–2 %, λ≈2,3–2,5 W/mK." },
+    "holz_nadel": { "lambda": 0.13, "lambda_min": 0.12, "lambda_max": 0.14, "bemerkung": "Nadelholz (Fichte/Tanne) λ≈0,13 W/mK." },
+    "holz_laub": { "lambda": 0.18, "lambda_min": 0.16, "lambda_max": 0.2, "bemerkung": "Laubholz (Buche/Eiche) λ≈0,18 W/mK." },
+    "osb": { "lambda": 0.13, "lambda_min": 0.13, "lambda_max": 0.15, "bemerkung": "OSB-Platte ρ≈650 kg/m³ mit λ≈0,13 W/mK." },
+    "gipskarton": { "lambda": 0.22, "lambda_min": 0.21, "lambda_max": 0.25, "bemerkung": "Gipskartonbauplatte λ≈0,21–0,25 W/mK." },
+    "naturstein_mauerwerk": { "lambda": 2.5, "lambda_min": 2.0, "lambda_max": 3.0, "bemerkung": "Sichtmauerwerk aus dichtem Naturstein (Granit, Sandstein)." }
+  },
+  "n50": {
+    "beschreibung": "n50-Fallback wenn kein Blower-Door-Test vorliegt. Zuordnung über Baujahr + sichtbare Sanierungsschritte (z.B. neue Fenster).",
+    "altbau_fachwerk_ungesaniert": {
+      "typ": 7.0, "max": 12.0, "windschutz": "frei",
+      "bemerkung": "Unsanierte Fachwerk- und Altbauten mit Einfachverglasung erreichen oft n50 5–12 1/h.",
+      "normbezug": "EN 13829 / EN ISO 9972 (Messverfahren)."
+    },
+    "massivbau_1960_1970": {
+      "typ": 4.0, "max": 7.0, "windschutz": "maessig",
+      "bemerkung": "Massivbauten der 1960er/70er ohne systematische Luftdichtheitsschicht, typ. 3–7 1/h.",
+      "normbezug": "EN ISO 9972; EnEV/GEG-Obergrenze 3,0 ohne Lüftungsanlage."
+    },
+    "altbau_mit_neuen_fenstern_1980_1990": {
+      "typ": 3.0, "max": 5.0, "windschutz": "maessig",
+      "bemerkung": "Erneuerte Fenster senken Infiltration; ohne Luftdichtheitsschicht n50≈2–5 1/h.",
+      "normbezug": "EN ISO 9972; Sanierungsziele >1,5 1/h."
+    },
+    "neubau_ende_1990er_mit_luftdichtheitsschicht": {
+      "typ": 1.5, "max": 3.0, "windschutz": "maessig",
+      "bemerkung": "Neubauten ab Ende 1990er mit Folien-/Plattendichtheit erreichen n50 um 1–2 1/h.",
+      "normbezug": "DIN 4108-7, EnEV/GEG (3,0 ohne, 1,5 mit Lüftungsanlage)."
+    },
+    "muken_2014_minergie_standard": {
+      "typ": 1.0, "max": 1.5, "windschutz": "geschuetzt",
+      "bemerkung": "Effizienz-Neubauten mit kontrollierter Lüftung meist zwischen 0,6 und 1,5 1/h.",
+      "normbezug": "EN ISO 9972; Minergie RiLuMi."
+    },
+    "passivhaus_minergie_p": {
+      "typ": 0.4, "max": 0.6, "windschutz": "geschuetzt",
+      "bemerkung": "Passivhaus-Anforderung n50 ≤0,6 1/h; viele Gebäude erreichen 0,3–0,4 1/h.",
+      "normbezug": "Passivhaus-Kriterium; Minergie-P-Grenzwert n50,st 0,6 1/h."
+    }
+  }
+}

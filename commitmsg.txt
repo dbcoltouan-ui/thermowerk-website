@@ -1,21 +1,24 @@
-heizlast: Preset <-> manueller Wert synchron halten (3 Stellen)
+Heizlast-Tool S7 - Persistenz, Export, Live-Deploy
 
-Vorher musste man bei Abweichungen zwischen Preset und Eingabe
-manuell 'Eigener Wert' waehlen bzw. das Feld leeren. Jetzt
-synchronisiert der Rechner beides automatisch an drei Stellen:
+Neuer modular gebauter Heizlast-Rechner ersetzt das bisherige Single-File-
+FWS-Tool unter /heizlast. FWS-Default-View bleibt 1 zu 1 erhalten,
+Detail-Modus (EN 12831 raumweise + Huelle/Raeume + WP-DB + Foerder-Modul)
+ist per Toggle zuschaltbar - keine Funktionsregression fuer Bestandsuser.
 
-1) Wirkungsgrad eta (heizung.perioden[i]):
-   - Dropdown gewechselt -> etaValue wird geleert, Preset greift
-   - etaValue getippt -> Preset springt auf 'Eigener Wert'
-
-2) WW Bedarf pro Person (warmwasser.lProPerson / Preset):
-   - lProPerson getippt und weicht vom Preset ab -> Preset auf
-     'Eigener Wert' (beide Dropdowns: Sektion 2 + Sektion 3)
-
-3) Sanierungs-Einsparung (heizung.sanierungen[i].proz / preset):
-   - proz getippt und weicht vom Preset-Mittelwert ab -> Preset
-     auf 'Individuell'
-
-Alle Aenderungen per Targeted-DOM-Update, damit Input-Fokus
-beim Tippen nicht verloren geht (nur Preset-Dropdowns werden
-voll rebuilt).
+Inhalte (S7):
+* persistence.mjs: localStorage (thermowerk-heizlasttool-projects-v1 +
+  -active-v1) plus Cloud-Sync gegen /api/heizlast-projects und
+  /api/heizlast-auth. Mirror-Flag, Drift-Cleanup, Auto-Sync auf
+  visibilitychange und focus.
+* projects.mjs: Login-Modal + Projekte-Modal mit konsolidierter Liste
+  (Cloud + Lokal, kein Doppel-Eintrag, Cloud/Nur-lokal-Badge), Speichern,
+  Laden, Duplizieren, Loeschen.
+* export.mjs: Export-Modal mit PDF (Browser-Print + Print-CSS), HTML
+  (Standalone) und JSON. Pro Bereich abwaehlbar: Rechenweg, Notizen,
+  Foerderungs-Uebersicht, Vergleich Verbrauch/Norm (Detail), Geraete-
+  Auswahl (Detail).
+* build/bundle.mjs: konsolidiert src/*.mjs + style.css in eine einzige
+  index.html (~288 KB). Daten-Files (data/*.json + data/img/wp/*) bleiben
+  relativ verlinkt unter public/heizlast/data/.
+* Notizen-Block (3 Bereiche: Allgemein/Heizlast/Foerderung) als Eingabe-
+  flaeche in der UI ergaenzt.

@@ -1,0 +1,1106 @@
+{
+  "schemaVersion": 1,
+  "erstellt": "2026-04-22",
+  "quelle_primaer": "Perplexity-Pro-Research 2026-04-22, CH-Mittelland, SIA-/MuKEn-orientiert",
+  "quelle_sekundaer": "Wissensbasis B_Gebaeudehuelle_UWerte.md, Tab. 3.4/3.5 (DIN-B4 S.345 — für Plausibilitätsabgleich)",
+  "plausibilitaetsnote": "Perplexity ist feiner aufgeschlüsselt (9 Baujahrklassen + EFH/MFH + Dachformen + Bodenarten) und regional CH-lastiger. Wissensbasis Tab. 3.4 ist DIN/GEG-basiert (nur 4 Baujahrklassen) und nennt für Altbau (<1978) systematisch höhere U-Werte (konservativer). Für das CH-Tool wird Perplexity als Primärquelle verwendet; Wissensbasis als Obergrenze-Sanity-Check bei Altbauten.",
+  "wandUWert": {
+    "EFH": {
+      "vor1945": {
+        "typ": 1.8,
+        "min": 1.0,
+        "max": 1.8,
+        "aufbau": "Bruchstein- oder Vollziegelmauerwerk ca. 40–60 cm, innen/außen Kalkzementputz, keine Wärmedämmung.",
+        "daemmstoff": null
+      },
+      "1946_1960": {
+        "typ": 1.2,
+        "min": null,
+        "max": 1.2,
+        "aufbau": "30–40 cm Backsteinmauerwerk mit Innen- und Außenputz, praktisch ohne Dämmstoff.",
+        "daemmstoff": null
+      },
+      "1961_1977": {
+        "typ": 0.6,
+        "min": null,
+        "max": 1.2,
+        "aufbau": "Mehrschichtiges Mauerwerk (Hohlblock-/Hochlochziegel) mit minimaler Dämm- oder Luftschicht.",
+        "daemmstoff": "dünne Mineralwolle oder Luftschicht"
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.2,
+        "max": 0.5,
+        "aufbau": "Mehrschichtige Aussenwand mit kontinuierlicher Dämmung (WDVS, zweischaliges Mauerwerk mit Kerndämmung).",
+        "daemmstoff": "Mineralwolle oder EPS"
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": null,
+        "max": null,
+        "aufbau": "Massivwand mit Aussenwärmedämmverbundsystem oder hinterlüfteter Fassade, Neubau nach frühen SIA-380/1-Grenzwerten.",
+        "daemmstoff": "EPS oder Mineralwolle"
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": null,
+        "max": 0.28,
+        "aufbau": "Massiv- oder Holzrahmenkonstruktion mit Aussen- oder Kerndämmung, SIA 380/1:2009-konform.",
+        "daemmstoff": "Mineralwolle, EPS, PUR/PIR"
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.17,
+        "max": 0.25,
+        "aufbau": "Neubau im MuKEn-2008-Standard mit gedämmter Massiv- oder Holzrahmenwand.",
+        "daemmstoff": "Mineralwolle, EPS, Holzfaser oder PUR/PIR"
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.12,
+        "max": 0.25,
+        "aufbau": "Neubau nach MuKEn 2014 / aktuellen kantonalen Verordnungen mit sehr gut gedämmter Aussenwand.",
+        "daemmstoff": "Hochleistungsdämmstoffe (Mineralwolle, EPS, PUR/PIR, Holzfaser)"
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.1,
+        "max": 0.17,
+        "aufbau": "Minergie-/Minergie-P-Standard, häufig vorfabrizierte Holzbauelemente mit durchgehender Dämmung.",
+        "daemmstoff": "hochwertige Mineralwolle, PUR/PIR oder Holzfaser"
+      }
+    },
+    "MFH": {
+      "vor1945": {
+        "typ": 1.8,
+        "min": 1.0,
+        "max": 1.8,
+        "aufbau": "Massiver Ziegel-/Bruchsteinbau 40–60 cm, mehrgeschossig, innen/außen Putz, keine Dämmung.",
+        "daemmstoff": null
+      },
+      "1946_1960": {
+        "typ": 1.2,
+        "min": null,
+        "max": 1.2,
+        "aufbau": "30–40 cm Backstein-/Hohlblockmauerwerk, Innen- und Außenputz, ohne Dämmung.",
+        "daemmstoff": null
+      },
+      "1961_1977": {
+        "typ": 0.6,
+        "min": null,
+        "max": 1.2,
+        "aufbau": "Mehrschichtige Aussenwände (zweischalig, mit Luft-/Dämmschicht) mit minimaler Wärmedämmung.",
+        "daemmstoff": "dünne Mineralwolle oder Luftschicht"
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.2,
+        "max": 0.5,
+        "aufbau": "Verbesserte Verbund-/Kerndämmfassaden, zum Teil hochgedämmte Systeme ab ca. 1990.",
+        "daemmstoff": "Mineralwolle, EPS, teils Schaumglas"
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": null,
+        "max": null,
+        "aufbau": "WDVS oder hinterlüftete Fassade nach SIA-380/1-Grenzen für opake Wände.",
+        "daemmstoff": "Mineralwolle oder EPS"
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": null,
+        "max": 0.28,
+        "aufbau": "Massiv- oder Holzrahmen-Aussenwand mit Kerndämmung/Aussendämmung, SIA 380/1:2009-konform.",
+        "daemmstoff": "Mineralwolle, EPS, PUR/PIR"
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.17,
+        "max": 0.25,
+        "aufbau": "MuKEn-2008-konformes MFH mit sehr gut gedämmter Hülle.",
+        "daemmstoff": "Mineralwolle, EPS, Holzfaser oder PUR/PIR"
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.12,
+        "max": 0.25,
+        "aufbau": "MFH-Neubau nach MuKEn 2014 und aktuellen kantonalen Neubauanforderungen, hochgedämmte Aussenwand.",
+        "daemmstoff": "Hochleistungsdämmstoffe"
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.1,
+        "max": 0.17,
+        "aufbau": "Minergie-/Minergie-P-MFH mit sehr gut gedämmter Fassade (häufig Holz-/Hybridkonstruktionen).",
+        "daemmstoff": "hochwertige Mineralwolle, PUR/PIR oder Holzfaser"
+      }
+    }
+  },
+  "dachUWert": {
+    "steildach": {
+      "vor1945": {
+        "typ": 1.5,
+        "min": 1.0,
+        "max": 2.5,
+        "aufbau": "Steildach mit Holzsparren, ungedämmt oder nur dünne Schüttung, Ziegeldeckung."
+      },
+      "1946_1960": {
+        "typ": 1.2,
+        "min": 0.9,
+        "max": 1.5,
+        "aufbau": "Steildach mit Holzsparren, ggf. Schlacke-/Lehmschüttung, kaum gezielte Wärmedämmung."
+      },
+      "1961_1977": {
+        "typ": 0.8,
+        "min": 0.6,
+        "max": 1.0,
+        "aufbau": "Steildach mit erster Zwischensparrendämmung (z.B. Mineralwolle 6–10 cm) und Ziegeldeckung."
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.3,
+        "max": 0.6,
+        "aufbau": "Steildach mit Zwischensparrendämmung 12–16 cm, teils Aufdopplung, Unterdach; Ziegeldeckung."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Steildach Neubau mit Wärmedämmung nach frühen SIA-380/1-Grenzwerten (Dach/Decke 0,20–0,25)."
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": 0.2,
+        "max": 0.25,
+        "aufbau": "Steildach mit 20–24 cm Mineralwolle/PUR, Unterdach, Luftschicht und Ziegeldeckung."
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.15,
+        "max": 0.25,
+        "aufbau": "Steildach nach MuKEn 2008 mit erhöhter Dämmstärke, ggf. Aufsparrendämmung."
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.15,
+        "max": 0.2,
+        "aufbau": "Steildach Neubau nach MuKEn 2014 / aktuellen WDV des Kantons, hochgedämmte Konstruktion."
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.12,
+        "max": 0.18,
+        "aufbau": "Minergie-/Minergie-P-Steildach mit erhöhter Dämmstärke und optimierten Details."
+      }
+    },
+    "flachdach": {
+      "vor1945": {
+        "typ": null,
+        "min": null,
+        "max": null,
+        "aufbau": "Flachdächer waren im Wohnungsbau selten; keine belastbare Standardkonstruktion."
+      },
+      "1946_1960": {
+        "typ": 1.4,
+        "min": 1.2,
+        "max": 1.6,
+        "aufbau": "Warmdach mit massiver Stahlbetondecke, Bitumenabdichtung, kaum Wärmedämmung."
+      },
+      "1961_1977": {
+        "typ": 1.0,
+        "min": 0.7,
+        "max": 1.2,
+        "aufbau": "Warmdach mit 4–6 cm Dämmung (z.B. Schaumglas/EPS), Bitumenabdichtung."
+      },
+      "1978_1994": {
+        "typ": 0.6,
+        "min": 0.4,
+        "max": 0.7,
+        "aufbau": "Warm- oder Umkehrdach mit Dämmstoffdicken um 8–12 cm."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Flachdach-Neubau nach SIA-380/1-Grenzwerten, Dämmstärke ca. 16–18 cm λ≈0,035."
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": 0.2,
+        "max": 0.25,
+        "aufbau": "Flachdach nach SIA 380/1:2009 mit verstärkter Dämmung."
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.15,
+        "max": 0.25,
+        "aufbau": "Flachdach mit erhöhten Dämmstärken in Anlehnung an MuKEn 2008."
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.15,
+        "max": 0.2,
+        "aufbau": "Flachdach Neubau nach MuKEn 2014/WDV mit hochwirksamer Dämmung."
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.12,
+        "max": 0.18,
+        "aufbau": "Minergie-/Minergie-P-Flachdach mit sehr hoher Dämmqualität."
+      }
+    },
+    "pultdach": {
+      "vor1945": {
+        "typ": 1.5,
+        "min": 1.0,
+        "max": 2.0,
+        "aufbau": "Pultdach in historischer Bauweise, konstruktiv ähnlich Steildach, meist ungedämmt."
+      },
+      "1946_1960": {
+        "typ": 1.2,
+        "min": 0.9,
+        "max": 1.5,
+        "aufbau": "Pultdach mit Holzsparren, wenig bis keine Dämmung."
+      },
+      "1961_1977": {
+        "typ": 0.8,
+        "min": 0.6,
+        "max": 1.0,
+        "aufbau": "Pultdach mit erster Zwischensparrendämmung."
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.3,
+        "max": 0.6,
+        "aufbau": "Pultdach mit verbesserter Dämmung, vergleichbar Steildach."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Pultdach-Neubau nach SIA-380/1-Grenzwerten für Dach/Decke."
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": 0.2,
+        "max": 0.25,
+        "aufbau": "Pultdach mit moderner Dämmung (20–24 cm)."
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.15,
+        "max": 0.25,
+        "aufbau": "Pultdach nach MuKEn 2008 mit erhöhter Dämmstärke."
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.15,
+        "max": 0.2,
+        "aufbau": "Pultdach-Neubau nach MuKEn 2014."
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.12,
+        "max": 0.18,
+        "aufbau": "Minergie-Pultdach mit sehr guter Dämmqualität."
+      }
+    }
+  },
+  "bodenUWert": {
+    "gegenErdreich": {
+      "vor1945": {
+        "typ": 1.3,
+        "min": 1.0,
+        "max": 1.5,
+        "aufbau": "Massive Bodenplatte oder Gewölbe über Erdreich, ohne Wärmedämmung."
+      },
+      "1946_1960": {
+        "typ": 1.1,
+        "min": 0.9,
+        "max": 1.3,
+        "aufbau": "Betonplatte auf Erdreich mit dünner Sauberkeitsschicht, ohne Dämmung."
+      },
+      "1961_1977": {
+        "typ": 0.8,
+        "min": 0.6,
+        "max": 0.9,
+        "aufbau": "Bodenplatte mit geringer Dämmung (z.B. 4–6 cm) oder nur Verbundestrich."
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.3,
+        "max": 0.6,
+        "aufbau": "Betonplatte mit 6–10 cm Dämmung (EPS/XPS), Estrich, Bodenbelag."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Bodenplatte gegen Erdreich nach SIA 380/1-Grenzwerten (Wand/Boden 0,25)."
+      },
+      "2001_2009": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.28,
+        "aufbau": "Bodenplatte mit 10–14 cm Dämmung λ≈0,035, Estrich."
+      },
+      "2010_2015": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Boden gegen Erdreich nach kantonaler Wegleitung; U≤0,25 W/m²K bei Tiefe >2 m."
+      },
+      "2016_heute": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Neubau-Bodenplatte gegen Erdreich nach MuKEn 2014 und WDV."
+      },
+      "minergie": {
+        "typ": 0.2,
+        "min": 0.17,
+        "max": 0.25,
+        "aufbau": "Minergie-Bodenplatte gegen Erdreich mit erhöhter Dämmstärke."
+      }
+    },
+    "unbeheizterKeller": {
+      "vor1945": {
+        "typ": 1.3,
+        "min": 1.0,
+        "max": 1.5,
+        "aufbau": "Holzbalkendecke oder massive Decke zwischen beheiztem EG und unbeheiztem Keller, ungedämmt."
+      },
+      "1946_1960": {
+        "typ": 1.1,
+        "min": 0.9,
+        "max": 1.3,
+        "aufbau": "Massivdecke (z.B. Stahlbeton) zwischen beheiztem Geschoss und unbeheiztem Keller."
+      },
+      "1961_1977": {
+        "typ": 0.8,
+        "min": 0.6,
+        "max": 0.9,
+        "aufbau": "Decke mit begrenzter Dämmung oder Dämmschicht auf der Kellerdecke."
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.3,
+        "max": 0.6,
+        "aufbau": "Kellerdeckendämmung 6–10 cm, Estrich, Bodenbelag."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Decke gegen unbeheizten Keller nach SIA 380/1-Grenzwerten."
+      },
+      "2001_2009": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.28,
+        "aufbau": "Massivdecke mit Dämmung auf der kalten Seite."
+      },
+      "2010_2015": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Decke gegen unbeheizten Keller nach kantonalen Wegleitungen."
+      },
+      "2016_heute": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Neubau-Decke gegen unbeheizten Keller im Rahmen MuKEn 2014/WDV."
+      },
+      "minergie": {
+        "typ": 0.2,
+        "min": 0.17,
+        "max": 0.25,
+        "aufbau": "Minergie-Decke zum unbeheizten Keller mit erhöhter Dämmstärke."
+      }
+    },
+    "aussenluftDurchfahrt": {
+      "vor1945": {
+        "typ": 1.3,
+        "min": 1.0,
+        "max": 1.5,
+        "aufbau": "Decke über offener Durchfahrt (Außenluft) ohne Dämmung."
+      },
+      "1946_1960": {
+        "typ": 1.1,
+        "min": 0.9,
+        "max": 1.3,
+        "aufbau": "Massivdecke über Durchfahrt, ungedämmt."
+      },
+      "1961_1977": {
+        "typ": 0.8,
+        "min": 0.6,
+        "max": 0.9,
+        "aufbau": "Decke mit begrenzter Dämmung oder maßvoller Aufdopplung."
+      },
+      "1978_1994": {
+        "typ": 0.5,
+        "min": 0.3,
+        "max": 0.6,
+        "aufbau": "Decke mit 6–10 cm Dämmung auf der kalten Seite (Außenluft)."
+      },
+      "1995_2000": {
+        "typ": 0.25,
+        "min": 0.25,
+        "max": 0.25,
+        "aufbau": "Decke gegen Außenluft mit Dämmung nach SIA 380/1-Grenzwerten."
+      },
+      "2001_2009": {
+        "typ": 0.2,
+        "min": 0.2,
+        "max": 0.25,
+        "aufbau": "Decke über Durchfahrt mit moderner Dämmung."
+      },
+      "2010_2015": {
+        "typ": 0.2,
+        "min": 0.15,
+        "max": 0.25,
+        "aufbau": "Decke über Außenluft mit erhöhten Dämmstärken."
+      },
+      "2016_heute": {
+        "typ": 0.17,
+        "min": 0.15,
+        "max": 0.2,
+        "aufbau": "Neubau-Decke gegen Außenluft nach MuKEn 2014/WDV."
+      },
+      "minergie": {
+        "typ": 0.15,
+        "min": 0.12,
+        "max": 0.18,
+        "aufbau": "Minergie-Decke gegen Außenluft."
+      }
+    }
+  },
+  "fensterUWert": {
+    "einfachverglasung": {
+      "uGlas": {
+        "typ": 5.8,
+        "min": 5.0,
+        "max": 6.0
+      },
+      "uFenster_holz": {
+        "typ": 4.7,
+        "min": 4.5,
+        "max": 4.8
+      },
+      "uFenster_kunststoff": {
+        "typ": 4.7,
+        "min": null,
+        "max": null
+      },
+      "uFenster_holz_alu": {
+        "typ": null,
+        "min": null,
+        "max": null
+      },
+      "baujahr_typisch": "bis ca. 1975",
+      "bemerkung": "Einfachverglasung mit Holzrahmen; Ug ca. 5,0–6,0 W/m²K, Uw Holzfenster etwa 4,5–4,8 W/m²K."
+    },
+    "isolierglas_2fach_ohne_low_e": {
+      "uGlas": {
+        "typ": 2.8,
+        "min": 2.7,
+        "max": 3.0
+      },
+      "uFenster_holz": {
+        "typ": 2.7,
+        "min": 2.5,
+        "max": 3.0
+      },
+      "uFenster_kunststoff": {
+        "typ": 2.6,
+        "min": 2.4,
+        "max": 2.8
+      },
+      "uFenster_holz_alu": {
+        "typ": 2.6,
+        "min": 2.4,
+        "max": 2.8
+      },
+      "baujahr_typisch": "ca. 1975–1995",
+      "bemerkung": "Frühe Zweischeiben-Isoliergläser ohne Wärmeschutzbeschichtung, Ug 2,7–3,0 W/m²K."
+    },
+    "isolierglas_2fach_low_e_argon": {
+      "uGlas": {
+        "typ": 1.1,
+        "min": 1.0,
+        "max": 1.3
+      },
+      "uFenster_holz": {
+        "typ": 1.4,
+        "min": 1.2,
+        "max": 1.6
+      },
+      "uFenster_kunststoff": {
+        "typ": 1.3,
+        "min": 1.1,
+        "max": 1.5
+      },
+      "uFenster_holz_alu": {
+        "typ": 1.3,
+        "min": 1.1,
+        "max": 1.5
+      },
+      "baujahr_typisch": "ab ca. 1995",
+      "bemerkung": "Wärmeschutz-Isolierglas 2-fach mit Low-E-Beschichtung und Argonfüllung, Ug 1,0–1,3 W/m²K; typische Uw 1,1–1,3 W/m²K."
+    },
+    "isolierglas_3fach_standard": {
+      "uGlas": {
+        "typ": 0.7,
+        "min": 0.6,
+        "max": 0.8
+      },
+      "uFenster_holz": {
+        "typ": 0.9,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "uFenster_kunststoff": {
+        "typ": 0.9,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "uFenster_holz_alu": {
+        "typ": 0.9,
+        "min": 0.8,
+        "max": 1.0
+      },
+      "baujahr_typisch": "ab ca. 2005",
+      "bemerkung": "Dreifach-Isolierglas mit Ug≈0,6–0,8 W/m²K; typische Uw-Werte Neubaufenster 0,8–0,9 W/m²K."
+    },
+    "isolierglas_3fach_high_end": {
+      "uGlas": {
+        "typ": 0.6,
+        "min": 0.5,
+        "max": 0.6
+      },
+      "uFenster_holz": {
+        "typ": 0.8,
+        "min": 0.7,
+        "max": 0.8
+      },
+      "uFenster_kunststoff": {
+        "typ": 0.8,
+        "min": 0.7,
+        "max": 0.8
+      },
+      "uFenster_holz_alu": {
+        "typ": 0.8,
+        "min": 0.7,
+        "max": 0.8
+      },
+      "baujahr_typisch": "ab ca. 2010 (Passivhaus/Minergie-P)",
+      "bemerkung": "Hochwertige 3-fach-Verglasung mit Ug bis 0,5–0,6 W/m²K, Passivhaus-/Minergie-P-Fenster Uw≤0,8 W/m²K."
+    }
+  },
+  "daemmstoffe": {
+    "_quelle": "SIA 380/1, Wissensbasis B Tab. 3.3, Hersteller-Mittelwerte CH (2026-04-27, Phase 12.5a Default-Kaskade)",
+    "_hinweis": "Lambda-Werte fuer die Default-Kaskade (besichtigung.html Bauteil-Dialog). Etwas konservativer als der Material-Katalog in calc/envelope.mjs MATERIAL_CATALOG, weil die Kaskade typische Praxis-Daemmungen ohne Hersteller-Datenblatt abbildet.",
+    "mineralwolle": {
+      "label": "Mineralwolle",
+      "lambda": 0.04,
+      "verbreitung": "Sanierungs-Standard 1980-2010, Glaswolle/Steinwolle."
+    },
+    "eps": {
+      "label": "EPS (Polystyrol)",
+      "lambda": 0.038,
+      "verbreitung": "Standard-Aussendaemmung WDVS ab 1995."
+    },
+    "xps": {
+      "label": "XPS",
+      "lambda": 0.034,
+      "verbreitung": "Perimeterdaemmung, Flachdach, druckbelastet."
+    },
+    "pur": {
+      "label": "PUR/PIR",
+      "lambda": 0.025,
+      "verbreitung": "Hochleistungs-Daemmstoff, Minergie-P, Aufsparrendaemmung."
+    },
+    "holzfaser": {
+      "label": "Holzfaser",
+      "lambda": 0.045,
+      "verbreitung": "Oekologische Daemmung, Holzbau, Aufdoppelung."
+    },
+    "unbekannt": {
+      "label": "unbekannt / nicht prüfbar (konservativ)",
+      "lambda": 0.045,
+      "verbreitung": "Worst-Case-Fallback Stufe 4 der Default-Kaskade — bewusst pessimistisch, damit Auslegung eher zu gross statt zu klein wird."
+    }
+  },
+  "bauteilDefaults": {
+    "_quelle": "ANALYSE-A1-genauigkeit-sanierung.md §3 (Bauteil-Schaetzungs-Tabelle), ANALYSE-FAZIT-konsolidierung.md §6 (Default-Strategie), Wissensbasis B (SIA 380/1)",
+    "_struktur": "Pro Bauteil-Typ × Baujahrsklasse: { tragschicht: {label,lambda,d}, daemmung: {material,dicke} | null, putzInnen?, putzAussen?, beschreibung }. Material-Key referenziert daemmstoffe-Block. Dicke in Metern.",
+    "_lese-konvention": "Stufe 0 (Default ohne Daemmung) verwendet tragschicht + ggf. Putz und liefert den typischen Baujahr-U-Wert aus wandUWert/dachUWert/bodenUWert. Stufe 2 (gedaemmt = ja) verwendet zusaetzlich den daemmung-Block — material und dicke sind die Vorbelegung des Material-Dropdowns + Dicken-Sliders.",
+    "aussenwand": {
+      "vor1945": {
+        "tragschicht": {
+          "label": "Vollziegel/Naturstein 50 cm",
+          "lambda": 0.81,
+          "d": 0.5
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 20 mm",
+          "lambda": 0.7,
+          "d": 0.02
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 20 mm",
+          "lambda": 1.0,
+          "d": 0.02
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.04
+        },
+        "beschreibung": "Bruchstein-/Vollziegel ungedaemmt; bei Sanierung typisch 4 cm Aussendaemmung."
+      },
+      "1946_1960": {
+        "tragschicht": {
+          "label": "Backstein 30 cm",
+          "lambda": 0.81,
+          "d": 0.3
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 20 mm",
+          "lambda": 1.0,
+          "d": 0.02
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.06
+        },
+        "beschreibung": "Backsteinmauerwerk ohne Daemmung; Sanierung typisch 6 cm WDVS."
+      },
+      "1961_1977": {
+        "tragschicht": {
+          "label": "Hochlochziegel 30 cm",
+          "lambda": 0.4,
+          "d": 0.3
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 15 mm",
+          "lambda": 1.0,
+          "d": 0.015
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.06
+        },
+        "beschreibung": "Hochloch-Ziegelmauerwerk, Erstdaemmung dünn oder fehlend. Sanierungs-Standard 1990er: 6 cm Mineralwolle."
+      },
+      "1978_1994": {
+        "tragschicht": {
+          "label": "Hochlochziegel 24 cm",
+          "lambda": 0.29,
+          "d": 0.24
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 15 mm",
+          "lambda": 1.0,
+          "d": 0.015
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.08
+        },
+        "beschreibung": "Massivbau mit erster Aussendaemmung 6-10 cm Mineralwolle/EPS."
+      },
+      "1995_2000": {
+        "tragschicht": {
+          "label": "Hochlochziegel 17,5 cm",
+          "lambda": 0.29,
+          "d": 0.175
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 10 mm",
+          "lambda": 1.0,
+          "d": 0.01
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.12
+        },
+        "beschreibung": "WDVS Standard SIA 380/1 1995, 12 cm EPS."
+      },
+      "2001_2009": {
+        "tragschicht": {
+          "label": "Hochlochziegel 17,5 cm",
+          "lambda": 0.29,
+          "d": 0.175
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 10 mm",
+          "lambda": 1.0,
+          "d": 0.01
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.14
+        },
+        "beschreibung": "MuKEn 2008, 14 cm EPS auf Massiv-Mauerwerk."
+      },
+      "2010_2015": {
+        "tragschicht": {
+          "label": "Hochlochziegel 17,5 cm",
+          "lambda": 0.29,
+          "d": 0.175
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 10 mm",
+          "lambda": 1.0,
+          "d": 0.01
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.16
+        },
+        "beschreibung": "MuKEn 2014, 16 cm EPS oder Mineralwolle."
+      },
+      "2016_heute": {
+        "tragschicht": {
+          "label": "Hochlochziegel 17,5 cm",
+          "lambda": 0.29,
+          "d": 0.175
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 10 mm",
+          "lambda": 1.0,
+          "d": 0.01
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.18
+        },
+        "beschreibung": "Aktueller MuKEn-Standard, 18 cm EPS."
+      },
+      "minergie": {
+        "tragschicht": {
+          "label": "Hochlochziegel 17,5 cm",
+          "lambda": 0.29,
+          "d": 0.175
+        },
+        "putzInnen": {
+          "label": "Innenputz Kalkgips 15 mm",
+          "lambda": 0.7,
+          "d": 0.015
+        },
+        "putzAussen": {
+          "label": "Aussenputz Zement 10 mm",
+          "lambda": 1.0,
+          "d": 0.01
+        },
+        "daemmung": {
+          "material": "pur",
+          "dicke": 0.22
+        },
+        "beschreibung": "Minergie-/Minergie-P-Standard, 22 cm PUR oder hochwertige Mineralwolle."
+      }
+    },
+    "dach": {
+      "vor1945": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.1
+        },
+        "beschreibung": "Steildach urspruenglich ungedaemmt; Sanierungs-Default 10 cm Zwischensparren."
+      },
+      "1946_1960": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.12
+        },
+        "beschreibung": "Sanierung typisch 12 cm Mineralwolle Zwischensparren."
+      },
+      "1961_1977": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.14
+        },
+        "beschreibung": "Erste Zwischensparrendaemmung dünn; Sanierungs-Standard 14 cm."
+      },
+      "1978_1994": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.16
+        },
+        "beschreibung": "Standard-Zwischensparren 16 cm."
+      },
+      "1995_2000": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.2
+        },
+        "beschreibung": "SIA 380/1 1995 mit 20 cm Mineralwolle."
+      },
+      "2001_2009": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.22
+        },
+        "beschreibung": "MuKEn 2008, 22 cm Mineralwolle."
+      },
+      "2010_2015": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "mineralwolle",
+          "dicke": 0.24
+        },
+        "beschreibung": "MuKEn 2014, 24 cm Zwischensparren + Aufsparren."
+      },
+      "2016_heute": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "pur",
+          "dicke": 0.2
+        },
+        "beschreibung": "Aktueller Standard mit PUR-Aufsparren."
+      },
+      "minergie": {
+        "tragschicht": {
+          "label": "Holzsparren + Schalung",
+          "lambda": 0.13,
+          "d": 0.025
+        },
+        "daemmung": {
+          "material": "pur",
+          "dicke": 0.26
+        },
+        "beschreibung": "Minergie-P, 26 cm PUR oder hochwertig Mineralwolle."
+      }
+    },
+    "boden": {
+      "vor1945": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.04
+        },
+        "beschreibung": "Massive Bodenplatte ungedaemmt; Sanierung typisch 4 cm EPS auf Kellerdecke (von oben)."
+      },
+      "1946_1960": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 18 cm",
+          "lambda": 1.7,
+          "d": 0.18
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.06
+        },
+        "beschreibung": "Sanierung typisch 6 cm EPS."
+      },
+      "1961_1977": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 18 cm",
+          "lambda": 1.7,
+          "d": 0.18
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.08
+        },
+        "beschreibung": "Erstdaemmung Bodenplatte dünn; Sanierung 8 cm EPS."
+      },
+      "1978_1994": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 18 cm",
+          "lambda": 1.7,
+          "d": 0.18
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.08
+        },
+        "beschreibung": "Standard 8 cm EPS unter Estrich."
+      },
+      "1995_2000": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "eps",
+          "dicke": 0.1
+        },
+        "beschreibung": "SIA 380/1 1995, 10 cm EPS."
+      },
+      "2001_2009": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "xps",
+          "dicke": 0.12
+        },
+        "beschreibung": "MuKEn 2008, 12 cm XPS Perimeter."
+      },
+      "2010_2015": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "xps",
+          "dicke": 0.14
+        },
+        "beschreibung": "MuKEn 2014, 14 cm XPS."
+      },
+      "2016_heute": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "xps",
+          "dicke": 0.16
+        },
+        "beschreibung": "Aktueller Standard 16 cm XPS."
+      },
+      "minergie": {
+        "tragschicht": {
+          "label": "Stahlbetonplatte 20 cm",
+          "lambda": 1.7,
+          "d": 0.2
+        },
+        "daemmung": {
+          "material": "xps",
+          "dicke": 0.2
+        },
+        "beschreibung": "Minergie-P, 20 cm XPS."
+      }
+    }
+  },
+  "fensterGenerationen": {
+    "_quelle": "docs/ANALYSE-A1-genauigkeit-sanierung.md §3 (Fenster-Tabelle), Wissensbasis B Tab. 3.4, A1 Feuerzeug-Test-Logik",
+    "_hinweis": "Praxis-Erkennung mit Feuerzeug-Test (Anzahl Spiegelbilder = Anzahl Scheiben) + Stempel zwischen Glasscheiben + Distanzhalter (Aluminium = alt, Kunststoff/Edelstahl = neu).",
+    "einfach": {
+      "label": "Einfachverglasung (vor 1975)",
+      "uw": 5.2,
+      "kennzeichen": "1 Glasscheibe — Feuerzeug zeigt 1 Reflexion."
+    },
+    "2fach_unbeschichtet": {
+      "label": "2-fach unbeschichtet (1975-1995)",
+      "uw": 2.8,
+      "kennzeichen": "2 Scheiben mit Aluminium-Distanzhalter, kein Low-E."
+    },
+    "2fach_low_e": {
+      "label": "2-fach Low-E + Argon (1995-2005)",
+      "uw": 1.3,
+      "kennzeichen": "2 Scheiben, leichter Spiegelglanz auf einer Seite (Low-E), Stempel mit Datum."
+    },
+    "3fach": {
+      "label": "3-fach Standard (2005-2015)",
+      "uw": 0.95,
+      "kennzeichen": "3 Scheiben — Feuerzeug zeigt 3 Reflexionen."
+    },
+    "3fach_passiv": {
+      "label": "3-fach Passivhaus / Minergie-P (ab 2010)",
+      "uw": 0.8,
+      "kennzeichen": "Passivhaus-/Minergie-P-Datenblatt vorhanden."
+    },
+    "unbekannt": {
+      "label": "unbekannt / nicht prüfbar (konservativ)",
+      "uw": 2.8,
+      "kennzeichen": "Worst-Case-Fallback Stufe 4: 2-fach unbeschichtet ist plausibles Mittel, leicht pessimistisch fuer Bestand."
+    }
+  },
+  "fensterGenerationDefault": {
+    "_quelle": "A1 §3 Tabelle Baujahr → Generation. Kaskaden-Vorbelegung Stufe 0 fuer das Fenster-Dropdown.",
+    "vor1945": "einfach",
+    "1946_1960": "einfach",
+    "1961_1977": "2fach_unbeschichtet",
+    "1978_1994": "2fach_unbeschichtet",
+    "1995_2000": "2fach_low_e",
+    "2001_2009": "2fach_low_e",
+    "2010_2015": "3fach",
+    "2016_heute": "3fach",
+    "minergie": "3fach_passiv"
+  }
+}

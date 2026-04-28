@@ -1,0 +1,7 @@
+Import-Report 2026-04-27T23:48:13.331Z
+Quelle: /sessions/magical-keen-planck/mnt/Thermowerk/Review_WP_Datenbank_v0.2/04_Tool_Uebernahme/datenbank_export_v1.0.json
+
+3 Warnungen:
+  HG OE-0002: bauformFamilie="Oertli_LAN_1118BWCP" hat kein Datenblatt — ref entfernt
+  HG OE-0019: bauformFamilie="Oertli_LAN_Innen_35TBS" hat kein Datenblatt — ref entfernt
+  KOMP duplicate Art.-Nr. 14784.002: zweites Vorkommen → wp-komponente-14784-002-dup2
