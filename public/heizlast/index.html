@@ -77,9 +77,9 @@
 html, body { margin: 0; padding: 0; }
 html {
   -webkit-text-size-adjust: 100%;
-  /* Mobile-Fix: iOS-Rubber-Band-Effekt soll nicht den Hintergrund hinter
-     der Sticky-Topbar zeigen — html-Background sicherstellen. */
-  background: var(--ink-0);
+  /* Mobile-Fix: iOS-Safe-Area / Rubber-Band-Zone soll Seiten-Background zeigen
+     (nicht durchsichtig). var(--c-bg) = light grey wie der Rest der Seite. */
+  background: var(--c-bg);
 }
 body {
   font-family: var(--ff);
@@ -118,9 +118,9 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   top: 0;
   z-index: 30;
   box-shadow: var(--shadow-sm);
-  /* Mobile-Fix: Safe-Area-Inset abdecken (iOS Notch) + opakes Bg auch bei
-     Rubber-Band/Overscroll. Beide Sub-Rows bekommen explizite Bg-Color. */
-  padding-top: env(safe-area-inset-top, 0);
+  /* Mobile-Fix: Safe-Area-Zone zeigt jetzt html-Bg (Seiten-Grau) statt
+     unter weisser Topbar verdeckt zu sein. Kein padding-top hier — die
+     Topbar startet direkt unter der Safe-Area. */
 }
 .topbar__brand-row { border-bottom: 1px solid var(--ink-100); background: var(--ink-0); }
 .topbar__action-row { background: var(--ink-0); }
@@ -1391,6 +1391,58 @@ body.modal-open { overflow: hidden; }
 }
 .kreis-row .field { margin-bottom: 0; }
 .kreis-row .field__label { font-size: var(--fs-xs); color: var(--ink-500); }
+
+
+/* S7 — Bauteil-Editor: 2-Zeilen-Layout, Auto-Werte sichtbar */
+.bauteil {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+  margin-bottom: var(--s-2);
+  background: var(--ink-50);
+}
+.bauteil__row1, .bauteil__row2 {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  align-items: end;
+}
+.bauteil__row2 {
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+  border-top: 1px dashed var(--c-border);
+}
+.bauteil__row1 .field, .bauteil__row2 .field { margin-bottom: 0; }
+.bauteil__readout .bauteil__value {
+  background: var(--ink-100);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  font-weight: 700;
+  color: var(--brand-500);
+  font-size: var(--fs-md);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bauteil__unit {
+  color: var(--ink-500);
+  font-weight: 500;
+  font-size: var(--fs-xs);
+}
+.bauteil__source {
+  background: var(--ink-100);
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  color: var(--ink-700);
+  font-size: var(--fs-xs);
+  font-style: italic;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
 
 </style>
 </head>
@@ -3756,6 +3808,8 @@ function updateUi(state, calc){
   updateHints(state, calc);
   updateDetailHints(state, calc);
   updateSpeicherSection(state, calc);
+  // S7: Bauteil-Readouts (U / fRT / Quelle) live aktualisieren
+  updateBauteilReadouts(state);
   if (state?.detail?.aktiv){
     updateVerteilungSection(state, calc);
     updateGeraetSection(state, calc);
@@ -4398,6 +4452,67 @@ function renderSpeicher(s){
    S4 — DETAIL-MODUS: HÜLLE + RÄUME
    ========================================================================= */
 
+/* S7 — Variant- und Anschluss-Optionen pro Bauteil-Typ.
+   Werte werden aus data/u-werte.json gezogen + ggf. nach Sanierungsstand
+   angepasst. Per-Bauteil-fRT folgt aus dem gewählten Anschluss-Typ. */
+const BAUTEIL_VARIANT_OPTS = {
+  // Standard 4-Stufe für Wand/Dach/Boden — kombiniert mit Bauperiode.
+  std: [
+    ['unbekannt',   'Unbekannt — typischer Wert für Bauperiode'],
+    ['unsaniert',   'Original / unsaniert (max. U-Wert)'],
+    ['saniert',     'Saniert / gut gedämmt (min. U-Wert)'],
+    ['eigener',     'Eigener Wert eingeben']
+  ],
+  // Dach: zusätzlich Dach-Form (steildach/flachdach/pultdach)
+  dachForm: [
+    ['steildach',  'Steildach / geneigtes Dach'],
+    ['flachdach',  'Flachdach'],
+    ['pultdach',   'Pultdach']
+  ],
+  // Fenster: 5 Verglasungs-Generationen
+  fensterGen: [
+    ['unbekannt',                      'Unbekannt — typisch für Bauperiode'],
+    ['einfachverglasung',              'Einfachverglasung (alt, vor ~1975)'],
+    ['isolierglas_2fach_ohne_low_e',   '2-fach-Isolierglas ohne Low-E'],
+    ['isolierglas_2fach_low_e_argon',  '2-fach-Isolierglas Low-E + Argon'],
+    ['isolierglas_3fach_standard',     '3-fach-Isolierglas (Standard)'],
+    ['isolierglas_3fach_high_end',     '3-fach-Isolierglas (High-End)'],
+    ['eigener',                        'Eigener Wert eingeben']
+  ],
+  fensterRahmen: [
+    ['holz',        'Holzrahmen'],
+    ['kunststoff',  'Kunststoffrahmen'],
+    ['holz_alu',    'Holz/Alu']
+  ]
+};
+const ANSCHLUSS_OPTS = {
+  // Wand/Dach default = aussenluft
+  aussenluft:  ['aussenluft',  'gegen Aussenluft (f_RT 1.00)'],
+  erdreich:    ['erdreich',    'gegen Erdreich (f_RT 0.50)'],
+  unbeheizt:   ['unbeheizt',   'gegen unbeheizten Raum/Keller (f_RT 0.70)'],
+  durchfahrt:  ['durchfahrt',  'gegen unbeheizt + Aussenluft (f_RT 0.90)'],
+  beheizt:     ['beheizt',     'gegen beheizten Nachbarn (f_RT 0.00)']
+};
+const ANSCHLUSS_FRT = {
+  aussenluft: 1.0, erdreich: 0.5, unbeheizt: 0.7, durchfahrt: 0.9, beheizt: 0.0
+};
+const ANSCHLUSS_DEFAULT = {
+  wand: 'aussenluft', dach: 'aussenluft', fenster: 'aussenluft',
+  tueren: 'aussenluft', boden: 'erdreich'
+};
+function anschlussOptsFor(typ){
+  if (typ === 'boden') return ['erdreich', 'unbeheizt', 'durchfahrt'].map(k => ANSCHLUSS_OPTS[k]);
+  if (typ === 'wand' || typ === 'tueren') return ['aussenluft', 'unbeheizt', 'beheizt'].map(k => ANSCHLUSS_OPTS[k]);
+  if (typ === 'dach') return ['aussenluft', 'unbeheizt'].map(k => ANSCHLUSS_OPTS[k]);
+  return ['aussenluft', 'unbeheizt'].map(k => ANSCHLUSS_OPTS[k]);
+}
+/** Tür-Fallback-Tabelle (data/u-werte.json hat keine Tür-Daten). */
+const TUER_U_BY_BK = {
+  vor1945: 3.0, '1946_1960': 2.8, '1961_1977': 2.5, '1978_1994': 2.0,
+  '1995_2000': 1.7, '2001_2009': 1.5, '2010_2015': 1.3, '2016_heute': 1.2,
+  minergie: 1.0
+};
+
 const BAUTEIL_LABELS = {
   wand:    'Aussenwand',
   fenster: 'Fenster',
@@ -4586,27 +4701,165 @@ function renderRoom(r, idx){
   </div>`;
 }
 
+/**
+ * S7 — Resolver für U-Wert + f_RT eines Bauteils.
+ * Nutzt data/u-werte.json + Bauperiode + Sanierungsstand + Variant + Anschluss.
+ * Liefert immer ein Result, auch wenn keine Daten geladen sind (Fallback).
+ */
+/**
+ * S7 — Bauteil-Werte (U + f_RT) gemäss Variant/Anschluss/Bauperiode pro
+ * Raum auflösen und in eine ENRICHED-Kopie schreiben. Wird vor compute/
+ * computeBuildingDetailLoad in main.mjs aufgerufen, damit der Heatload-
+ * Calc ohne Code-Eingriff die korrekten Werte sieht.
+ */
+function enrichRaeumeWithResolvedUFrt(state){
+  if (!state?.detail?.raeume) return state;
+  const out = JSON.parse(JSON.stringify(state));
+  (out.detail.raeume || []).forEach(r => {
+    (r.bauteile || []).forEach(b => {
+      const res = resolveBauteilUFrt(state, b);
+      b.u   = res.u;
+      b.fRT = res.fRT;
+    });
+  });
+  return out;
+}
+
+function resolveBauteilUFrt(state, b){
+  const obj = state?.objekt || {};
+  let bk = bauklasseFromPeriode(obj.bauperiode) || '1978_1994';
+  bk = applySanierung(bk, obj.sanierungsstand) || bk;
+  const typ = b.typ || 'wand';
+  const variant = b.variant || 'unbekannt';
+  const anschluss = b.anschluss || ANSCHLUSS_DEFAULT[typ] || 'aussenluft';
+  const fRT = ANSCHLUSS_FRT[anschluss] != null ? ANSCHLUSS_FRT[anschluss] : 1.0;
+  const fRT_src = ANSCHLUSS_OPTS[anschluss] ? ANSCHLUSS_OPTS[anschluss][1] : '';
+
+  // User-Override
+  if (variant === 'eigener' && b.u_override != null && b.u_override !== ''){
+    return { u: Number(b.u_override), fRT, source: 'manuell · ' + fRT_src };
+  }
+
+  const data = _uWerteData;
+  const pick = (entry) => {
+    if (!entry) return null;
+    if (variant === 'unsaniert') return entry.max ?? entry.typ ?? null;
+    if (variant === 'saniert')   return entry.min ?? entry.typ ?? null;
+    return entry.typ ?? null;
+  };
+  let u = null, src = '';
+  switch (typ){
+    case 'wand': {
+      const tk = obj.typ === 'mfh' ? 'MFH' : 'EFH';
+      const e = data?.wandUWert?.[tk]?.[bk];
+      u = pick(e);
+      src = `Tabelle Wand · ${tk} · ${esc(bk)}`;
+      break;
+    }
+    case 'dach': {
+      const dachKey = b.dach_variant || 'steildach';
+      const e = data?.dachUWert?.[dachKey]?.[bk];
+      u = pick(e);
+      src = `Tabelle Dach · ${esc(dachKey)} · ${esc(bk)}`;
+      break;
+    }
+    case 'boden': {
+      const bodenKey = anschluss === 'erdreich' ? 'gegenErdreich'
+                    : anschluss === 'unbeheizt' ? 'unbeheizterKeller'
+                    : anschluss === 'durchfahrt' ? 'aussenluftDurchfahrt'
+                    : 'gegenErdreich';
+      const e = data?.bodenUWert?.[bodenKey]?.[bk];
+      u = pick(e);
+      src = `Tabelle Boden · ${esc(bodenKey)} · ${esc(bk)}`;
+      break;
+    }
+    case 'fenster': {
+      let gen = b.fenster_gen || 'unbekannt';
+      // Auto-Generation aus Bauperiode wenn 'unbekannt'
+      if (gen === 'unbekannt') {
+        gen = data?.fensterGenerationDefault?.[bk] || 'isolierglas_2fach_low_e_argon';
+      }
+      const e = data?.fensterUWert?.[gen];
+      const rahmen = b.fenster_rahmen || 'kunststoff';
+      const rk = 'uFenster_' + (rahmen === 'holz_alu' ? 'holz_alu' : rahmen);
+      u = e?.[rk]?.typ ?? e?.uFenster_holz?.typ ?? e?.uGlas?.typ ?? null;
+      src = `Fenster ${esc(gen)} (${esc(rahmen)})`;
+      break;
+    }
+    case 'tueren': {
+      u = TUER_U_BY_BK[bk] ?? 2.0;
+      src = `Tür-Standard · ${esc(bk)}`;
+      break;
+    }
+  }
+  if (u == null) u = 1.0; // Notnagel-Fallback
+  return { u, fRT, source: src + ' · ' + fRT_src };
+}
+
 function renderRoomBauteil(idx, j, b){
   const typeOpts = Object.entries(BAUTEIL_LABELS).map(([k, l]) => [k, l]);
+  const typ = b.typ || 'wand';
+  const variant = b.variant || 'unbekannt';
+  const isFenster = (typ === 'fenster');
+  const isDach = (typ === 'dach');
+  const isTuer = (typ === 'tueren');
+
+  // Resolver-Aufruf — Werte sichtbar im UI
+  const state = _getState ? _getState() : null;
+  const r = state ? resolveBauteilUFrt(state, b) : { u: 1.0, fRT: 1.0, source: '—' };
+
+  const variantOpts = isFenster ? BAUTEIL_VARIANT_OPTS.fensterGen : BAUTEIL_VARIANT_OPTS.std;
+  const anschlussOpts = anschlussOptsFor(typ);
+  const eigenerVariant = (variant === 'eigener');
+
   return `
   <div class="bauteil" data-bauteil-idx="${idx}-${j}">
-    <div class="field" style="min-width:120px;">
-      <label class="field__label">Typ</label>
-      ${select(`detail.raeume[${idx}].bauteile[${j}].typ`, b.typ || 'wand', typeOpts)}
+    <div class="bauteil__row1">
+      <div class="field" style="flex:1;min-width:120px;">
+        <label class="field__label">Typ</label>
+        ${select(`detail.raeume[${idx}].bauteile[${j}].typ`, typ, typeOpts)}
+      </div>
+      <div class="field" style="flex:2;min-width:200px;">
+        <label class="field__label">${isFenster ? 'Verglasung' : 'Bauweise / Variante'}</label>
+        ${select(`detail.raeume[${idx}].bauteile[${j}].variant`, variant, variantOpts)}
+      </div>
+      ${isDach ? `
+      <div class="field" style="min-width:140px;">
+        <label class="field__label">Dach-Form</label>
+        ${select(`detail.raeume[${idx}].bauteile[${j}].dach_variant`, b.dach_variant || 'steildach', BAUTEIL_VARIANT_OPTS.dachForm)}
+      </div>` : ''}
+      ${isFenster ? `
+      <div class="field" style="min-width:140px;">
+        <label class="field__label">Rahmen</label>
+        ${select(`detail.raeume[${idx}].bauteile[${j}].fenster_rahmen`, b.fenster_rahmen || 'kunststoff', BAUTEIL_VARIANT_OPTS.fensterRahmen)}
+      </div>` : ''}
+      ${!isFenster && !isTuer ? `
+      <div class="field" style="min-width:200px;">
+        <label class="field__label">Anschluss</label>
+        ${select(`detail.raeume[${idx}].bauteile[${j}].anschluss`, b.anschluss || ANSCHLUSS_DEFAULT[typ], anschlussOpts)}
+      </div>` : ''}
+      <button class="btn btn--ghost" type="button" data-del-bauteil="${idx}-${j}" title="Bauteil löschen">×</button>
     </div>
-    <div class="field" style="min-width:80px;">
-      <label class="field__label">A</label>
-      <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
+    <div class="bauteil__row2">
+      <div class="field" style="min-width:100px;">
+        <label class="field__label">Fläche A</label>
+        <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
+      </div>
+      <div class="field bauteil__readout" style="min-width:160px;">
+        <label class="field__label">U-Wert (auto)</label>
+        ${eigenerVariant
+          ? `<div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].u_override`, b.u_override || '', 0.01, 0, '0.40')}<span class="input-group__unit">W/(m²·K)</span></div>`
+          : `<div class="bauteil__value" data-readout-u="${idx}-${j}">${fmt(r.u, 2)} <span class="bauteil__unit">W/(m²·K)</span></div>`}
+      </div>
+      <div class="field bauteil__readout" style="min-width:120px;">
+        <label class="field__label">f<sub>RT</sub> (auto)</label>
+        <div class="bauteil__value" data-readout-frt="${idx}-${j}">${fmt(r.fRT, 2)}</div>
+      </div>
+      <div class="field" style="flex:1;min-width:200px;">
+        <label class="field__label">Quelle</label>
+        <div class="bauteil__source" data-readout-src="${idx}-${j}">${r.source || '—'}</div>
+      </div>
     </div>
-    <div class="field" style="min-width:90px;">
-      <label class="field__label">U-Wert</label>
-      <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].u`, b.u || '', 0.01, 0, 'auto')}<span class="input-group__unit">W/(m²·K)</span></div>
-    </div>
-    <div class="field" style="min-width:70px;">
-      <label class="field__label">f<sub>RT</sub></label>
-      ${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].fRT`, b.fRT != null ? b.fRT : '', 0.05, -1, '1.0')}
-    </div>
-    <button class="btn btn--ghost" type="button" data-del-bauteil="${idx}-${j}" title="Bauteil löschen">×</button>
   </div>`;
 }
 
@@ -5120,7 +5373,7 @@ function attachStaticHandlers(root, stepperEl, getState){
       const st = getState();
       const rs = (st.detail && st.detail.raeume || []).map(r => Object.assign({}, r, { bauteile: (r.bauteile || []).slice() }));
       if (!rs[idx]) return;
-      rs[idx].bauteile.push({ typ: 'wand', A: 0, u: '', fRT: 1.0 });
+      rs[idx].bauteile.push({ typ: 'wand', variant: 'unbekannt', anschluss: 'aussenluft', A: 0 });
       _set('detail.raeume', rs);
       return;
     }
@@ -5221,6 +5474,15 @@ function onInputChange(ev){
   }
   else value = el.value;
   _set(path, value);
+  // S7: Strukturelle Bauteil-Änderungen (Typ/Variante/Anschluss/Dach-Form/
+  // Fenster-Generation) triggern einen Rebuild der Räume-Liste, weil sich
+  // die sichtbaren Felder ändern (Override-Input ↔ Readout, Anschluss ↔ Dach-
+  // Form ↔ Fenster-Rahmen). Bauperiode/Sanierungsstand wirken auch auf alle
+  // Bauteil-Lookups → Rebuild ebenfalls.
+  if (/\.bauteile\[\d+\]\.(typ|variant|anschluss|dach_variant|fenster_gen|fenster_rahmen)$/.test(path) ||
+      path === 'objekt.bauperiode' || path === 'objekt.sanierungsstand'){
+    setTimeout(() => rebuildRooms(_getState ? _getState() : null), 0);
+  }
 }
 
 /* =========================================================================
@@ -5883,6 +6145,26 @@ function syncRaumHflCount(state){
   }
 }
 
+/**
+ * S7 — Bauteil-Readout-Felder (U-Wert, f_RT, Quelle) live aktualisieren,
+ * wenn der User die Variante / den Anschluss / die Bauperiode wechselt.
+ * Spart einen vollständigen Rebuild der Räume-Liste (Focus bleibt erhalten).
+ */
+function updateBauteilReadouts(state){
+  const raeume = state?.detail?.raeume || [];
+  raeume.forEach((r, i) => {
+    (r.bauteile || []).forEach((b, j) => {
+      const res = resolveBauteilUFrt(state, b);
+      const elU = document.querySelector(`[data-readout-u="${i}-${j}"]`);
+      if (elU) elU.innerHTML = `${fmt(res.u, 2)} <span class="bauteil__unit">W/(m²·K)</span>`;
+      const elF = document.querySelector(`[data-readout-frt="${i}-${j}"]`);
+      if (elF) elF.textContent = fmt(res.fRT, 2);
+      const elS = document.querySelector(`[data-readout-src="${i}-${j}"]`);
+      if (elS) elS.textContent = res.source || '—';
+    });
+  });
+}
+
 function applyAllConditionals(s){
   setHidden('wwField-direkt',         s.warmwasser.modus !== 'direkt');
   setHidden('wwField-personen-pers',  s.warmwasser.modus !== 'personen');
@@ -6010,7 +6292,7 @@ function computeTvollHint(s){
   return `t<sub>voll</sub> = ${auto} h · ${esc(s.objekt.typ.toUpperCase())} · ${esc(s.objekt.lage)}`;
 }
 
-__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte };
+__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
 })();
 
 // === ./persistence.mjs ===
@@ -7395,7 +7677,7 @@ const { compute } = __mods__["./calc/fws.mjs"];
 const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
-const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte } = __mods__["./ui.mjs"];
+const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
 // S7 — Persistenz + Modale
 const { loadActive, autosaveActive, installAutoSync, onLoaded, getActiveMeta } = __mods__["./persistence.mjs"];
@@ -7450,7 +7732,10 @@ async function boot(){
     const calc = compute(state);
     if (state.detail && state.detail.aktiv){
       const { uHuelle } = resolveHuelleUWerte(state);
-      calc.detail = computeBuildingDetailLoad(state, uHuelle);
+      // S7: Bauteile mit aufgelösten U/fRT-Werten anreichern (Variante +
+      // Anschluss + Bauperiode → U + fRT) BEVOR der Heatload sie liest.
+      const enriched = enrichRaeumeWithResolvedUFrt(state);
+      calc.detail = computeBuildingDetailLoad(enriched, uHuelle);
       calc.distribution = computeDistribution(state, calc.detail);
       try {
         const db = getWpDb();

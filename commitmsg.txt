@@ -1,18 +1,28 @@
-Heizlast S7 - Pro-Kreis VL/RL + Mobile-Topbar-Fix
+Heizlast S7 - U-Wert/fRT Auto-Lookup pro Bauteil + Mobile-Topbar Seitenfarbe
 
-Verteilung:
-* Heizkreise haben jetzt eigene Heizflaechen-Typ + tVL + tRL pro Kreis.
-  Plausibilitaets-Check pro Heizflaeche nutzt die Kreis-spezifischen
-  Werte (via kreis_id-Lookup) statt nur global. Fallback auf
-  Global-Block, wenn Kreis-Werte leer.
-* Hint-Box zeigt: "WP-Auslegungs-Vorlauf = max. T_VL aller Kreise" -
-  weil die WP IMMER auf den hoechsten Vorlauf ausgelegt wird (limitiert
-  COP/JAZ). Bei FBH+HK-Mix faengt der Bestand-Vorlauf den hoechsten ab.
+U-Wert + fRT (gross):
+* Bauteil-Editor neu strukturiert: User waehlt Typ + Bauweise/Variante
+  + Anschluss (gegen Aussenluft / Erdreich / unbeheizten Raum / etc.) +
+  Flaeche. U-Wert und f_RT werden automatisch aus data/u-werte.json
+  + Bauperiode + Sanierungsstand resolved und als Read-only-Felder
+  sichtbar angezeigt.
+* Variante-Optionen: "Unbekannt" (typischer Wert) / "Original-unsaniert"
+  (max) / "Saniert/gut gedaemmt" (min) / "Eigener Wert".
+  Bei "Eigener Wert" erscheint Override-Input.
+* Pro Bauteil zusaetzlich Quelle-Anzeige: "Tabelle Wand EFH 1978_1994
+  · gegen Aussenluft (f_RT 1.00)" - User sieht woher der Wert kommt.
+* Anschluss-Optionen kontextabhaengig: Wand bekommt aussenluft/unbeheizt,
+  Boden bekommt erdreich/unbeheizt/durchfahrt, Dach bekommt aussenluft/
+  unbeheizt. f_RT-Mapping: aussenluft=1.0, erdreich=0.5, unbeheizt=0.7,
+  durchfahrt=0.9, beheizt=0.0.
+* Spezialfaelle: Dach hat zusaetzliche "Dach-Form" (Steildach/Flachdach/
+  Pultdach), Fenster hat "Verglasung" (5 Generationen) + "Rahmen"
+  (Holz/Kunststoff/Holz-Alu). Tuer hat eigene Bauperiode-Tabelle.
+* Heatload-Calc bekommt jetzt eine angereicherte State-Kopie (via
+  enrichRaeumeWithResolvedUFrt) - der Calc-Pfad ist unveraendert,
+  nur die Eingabewerte sind komplett.
 
-Mobile-Topbar:
-* Auf iOS war beim Scrollen am oberen Rand ein durchsichtiger Streifen
-  zu sehen (Rubber-Band-Effekt zeigt Page-BG hinter sticky-topbar).
-  Fix: html { background: var(--ink-0) } sodass der Overscroll-Hintergrund
-  weiss ist; topbar bekommt zusaetzlich padding-top: env(safe-area-inset-top)
-  fuer iOS-Notch-Geraete; .topbar__brand-row und .topbar__action-row
-  bekommen explizit background:var(--ink-0).
+Mobile:
+* Top-Strip in Seitenfarbe (light grey) statt durchsichtig: html-Bg
+  jetzt var(--c-bg) statt weiss. Topbar-padding-top:env(safe-area-inset-top)
+  entfernt - Safe-Area zeigt direkt html-Bg.
