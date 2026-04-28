@@ -3831,10 +3831,11 @@ function renderHeizlast(s){
           <span class="switch__track"></span>
           <span>Methode aktiv nutzen</span>
         </label>
-        <label class="chk" style="margin-bottom:var(--s-3);">
+        <label class="chk" style="margin-bottom:var(--s-2);">
           <input type="checkbox" data-path="heizung.verbrauchInklWW" ${h.verbrauchInklWW ? 'checked' : ''}>
           <span><strong>Verbrauch enthält Warmwasser</strong> — wird automatisch abgezogen</span>
         </label>
+        <p class="field__hint" id="wwDeductHint" style="margin:0 0 var(--s-3) 30px;">—</p>
         <div id="periodsList"></div>
         <button class="add-row" type="button" id="btnAddPeriod">+ Energieträger hinzufügen</button>
         <p class="field__hint" style="margin-top:var(--s-2);">
@@ -4943,6 +4944,22 @@ function updateMethodStatus(s, c){
   setHTML('mA-status', fmtStatus(c.methods.verbrauch,       '— Eingaben fehlen'));
   setHTML('mB-status', fmtStatus(c.methods.betriebsstunden, '— inaktiv'));
   setHTML('mC-status', fmtStatus(c.methods.kwh,             '— inaktiv'));
+
+  // S7-Bugfix: live sichtbar machen, was die "Verbrauch enthält WW"-Toggle aktuell bewirkt.
+  // Math-konform mit FWS — wenn V_W,u = 0 hat der Toggle keinen Effekt (User merkt es).
+  const hint = document.getElementById('wwDeductHint');
+  if (hint){
+    const m = c.methods.verbrauch;
+    if (!s.heizung.verbrauchInklWW){
+      hint.innerHTML = `<em>WW wird nicht abgezogen.</em>`;
+    } else if (m && m.QnWW > 0){
+      hint.innerHTML = `Aktuell <strong>${fmtKWh(m.QnWW)} kWh/a</strong> Warmwasser-Anteil aus dem Verbrauch abgezogen → Q<sub>n,H</sub> = ${fmtKWh(m.QnH)} kWh/a.`;
+    } else if (s.heizung.verbrauchInklWW){
+      hint.innerHTML = `<em style="color:var(--warn-500)">Aktuell <strong>0 kWh/a</strong> abgezogen — bitte in <a href="#sec-ww">Schritt 3 (Warmwasser)</a> Personen oder V<sub>W,u</sub> erfassen, damit der Abzug greift.</em>`;
+    } else {
+      hint.innerHTML = '—';
+    }
+  }
 }
 
 function updateHints(s, c){
@@ -6990,7 +7007,13 @@ async function boot(){
 
   // S7 — Aktive Session aus localStorage wiederherstellen, BEVOR der Render-
   // Tick angestossen wird. Wenn nichts da ist: freshState bleibt aktiv.
-  loadActive();
+  const wasLoaded = loadActive();
+  // Wenn das geladene Projekt im Detail-Modus war: UI komplett neu rendern,
+  // damit die Detail-Sektionen sichtbar sind (initUi rendert sonst nur
+  // fresh-state-Layout).
+  if (wasLoaded){
+    rebuildOnDetailToggle(getState());
+  }
 
   // S7 — Wenn ein Projekt geladen wird (lokal/cloud), UI komplett neu rendern.
   onLoaded((state) => {
