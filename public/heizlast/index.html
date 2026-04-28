@@ -4386,15 +4386,11 @@ function renderRaeume(s){
       <h2 class="section__title">Räume</h2>
     </header>
     <p class="section__intro">
-      Räume erfassen für raumweise Norm-Heizlast. Restfläche
-      (EBF − Σ Räume) wird automatisch pauschal mit Global-U-Werten gerechnet.
+      Räume erfassen für raumweise Norm-Heizlast. Σ raumweise + (falls die
+      EBF grösser als die Summe der erfassten Räume ist) automatisch ein
+      pauschaler Restflächen-Anteil mit den Hülle-Defaults aus Schritt 6.
     </p>
     <div class="block">
-      <label class="chk" style="margin-bottom:var(--s-3);">
-        <input type="checkbox" data-path="detail.misch.rest_global"
-          ${s.detail.misch?.rest_global !== false ? 'checked' : ''}>
-        <span><strong>Restfläche pauschal mitrechnen</strong> (EBF − Σ Räume mit Global-U)</span>
-      </label>
       <div id="roomsList" class="rooms-list"></div>
       <button class="add-row" type="button" id="btnAddRoom">+ Raum hinzufügen</button>
       <p class="field__hint" id="roomsSummary" style="margin-top:var(--s-3);">—</p>
