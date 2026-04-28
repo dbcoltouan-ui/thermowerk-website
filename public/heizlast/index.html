@@ -236,7 +236,9 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
-  padding: var(--s-3) 0;
+  /* horizontales Padding muss vom .container kommen — wenn überschrieben,
+     ragt der Stepper links über die anderen Container hinaus. */
+  padding: var(--s-3) var(--s-5);
 }
 .step {
   display: inline-flex;
@@ -1507,6 +1509,15 @@ body.modal-open { overflow: hidden; }
   font-style: italic;
   margin-left: auto;
 }
+
+
+/* S7 — Modal-Layout-Fix: Header + Footer schrumpfen nicht, Body scrollt */
+.modal__head, .modal__foot { flex-shrink: 0; }
+.modal__body { flex: 1 1 auto; min-height: 0; }
+#modalExport .modal__panel { width: 560px; max-width: 100%; }
+#modalExport .modal__foot { flex-wrap: wrap; }
+#modalExport .modal__foot .btn { min-width: 120px; }
+#modalExport .field__hint { margin-bottom: var(--s-3); }
 
 </style>
 </head>
@@ -4173,7 +4184,7 @@ function renderStammdaten(s){
           <div class="input-group">${inputNumRaw('objekt.tVLMaxHeizung', o.tVLMaxHeizung, 1)}<span class="input-group__unit">°C</span></div>
           ${infoBox('objekt.tVLMaxHeizung', 'Welcher Wert für T_VL?')}
         </div>
-        <div class="field">
+        <div class="field" id="stammVlWwField" ${s.warmwasser.aktiv ? '' : 'hidden'}>
           <label class="field__label">Vorlauf WW <span class="symbol">T<sub>VL,WW</sub></span></label>
           <div class="input-group">${inputNumRaw('warmwasser.tLadeWW', s.warmwasser.tLadeWW, 1)}<span class="input-group__unit">°C</span></div>
           ${infoBox('warmwasser.tLadeWW', 'WW-Ladetemperatur?')}
@@ -5783,6 +5794,30 @@ function onInputChange(ev){
   }
   else value = el.value;
   _set(path, value);
+
+  // S7-Auto-Switch: Dropdown-Preset ↔ manueller Override-Wert synchron halten.
+  // Sobald User einen eigenen Wert tippt → Preset auf "Eigener Wert".
+  // Sobald User einen Preset wählt → Override-Feld leeren.
+  let m;
+  // (a) Wirkungsgrad eta pro Periode
+  if ((m = path.match(/^heizung\.perioden\[(\d+)\]\.etaValue$/)) && value !== '' && value != null && Number(value) > 0){
+    _set(`heizung.perioden[${m[1]}].etaPreset`, 'custom');
+  }
+  if ((m = path.match(/^heizung\.perioden\[(\d+)\]\.etaPreset$/)) && value !== 'custom'){
+    _set(`heizung.perioden[${m[1]}].etaValue`, '');
+  }
+  // (b) Hülle: u_user (Override) ↔ variant
+  if ((m = path.match(/^detail\.huelle\.([a-zA-Z]+)\.u_user$/)) && value !== '' && value != null && Number(value) > 0){
+    _set(`detail.huelle.${m[1]}.variant`, 'eigener');
+  }
+  if ((m = path.match(/^detail\.huelle\.([a-zA-Z]+)\.variant$/)) && value !== 'eigener'){
+    _set(`detail.huelle.${m[1]}.u_user`, '');
+  }
+  // (c) Räume-Bauteil: u_override → variant
+  if ((m = path.match(/^detail\.raeume\[(\d+)\]\.bauteile\[(\d+)\]\.u_override$/)) && value !== '' && value != null && Number(value) > 0){
+    _set(`detail.raeume[${m[1]}].bauteile[${m[2]}].variant`, 'eigener');
+  }
+
   // S7: Strukturelle Bauteil-Änderungen (Typ/Variante/Anschluss/Dach-Form/
   // Fenster-Generation) triggern einen Rebuild der Räume-Liste, weil sich
   // die sichtbaren Felder ändern (Override-Input ↔ Readout, Anschluss ↔ Dach-
@@ -5799,6 +5834,14 @@ function onInputChange(ev){
         const huelleBlock = document.getElementById('sec-huelle');
         if (huelleBlock) rebuildHuelleBauteile(st);
       }
+    }, 0);
+  }
+  // S7-Auto-Switch: bei eta-Preset/Override Wechsel auch den Period-Render
+  // updaten, damit das andere Feld visuell mit dem State synchron ist.
+  if (/^heizung\.perioden\[\d+\]\.(etaPreset|etaValue)$/.test(path)){
+    setTimeout(() => {
+      const st = _getState ? _getState() : null;
+      if (st) rebuildPeriods(st);
     }, 0);
   }
 }
@@ -6516,6 +6559,8 @@ function applyAllConditionals(s){
   }
   const wwBlock = document.getElementById('wwBlock');
   if (wwBlock) wwBlock.style.opacity = s.warmwasser.aktiv ? '1' : '0.55';
+  // S7: T_VL,WW in Stammdaten nur sichtbar wenn WW aktiv
+  setHidden('stammVlWwField', !s.warmwasser.aktiv);
   // S6 — WP-Quelle nur bei Heizungsersatz relevant
   const wpQ = document.getElementById('wpQuelleField');
   if (wpQ) wpQ.style.opacity = (s.projekt && s.projekt.massnahme === 'heizungsersatz') ? '1' : '0.45';
@@ -7457,7 +7502,7 @@ const { compute } = __mods__["./calc/fws.mjs"];
 const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
-const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb } = __mods__["./ui.mjs"];
+const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb, enrichRaeumeWithResolvedUFrt } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
 const { getActiveMeta } = __mods__["./persistence.mjs"];
 
@@ -7540,43 +7585,67 @@ function readOptions(){
    Hauptfunktion: Export ausführen
    ====================================================== */
 function doExport(format){
-  const state = getState();
-  const calc  = computeFullCalc(state);
-  const opts  = readOptions();
-  const meta  = getActiveMeta();
+  try {
+    const state = getState();
+    const calc  = computeFullCalc(state);
+    const opts  = readOptions();
+    const meta  = getActiveMeta();
 
-  if (format === 'json'){
-    const payload = {
-      meta,
-      state,
-      calc: stripFunctions(calc),
-      exportedAt: new Date().toISOString(),
-      options: opts
-    };
-    download(blob(JSON.stringify(payload, null, 2), 'application/json;charset=utf-8'),
-             buildFilename(meta, 'json'));
-    closeExportModal();
-    return;
-  }
+    if (format === 'json'){
+      const payload = {
+        meta, state,
+        calc: stripFunctions(calc),
+        exportedAt: new Date().toISOString(),
+        options: opts
+      };
+      download(blob(JSON.stringify(payload, null, 2), 'application/json;charset=utf-8'),
+               buildFilename(meta, 'json'));
+      closeExportModal();
+      return;
+    }
 
-  const html = buildHtml(state, calc, opts, meta);
-  if (format === 'html'){
-    download(blob(html, 'text/html;charset=utf-8'), buildFilename(meta, 'html'));
-    closeExportModal();
-    return;
-  }
+    const html = buildHtml(state, calc, opts, meta);
 
-  if (format === 'pdf'){
-    // Browser-Print über versteckten iframe — print-CSS aus Style-Block.
-    const w = window.open('', '_blank', 'width=900,height=1200');
-    if (!w){ alert('Pop-up blockiert — bitte für PDF-Export erlauben.'); return; }
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-    // Etwas Zeit fürs Layout, dann Print-Dialog.
-    setTimeout(() => { try { w.focus(); w.print(); } catch(_){} }, 350);
-    closeExportModal();
-    return;
+    if (format === 'html'){
+      download(blob(html, 'text/html;charset=utf-8'), buildFilename(meta, 'html'));
+      closeExportModal();
+      return;
+    }
+
+    if (format === 'pdf'){
+      // Robuster PDF-Pfad: 1) versuche window.open. 2) Falls Pop-up
+      // blockiert: in den aktuellen Tab als Iframe injizieren und drucken.
+      const w = window.open('', '_blank', 'width=900,height=1200');
+      if (w && !w.closed){
+        try {
+          w.document.open();
+          w.document.write(html);
+          w.document.close();
+          setTimeout(() => { try { w.focus(); w.print(); } catch(_){} }, 400);
+        } catch(e){
+          alert('PDF-Fenster konnte nicht geschrieben werden: ' + (e.message || e));
+        }
+        closeExportModal();
+        return;
+      }
+      // Fallback: hidden iframe im aktuellen Dokument
+      const old = document.getElementById('exportPrintFrame');
+      if (old) old.remove();
+      const iframe = document.createElement('iframe');
+      iframe.id = 'exportPrintFrame';
+      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+      document.body.appendChild(iframe);
+      iframe.onload = () => {
+        try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+        catch(e){ alert('Print fehlgeschlagen: ' + (e.message || e)); }
+      };
+      iframe.srcdoc = html;
+      closeExportModal();
+      return;
+    }
+  } catch(err){
+    console.error('[export] doExport failed:', err);
+    alert('Export fehlgeschlagen: ' + (err && err.message ? err.message : err));
   }
 }
 
@@ -7588,7 +7657,10 @@ function computeFullCalc(state){
   if (state.detail && state.detail.aktiv){
     try {
       const { uHuelle } = resolveHuelleUWerte(state);
-      calc.detail = computeBuildingDetailLoad(state, uHuelle);
+      // Konsistent mit main.mjs: Bauteile mit aufgelösten U/fRT-Werten
+      // anreichern, damit das Export die gleiche Norm-Heizlast zeigt.
+      const enriched = enrichRaeumeWithResolvedUFrt(state);
+      calc.detail = computeBuildingDetailLoad(enriched, uHuelle);
     } catch(e){ calc.detail = null; }
     try { calc.distribution = computeDistribution(state, calc.detail); }
     catch(e){ calc.distribution = null; }
