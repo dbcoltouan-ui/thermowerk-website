@@ -7487,27 +7487,39 @@ __mods__["./projects.mjs"] = { showToast, renderTopbarActions, renderModals, ope
 // === ./export.mjs ===
 (function(){
 // src/export.mjs
-// Session 7 — Export-Modal: PDF (Browser-Print) · HTML (Standalone) · JSON.
-// Pro Bereich abwählbar:
-//   - Rechenweg            (Default an)
-//   - Notizen (3 Bereiche) (Default an)
-//   - Förderungs-Übersicht (Default an)
-//   - Vergleich Verbrauch/Norm (nur wenn Detail-Modus aktiv war/aktuell ist)
-//   - Geräte-Auswahl       (nur wenn Detail-Modus aktiv war/aktuell ist)
-//
-// Output baut aus aktuellem state + calc ein in sich geschlossenes HTML.
+// Session 7 — Export im FWS-Broschüren-Stil (portiert aus dem Original-FWS-
+// Single-File-Tool). Drei Formate: PDF (Browser-Print) · HTML (Standalone) · JSON.
+// Die Broschüre besteht aus zwei Blättern:
+//   Blatt 1: Auslegungsbericht (Kundschaft, Objektdaten, Leistungen, Speicher)
+//   Blatt 2: Berechnungsgrundlagen + ausführlicher Rechenweg + Notizen
+// Detail-Modus ergänzt: Hülle-Tabelle, Räume-Übersicht, Cockpit-Vergleich
+// Norm↔Verbrauch, Geräte-Karte, Förderungs-Tabelle.
 
 const { getState } = __mods__["./state.mjs"];
-const { compute } = __mods__["./calc/fws.mjs"];
+const { compute, HEIZWERT, TOFF_DEFAULTS, F_STO_PRESETS, SANIERUNG_PRESETS, effectiveTvoll, tvollAuto, sanFactor, effectiveVWu, periodEta } = __mods__["./calc/fws.mjs"];
 const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
-const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb, enrichRaeumeWithResolvedUFrt } = __mods__["./ui.mjs"];
+const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
 const { getActiveMeta } = __mods__["./persistence.mjs"];
 
+const FIRMA = {
+  name:  'Gebäudetechnik Coltouan',
+  adr:   'Rankstrasse 18, 8413 Neftenbach',
+  tel:   '+41 76 504 03 68',
+  email: 'info@thermowerk.ch',
+  uid:   'CHE-489.162.528'
+};
+const BAUPERIODE_LABEL = {
+  '<1919':'vor 1919', '1919-1945':'1919–1945', '1946-1960':'1946–1960',
+  '1961-1970':'1961–1970', '1971-1980':'1971–1980', '1981-1985':'1981–1985',
+  '1986-1990':'1986–1990', '1991-1995':'1991–1995', '1996-2000':'1996–2000',
+  '2001-2005':'2001–2005', '2006-2010':'2006–2010', '2011-heute':'2011–heute'
+};
+
 /* ======================================================
-   Modal-Skelett
+   Modal
    ====================================================== */
 function renderExportModal(){
   return `
@@ -7519,13 +7531,14 @@ function renderExportModal(){
         <button class="modal__close" type="button" data-close="modalExport" aria-label="Schliessen">×</button>
       </header>
       <div class="modal__body">
-        <p class="field__hint">Wählt die Bereiche aus, die im Export erscheinen sollen. Stammdaten und Ergebnis sind immer enthalten.</p>
+        <p class="field__hint">Auslegungsbericht im Thermowerk-Stil. Stammdaten, Leistungen und Ergebnis sind immer enthalten.</p>
         <div class="export-opts" id="exportOpts">
-          <label class="chk"><input type="checkbox" id="opt-rechenweg" checked> <span>Rechenweg (FWS-Methoden, Zwischenwerte)</span></label>
-          <label class="chk"><input type="checkbox" id="opt-notizen" checked>   <span>Notizen (alle Bereiche)</span></label>
+          <label class="chk"><input type="checkbox" id="opt-rechenweg" checked> <span>Detaillierter Rechenweg (Schritt-für-Schritt mit Formeln)</span></label>
+          <label class="chk"><input type="checkbox" id="opt-notizen" checked>   <span>Notizen (alle Bereiche + Räume)</span></label>
           <label class="chk"><input type="checkbox" id="opt-foerder"  checked>  <span>Förderungs-Übersicht</span></label>
           <label class="chk" id="opt-vergleich-wrap"><input type="checkbox" id="opt-vergleich" checked> <span>Vergleich Verbrauch ↔ Norm-Heizlast (Detail-Modus)</span></label>
-          <label class="chk" id="opt-geraet-wrap">  <input type="checkbox" id="opt-geraet" checked>    <span>Geräte-Auswahl (Detail-Modus)</span></label>
+          <label class="chk" id="opt-huelle-wrap"><input type="checkbox" id="opt-huelle" checked> <span>Hülle &amp; Räume (Detail-Modus)</span></label>
+          <label class="chk" id="opt-geraet-wrap"><input type="checkbox" id="opt-geraet" checked> <span>Geräte-Auswahl (Detail-Modus)</span></label>
         </div>
       </div>
       <footer class="modal__foot modal__foot--export">
@@ -7538,9 +7551,6 @@ function renderExportModal(){
   </div>`;
 }
 
-/* ======================================================
-   Wiring
-   ====================================================== */
 function initExportUi(){
   document.addEventListener('click', (ev) => {
     const t = ev.target.closest('button');
@@ -7555,12 +7565,11 @@ function initExportUi(){
 function openExportModal(){
   const m = document.getElementById('modalExport');
   if (!m) return;
-  // Detail-Modus-Optionen je nach State sichtbar lassen.
   const detail = !!getState()?.detail?.aktiv;
-  const v = document.getElementById('opt-vergleich-wrap');
-  const g = document.getElementById('opt-geraet-wrap');
-  if (v) v.style.display = detail ? '' : 'none';
-  if (g) g.style.display = detail ? '' : 'none';
+  ['opt-vergleich-wrap','opt-huelle-wrap','opt-geraet-wrap'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = detail ? '' : 'none';
+  });
   m.hidden = false;
   document.body.classList.add('modal-open');
 }
@@ -7577,12 +7586,13 @@ function readOptions(){
     notizen:   !!document.getElementById('opt-notizen')?.checked,
     foerder:   !!document.getElementById('opt-foerder')?.checked,
     vergleich: !!document.getElementById('opt-vergleich')?.checked,
+    huelle:    !!document.getElementById('opt-huelle')?.checked,
     geraet:    !!document.getElementById('opt-geraet')?.checked
   };
 }
 
 /* ======================================================
-   Hauptfunktion: Export ausführen
+   Hauptfunktion
    ====================================================== */
 function doExport(format){
   try {
@@ -7592,20 +7602,15 @@ function doExport(format){
     const meta  = getActiveMeta();
 
     if (format === 'json'){
-      const payload = {
-        meta, state,
-        calc: stripFunctions(calc),
-        exportedAt: new Date().toISOString(),
-        options: opts
-      };
+      const payload = { meta, state, calc: stripFunctions(calc),
+        exportedAt: new Date().toISOString(), options: opts };
       download(blob(JSON.stringify(payload, null, 2), 'application/json;charset=utf-8'),
                buildFilename(meta, 'json'));
       closeExportModal();
       return;
     }
 
-    const html = buildHtml(state, calc, opts, meta);
-
+    const html = buildFullHtml(state, calc, opts, meta);
     if (format === 'html'){
       download(blob(html, 'text/html;charset=utf-8'), buildFilename(meta, 'html'));
       closeExportModal();
@@ -7613,32 +7618,23 @@ function doExport(format){
     }
 
     if (format === 'pdf'){
-      // Robuster PDF-Pfad: 1) versuche window.open. 2) Falls Pop-up
-      // blockiert: in den aktuellen Tab als Iframe injizieren und drucken.
       const w = window.open('', '_blank', 'width=900,height=1200');
       if (w && !w.closed){
         try {
-          w.document.open();
-          w.document.write(html);
-          w.document.close();
+          w.document.open(); w.document.write(html); w.document.close();
           setTimeout(() => { try { w.focus(); w.print(); } catch(_){} }, 400);
-        } catch(e){
-          alert('PDF-Fenster konnte nicht geschrieben werden: ' + (e.message || e));
-        }
+        } catch(e){ alert('PDF-Fenster konnte nicht geschrieben werden: ' + (e.message || e)); }
         closeExportModal();
         return;
       }
-      // Fallback: hidden iframe im aktuellen Dokument
+      // Fallback: hidden iframe
       const old = document.getElementById('exportPrintFrame');
       if (old) old.remove();
       const iframe = document.createElement('iframe');
       iframe.id = 'exportPrintFrame';
       iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
       document.body.appendChild(iframe);
-      iframe.onload = () => {
-        try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
-        catch(e){ alert('Print fehlgeschlagen: ' + (e.message || e)); }
-      };
+      iframe.onload = () => { try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){} };
       iframe.srcdoc = html;
       closeExportModal();
       return;
@@ -7650,378 +7646,440 @@ function doExport(format){
 }
 
 /* ======================================================
-   Calc-Wrapper (gleiche Pipeline wie main.mjs)
+   Calc-Wrapper
    ====================================================== */
 function computeFullCalc(state){
   const calc = compute(state);
   if (state.detail && state.detail.aktiv){
     try {
       const { uHuelle } = resolveHuelleUWerte(state);
-      // Konsistent mit main.mjs: Bauteile mit aufgelösten U/fRT-Werten
-      // anreichern, damit das Export die gleiche Norm-Heizlast zeigt.
       const enriched = enrichRaeumeWithResolvedUFrt(state);
       calc.detail = computeBuildingDetailLoad(enriched, uHuelle);
     } catch(e){ calc.detail = null; }
-    try { calc.distribution = computeDistribution(state, calc.detail); }
-    catch(e){ calc.distribution = null; }
-    try { calc.heatpump = computeHeatpumpResult(state, getWpDb(), calc.Qh); }
-    catch(e){ calc.heatpump = null; }
+    try { calc.distribution = computeDistribution(state, calc.detail); } catch(e){ calc.distribution = null; }
+    try { calc.heatpump = computeHeatpumpResult(state, getWpDb(), calc.Qh); } catch(e){ calc.heatpump = null; }
   }
   return calc;
 }
 
 /* ======================================================
-   HTML-Output (selbsttragend, Print-CSS inline)
+   Full HTML
    ====================================================== */
-function buildHtml(state, calc, opts, meta){
+function buildFullHtml(state, calc, opts, meta){
+  const heute = new Date().toLocaleDateString('de-CH');
+  const projName = state.projekt?.name || meta.name || 'Heizlast-Bericht';
   const detail = !!state?.detail?.aktiv;
-  const today  = new Date().toLocaleDateString('de-CH', { year:'numeric', month:'long', day:'numeric' });
-  const projName = state.projekt?.name || meta.name || 'Heizlast-Berechnung';
-  const title    = `Heizlast-Bericht · ${esc(projName)}`;
+  const parts = [];
 
-  const sections = [];
-  sections.push(renderStammdatenSec(state));
-  sections.push(renderErgebnisSec(state, calc));
-  if (opts.rechenweg) sections.push(renderRechenwegSec(state, calc));
-  if (detail && opts.vergleich) sections.push(renderVergleichSec(state, calc));
-  if (detail && opts.geraet)    sections.push(renderGeraetSec(state, calc));
-  if (opts.foerder)             sections.push(renderFoerderSec(state, calc));
-  if (opts.notizen)             sections.push(renderNotizenSec(state));
+  // === Blatt 1: Auslegungsbericht ===
+  parts.push(buildReportHeader());
+  parts.push(buildPageHead('Auslegungsbericht Wärmepumpe', heute, 'title'));
+  parts.push(buildKundschaftTable(state));
+  parts.push(buildObjektdatenTable(state, calc));
+  parts.push(buildLeistungenTable(state, calc));
+  if (detail) parts.push(buildDetailCockpitTable(state, calc));
+  parts.push(buildSpeicherTable(state, calc));
+  if (detail && opts.geraet && state?.geraet?.gewaehlt_id){
+    parts.push(buildGeraeteTable(state, calc));
+  }
 
-  return `<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<title>${title}</title>
-<style>${PRINT_CSS}</style>
+  // === Blatt 2: Berechnung ===
+  parts.push(`<div class="brosch__page-break"></div>`);
+  parts.push(buildReportHeader());
+  parts.push(buildPageHead('Berechnungsgrundlagen', heute, 'subtitle'));
+  parts.push(buildBerechnungsgrundlagen());
+  if (calc.primary && opts.rechenweg !== false){
+    parts.push(`<h2 class="brosch__h2">Detaillierte Berechnung</h2>`);
+    parts.push(`<p class="brosch__note">Jeder Schritt zeigt Formel, eingesetzte Werte und Zwischenergebnis. Einheiten werden explizit geführt.</p>`);
+    parts.push(buildRechenwegDetail(state, calc));
+  }
+  if (detail && opts.huelle){
+    parts.push(`<div class="brosch__page-break"></div>`);
+    parts.push(buildReportHeader());
+    parts.push(buildPageHead('Gebäudehülle &amp; Räume', heute, 'subtitle'));
+    parts.push(buildHuelleTable(state));
+    parts.push(buildRaeumeTable(state, calc));
+  }
+  if (opts.foerder){
+    parts.push(`<div class="brosch__page-break"></div>`);
+    parts.push(buildReportHeader());
+    parts.push(buildPageHead('Förderprogramme &amp; Baubewilligung', heute, 'subtitle'));
+    parts.push(buildFoerderTable(state, calc));
+  }
+  if (opts.notizen){
+    parts.push(buildNotizenBlock(state));
+  }
+
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"/>
+<title>${esc(projName)} — Auslegungsbericht</title>
+<style>${BROSCH_CSS}</style>
 </head>
-<body>
-<header class="rep-head">
-  <div class="rep-head__title">
-    <h1>${esc(projName)}</h1>
-    <p class="rep-head__sub">Heizlast-Bericht · Thermowerk · ${esc(today)}</p>
-  </div>
-  <div class="rep-head__brand">
-    <div class="rep-head__mark">T</div>
-    <div>
-      <div><strong>Gebäudetechnik Coltouan</strong></div>
-      <div>Rankstrasse 18 · 8413 Neftenbach</div>
-      <div>+41 76 504 03 68 · info@thermowerk.ch</div>
-    </div>
-  </div>
-</header>
-
-${sections.join('\n')}
-
-<footer class="rep-foot">
-  <p>Erstellt mit dem Thermowerk Heizlast-Tool. FWS-Methode (AWB WP-Kurs Modul 3) und EN 12831 / SIA 384.201 raumweise. Förder-Beträge sind Stand <strong>${esc(today)}</strong> — verbindlich nur über die Antragsportale der Programme.</p>
-</footer>
-</body>
-</html>`;
+<body class="brosch brosch--report">
+${parts.join('\n')}
+</body></html>`;
 }
 
 /* ======================================================
-   Sektionen
+   BUILDERS — adaptiert aus FWS-Original
    ====================================================== */
-function renderStammdatenSec(s){
-  const p = s.projekt || {};
-  const o = s.objekt  || {};
-  const adr = [p.strasse, [p.plz, p.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+function buildReportHeader(){
   return `
-<section class="rep-sec">
-  <h2>Stammdaten</h2>
-  <div class="rep-grid">
-    <div><span class="rep-lbl">Projekt</span><span>${esc(p.name) || '—'}</span></div>
-    <div><span class="rep-lbl">Planer</span><span>${esc(p.planer) || '—'}</span></div>
-    <div><span class="rep-lbl">Adresse</span><span>${esc(adr) || '—'}</span></div>
-    <div><span class="rep-lbl">Bauherrschaft</span><span>${esc(p.bauherrschaft) || '—'}</span></div>
-    <div><span class="rep-lbl">Kanton / Gemeinde</span><span>${esc(p.kanton) || '—'} ${p.gemeinde ? '· '+esc(p.gemeinde) : ''}</span></div>
-    <div><span class="rep-lbl">Geplante Massnahme</span><span>${esc(massnahmeLabel(p.massnahme))} ${p.wp_quelle ? '· WP '+esc(wpQuelleLabel(p.wp_quelle)) : ''}</span></div>
-    <div><span class="rep-lbl">Gebäudetyp · Lage</span><span>${esc((o.typ||'').toUpperCase())} · ${esc(o.lage)}</span></div>
-    <div><span class="rep-lbl">Bauperiode · EBF</span><span>${esc(o.bauperiode)} · ${fmt(o.ebf, 0)} m²</span></div>
-    <div><span class="rep-lbl">Wohneinheiten</span><span>${esc(o.wohneinheiten)}</span></div>
-    <div><span class="rep-lbl">T<sub>N</sub> / T<sub>VL,H</sub></span><span>${fmt(o.tAussenAuslegung,1)} °C / ${fmt(o.tVLMaxHeizung,0)} °C</span></div>
-  </div>
-</section>`;
+    <div class="brosch__header">
+      <img class="brosch__header-logo" src="${(typeof location !== 'undefined' && location.href.indexOf('/heizlast') >= 0) ? './img/Logo.png' : 'https://thermowerk.ch/heizlast/img/Logo.png'}" alt="Thermowerk" onerror="this.style.display='none'"/>
+      <div class="brosch__header-firm">
+        <strong>${esc(FIRMA.name)}</strong>
+        <span>${esc(FIRMA.adr)}</span>
+        <span>${esc(FIRMA.tel)} · ${esc(FIRMA.email)}</span>
+        <span>UID ${esc(FIRMA.uid)}</span>
+      </div>
+    </div>
+  `;
 }
 
-function renderErgebnisSec(s, c){
-  return `
-<section class="rep-sec">
-  <h2>Ergebnis</h2>
-  <div class="rep-kpis">
-    <div class="rep-kpi"><span class="rep-kpi__lbl">Q<sub>hl</sub> · Norm-Heizlast (FWS)</span><span class="rep-kpi__val">${fmt(c.Qhl,2)}</span><span class="rep-kpi__u">kW</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">Q<sub>w</sub> + Q<sub>off</sub></span><span class="rep-kpi__val">${fmt((c.Qw||0)+(c.Qoff||0),2)}</span><span class="rep-kpi__u">kW</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">Q<sub>h</sub> · WP-Auslegung</span><span class="rep-kpi__val rep-kpi__val--hero">${fmt(c.Qh,2)}</span><span class="rep-kpi__u">kW</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">Q<sub>n,WW</sub></span><span class="rep-kpi__val">${fmt(c.QnWW,0)}</span><span class="rep-kpi__u">kWh/a</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">Spez. Heizleistung</span><span class="rep-kpi__val">${fmt(c.spez,0)}</span><span class="rep-kpi__u">W/m²</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">V<sub>WW-Speicher</sub></span><span class="rep-kpi__val">${fmt(c.V_WSto, 0)}</span><span class="rep-kpi__u">l</span></div>
-    <div class="rep-kpi"><span class="rep-kpi__lbl">V<sub>Heizpuffer</sub></span><span class="rep-kpi__val">${fmt(c.V_PSto, 0)}</span><span class="rep-kpi__u">l</span></div>
-  </div>
-</section>`;
+function buildPageHead(title, date, variant){
+  const cls = variant === 'subtitle' ? 'brosch__page-subtitle' : 'brosch__page-title';
+  const tag = variant === 'subtitle' ? 'h2' : 'h1';
+  return `<div class="brosch__page-head"><${tag} class="${cls}">${title}</${tag}><span class="brosch__page-head-date">${esc(date)}</span></div>`;
 }
 
-function renderRechenwegSec(s, c){
+function buildKundschaftTable(s){
   const rows = [];
-  rows.push(['Methode aktiv', c.method ? c.method.label : '—']);
-  if (c.method){
-    if (c.method.Qn != null)        rows.push(['Q<sub>n</sub> (Brennstoff annualisiert)', fmt(c.method.Qn,0) + ' kWh/a']);
-    if (c.method.QnWW != null)      rows.push(['Q<sub>n,WW</sub> aus Verbrauch abgezogen', fmt(c.method.QnWW,0) + ' kWh/a']);
-    if (c.method.QnH != null)       rows.push(['Q<sub>n,H</sub> (Heizen, ohne WW)', fmt(c.method.QnH,0) + ' kWh/a']);
-    if (c.method.tvoll != null)     rows.push(['t<sub>voll</sub>', fmt(c.method.tvoll,0) + ' h/a']);
-    if (c.method.Qhl_roh != null)   rows.push(['Q<sub>hl,roh</sub>', fmt(c.method.Qhl_roh,2) + ' kW']);
-    if (c.method.sparFactor != null) rows.push(['Sanierungsfaktor', fmt(c.method.sparFactor,3)]);
-  }
-  rows.push(['Q<sub>hl</sub> (FWS)', fmt(c.Qhl,2) + ' kW']);
-  if (c.Qw  != null) rows.push(['Q<sub>w</sub> (WW-Zuschlag)',     fmt(c.Qw,2)  + ' kW']);
-  if (c.Qoff != null) rows.push(['Q<sub>off</sub> (EVU-Sperrzeit)', fmt(c.Qoff,2)+ ' kW']);
-  if (c.Qas != null) rows.push(['Q<sub>as</sub> (verbund. Systeme)', fmt(c.Qas,2)+ ' kW']);
-  rows.push(['Q<sub>h</sub> (Auslegung)', fmt(c.Qh,2) + ' kW']);
-  if (c.detail){
-    rows.push(['Φ<sub>HL</sub> raumweise (EN 12831)', fmt(c.detail.phi_R/1000, 2) + ' kW']);
-    rows.push(['Φ<sub>HL</sub> Rest pauschal',         fmt(c.detail.phi_Rest/1000, 2) + ' kW']);
-    rows.push(['Q<sub>hl,Norm</sub> (Detail)',         fmt(c.detail.Qhl_Norm, 2) + ' kW']);
-  }
-  return `
-<section class="rep-sec">
-  <h2>Rechenweg</h2>
-  <table class="rep-tbl">
-    <tbody>
-      ${rows.map(r => `<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('')}
-    </tbody>
-  </table>
-</section>`;
+  const p = s.projekt || {};
+  if (p.name?.trim()) rows.push(['Projekt', esc(p.name)]);
+  if (p.bauherrschaft?.trim()) rows.push(['Bauherrschaft', esc(p.bauherrschaft)]);
+  const adr = [p.strasse, [p.plz, p.ort].filter(Boolean).join(' ')].filter(x => x && x.trim());
+  if (adr.length) rows.push(['Anschrift', esc(adr.join(', '))]);
+  if (p.kanton) rows.push(['Kanton / Gemeinde', `${esc(p.kanton)}${p.gemeinde ? ' · ' + esc(p.gemeinde) : ''}`]);
+  if (p.planer?.trim()) rows.push(['Planer / Verfasser', esc(p.planer)]);
+  if (!rows.length) return '';
+  return `<h2 class="brosch__h2">Kundschaft</h2>
+    <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
 }
 
-function renderVergleichSec(s, c){
+function buildObjektdatenTable(s, c){
+  const o = s.objekt || {};
+  const rows = [
+    ['Gebäudetyp', o.typ === 'efh' ? 'Einfamilienhaus' : 'Mehrfamilienhaus'],
+    ['Lage', cap(o.lage)],
+    ['Bauperiode', BAUPERIODE_LABEL[o.bauperiode] || '—'],
+    ['Sanierungsstand', cap(o.sanierungsstand)],
+    ['Energiebezugsfläche EBF', `${fmt(num(o.ebf), 0)} m²`],
+    ['Wohneinheiten', String(o.wohneinheiten || 1)],
+    ['Auslegungs-Aussentemperatur T<sub>N</sub>', `${fmt(o.tAussenAuslegung, 1)} °C`],
+    ['Vorlauf Heizung max. T<sub>VL,H</sub>', `${fmt(o.tVLMaxHeizung, 0)} °C`],
+    ['Verbrauch (Basis der Berechnung)', verbrauchBasisText(s, c)]
+  ];
+  return `<h2 class="brosch__h2">Objektdaten</h2>
+    <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function buildLeistungenTable(s, c){
+  const rows = [['Norm-Heizlast Q<sub>hl</sub>', `${fmtKW(c.Qhl)} kW`]];
+  if (s.zuschlaege?.sperrzeitAktiv) rows.push(['Leistungszuschlag Sperrzeit Q<sub>off</sub>', `${fmtKW(c.Qoff)} kW`]);
+  if (s.warmwasser?.aktiv)          rows.push(['Leistungszuschlag Warmwasser Q<sub>w</sub>', `${fmtKW(c.Qw)} kW`]);
+  if (s.zuschlaege?.verbundenAktiv) rows.push(['Zuschlag verbundene Systeme Q<sub>as</sub>', `${fmtKW(c.Qas)} kW`]);
+  return `<h2 class="brosch__h2">Dimensionsrelevante Leistungen</h2>
+    <table class="brosch__kv-table"><tbody>
+      ${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}
+      <tr class="is-highlight"><td>Auslegungsleistung Wärmepumpe Q<sub>h</sub></td><td>${fmtKW(c.Qh)} kW</td></tr>
+    </tbody></table>`;
+}
+
+function buildDetailCockpitTable(s, c){
   if (!c.detail) return '';
   const Qnorm = c.detail.Qhl_Norm;
-  const Qfws  = c.Qhl;
+  const Qfws = c.Qhl;
   const v = vergleichNormVerbrauch(Qnorm, Qfws);
-  const ampelTxt = (v.ampel || 'grau').toUpperCase();
-  return `
-<section class="rep-sec">
-  <h2>Vergleich Norm ↔ Verbrauch</h2>
-  <div class="rep-grid">
-    <div><span class="rep-lbl">Q<sub>hl,Norm</sub></span><span>${fmt(Qnorm,2)} kW</span></div>
-    <div><span class="rep-lbl">Q<sub>hl,FWS</sub></span><span>${fmt(Qfws,2)} kW</span></div>
-    <div><span class="rep-lbl">Δ absolut</span><span>${v.delta != null ? fmt(v.delta,2) : '—'} kW</span></div>
-    <div><span class="rep-lbl">Δ relativ</span><span>${v.proz != null ? fmt(v.proz,1)+' %' : '—'}</span></div>
-    <div><span class="rep-lbl">Bewertung</span><span class="rep-ampel rep-ampel--${esc(v.ampel || 'grau')}">${ampelTxt}</span></div>
-    <div><span class="rep-lbl">Hinweis</span><span>${esc(v.hinweis || '—')}</span></div>
-  </div>
-</section>`;
+  const rows = [
+    ['Norm-Heizlast (EN 12831 raumweise) Q<sub>hl,Norm</sub>', `${fmtKW(Qnorm)} kW`],
+    ['Verbrauchs-Heizlast (FWS) Q<sub>hl,FWS</sub>',           `${fmtKW(Qfws)} kW`],
+    ['Φ<sub>HL</sub> raumweise',         `${fmtKW((c.detail.phi_R||0)/1000)} kW`],
+    ['Φ<sub>HL</sub> Rest pauschal',     `${fmtKW((c.detail.phi_Rest||0)/1000)} kW`],
+    ['Δ absolut',  v.delta != null ? `${fmtKW(v.delta)} kW` : '—'],
+    ['Δ relativ',  v.proz != null ? `${fmt(v.proz,1)} %` : '—'],
+    ['Bewertung', `<span class="brosch__ampel brosch__ampel--${esc(v.ampel||'grau')}">${esc((v.ampel||'grau').toUpperCase())}</span> ${esc(v.hinweis || '')}`]
+  ];
+  return `<h2 class="brosch__h2">Auslegung-Cockpit · Norm vs. Verbrauch</h2>
+    <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
 }
 
-function renderGeraetSec(s, c){
-  const wpId = s.geraet && s.geraet.gewaehlt_id;
-  if (!wpId) return `<section class="rep-sec"><h2>Geräte-Auswahl</h2><p>Keine Wärmepumpe ausgewählt.</p></section>`;
+function buildSpeicherTable(s, c){
+  const showB = s.warmwasser?.aktiv && c.VW_Sto > 0;
+  const showP = c.VP_Sto > 0;
+  if (!showB && !showP) return '';
+  const rows = [];
+  if (showB){
+    const dT = fmt(num(s.warmwasser.dT) || 50, 0);
+    rows.push(['Warmwasserspeicher (empfohlen)', `${c.VW_Sto} Liter (ΔT ${dT} K)`]);
+  }
+  if (showP) rows.push(['Heizungs-Pufferspeicher (Richtwert)', `${c.VP_Sto} Liter (Abtau-Sicherung L/W-WP)`]);
+  return `<h2 class="brosch__h2">Empfohlene Speichervolumen</h2>
+    <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function buildGeraeteTable(s, c){
+  const wpId = s.geraet?.gewaehlt_id;
   const wp = (getWpDb() || []).find(x => (x.id || x._id) === wpId);
-  if (!wp) return `<section class="rep-sec"><h2>Geräte-Auswahl</h2><p>Gewählte Wärmepumpe nicht in Datenbank.</p></section>`;
+  if (!wp) return '';
   const rows = [
     ['Marke / Modell', `${esc(wp.marke || wp.brand || '')} ${esc(wp.modell || wp.name || wp.id || '')}`],
-    ['Aufstellung',    esc(wp.aufstellung || '—')],
-    ['Quelle',         esc(wp.quelle || '—')],
-    ['Q<sub>n</sub> @ A−7/W35', wp?.leistung?.A_minus7_W35 != null ? fmt(wp.leistung.A_minus7_W35,2) + ' kW' : '—'],
-    ['COP @ A2/W35',   wp?.leistung?.COP_A2_W35 != null ? fmt(wp.leistung.COP_A2_W35,2) : '—'],
-    ['T<sub>VL,max</sub>', wp.tvl_max != null ? fmt(wp.tvl_max,0) + ' °C' : '—'],
-    ['Schall (Tag, 1 m)', wp.schall_db != null ? fmt(wp.schall_db,0) + ' dB(A)' : '—']
+    ['Aufstellung', esc(wp.aufstellung || '—')],
+    ['Quelle',      esc(wp.quelle || '—')],
+    ['Q<sub>n</sub> @ A−7/W35', wp?.leistung?.A_minus7_W35 != null ? `${fmtKW(wp.leistung.A_minus7_W35)} kW` : '—'],
+    ['COP @ A2/W35', wp?.leistung?.COP_A2_W35 != null ? fmt(wp.leistung.COP_A2_W35, 2) : '—'],
+    ['T<sub>VL,max</sub>', wp.tvl_max != null ? `${fmt(wp.tvl_max, 0)} °C` : '—'],
+    ['Schalldruck Tag (1 m)', wp.schall_db != null ? `${fmt(wp.schall_db, 0)} dB(A)` : '—']
   ];
   if (c.heatpump){
-    if (c.heatpump.bivalenz_T  != null) rows.push(['Bivalenzpunkt',  fmt(c.heatpump.bivalenz_T,1) + ' °C']);
+    if (c.heatpump.bivalenz_T  != null) rows.push(['Bivalenzpunkt',  `${fmt(c.heatpump.bivalenz_T, 1)} °C`]);
     if (c.heatpump.jaz_est     != null) rows.push(['JAZ-Schätzung',  fmt(c.heatpump.jaz_est, 2)]);
-    if (c.heatpump.deckung_proz!= null) rows.push(['Q<sub>n</sub>/Q<sub>h</sub>-Deckung', fmt(c.heatpump.deckung_proz,0) + ' %']);
+    if (c.heatpump.deckung_proz != null) rows.push(['Q<sub>n</sub>/Q<sub>h</sub>-Deckung', `${fmt(c.heatpump.deckung_proz, 0)} %`]);
   }
-  return `
-<section class="rep-sec">
-  <h2>Geräte-Auswahl</h2>
-  <table class="rep-tbl">
-    <tbody>${rows.map(r => `<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('')}</tbody>
-  </table>
-</section>`;
+  return `<h2 class="brosch__h2">Gewählte Wärmepumpe</h2>
+    <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
 }
 
-function renderFoerderSec(s, c){
+function buildHuelleTable(s){
+  const det = s.detail?.huelle || {};
+  const types = ['wand','fenster','dach','boden','tueren'];
+  const labels = { wand:'Aussenwand', fenster:'Fenster', dach:'Dach', boden:'Boden', tueren:'Türen' };
+  const rows = types.map(k => {
+    const slot = det[k] || {};
+    const fakeB = { typ: k, variant: slot.variant || 'unbekannt', layers: slot.layers,
+      u_override: slot.u_user, anschluss: ANSCHLUSS_DEF[k],
+      dach_variant: slot.dach_variant, fenster_gen: slot.fenster_gen, fenster_rahmen: slot.fenster_rahmen };
+    let u = '—', src = '';
+    try { const r = resolveBauteilUFrt(s, fakeB); u = `${fmt(r.u, 2)} W/(m²·K)`; src = r.source || ''; } catch(_){}
+    return [labels[k], u, src];
+  });
+  return `<h2 class="brosch__h2">Globale Hülle (Defaults für Räume)</h2>
+    <table class="brosch__kv-table brosch__kv-table--3col"><thead><tr><th>Bauteil</th><th>U-Wert</th><th>Quelle</th></tr></thead>
+    <tbody>${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${r[1]}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table>`;
+}
+const ANSCHLUSS_DEF = { wand:'aussenluft', dach:'aussenluft', fenster:'aussenluft', tueren:'aussenluft', boden:'erdreich' };
+
+function buildRaeumeTable(s, c){
+  const raeume = s.detail?.raeume || [];
+  if (!raeume.length) return `<p class="brosch__note">Keine Räume erfasst — Heizlast wurde rein pauschal über die EBF gerechnet.</p>`;
+  const rows = raeume.map((r, i) => {
+    const A_eff = (Number(r.A) || (Number(r.l) > 0 && Number(r.b) > 0 ? Number(r.l) * Number(r.b) : 0));
+    const tInt = r.theta_int || '—';
+    const beheizt = r.beheizt === false ? 'nein' : 'ja';
+    const phi = c.detail?.roomResults?.[i]?.phiHL;
+    const phiTxt = (phi != null && Number.isFinite(phi)) ? `${fmt(phi/1000, 2)} kW` : '—';
+    return `<tr><td>${i+1}</td><td>${esc(r.name || '—')}</td><td>${fmt(A_eff,1)} m²</td><td>${tInt} °C</td><td>${beheizt}</td><td>${phiTxt}</td></tr>`;
+  }).join('');
+  const sum = c.detail ? `<tr class="is-highlight"><td colspan="5">Σ raumweise + Restpauschale</td><td>${fmtKW(c.detail.Qhl_Norm)} kW</td></tr>` : '';
+  return `<h2 class="brosch__h2">Räume</h2>
+    <table class="brosch__kv-table brosch__kv-table--6col"><thead><tr><th>#</th><th>Name</th><th>Fläche</th><th>θ<sub>int</sub></th><th>beheizt</th><th>Φ<sub>HL</sub></th></tr></thead>
+    <tbody>${rows}${sum}</tbody></table>`;
+}
+
+function buildFoerderTable(s, c){
   const db = getFoerderDb();
   const bauDb = getBauDb();
-  const ctx = {
-    Qh: c.Qh || 0,
-    objekt: { ebf: s.objekt && +s.objekt.ebf || 0 },
-    detail: { huelle: {} }
-  };
+  if (!db) return `<p class="brosch__note">Förder-Datenbank nicht verfügbar.</p>`;
+  const ctx = { Qh: c.Qh || 0, objekt: { ebf: num(s.objekt?.ebf) }, detail: { huelle: {} } };
   let progs = [];
-  let total = 0;
-  let bewBox = '';
   try {
-    if (db){
-      progs = filterFoerderungen(db, {
-        kanton:   s.projekt && s.projekt.kanton,
-        massnahme: s.projekt && s.projekt.massnahme,
-        wp_quelle: s.projekt && s.projekt.wp_quelle
-      });
-      const grouped = gruppiereProgramme(progs, ctx);
-      total = grouped.total_geschaetzt || 0;
-    }
+    progs = filterFoerderungen(db, {
+      kanton: s.projekt?.kanton, massnahme: s.projekt?.massnahme, wp_quelle: s.projekt?.wp_quelle
+    });
   } catch(e){}
-  if (!progs.length){
-    return `<section class="rep-sec"><h2>Förderungs-Übersicht</h2><p>Keine passenden Programme — Kanton oder Massnahme prüfen.</p></section>`;
-  }
+  if (!progs.length) return `<p class="brosch__note">Keine passenden Förderprogramme gefunden — Kanton/Massnahme prüfen.</p>`;
+  let total = 0;
+  try { const g = gruppiereProgramme(progs, ctx); total = g.total_geschaetzt || 0; } catch(_){}
   const rows = progs.map(p => {
-    const betr = (typeof schaetzeBetrag === 'function' && p.beitrag && p.beitrag.struktur)
-      ? schaetzeBetrag(p, ctx) : null;
-    return `<tr>
-      <td>${esc(p.ebene === 'bund' ? 'Bund' : (p.kanton || ''))}</td>
-      <td>${esc(p.name)}</td>
-      <td>${esc(p.beitrag?.text || '—')}</td>
-      <td>${betr != null && betr > 0 ? '≈ CHF ' + fmt(betr,0) : '—'}</td>
-      <td>${esc(Array.isArray(p.bedingungen) ? p.bedingungen.join('; ') : (p.bedingungen || '')) || '—'}</td>
-    </tr>`;
+    let betr = null;
+    try { if (p.beitrag && p.beitrag.struktur) betr = schaetzeBetrag(p, ctx); } catch(_){}
+    const bedingungen = Array.isArray(p.bedingungen) ? p.bedingungen.join('; ') : (p.bedingungen || '');
+    return `<tr><td>${esc(p.ebene === 'bund' ? 'Bund' : (p.kanton || ''))}</td><td>${esc(p.name)}</td><td>${esc(p.beitrag?.text || '—')}</td><td>${betr != null && betr > 0 ? '≈ CHF ' + fmt(betr, 0) : '—'}</td></tr>`;
   }).join('');
-  // Baubewilligung
-  if (bauDb && s.projekt && s.projekt.kanton){
+  let bewBox = '';
+  if (bauDb && s.projekt?.kanton){
     const b = lookupBaubewilligung(bauDb, s.projekt.kanton);
-    if (b){
-      bewBox = `
-<div class="rep-callout">
-  <h3>Baubewilligung — ${esc(b.kanton_name || s.projekt.kanton)}</h3>
-  <p><strong>Heizungsersatz:</strong> ${b.heizungsersatz?.bewilligung ? 'bewilligungspflichtig' : 'frei'} ${b.heizungsersatz?.bedingungen ? '· ' + esc(b.heizungsersatz.bedingungen) : ''}</p>
-  <p><strong>Erdsonde:</strong> ${b.erdsonde?.bewilligung ? 'bewilligungspflichtig (ANU/AWA/AUE)' : 'frei'} ${b.erdsonde?.hinweis ? '· ' + esc(b.erdsonde.hinweis) : ''}</p>
-  <p><strong>Luft/Wasser-WP (LSV):</strong> ${esc(b.lwwp?.hinweis || '—')}</p>
-  ${b.portal_link ? `<p>Portal: ${esc(b.portal_link)}</p>` : ''}
-  ${b.energie_link ? `<p>Energie-Portal: ${esc(b.energie_link)}</p>` : ''}
-</div>`;
-    }
+    if (b) bewBox = `<h2 class="brosch__h2">Baubewilligung — ${esc(b.kanton_name || s.projekt.kanton)}</h2>
+      <table class="brosch__kv-table"><tbody>
+        <tr><td>Heizungsersatz</td><td>${b.heizungsersatz?.bewilligung ? 'bewilligungspflichtig' : 'frei'}${b.heizungsersatz?.bedingungen ? ' · ' + esc(b.heizungsersatz.bedingungen) : ''}</td></tr>
+        <tr><td>Erdsonde</td><td>${b.erdsonde?.bewilligung ? 'bewilligungspflichtig' : 'frei'}${b.erdsonde?.hinweis ? ' · ' + esc(b.erdsonde.hinweis) : ''}</td></tr>
+        <tr><td>Luft/Wasser-WP (LSV)</td><td>${esc(b.lwwp?.hinweis || '—')}</td></tr>
+      </tbody></table>`;
   }
-  return `
-<section class="rep-sec">
-  <h2>Förderungs-Übersicht</h2>
-  <table class="rep-tbl rep-tbl--wide">
-    <thead><tr><th>Ebene</th><th>Programm</th><th>Beitrag</th><th>Schätzung</th><th>Bedingungen</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-  ${total > 0 ? `<p class="rep-total"><strong>Total Schätzung:</strong> ≈ CHF ${fmt(total,0)} (Bund + Kanton, kombinierbar)</p>` : ''}
-  ${bewBox}
-  <p class="rep-fine">Förder-Beträge sind Stand der Datenbank-Aktualisierung. Verbindlich nur über das jeweilige Antragsportal. Antrag VOR Baubeginn stellen.</p>
-</section>`;
+  return `<h2 class="brosch__h2">Förderprogramme · ${esc(s.projekt?.kanton || '—')}</h2>
+    <table class="brosch__kv-table brosch__kv-table--4col"><thead><tr><th>Ebene</th><th>Programm</th><th>Beitrag</th><th>Schätzung</th></tr></thead><tbody>${rows}</tbody></table>
+    ${total > 0 ? `<p class="brosch__note"><strong>Total Schätzung:</strong> ≈ CHF ${fmt(total, 0)} (Bund + Kanton, in der Regel kombinierbar)</p>` : ''}
+    ${bewBox}
+    <p class="brosch__footnote">Förder-Beträge sind Stand der Datenbank-Aktualisierung. Verbindlich nur über das jeweilige Antragsportal. Antrag VOR Baubeginn stellen.</p>`;
 }
 
-function renderNotizenSec(s){
-  const n = s.notes || {};
-  // Pro-Sektion-Notizen + Pro-Raum-Notizen sammeln.
-  const order = [
-    ['Stammdaten',     n.stamm],
-    ['Hülle',          n.huelle],
-    ['Räume',          n.raeume],
-    ['Warmwasser',     n.ww],
-    ['Wärmeübergabe',  n.verteilung],
-    ['Zuschläge',      n.zuschlaege],
-    ['Heizlast',       n.heizlast],
-    ['Speicher · Puffer · MAG', n.speicher],
-    ['Gerät',          n.geraet],
-    ['Förderungen',    n.foerder],
-    ['Baubewilligung', n.bau]
-  ];
-  // Backwards-Compat: alte s1..s5 als „Allgemein" anhängen, falls gefüllt
-  if (n.s1) order.push(['Allgemein',  n.s1]);
-  if (n.s2) order.push(['Allgemein 2', n.s2]);
-  if (n.s3) order.push(['Allgemein 3', n.s3]);
-
-  const sectionItems = order.filter(([_, txt]) => txt && String(txt).trim());
-
-  // Pro-Raum-Notizen
-  const raumItems = (s?.detail?.raeume || [])
-    .map((r, i) => [r.name || ('Raum ' + (i + 1)), r.notiz])
-    .filter(([_, txt]) => txt && String(txt).trim());
-
-  if (!sectionItems.length && !raumItems.length){
-    return `<section class="rep-sec"><h2>Notizen</h2><p>Keine Notizen erfasst.</p></section>`;
-  }
-  return `
-<section class="rep-sec">
-  <h2>Notizen</h2>
-  ${sectionItems.map(([t, txt]) => `<div class="rep-note"><h3>${esc(t)}</h3><p>${esc(txt).replace(/\n/g,'<br>')}</p></div>`).join('')}
-  ${raumItems.length ? `<h3 style="margin-top:14px;">Raum-Notizen</h3>` : ''}
-  ${raumItems.map(([t, txt]) => `<div class="rep-note"><h4>${esc(t)}</h4><p>${esc(txt).replace(/\n/g,'<br>')}</p></div>`).join('')}
-</section>`;
+function buildBerechnungsgrundlagen(){
+  return `<p class="brosch__note">Die Heizlast wurde nach dem Verbrauchsverfahren gemäss FWS (Schweizer Wärmepumpen-Fachvereinigung, AWB WP-Kurs Modul 3) ermittelt. Leistungszuschläge für Sperrzeiten und Warmwasserbereitung folgen denselben Grundlagen.</p>
+    <p class="brosch__note">Im Detail-Modus zusätzlich: SIA 384/1:2022 / EN 12831 (raumweise Norm-Heizlast), SIA 385/1:2020 (Warmwasser), VDI 4645 (Pufferspeicher). U-Werte: Auto-Lookup aus Schweizer Bauperioden-Tabelle (data/u-werte.json) + Sanierungsstand.</p>
+    <p class="brosch__footnote">Die berechneten Werte basieren auf den vom Kunden/Planer zur Verfügung gestellten Angaben (Brennstoffverbrauch, Gebäudekennwerte, Sanierungszustand, Bauteile). Abweichungen im Nutzerverhalten oder in der Gebäudehülle können das Ergebnis beeinflussen.</p>`;
 }
 
 /* ======================================================
-   Print-/Export-CSS
+   Detaillierter Rechenweg (FWS-Style mit Formeln)
    ====================================================== */
-const PRINT_CSS = `
-:root {
-  --ink-100:#eef2f6; --ink-200:#e2e8f0; --ink-500:#64748b;
-  --ink-700:#334155; --ink-900:#0f172a;
-  --brand:#0e7490; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+function buildRechenwegDetail(s, c){
+  const out = [];
+  const primary = c.primary;
+  const tv = effectiveTvoll(s);
+  const tvA = tvollAuto(s);
+  out.push(`<div class="brosch__calc-step">
+    <div class="brosch__calc-title">1 · Vollbetriebsstunden t<sub>voll</sub></div>
+    <div class="brosch__calc-list">Gebäudetyp = <code>${esc(s.objekt.typ.toUpperCase())}</code> · Lage = <code>${esc(s.objekt.lage)}</code> · WW-Betrieb = <code>${s.warmwasser.aktiv?'mit':'ohne'}</code></div>
+    <span class="brosch__calc-formula">t<sub>voll,auto</sub> = FWS-Tabelle(${esc(s.objekt.typ.toUpperCase())}, ${esc(s.objekt.lage)}) = <strong>${fmt(tvA,0)} h/a</strong>${num(s.heizung.tvollOverride)>0?` · Override = ${fmt(num(s.heizung.tvollOverride),0)} h/a`:''}</span>
+    <div class="brosch__calc-result">t<sub>voll</sub> = ${fmt(tv,0)} h/a</div>
+  </div>`);
+  if (primary && primary.key === 'verbrauch' && s.heizung.perioden.length){
+    const rows = s.heizung.perioden.map((p, i) => {
+      const h = HEIZWERT[p.energy]; if (!h) return '';
+      const menge = num(p.menge); if (menge <= 0) return `<li>Periode ${i+1} — <em>keine Menge erfasst</em></li>`;
+      const d = periodDays(p);
+      const annual = menge * (365/d);
+      const eta = periodEta(p);
+      const Qn_i = annual * h.Ho * eta;
+      const scaled = d !== 365;
+      return `<div class="brosch__calc-step brosch__calc-step--accent" style="margin:8px 0 8px 12px; padding:8px 12px;">
+        <div class="brosch__calc-subtitle">Periode ${i+1}: ${esc(h.name)}</div>
+        <ul class="brosch__calc-list">
+          <li>Mess-Menge = <code>${fmt(menge,1)} ${esc(h.unit)}</code>${p.von&&p.bis?` · Zeitraum <code>${esc(p.von)} … ${esc(p.bis)}</code> = <code>${d} d</code>`:` · Annahme <code>365 d</code>`}</li>
+          ${scaled?`<li>Annualisierung: ${fmt(menge,1)} × (365/${d}) = <code>${fmt(annual,1)} ${esc(h.unit)}/a</code></li>`:`<li>Annualisierte Menge = <code>${fmt(annual,1)} ${esc(h.unit)}/a</code></li>`}
+          <li>Heizwert = <code>${h.Ho} kWh/${esc(h.unit)}</code> · η = <code>${fmt(eta,3)}</code></li>
+        </ul>
+        <span class="brosch__calc-formula">Q<sub>n,${i+1}</sub> = ${fmt(annual,1)} × ${h.Ho} × ${fmt(eta,3)} = <strong>${fmtKWh(Qn_i)} kWh/a</strong></span>
+      </div>`;
+    }).join('');
+    out.push(`<div class="brosch__calc-step">
+      <div class="brosch__calc-title">2 · Brennstoff-Verbrauch → Q<sub>n</sub> (Bruttoenergie)</div>
+      <span class="brosch__calc-formula">Q<sub>n</sub> = Σ [ Menge × (365 / T<sub>Mess</sub>) × H × η ]</span>
+      ${rows}
+      <div class="brosch__calc-result">Σ Q<sub>n</sub> = ${fmtKWh(primary.Qn)} kWh/a</div>
+    </div>`);
+  }
+  if (primary && primary.key === 'betriebsstunden'){
+    const kwh = num(s.heizung.bstd_kwh), std = num(s.heizung.bstd_stunden), cop = num(s.heizung.bstd_cop)||1;
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">2 · Methode B — WP-Betriebsstunden</div>
+      <ul class="brosch__calc-list"><li>Strombezug = <code>${fmtKWh(kwh)} kWh/a</code> · Stunden = <code>${fmt(std,0)} h</code> · COP = <code>${fmt(cop,2)}</code></li></ul>
+      <span class="brosch__calc-formula">Q<sub>n,H</sub> = ${fmtKWh(kwh)} × ${fmt(cop,2)} = <strong>${fmtKWh(primary.QnH)} kWh/a</strong></span></div>`);
+  }
+  if (primary && primary.key === 'kwh'){
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">2 · Methode C — Nutzenergie direkt</div>
+      <span class="brosch__calc-formula">Q<sub>n,H</sub> = <strong>${fmtKWh(primary.QnH)} kWh/a</strong></span></div>`);
+  }
+  // Step 3 — Warmwasser
+  const showWW = s.warmwasser.aktiv || (s.heizung.verbrauchInklWW && primary && primary.QnWW > 0);
+  if (showWW){
+    const V = effectiveVWu(s);
+    const cp = 4.2, dT = num(s.warmwasser.dT) || 50;
+    const perDay = V*cp*dT/3600;
+    const perYear = perDay * 365;
+    const fS = num(s.warmwasser.speicherverluste)/100;
+    const fZ = num(s.warmwasser.zirkulation)/100;
+    const fA = num(s.warmwasser.ausstoss)/100;
+    const pf = (1+fS)*(1+fZ)*(1+fA);
+    const QnWW = perYear * pf;
+    const vLine = s.warmwasser.modus === 'personen'
+      ? `${num(s.warmwasser.personen)} P × ${num(s.warmwasser.lProPerson)||40} l/(P·d) = <code>${fmt(V,0)} l/d</code>`
+      : `direkt eingegeben = <code>${fmt(V,0)} l/d</code>`;
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">3 · Warmwasser-Nutzenergie Q<sub>n,WW</sub></div>
+      <ul class="brosch__calc-list">
+        <li>V<sub>W,u</sub>: ${vLine}</li>
+        <li>Tages-Nutzenergie: ${fmt(V,0)} × 4.2 × ${dT} / 3600 = <code>${fmtKWh(perDay)} kWh/d</code></li>
+        <li>× 365 d → <code>${fmtKWh(perYear)} kWh/a</code> · Verlust-Faktor (1+${fS.toFixed(2)})·(1+${fZ.toFixed(2)})·(1+${fA.toFixed(2)}) = <code>${pf.toFixed(3)}</code></li>
+      </ul>
+      <span class="brosch__calc-formula">Q<sub>n,WW</sub> = V × c<sub>p</sub> × ΔT × 365 / 3600 × Π(1+f) = <strong>${fmtKWh(QnWW)} kWh/a</strong></span></div>`);
+  }
+  // Step 4 — QnH
+  if (primary){
+    const inclWW = s.heizung.verbrauchInklWW && primary.key==='verbrauch' && primary.QnWW > 0;
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">4 · Heizanteil Q<sub>n,H</sub></div>
+      ${inclWW
+        ? `<span class="brosch__calc-formula">Q<sub>n,H</sub> = Q<sub>n</sub> − Q<sub>n,WW</sub> = ${fmtKWh(primary.Qn)} − ${fmtKWh(primary.QnWW)} = <strong>${fmtKWh(primary.QnH)} kWh/a</strong></span>`
+        : `<span class="brosch__calc-formula">Q<sub>n,H</sub> = <strong>${fmtKWh(primary.QnH)} kWh/a</strong>${primary.key==='verbrauch'?' (Verbrauch enthält kein WW)':''}</span>`}
+      </div>`);
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">5 · Norm-Heizlast roh Q<sub>hl,roh</sub></div>
+      <span class="brosch__calc-formula">Q<sub>hl,roh</sub> = Q<sub>n,H</sub> / t<sub>voll</sub> = ${fmtKWh(primary.QnH)} / ${fmt(primary.tvoll,0)} = <strong>${fmtKW(primary.Qhl_roh)} kW</strong></span>
+      <p class="brosch__calc-note">Einheiten: kWh/a ÷ h/a = kW.</p></div>`);
+  }
+  // Step 6 — Sanierungsfaktor
+  if (primary){
+    const f = sanFactor(s);
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">6 · Sanierungsfaktor</div>
+      <span class="brosch__calc-formula">Faktor = <strong>${f.toFixed(4)}</strong> · Q<sub>hl</sub> = Q<sub>hl,roh</sub> × ${f.toFixed(4)} = <strong>${fmtKW(primary.Qhl)} kW</strong></span></div>`);
+  }
+  // Step 7 — Q_w
+  if (s.warmwasser.aktiv && primary){
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">7 · Warmwasser-Nachheizung Q<sub>w</sub></div>
+      <span class="brosch__calc-formula">Q<sub>w</sub> = Q<sub>hl</sub> × (24/(24 − t<sub>d</sub>) − 1) = <strong>${fmtKW(c.Qw)} kW</strong></span></div>`);
+  }
+  // Step 8 — Q_off
+  if (s.zuschlaege.sperrzeitAktiv){
+    const ov = num(s.zuschlaege.toffOverride);
+    const toff = ov > 0 ? ov : (TOFF_DEFAULTS[s.zuschlaege.sperrzeitTyp] || 0);
+    out.push(`<div class="brosch__calc-step"><div class="brosch__calc-title">8 · EVU-Sperrzeit Q<sub>off</sub></div>
+      <span class="brosch__calc-formula">t<sub>off</sub> = ${toff} h/d · Q<sub>off</sub> = Q<sub>hl</sub> × (24/(24 − ${toff}) − 1) = <strong>${fmtKW(c.Qoff)} kW</strong></span></div>`);
+  }
+  // Step Final
+  out.push(`<div class="brosch__calc-step brosch__calc-step--accent">
+    <div class="brosch__calc-title">∑ · WP-Auslegungsleistung Q<sub>h</sub></div>
+    <span class="brosch__calc-formula">Q<sub>h</sub> = ${fmtKW(c.Qhl)} + ${fmtKW(c.Qw)} + ${fmtKW(c.Qoff)} + ${fmtKW(c.Qas)} = <strong>${fmtKW(c.Qh)} kW</strong></span>
+    <div class="brosch__calc-result">Q<sub>h</sub> = ${fmtKW(c.Qh)} kW</div></div>`);
+  return out.join('');
 }
-* { box-sizing:border-box; }
-html, body { margin:0; padding:0; }
-body { font-family:'Inter','Segoe UI',Roboto,sans-serif; color:var(--ink-900); font-size:12pt; line-height:1.45; padding:24px 28px; max-width:900px; margin:0 auto; }
-h1 { font-size:22pt; margin:0 0 4px; }
-h2 { font-size:14pt; margin:24px 0 10px; padding-bottom:4px; border-bottom:2px solid var(--ink-200); color:var(--brand); }
-h3 { font-size:12pt; margin:14px 0 6px; color:var(--ink-700); }
-p  { margin:6px 0; }
-.rep-head { display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start; padding-bottom:12px; border-bottom:3px solid var(--brand); }
-.rep-head__title h1 { color:var(--ink-900); }
-.rep-head__sub { color:var(--ink-500); font-size:11pt; margin:0; }
-.rep-head__brand { display:flex; gap:10px; align-items:center; font-size:10pt; color:var(--ink-700); }
-.rep-head__mark { width:36px; height:36px; border-radius:8px; background:var(--brand); color:#fff; font-weight:700; font-size:18pt; display:flex; align-items:center; justify-content:center; }
-.rep-sec { page-break-inside:avoid; margin-bottom:18px; }
-.rep-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:6px 18px; font-size:11pt; }
-.rep-grid > div { display:flex; gap:8px; padding:4px 0; border-bottom:1px dotted var(--ink-200); }
-.rep-lbl { color:var(--ink-500); min-width:140px; }
-.rep-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
-.rep-kpi { background:var(--ink-100); border-radius:10px; padding:10px 12px; }
-.rep-kpi__lbl { display:block; color:var(--ink-500); font-size:9pt; }
-.rep-kpi__val { font-size:18pt; font-weight:700; color:var(--ink-900); }
-.rep-kpi__val--hero { color:var(--brand); }
-.rep-kpi__u { font-size:9pt; color:var(--ink-500); margin-left:4px; }
-.rep-tbl { width:100%; border-collapse:collapse; margin-top:8px; font-size:11pt; }
-.rep-tbl th { text-align:left; font-weight:600; padding:6px 8px; background:var(--ink-100); width:200px; }
-.rep-tbl td { padding:6px 8px; border-bottom:1px solid var(--ink-200); }
-.rep-tbl--wide th { width:auto; }
-.rep-tbl--wide thead th { background:var(--brand); color:#fff; }
-.rep-tbl--wide tbody tr:nth-child(even) td { background:var(--ink-100); }
-.rep-ampel { display:inline-block; padding:2px 10px; border-radius:14px; font-size:10pt; font-weight:600; color:#fff; }
-.rep-ampel--gruen { background:var(--ok); }
-.rep-ampel--gelb  { background:var(--warn); }
-.rep-ampel--rot   { background:var(--bad); }
-.rep-ampel--grau  { background:var(--ink-500); }
-.rep-callout { margin-top:14px; padding:10px 14px; border-left:4px solid var(--brand); background:var(--ink-100); border-radius:6px; }
-.rep-callout p { margin:4px 0; font-size:11pt; }
-.rep-total { margin-top:10px; font-size:12pt; }
-.rep-fine { margin-top:8px; color:var(--ink-500); font-size:9pt; }
-.rep-note { margin-top:8px; }
-.rep-foot { margin-top:24px; padding-top:8px; border-top:1px solid var(--ink-200); color:var(--ink-500); font-size:9pt; }
 
-@media print {
-  @page { margin:18mm 16mm; }
-  body { padding:0; }
-  .rep-sec { page-break-inside:avoid; }
-  h2 { page-break-after:avoid; }
+function buildNotizenBlock(s){
+  const n = s.notes || {};
+  const order = [
+    ['Stammdaten', n.stamm], ['Hülle', n.huelle], ['Räume', n.raeume],
+    ['Warmwasser', n.ww], ['Wärmeübergabe', n.verteilung],
+    ['Zuschläge', n.zuschlaege], ['Heizlast', n.heizlast],
+    ['Speicher · Puffer · MAG', n.speicher], ['Gerät', n.geraet],
+    ['Förderungen', n.foerder], ['Baubewilligung', n.bau]
+  ].filter(([_, t]) => t && String(t).trim());
+  const raum = (s.detail?.raeume || []).map((r, i) => [r.name || ('Raum ' + (i+1)), r.notiz]).filter(([_, t]) => t && String(t).trim());
+  if (!order.length && !raum.length) return '';
+  let html = `<div class="brosch__page-break"></div>${buildReportHeader()}${buildPageHead('Notizen', new Date().toLocaleDateString('de-CH'), 'subtitle')}`;
+  order.forEach(([k, v]) => {
+    html += `<div class="brosch__note-block"><strong>${esc(k)}</strong><p>${esc(v).replace(/\n/g,'<br>')}</p></div>`;
+  });
+  if (raum.length) html += `<h2 class="brosch__h2">Raum-Notizen</h2>`;
+  raum.forEach(([k, v]) => {
+    html += `<div class="brosch__note-block"><strong>${esc(k)}</strong><p>${esc(v).replace(/\n/g,'<br>')}</p></div>`;
+  });
+  return html;
 }
-`;
 
 /* ======================================================
    Helpers
    ====================================================== */
-function fmt(v, d = 2){
-  const n = Number(v);
-  if (!Number.isFinite(n)) return '–';
-  return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d });
+function verbrauchBasisText(s, c){
+  const p = c.primary; if (!p) return '— (keine Methode aktiv)';
+  if (p.key === 'verbrauch'){
+    const parts = (s.heizung.perioden||[]).filter(x => num(x.menge) > 0).map(x => {
+      const h = HEIZWERT[x.energy]; const d = periodDays(x);
+      return `${fmt(num(x.menge)*(365/d), 0)} ${h?h.unit:''}/a ${h?h.name:x.energy}`;
+    });
+    return parts.length ? esc(parts.join(' + ')) : '— (keine Menge erfasst)';
+  }
+  if (p.key === 'betriebsstunden') return `${fmtKWh(num(s.heizung.bstd_kwh))} kWh/a Strombezug · COP ${fmt(num(s.heizung.bstd_cop), 2)}`;
+  if (p.key === 'kwh') return `${fmtKWh(num(s.heizung.kwhManual))} kWh/a Nutzenergie (direkt)`;
+  if (p.key === 'bauperiode') return `Bauperioden-Schätzung · ${BAUPERIODE_LABEL[s.objekt.bauperiode] || '—'}`;
+  return '—';
 }
+function periodDays(p){ if (!p.von || !p.bis) return 365; const dv = new Date(p.von), db = new Date(p.bis); if (isNaN(dv) || isNaN(db)) return 365; const d = Math.round((db-dv)/86400000)+1; return d>0?d:365; }
+function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+function fmt(v, d=2){ const n = Number(v); if (!Number.isFinite(n)) return '–'; return n.toLocaleString('de-CH', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function fmtKW(v){ return fmt(v, 2); }
+function fmtKWh(v){ return fmt(v, 0); }
+function cap(s){ return String(s||'').charAt(0).toUpperCase() + String(s||'').slice(1); }
 function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function blob(content, mime){
-  return new Blob([content], { type: mime });
-}
-function download(blob, filename){
-  const a = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = filename;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
+function blob(content, mime){ return new Blob([content], { type: mime }); }
+function download(b, filename){
+  const a = document.createElement('a'); const url = URL.createObjectURL(b);
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
 }
 function buildFilename(meta, ext){
@@ -8029,28 +8087,137 @@ function buildFilename(meta, ext){
   const today = new Date().toISOString().slice(0, 10);
   return `${safe}_${today}.${ext}`;
 }
-function stripFunctions(obj){
-  // Remove non-serializable values from calc-result.
-  try { return JSON.parse(JSON.stringify(obj)); } catch(_){ return null; }
+function stripFunctions(obj){ try { return JSON.parse(JSON.stringify(obj)); } catch(_){ return null; } }
+
+/* ======================================================
+   Brosch-CSS — komplett inline (Standalone-HTML-fähig)
+   ====================================================== */
+const BROSCH_CSS = `
+:root {
+  --ink-0:#fff; --ink-50:#f7f9fb; --ink-100:#eef2f6; --ink-200:#e2e8f0;
+  --ink-300:#cbd5e1; --ink-400:#94a3b8; --ink-500:#64748b; --ink-600:#475569;
+  --ink-700:#334155; --ink-800:#1e293b; --ink-900:#0f172a;
+  --navy:#1B2A4A; --accent:#D93025; --accent-ink:#B71C1C;
+  --r-sm:2px; --r-md:3px;
 }
-function massnahmeLabel(key){
-  const map = {
-    heizungsersatz:    'Heizungsersatz (erneuerbar)',
-    sanierung_huelle:  'Sanierung Aussenwand',
-    sanierung_dach:    'Sanierung Dach',
-    sanierung_boden:   'Sanierung Boden',
-    sanierung_fenster: 'Fensterersatz',
-    neubau_minergie:   'Neubau Minergie/GEAK A',
-    thermische_solar:  'Thermische Solaranlage',
-    pv:                'Photovoltaik',
-    geak:              'GEAK / GEAK Plus'
-  };
-  return map[key] || (key || '—');
+* { box-sizing:border-box; }
+body { font-family:'Inter','Segoe UI',Roboto,sans-serif; color:var(--ink-900); margin:0; background:#fff; }
+.brosch { max-width:880px; margin:0 auto; padding:8mm 8mm; display:flex; flex-direction:column; gap:0; background:#fff; }
+.brosch--report { padding:6mm 6mm; max-width:860px; }
+.brosch__page-break { page-break-before:always; break-before:page; height:0; }
+
+.brosch__header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:18px; padding:0 0 6px; margin:0 0 4px;
+  border-bottom:2px solid var(--ink-900);
 }
-function wpQuelleLabel(key){
-  const map = { luft:'Luft/Wasser', sole:'Sole/Wasser', wasser:'Wasser/Wasser' };
-  return map[key] || key;
+.brosch__header-logo { max-height:42px; width:auto; display:block; flex-shrink:0; }
+.brosch__header-firm {
+  flex:1; display:flex; flex-direction:column; gap:1px;
+  font-size:8.5pt; color:var(--ink-600); line-height:1.35;
+  text-align:right; align-items:flex-end;
 }
+.brosch__header-firm strong { color:var(--ink-900); font-size:9pt; font-weight:700; }
+
+.brosch__page-head {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:16px; margin:14px 0 8px; padding:0;
+}
+.brosch__page-head-date {
+  font-size:10pt; color:var(--ink-700); white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.brosch__page-title {
+  font-size:17pt; font-weight:700; color:var(--accent);
+  margin:0; padding:0; letter-spacing:0.01em; line-height:1.2;
+}
+.brosch__page-subtitle {
+  font-size:11.5pt; font-weight:700; color:var(--ink-900);
+  margin:0; padding:0; line-height:1.25;
+}
+
+.brosch__h2 {
+  font-size:11.5pt; font-weight:700; color:var(--ink-900);
+  margin:14px 0 6px; padding-bottom:4px;
+  border-bottom:1px solid var(--ink-300);
+}
+
+.brosch__kv-table { width:100%; border-collapse:collapse; font-size:9.5pt; margin:0 0 6px; }
+.brosch__kv-table td, .brosch__kv-table th {
+  padding:3px 4px; border-bottom:1px solid var(--ink-100);
+  color:var(--ink-700); vertical-align:baseline; line-height:1.3;
+}
+.brosch__kv-table th {
+  text-align:left; color:var(--ink-500); font-size:8.5pt;
+  text-transform:uppercase; letter-spacing:0.04em; font-weight:600;
+  border-bottom:2px solid var(--ink-300);
+}
+.brosch__kv-table td:last-child {
+  text-align:right; font-weight:600; color:var(--ink-900);
+  font-variant-numeric:tabular-nums;
+}
+.brosch__kv-table--3col td:nth-child(2),
+.brosch__kv-table--4col td:nth-child(2),
+.brosch__kv-table--6col td:nth-child(2) {
+  text-align:left; font-weight:500; color:var(--ink-900);
+}
+.brosch__kv-table--6col td { font-size:9pt; }
+.brosch__kv-table tr.is-highlight td {
+  background:var(--accent); color:#fff; font-weight:800;
+  border:none; padding:10px 12px; font-size:12pt; letter-spacing:0.2px;
+}
+.brosch__kv-table tr.is-highlight td:last-child { font-size:15pt; color:#fff; }
+
+.brosch__note { font-size:9pt; color:var(--ink-700); line-height:1.5; margin:0 0 6px; }
+.brosch__footnote {
+  font-size:8pt; color:var(--ink-500); line-height:1.4;
+  margin-top:8px; padding-top:6px; border-top:1px solid var(--ink-100);
+}
+
+.brosch__ampel { display:inline-block; padding:2px 8px; border-radius:var(--r-sm); font-size:9pt; font-weight:700; color:#fff; }
+.brosch__ampel--gruen { background:#16a34a; }
+.brosch__ampel--gelb  { background:#d97706; }
+.brosch__ampel--rot   { background:var(--accent); }
+.brosch__ampel--grau  { background:var(--ink-500); }
+
+.brosch__note-block { margin:8px 0; padding:6px 10px; border-left:3px solid var(--ink-300); background:var(--ink-50); }
+.brosch__note-block strong { color:var(--navy); font-size:10pt; }
+.brosch__note-block p { margin:3px 0 0; font-size:9.5pt; color:var(--ink-700); white-space:pre-wrap; }
+
+/* Rechenweg */
+.brosch__calc-step {
+  margin:8px 0; padding:8px 12px 10px;
+  background:var(--ink-50); border-left:3px solid var(--ink-900);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  page-break-inside:avoid;
+}
+.brosch__calc-step--accent { border-left-color:var(--accent); }
+.brosch__calc-title { font-size:10.5pt; font-weight:700; color:var(--ink-900); margin:0 0 4px; }
+.brosch__calc-subtitle { margin:6px 0 3px; font-size:10pt; font-weight:600; color:var(--ink-900); }
+.brosch__calc-formula {
+  font-family:ui-monospace,'SF Mono',Consolas,monospace;
+  font-size:9.5pt; color:var(--ink-700); background:#fff;
+  border:1px dashed var(--ink-300); border-radius:var(--r-sm);
+  padding:4px 8px; margin:2px 0; display:block;
+  font-variant-numeric:tabular-nums; white-space:pre-wrap;
+}
+.brosch__calc-formula strong { color:var(--ink-900); }
+.brosch__calc-list { margin:3px 0 4px 16px; padding:0; font-size:9.5pt; color:var(--ink-700); line-height:1.5; }
+.brosch__calc-list li { margin-bottom:2px; }
+.brosch__calc-list code { font-family:ui-monospace,'SF Mono',Consolas,monospace; color:var(--ink-900); font-weight:600; }
+.brosch__calc-result {
+  margin-top:6px; padding:5px 10px; background:var(--ink-900); color:#fff;
+  border-radius:var(--r-sm); font-size:10pt; font-weight:600;
+  font-variant-numeric:tabular-nums; display:inline-block;
+}
+.brosch__calc-note { font-size:8.5pt; color:var(--ink-500); margin:3px 0 0; font-style:italic; }
+
+@media print {
+  @page { margin:10mm 10mm; size:A4; }
+  body { background:#fff; }
+  .brosch { padding:0; max-width:none; }
+}
+`;
 
 __mods__["./export.mjs"] = { renderExportModal, initExportUi };
 })();

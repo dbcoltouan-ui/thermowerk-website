@@ -1,6 +1,19 @@
-Heizlast S7 - Export-Bug: bedingungen ist String statt Array
+Heizlast S7 - Export im FWS-Broschueren-Stil portiert
 
-* In foerderungen.json haben einige Programme p.bedingungen als String
-  statt Array - der Code hat blind (p.bedingungen || []).join('; ')
-  aufgerufen, was bei String-Werten "join is not a function" wirft.
-* Fix: Array.isArray-Check, fallback to direct String-Output.
+* export.mjs komplett neu geschrieben - portiert die FWS-Broschueren-Builder
+  (buildReportHeader, buildPageHead, buildKundschaftTable, buildObjekt-
+  datenTable, buildLeistungenTable mit Q_h-Highlight, buildSpeicherTable,
+  buildBerechnungsgrundlagen, buildRechenwegDetail mit 8 Schritten + Formeln,
+  buildNotizenBlock).
+* Detail-Modus-Erweiterung: buildDetailCockpitTable (Norm vs. Verbrauch
+  mit Ampel + Hinweis), buildHuelleTable, buildRaeumeTable mit Phi pro Raum,
+  buildGeraeteTable mit WP-Eckwerten, buildFoerderTable mit Bund/Kanton +
+  Baubewilligung-Box.
+* PDF-Pfad: window.open + Iframe-Fallback (ohne Pop-up-Block-Probleme).
+* Brosch-CSS jetzt komplett inline in BROSCH_CSS-Konstante mit Hex-Farben
+  (Navy #1B2A4A, Accent #D93025) - HTML-Export ist standalone, ohne externe
+  Stylesheet-Dependencies.
+* Layout: 2-Blatt-Bericht (Auslegung + Berechnung), Detail-Modus erzeugt
+  zusaetzliche Bloecke fuer Huelle/Raeume und Foerderung.
+* Q_h-Highlight-Zeile in Leistungen-Tabelle in Brand-Red mit weisser
+  Schrift - genau wie das alte FWS.
