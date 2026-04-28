@@ -1793,14 +1793,14 @@ __mods__["./state.mjs"] = { freshState, getState, setState, set, batch, subscrib
    ========================================================================== */
 
 const HEIZWERT = {
-  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Ho: 9.91,  useHi: true,
+  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Ho: 10.5,  useHi: false,
     etaPresets: [
       { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
       { key:'alt_ohneWW',  label:'älter, ohne WW',                eta:0.85 },
       { key:'alt_mitWW',   label:'älter, mit WW',                 eta:0.75 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Ho: 10.04, useHi: true,
+  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Ho: 10.4,  useHi: false,
     etaPresets: [
       { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
       { key:'alt_ohneWW',  label:'älter, ohne WW',                eta:0.85 },
@@ -2458,9 +2458,17 @@ const PHI_SPEZ_BAND = {
  *  Volumen = A_rest * h, Lüftung n_min = 0.5.
  *  uHuelle = { wand, fenster, dach, boden, tueren } (Zahlen).
  */
-function computePauschalRest({ A_rest, h, n_geschosse = 2, uHuelle = {}, theta_int = 20, theta_e = -8, n_min = 0.5 }){
+function computePauschalRest({
+  A_rest, h, n_geschosse = 2, uHuelle = {},
+  theta_int = 20, theta_e = -8,
+  n_min = 0.5,
+  // AUDIT 3.4 — Lüftungs-Infiltration nach EN 12831:
+  //   V_inf = 2 · V · n50 · e_wind · ε ; V_dot = max(V_inf, V_min)
+  //   Defaults für Bestand: n50 = 4 (mässig dicht), e_wind = 0.02, ε = 1.0.
+  n50 = 4, e_wind = 0.02, epsilon = 1.0
+}){
   const A = Number(A_rest) || 0;
-  if (A <= 0) return { phiHL: 0, HT: 0, HV: 0, V: 0, dT: 0 };
+  if (A <= 0) return { phiHL: 0, HT: 0, HV: 0, V: 0, V_inf: 0, V_min: 0, V_dot: 0, dT: 0 };
   const hh = Number(h) || 2.5;
   const ng = Math.max(1, Number(n_geschosse) || 1);
   const dT = (Number(theta_int) || 20) - (Number(theta_e) || -8);
@@ -2475,9 +2483,13 @@ function computePauschalRest({ A_rest, h, n_geschosse = 2, uHuelle = {}, theta_i
   const A_d = A / ng;           // Dachfläche-Anteil
   const A_b = A / ng;           // Bodenfläche-Anteil
   const HT = u_w * A_w + u_f * A_f + u_d * A_d + u_b * A_b * 0.5; // Boden mit fRT≈0.5 (Erdreich)
-  const HV = 0.34 * V * (Number(n_min) || 0.5);
+  // Lüftung: V_inf vs V_min — der grössere Anteil dominiert.
+  const V_inf = 2 * V * (Number(n50) || 0) * (Number(e_wind) || 0) * (Number(epsilon) || 1);
+  const V_min = V * (Number(n_min) || 0.5);
+  const V_dot = Math.max(V_inf, V_min);
+  const HV = 0.34 * V_dot;
   const phiHL = (HT + HV) * dT;
-  return { phiHL, HT, HV, V, dT };
+  return { phiHL, HT, HV, V, V_inf, V_min, V_dot, dT };
 }
 
 /** Hauptfunktion S4: Detail-Heizlast aus state.
@@ -2541,9 +2553,15 @@ function computeBuildingDetailLoad(state, uHuelleResolved = {}){
   let phi_rest = 0;
   let restDetail = null;
   if (det.misch && det.misch.rest_global !== false && A_rest > 0){
+    // AUDIT 3.4: n50/e_wind aus state.objekt (oder Mittelwert über Räume)
+    //  als Default für Pauschal-Rest. Falls nicht gesetzt, EN 12831 Bestand-
+    //  Default 4 / 0.02 (siehe computePauschalRest).
+    const n50_eff = Number(obj.n50) || 4;
+    const e_wind_eff = Number(obj.e_wind) || 0.02;
     restDetail = computePauschalRest({
       A_rest, h, n_geschosse, uHuelle: uHuelleResolved,
-      theta_int: 20, theta_e
+      theta_int: 20, theta_e,
+      n50: n50_eff, e_wind: e_wind_eff
     });
     phi_rest = restDetail.phiHL;
   }
@@ -4573,12 +4591,14 @@ const ANSCHLUSS_OPTS = {
   // Wand/Dach default = aussenluft
   aussenluft:  ['aussenluft',  'gegen Aussenluft (f_RT 1.00)'],
   erdreich:    ['erdreich',    'gegen Erdreich (f_RT 0.50)'],
-  unbeheizt:   ['unbeheizt',   'gegen unbeheizten Raum/Keller (f_RT 0.70)'],
+  unbeheizt:   ['unbeheizt',   'gegen unbeheizten Raum/Keller (f_RT 0.50)'],
   durchfahrt:  ['durchfahrt',  'gegen unbeheizt + Aussenluft (f_RT 0.90)'],
-  beheizt:     ['beheizt',     'gegen beheizten Nachbarn (f_RT 0.00)']
+  beheizt:     ['beheizt',     'gegen beheizten Nachbarn (f_RT aus θ_nb)']
 };
 const ANSCHLUSS_FRT = {
-  aussenluft: 1.0, erdreich: 0.5, unbeheizt: 0.7, durchfahrt: 0.9, beheizt: 0.0
+  // AUDIT 3.5: unbeheizt 0.7 → 0.5 (EN 12831 Standard b_u)
+  // beheizt: NaN-Marker, wird in resolveBauteilUFrt formel-basiert berechnet
+  aussenluft: 1.0, erdreich: 0.5, unbeheizt: 0.5, durchfahrt: 0.9, beheizt: null
 };
 const ANSCHLUSS_DEFAULT = {
   wand: 'aussenluft', dach: 'aussenluft', fenster: 'aussenluft',
@@ -4594,6 +4614,47 @@ function anschlussOptsFor(typ){
    Wird zusätzlich zur Tabellen-Variante angeboten; Detail-User können
    pro Bauteil Schichten anlegen, einzelne Felder sind individual als
    "Unbekannt" markierbar (zieht dann Default für Bauperiode). */
+/* Bauteil-spezifische Material-Listen — Dach kriegt Holz-/Tragwerk-Optionen
+   (kein Mauerwerk!), Boden kriegt Bodenplatte/Bohlen-Optionen. Wand bleibt
+   bei Mauerwerk + Holzbau. */
+const MATERIAL_CATALOG_BY_TYP = {
+  wand: {
+    tragschicht: [
+      ['auto',          'Standard Bauperiode (auto)'],
+      ['vollziegel',    'Vollziegel/Naturstein (λ 0.81)'],
+      ['backstein',     'Backstein (λ 0.81)'],
+      ['hochloch_alt',  'Hochlochziegel alt (λ 0.40)'],
+      ['hochloch_neu',  'Hochlochziegel modern (λ 0.29)'],
+      ['kalksandstein', 'Kalksandstein (λ 0.99)'],
+      ['beton',         'Stahlbeton (λ 2.30)'],
+      ['holzbau',       'Holzbau / BSP (λ 0.13)'],
+      ['leichtbeton',   'Leichtbeton (λ 0.18)'],
+      ['unbekannt',     'Unbekannt → Default Bauperiode']
+    ]
+  },
+  dach: {
+    tragschicht: [
+      ['auto',           'Standard Bauperiode (auto)'],
+      ['holzsparren',    'Holzsparren / Pfetten (λ 0.13)'],
+      ['holzbalken',     'Holzbalkendecke (λ 0.13)'],
+      ['holzbau',        'Brettsperrholz / BSP-Decke (λ 0.13)'],
+      ['stahlbeton',     'Stahlbeton-Decke (λ 2.30)'],
+      ['hourdis',        'Hourdis-Decke (λ 0.45)'],
+      ['unbekannt',      'Unbekannt → Default Bauperiode']
+    ]
+  },
+  boden: {
+    tragschicht: [
+      ['auto',           'Standard Bauperiode (auto)'],
+      ['stahlbeton',     'Stahlbeton-Bodenplatte (λ 2.30)'],
+      ['magerbeton',     'Magerbeton (λ 1.40)'],
+      ['holzbalken',     'Holzbalkendecke (λ 0.13)'],
+      ['ziegelgewoelbe', 'Ziegelgewölbe (λ 0.81)'],
+      ['unbekannt',      'Unbekannt → Default Bauperiode']
+    ]
+  }
+};
+
 const MATERIAL_CATALOG = {
   tragschicht: [
     ['auto',          'Standard Bauperiode (auto)'],
@@ -4649,7 +4710,7 @@ const MATERIAL_CATALOG = {
   ]
 };
 const MATERIAL_LAMBDA = {
-  tragschicht: { vollziegel: 0.81, backstein: 0.81, hochloch_alt: 0.40, hochloch_neu: 0.29, kalksandstein: 0.99, beton: 2.30, holzbau: 0.13, holzsparren: 0.13, leichtbeton: 0.18 },
+  tragschicht: { vollziegel: 0.81, backstein: 0.81, hochloch_alt: 0.40, hochloch_neu: 0.29, kalksandstein: 0.99, beton: 2.30, stahlbeton: 2.30, magerbeton: 1.40, holzbau: 0.13, holzsparren: 0.13, holzbalken: 0.13, leichtbeton: 0.18, hourdis: 0.45, ziegelgewoelbe: 0.81, unbekannt: 0.81 },
   daemmung:    { mineralwolle: 0.040, eps: 0.038, xps: 0.034, pur: 0.025, holzfaser: 0.045, zellulose: 0.040, perlite: 0.050, luftschicht: 0.50, unbekannt: 0.045 },
   putzInnen:   { kalkgips: 0.70, gipskarton: 0.21, lehmputz: 0.91 },
   putzAussen:  { zement: 1.00, kalk: 0.80, holzfassade: 0.04 },
@@ -5019,7 +5080,19 @@ function resolveBauteilUFrt(state, b){
   const typ = b.typ || 'wand';
   const variant = b.variant || 'unbekannt';
   const anschluss = b.anschluss || ANSCHLUSS_DEFAULT[typ] || 'aussenluft';
-  const fRT = ANSCHLUSS_FRT[anschluss] != null ? ANSCHLUSS_FRT[anschluss] : 1.0;
+  // AUDIT 3.6: für 'beheizt' fRT formel-basiert aus θ_int/θ_nb/θ_e
+  let fRT;
+  if (anschluss === 'beheizt'){
+    const theta_int = Number(obj.tInnenAuslegung) || 20;
+    const theta_e   = Number(obj.tAussenAuslegung); // kann negativ sein
+    const theta_e_eff = Number.isFinite(theta_e) ? theta_e : -8;
+    const theta_nb  = Number(b.theta_nb);
+    const theta_nb_eff = Number.isFinite(theta_nb) ? theta_nb : 20;
+    const dt = theta_int - theta_e_eff;
+    fRT = dt !== 0 ? (theta_int - theta_nb_eff) / dt : 0;
+  } else {
+    fRT = ANSCHLUSS_FRT[anschluss] != null ? ANSCHLUSS_FRT[anschluss] : 1.0;
+  }
   const fRT_src = ANSCHLUSS_OPTS[anschluss] ? ANSCHLUSS_OPTS[anschluss][1] : '';
 
   // User-Override
@@ -5077,16 +5150,39 @@ function resolveBauteilUFrt(state, b){
       break;
     }
     case 'fenster': {
-      let gen = b.fenster_gen || 'unbekannt';
-      // Auto-Generation aus Bauperiode wenn 'unbekannt'
-      if (gen === 'unbekannt') {
-        gen = data?.fensterGenerationDefault?.[bk] || 'isolierglas_2fach_low_e_argon';
-      }
-      const e = data?.fensterUWert?.[gen];
+      // AUDIT 3.2/3.3 Fix:
+      //  - Variant-Dropdown schreibt in `b.variant` mit fensterUWert-Keys
+      //    (einfachverglasung, isolierglas_2fach_low_e_argon, …) → wenn ein
+      //    gültiger Key vorliegt, direkt in fensterUWert mit Rahmen lesen.
+      //  - Sonst (variant='unbekannt') Fallback auf b.fenster_gen bzw.
+      //    fensterGenerationDefault[bk] (Keys: einfach, 3fach, …) → primär
+      //    aus fensterGenerationen[gen].uw, sekundär aus fensterUWert[gen].
       const rahmen = b.fenster_rahmen || 'kunststoff';
       const rk = 'uFenster_' + (rahmen === 'holz_alu' ? 'holz_alu' : rahmen);
-      u = e?.[rk]?.typ ?? e?.uFenster_holz?.typ ?? e?.uGlas?.typ ?? null;
-      src = `Fenster ${esc(gen)} (${esc(rahmen)})`;
+      // 1) Variant ist gültiger fensterUWert-Key → direkter Lookup
+      if (variant && variant !== 'unbekannt' && variant !== 'eigener'
+          && variant !== 'schichten' && data?.fensterUWert?.[variant]){
+        const e = data.fensterUWert[variant];
+        u = e?.[rk]?.typ ?? e?.uFenster_holz?.typ ?? e?.uFenster_kunststoff?.typ ?? e?.uGlas?.typ ?? null;
+        src = `Fenster ${esc(variant)} (${esc(rahmen)})`;
+        break;
+      }
+      // 2) Default-Pfad: fenster_gen oder Bauperiode-Default → fensterGenerationen
+      let gen = b.fenster_gen;
+      if (!gen || gen === 'unbekannt'){
+        gen = data?.fensterGenerationDefault?.[bk] || '3fach';
+      }
+      if (data?.fensterGenerationen?.[gen]?.uw != null){
+        u = data.fensterGenerationen[gen].uw;
+        src = `Fenster ${esc(gen)} · Bauperiode ${esc(bk)}`;
+        break;
+      }
+      // 3) Letzter Fallback: fensterUWert mit Rahmen
+      const e = data?.fensterUWert?.[gen];
+      if (e){
+        u = e?.[rk]?.typ ?? e?.uFenster_holz?.typ ?? e?.uFenster_kunststoff?.typ ?? e?.uGlas?.typ ?? null;
+        src = `Fenster ${esc(gen)} (${esc(rahmen)})`;
+      }
       break;
     }
     case 'tueren': {
@@ -5195,6 +5291,11 @@ function renderRoomBauteil(idx, j, b){
         <label class="field__label">f<sub>RT</sub> (auto)</label>
         <div class="bauteil__value" data-readout-frt="${idx}-${j}">${fmt(r.fRT, 2)}</div>
       </div>
+      ${b.anschluss === 'beheizt' ? `
+      <div class="field" style="min-width:140px;">
+        <label class="field__label">θ Nachbarraum</label>
+        <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].theta_nb`, b.theta_nb == null ? '' : b.theta_nb, 1, -20, '20')}<span class="input-group__unit">°C</span></div>
+      </div>` : ''}
       <div class="field" style="flex:1;min-width:200px;">
         <label class="field__label">Quelle</label>
         <div class="bauteil__source" data-readout-src="${idx}-${j}">${r.source || '—'}</div>
@@ -6733,10 +6834,18 @@ const PROJECTS_URL   = '/api/heizlast-projects';
 let _isAuthenticated = false;
 let _cloudProjects   = [];
 let _activeMeta      = freshMeta();
+let _lastCalc        = null; // letztes compute()-Ergebnis (für KPIs in Cloud-Liste)
 let _onToast         = null; // (msg:string) => void
 let _onAuthChange    = null; // (authed:bool) => void
 let _onProjectsChange= null; // () => void
 let _onLoaded        = null; // (state) => void  (für UI-Refresh)
+
+/**
+ * Speichert das letzte compute()-Ergebnis, damit cloudSave() die KPIs
+ * (Qhl, Qh) korrekt in die Cloud-Liste schreiben kann.
+ * Aufruf nach jedem subscribe-Tick in main.mjs.
+ */
+function setLastCalc(calc){ _lastCalc = calc; }
 
 /* ======================================================
    Helpers
@@ -6834,7 +6943,7 @@ async function saveProject(){
   _activeMeta = meta;
   saveActive();
   if (_isAuthenticated){
-    const ok = await cloudSave(false);
+    const ok = await cloudSave(false, _lastCalc);
     if (ok) markLocalAsCloudMirror(meta.id);
     toast(ok ? 'Projekt gespeichert (lokal + Cloud).' : 'Lokal gespeichert (Cloud fehlgeschlagen).');
   } else {
@@ -7213,7 +7322,7 @@ function deepMerge(target, src){
   return out;
 }
 
-__mods__["./persistence.mjs"] = { uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, STORAGE_KEY, ACTIVE_KEY };
+__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, STORAGE_KEY, ACTIVE_KEY };
 })();
 
 // === ./projects.mjs ===
@@ -8276,7 +8385,7 @@ const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
 const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
 // S7 — Persistenz + Modale
-const { loadActive, autosaveActive, installAutoSync, onLoaded, getActiveMeta } = __mods__["./persistence.mjs"];
+const { loadActive, autosaveActive, installAutoSync, onLoaded, getActiveMeta, setLastCalc } = __mods__["./persistence.mjs"];
 const { renderTopbarActions, renderModals, bootProjectsUi } = __mods__["./projects.mjs"];
 const { renderExportModal, initExportUi } = __mods__["./export.mjs"];
 
@@ -8345,6 +8454,7 @@ async function boot(){
       _lastDetailFlag = cur;
       rebuildOnDetailToggle(state);
     }
+    setLastCalc(calc);
     updateUi(state, calc);
     autosaveActive();
     // Topbar-Projekt-Tag synchron halten.
