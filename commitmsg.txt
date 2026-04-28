@@ -1,23 +1,13 @@
-Heizlast S7 - FWS-Topbar zurueck + Section-Reihenfolge + Notizen pro Sektion/Raum
+Heizlast S7 - Topbar: Logo (logo alt.png) ohne Anschrift, Container-Bug fix
 
-Topbar:
-* Zurueck auf weissen FWS-Look mit dezenten SVG-Icons (Lucide-Stil).
-  Zwei Zeilen: Logo (logo-thermowerk.svg) + Anschrift (Coltouan,
-  Rankstrasse 18, 8413 Neftenbach, Tel + Mail) + Sub-Title oben;
-  Projekt-Tag + Action-Buttons + Detail-Toggle unten.
-* Login-Button im Brand-Red, alle anderen Buttons als dezente
-  Outline-Buttons. Mobile: nur Icons sichtbar.
-* topProjectName updates synchron mit state.projekt.name + meta.name.
-
-Section-Reihenfolge (aufbauend, logisch):
-* FWS-Default: 1 Stamm > 2 WW > 3 Zuschlaege > 4 Heizlast > 5 Speicher > Ergebnis.
-* Detail: 1 Stamm > 2 Huelle > 3 Raeume > 4 WW > 5 Waermeuebergabe >
-  6 Zuschlaege > 7 Heizlast > 8 Speicher > 9 Geraet > F Foerder >
-  B Baubewilligung > Ergebnis.
-
-Notizen:
-* Dedizierte Notizen-Section entfernt. Statt: jede Sektion hat ein
-  eigenes (eingeklapptes) Notiz-Textarea am Bereich-Ende.
-* Jeder Raum hat ein eigenes Notiz-Feld unter den Bauteilen.
-* Export sammelt alle Sektion-Notizen + Raum-Notizen, gruppiert
-  nach Bereich.
+* Logo (public/img/logo alt.png) wird jetzt nach public/heizlast/img/Logo.png
+  gespiegelt und via relativem Pfad ./img/Logo.png eingebunden — kein
+  externer Asset-Request, kein Cache-Problem.
+* Anschrift entfernt — Logo allein reicht (User-Wunsch). Sub-Title
+  "Heizlast-Auslegung" rechts daneben bleibt.
+* Topbar-Layout-Bug: Brand-Row und Action-Row hatten Padding direkt am
+  flex-Container, was bei Container-Klasse (max-width 1100px) inkonsistent
+  zur App-Main-Container-Breite war (links uebersteh, rechts buendig).
+  Refactor: full-width-Outer-Row + .topbar__inner mit max-width 1100px,
+  margin: 0 auto und padding — gleicher Centering-Mechanismus wie der
+  rest der Seite, jetzt buendig auf beiden Seiten.
