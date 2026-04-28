@@ -1,25 +1,26 @@
-Heizlast S7 - Layer-Editor: Material x Dicke pro Schicht (Hülle + Räume)
+Heizlast S7 - Doppelmauerwerk + Hohlraum + Unbekannt-Defaults
 
-* Neue Variante "Detail-Schichten (Material x Dicke berechnen)" in jedem
-  Bauteil (Wand/Dach/Boden) - sowohl in der globalen Hülle-Sektion als
-  auch in jedem Raum-Bauteil verfügbar.
-* Pro Schicht (Innenputz/Tragschicht/Dämmung/Aussenputz fuer Wand,
-  Tragschicht/Dämmung fuer Dach+Boden):
-  - Material-Dropdown mit ca. 10 Optionen pro Schichttyp + "Standard
-    Bauperiode (auto)" + "Unbekannt".
-  - Dicke-Input in cm (leer = Default fuer Bauperiode).
-  - Live-Anzeige des aufgelösten λ und d hinter dem Input.
-* U-Wert wird aus den Schichten via uFromLayers berechnet (1/(Rsi+Σd/λ+Rse))
-  und ersetzt den Tabellen-Wert. Quelle-Anzeige wechselt zu
-  "Schichten-Aufbau · N Lagen · <bauklasse>".
-* Material-Lambdas: 11 Tragschicht-Materialien (Vollziegel, Backstein,
-  Hochlochziegel alt+neu, Kalksandstein, Beton, Holzbau/BSP, Holzsparren,
-  Leichtbeton), 7 Dämmstoffe (Mineralwolle, EPS, XPS, PUR, Holzfaser,
-  Unbekannt-konservativ), Putze (Kalkgips, Gipskarton, Lehmputz, Zement,
-  Kalk, Holzfassade) - alles aus data/u-werte.json + ergänzte Werte.
-* Hülle-Sektion-Layout neu: jede Bauteil-Zeile als Karte mit Variant-
-  Dropdown, Live-U-Anzeige, Quelle, optional Layer-Editor oder Override.
-* Trigger-Logik in onInputChange erweitert: Material-Wechsel → Rebuild
-  (Layer-Editor wird neu aufgebaut, λ/d aktualisiert).
-* resolveHuelleUWerte nutzt jetzt denselben Resolver wie Räume —
-  unifizierter Pfad zwischen Hülle und Räumen.
+Doppelmauerwerk:
+* Wand bekommt 5. optionalen Layer "Aussenschale" (zwischen Daemmung und
+  Aussenputz). Default 'keine' = klassisches einschaliges Mauerwerk.
+* Aussenschale-Catalog: Backstein-Sicht 12/15 cm, Kalksandstein-Vorsatz,
+  Vollziegel-Vorsatz, Naturstein, Holzfassade hinterlueftet, Unbekannt.
+* MATERIAL_DEFAULT_D fuer Aussenschale: 12-15 cm typisch je Material.
+
+Hohlraum / Cavity:
+* Daemmung-Catalog erweitert um: Luftschicht (lambda 0.5, Default-Dicke
+  5 cm fuer typischen Doppelmauerwerk-Hohlraum), Zellulose (0.040),
+  Perlite (0.050).
+* Pragmatischer Lambda-Wert 0.5 fuer Luftschicht beruecksichtigt
+  Konvektion in groesseren Hohlraeumen - konservativ.
+
+Unbekannt-Defaults (User-Wunsch):
+* Bei mat='unbekannt' wird IMMER ein sinnvoller Default-Wert gezogen
+  (lambda + Dicke), egal welcher Layer-Slot:
+  - daemmung: lambda 0.045 (konservativ) + Bauperiode-Default-Dicke
+  - tragschicht/putze: Bauperiode-Default-lambda
+  - aussenschale: Backstein 0.81 + 12 cm
+* Bei leerer Dicke (auch wenn mat gesetzt): Bauperiode-Default oder
+  material-spezifischer Default (luftschicht=5cm, aussenschale=12cm).
+* User kann pro Layer + pro Feld einzeln "Unbekannt" markieren - das
+  Tool rechnet trotzdem mit besten Estimates weiter.

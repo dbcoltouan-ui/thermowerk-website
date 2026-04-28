@@ -4597,7 +4597,22 @@ const MATERIAL_CATALOG = {
     ['xps',           'XPS (λ 0.034)'],
     ['pur',           'PUR/PIR (λ 0.025)'],
     ['holzfaser',     'Holzfaser (λ 0.045)'],
+    ['zellulose',     'Zellulose / Einblasdämmung (λ 0.040)'],
+    ['perlite',       'Perlite (λ 0.050)'],
+    ['luftschicht',   'Luftschicht (Hohlraum, ungedämmt — λ 0.5)'],
     ['unbekannt',     'Unbekannt → konservativ (λ 0.045)']
+  ],
+  // S7 — Aussenschale für Doppelmauerwerk (zweischaliges Mauerwerk).
+  // Default 'keine' = klassisches einschaliges Mauerwerk.
+  aussenschale: [
+    ['keine',          'Keine Aussenschale (einschaliges Mauerwerk)'],
+    ['backstein_12',   'Backstein-Sichtmauerwerk 12 cm (λ 0.81)'],
+    ['backstein_15',   'Backstein-Sichtmauerwerk 15 cm (λ 0.81)'],
+    ['kalksandstein',  'Kalksandstein-Vorsatzschale (λ 0.99)'],
+    ['vollziegel',     'Vollziegel-Vorsatzschale (λ 0.81)'],
+    ['naturstein',     'Naturstein-Vorsatzschale (λ 1.50)'],
+    ['holzfassade',    'Holzfassade hinterlüftet (λ ≈ 0)'],
+    ['unbekannt',      'Unbekannt → Default Backstein 12 cm']
   ],
   putzInnen: [
     ['auto',         'Standard (auto)'],
@@ -4616,21 +4631,29 @@ const MATERIAL_CATALOG = {
 };
 const MATERIAL_LAMBDA = {
   tragschicht: { vollziegel: 0.81, backstein: 0.81, hochloch_alt: 0.40, hochloch_neu: 0.29, kalksandstein: 0.99, beton: 2.30, holzbau: 0.13, holzsparren: 0.13, leichtbeton: 0.18 },
-  daemmung:    { mineralwolle: 0.040, eps: 0.038, xps: 0.034, pur: 0.025, holzfaser: 0.045, unbekannt: 0.045 },
+  daemmung:    { mineralwolle: 0.040, eps: 0.038, xps: 0.034, pur: 0.025, holzfaser: 0.045, zellulose: 0.040, perlite: 0.050, luftschicht: 0.50, unbekannt: 0.045 },
   putzInnen:   { kalkgips: 0.70, gipskarton: 0.21, lehmputz: 0.91 },
-  putzAussen:  { zement: 1.00, kalk: 0.80, holzfassade: 0.04 }
+  putzAussen:  { zement: 1.00, kalk: 0.80, holzfassade: 0.04 },
+  aussenschale:{ backstein_12: 0.81, backstein_15: 0.81, kalksandstein: 0.99, vollziegel: 0.81, naturstein: 1.50, holzfassade: 0.04, unbekannt: 0.81 }
 };
-/** Schicht-Reihenfolge pro Bauteil-Typ (innen → aussen). */
+const MATERIAL_DEFAULT_D = {
+  // Default-Dicken für Aussenschale, falls User keine eingibt
+  aussenschale: { backstein_12: 0.12, backstein_15: 0.15, kalksandstein: 0.12, vollziegel: 0.12, naturstein: 0.15, holzfassade: 0.025, unbekannt: 0.12 }
+};
+/** Schicht-Reihenfolge pro Bauteil-Typ (innen → aussen).
+ *  Wand inkl. optionaler Aussenschale für Doppelmauerwerk. Default
+ *  'keine' für aussenschale → Layer wird übersprungen. */
 const LAYERS_FOR_TYP = {
-  wand:  ['putzInnen', 'tragschicht', 'daemmung', 'putzAussen'],
+  wand:  ['putzInnen', 'tragschicht', 'daemmung', 'aussenschale', 'putzAussen'],
   dach:  ['tragschicht', 'daemmung'],
   boden: ['tragschicht', 'daemmung']
 };
 const LAYER_LABELS = {
-  putzInnen:   'Innenputz',
-  tragschicht: 'Tragschicht',
-  daemmung:    'Dämmung',
-  putzAussen:  'Aussenputz'
+  putzInnen:    'Innenputz',
+  tragschicht:  'Tragschicht / Innenmauer',
+  daemmung:     'Dämmung / Hohlraum',
+  aussenschale: 'Aussenschale (Doppelmauerwerk)',
+  putzAussen:   'Aussenputz'
 };
 
 /** Tür-Fallback-Tabelle (data/u-werte.json hat keine Tür-Daten). */
@@ -4887,20 +4910,28 @@ function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
   const dataTyp = (typ === 'wand') ? 'aussenwand' : typ;
   const node = _uWerteData?.bauteilDefaults?.[dataTyp]?.[bauklasse] || null;
   const slotDefault = node ? node[slot] : null;
-  const mat = cfg.mat || 'auto';
+  const mat = cfg.mat || (slot === 'aussenschale' ? 'keine' : 'auto');
 
-  // 'keine'/'keiner' → kein Layer
+  // 'keine'/'keiner' → kein Layer (Aussenschale Default für einschalige Wand)
   if (mat === 'keine' || mat === 'keiner') return null;
 
-  // λ ermitteln
+  // λ ermitteln — bei 'unbekannt' werden Standardwerte gezogen.
   let lambda = null, label = '';
   if (mat === 'auto'){
     if (!slotDefault) return null;
     lambda = slotDefault.lambda || (_uWerteData?.daemmstoffe?.[slotDefault.material]?.lambda) || null;
     label  = slotDefault.label || (slotDefault.material ? _uWerteData?.daemmstoffe?.[slotDefault.material]?.label : '') || LAYER_LABELS[slot];
   } else if (mat === 'unbekannt'){
-    lambda = (slot === 'daemmung') ? 0.045 : (MATERIAL_LAMBDA[slot]?.[slotDefault?.material] || 0.5);
-    label  = 'Unbekannt';
+    // Unbekannt = nutzt Standard für Bauperiode bzw. konservative Schätzung.
+    if (slot === 'daemmung'){
+      lambda = (_uWerteData?.daemmstoffe?.unbekannt?.lambda) || 0.045;
+    } else if (slot === 'aussenschale'){
+      lambda = MATERIAL_LAMBDA.aussenschale.unbekannt; // Backstein-Default 0.81
+    } else {
+      // tragschicht / Putze: nimm Bauperiode-Default
+      lambda = slotDefault?.lambda ?? 0.5;
+    }
+    label = 'Unbekannt — Standard';
   } else {
     lambda = MATERIAL_LAMBDA[slot]?.[mat] || null;
     if (!lambda && slot === 'daemmung'){
@@ -4914,14 +4945,18 @@ function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
   if (cfg.d_cm != null && cfg.d_cm !== '' && Number(cfg.d_cm) > 0){
     d_m = Number(cfg.d_cm) / 100;
   } else {
-    // 'unbekannt' bei Dicke ODER leer → Default aus Bauperiode
-    if (slot === 'daemmung'){
-      d_m = (slotDefault?.dicke != null) ? Number(slotDefault.dicke) : 0;
+    // Default-Dicke je Slot/Material — auch bei 'unbekannt' wird ein
+    // sinnvoller Standardwert gezogen, damit U trotzdem berechnet wird.
+    if (slot === 'aussenschale'){
+      d_m = MATERIAL_DEFAULT_D.aussenschale[mat] ?? 0.12;
+    } else if (slot === 'daemmung'){
+      if (mat === 'luftschicht') d_m = 0.05; // typischer Doppelmauerwerk-Hohlraum
+      else d_m = (slotDefault?.dicke != null) ? Number(slotDefault.dicke) : 0;
     } else {
       d_m = slotDefault?.d != null ? Number(slotDefault.d) : 0;
     }
   }
-  return { d: d_m, lambda, label, fromDefault: (cfg.mat === 'auto' || !cfg.mat) };
+  return { d: d_m, lambda, label, fromDefault: (mat === 'auto' || mat === 'unbekannt' || !cfg.d_cm) };
 }
 
 /**
