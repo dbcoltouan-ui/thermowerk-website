@@ -1,13 +1,23 @@
-Heizlast S7 - Räume: Pauschal-Toggle entfernt
+Heizlast S7 - FWS-Topbar zurueck + Section-Reihenfolge + Notizen pro Sektion/Raum
 
-* Schalter "Restflaeche pauschal mitrechnen" entfernt — die automatische
-  Behandlung lief ohnehin schon im Default. Der Toggle hat nur verwirrt.
-* Verhalten jetzt deterministisch:
-  - Räume erfasst → einzeln gerechnet und addiert.
-  - Wenn EBF > Σ Räume → die Differenz wird automatisch pauschal mit
-    den Global-U-Werten aus Schritt 6 mitgerechnet.
-  - Wenn Σ Räume ≥ EBF → kein Restflächen-Anteil, alles raumweise.
-* Section-Intro klarer formuliert.
-* state.detail.misch.rest_global bleibt im State (Default true) für
-  Kompatibilität mit gespeicherten Projekten — wird nur nicht mehr
-  durch UI veränderbar.
+Topbar:
+* Zurueck auf weissen FWS-Look mit dezenten SVG-Icons (Lucide-Stil).
+  Zwei Zeilen: Logo (logo-thermowerk.svg) + Anschrift (Coltouan,
+  Rankstrasse 18, 8413 Neftenbach, Tel + Mail) + Sub-Title oben;
+  Projekt-Tag + Action-Buttons + Detail-Toggle unten.
+* Login-Button im Brand-Red, alle anderen Buttons als dezente
+  Outline-Buttons. Mobile: nur Icons sichtbar.
+* topProjectName updates synchron mit state.projekt.name + meta.name.
+
+Section-Reihenfolge (aufbauend, logisch):
+* FWS-Default: 1 Stamm > 2 WW > 3 Zuschlaege > 4 Heizlast > 5 Speicher > Ergebnis.
+* Detail: 1 Stamm > 2 Huelle > 3 Raeume > 4 WW > 5 Waermeuebergabe >
+  6 Zuschlaege > 7 Heizlast > 8 Speicher > 9 Geraet > F Foerder >
+  B Baubewilligung > Ergebnis.
+
+Notizen:
+* Dedizierte Notizen-Section entfernt. Statt: jede Sektion hat ein
+  eigenes (eingeklapptes) Notiz-Textarea am Bereich-Ende.
+* Jeder Raum hat ein eigenes Notiz-Feld unter den Bauteilen.
+* Export sammelt alle Sektion-Notizen + Raum-Notizen, gruppiert
+  nach Bereich.
