@@ -1,28 +1,25 @@
-Heizlast S7 - U-Wert/fRT Auto-Lookup pro Bauteil + Mobile-Topbar Seitenfarbe
+Heizlast S7 - Layer-Editor: Material x Dicke pro Schicht (Hülle + Räume)
 
-U-Wert + fRT (gross):
-* Bauteil-Editor neu strukturiert: User waehlt Typ + Bauweise/Variante
-  + Anschluss (gegen Aussenluft / Erdreich / unbeheizten Raum / etc.) +
-  Flaeche. U-Wert und f_RT werden automatisch aus data/u-werte.json
-  + Bauperiode + Sanierungsstand resolved und als Read-only-Felder
-  sichtbar angezeigt.
-* Variante-Optionen: "Unbekannt" (typischer Wert) / "Original-unsaniert"
-  (max) / "Saniert/gut gedaemmt" (min) / "Eigener Wert".
-  Bei "Eigener Wert" erscheint Override-Input.
-* Pro Bauteil zusaetzlich Quelle-Anzeige: "Tabelle Wand EFH 1978_1994
-  · gegen Aussenluft (f_RT 1.00)" - User sieht woher der Wert kommt.
-* Anschluss-Optionen kontextabhaengig: Wand bekommt aussenluft/unbeheizt,
-  Boden bekommt erdreich/unbeheizt/durchfahrt, Dach bekommt aussenluft/
-  unbeheizt. f_RT-Mapping: aussenluft=1.0, erdreich=0.5, unbeheizt=0.7,
-  durchfahrt=0.9, beheizt=0.0.
-* Spezialfaelle: Dach hat zusaetzliche "Dach-Form" (Steildach/Flachdach/
-  Pultdach), Fenster hat "Verglasung" (5 Generationen) + "Rahmen"
-  (Holz/Kunststoff/Holz-Alu). Tuer hat eigene Bauperiode-Tabelle.
-* Heatload-Calc bekommt jetzt eine angereicherte State-Kopie (via
-  enrichRaeumeWithResolvedUFrt) - der Calc-Pfad ist unveraendert,
-  nur die Eingabewerte sind komplett.
-
-Mobile:
-* Top-Strip in Seitenfarbe (light grey) statt durchsichtig: html-Bg
-  jetzt var(--c-bg) statt weiss. Topbar-padding-top:env(safe-area-inset-top)
-  entfernt - Safe-Area zeigt direkt html-Bg.
+* Neue Variante "Detail-Schichten (Material x Dicke berechnen)" in jedem
+  Bauteil (Wand/Dach/Boden) - sowohl in der globalen Hülle-Sektion als
+  auch in jedem Raum-Bauteil verfügbar.
+* Pro Schicht (Innenputz/Tragschicht/Dämmung/Aussenputz fuer Wand,
+  Tragschicht/Dämmung fuer Dach+Boden):
+  - Material-Dropdown mit ca. 10 Optionen pro Schichttyp + "Standard
+    Bauperiode (auto)" + "Unbekannt".
+  - Dicke-Input in cm (leer = Default fuer Bauperiode).
+  - Live-Anzeige des aufgelösten λ und d hinter dem Input.
+* U-Wert wird aus den Schichten via uFromLayers berechnet (1/(Rsi+Σd/λ+Rse))
+  und ersetzt den Tabellen-Wert. Quelle-Anzeige wechselt zu
+  "Schichten-Aufbau · N Lagen · <bauklasse>".
+* Material-Lambdas: 11 Tragschicht-Materialien (Vollziegel, Backstein,
+  Hochlochziegel alt+neu, Kalksandstein, Beton, Holzbau/BSP, Holzsparren,
+  Leichtbeton), 7 Dämmstoffe (Mineralwolle, EPS, XPS, PUR, Holzfaser,
+  Unbekannt-konservativ), Putze (Kalkgips, Gipskarton, Lehmputz, Zement,
+  Kalk, Holzfassade) - alles aus data/u-werte.json + ergänzte Werte.
+* Hülle-Sektion-Layout neu: jede Bauteil-Zeile als Karte mit Variant-
+  Dropdown, Live-U-Anzeige, Quelle, optional Layer-Editor oder Override.
+* Trigger-Logik in onInputChange erweitert: Material-Wechsel → Rebuild
+  (Layer-Editor wird neu aufgebaut, λ/d aktualisiert).
+* resolveHuelleUWerte nutzt jetzt denselben Resolver wie Räume —
+  unifizierter Pfad zwischen Hülle und Räumen.

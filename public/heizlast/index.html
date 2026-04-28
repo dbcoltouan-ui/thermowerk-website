@@ -1444,6 +1444,70 @@ body.modal-open { overflow: hidden; }
   align-items: center;
 }
 
+
+/* S7 — Layer-Editor (Schichtenaufbau pro Bauteil) */
+.layer-editor {
+  margin-top: var(--s-3);
+  padding: var(--s-3);
+  background: var(--ink-100);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+}
+.layer-editor__head {
+  font-size: var(--fs-xs);
+  color: var(--ink-600);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--s-2);
+  font-weight: 600;
+}
+.layer-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 130px 1fr;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--c-border);
+  font-size: var(--fs-sm);
+}
+.layer-row:last-child { border-bottom: 0; }
+.layer-row__name { font-weight: 600; color: var(--brand-500); }
+.layer-row__resolved { font-size: var(--fs-xs); color: var(--ink-500); font-style: italic; }
+.layer-row__resolved em { color: var(--ink-400); font-weight: 500; }
+@media (max-width: 640px) {
+  .layer-row { grid-template-columns: 1fr 1fr; }
+  .layer-row__name { grid-column: 1 / -1; margin-bottom: 4px; }
+  .layer-row__resolved { grid-column: 1 / -1; margin-top: 4px; }
+}
+
+/* S7 — Hülle: jede Bauteil-Zeile als Karte */
+.huelle-row {
+  background: var(--ink-50);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+  margin-bottom: var(--s-3);
+  grid-column: 1 / -1;
+}
+.huelle-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: baseline;
+  margin-bottom: var(--s-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-border);
+}
+.huelle-row__head strong { font-size: var(--fs-md); color: var(--brand-500); }
+.huelle-row__u { font-size: var(--fs-md); color: var(--ink-700); }
+.huelle-row__u strong { color: var(--accent-500); }
+.huelle-row__src {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  font-style: italic;
+  margin-left: auto;
+}
+
 </style>
 </head>
 <body>
@@ -4461,7 +4525,8 @@ const BAUTEIL_VARIANT_OPTS = {
     ['unbekannt',   'Unbekannt — typischer Wert für Bauperiode'],
     ['unsaniert',   'Original / unsaniert (max. U-Wert)'],
     ['saniert',     'Saniert / gut gedämmt (min. U-Wert)'],
-    ['eigener',     'Eigener Wert eingeben']
+    ['schichten',   'Detail-Schichten (Material × Dicke berechnen)'],
+    ['eigener',     'Eigener U-Wert eingeben']
   ],
   // Dach: zusätzlich Dach-Form (steildach/flachdach/pultdach)
   dachForm: [
@@ -4506,6 +4571,68 @@ function anschlussOptsFor(typ){
   if (typ === 'dach') return ['aussenluft', 'unbeheizt'].map(k => ANSCHLUSS_OPTS[k]);
   return ['aussenluft', 'unbeheizt'].map(k => ANSCHLUSS_OPTS[k]);
 }
+/* S7 — Layer-basierter Bauteil-Aufbau (Material × Dicke × λ → U via uFromLayers).
+   Wird zusätzlich zur Tabellen-Variante angeboten; Detail-User können
+   pro Bauteil Schichten anlegen, einzelne Felder sind individual als
+   "Unbekannt" markierbar (zieht dann Default für Bauperiode). */
+const MATERIAL_CATALOG = {
+  tragschicht: [
+    ['auto',          'Standard Bauperiode (auto)'],
+    ['vollziegel',    'Vollziegel/Naturstein (λ 0.81)'],
+    ['backstein',     'Backstein (λ 0.81)'],
+    ['hochloch_alt',  'Hochlochziegel alt (λ 0.40)'],
+    ['hochloch_neu',  'Hochlochziegel modern (λ 0.29)'],
+    ['kalksandstein', 'Kalksandstein (λ 0.99)'],
+    ['beton',         'Stahlbeton (λ 2.30)'],
+    ['holzbau',       'Holzbau / BSP (λ 0.13)'],
+    ['holzsparren',   'Holzsparren + Schalung (λ 0.13)'],
+    ['leichtbeton',   'Leichtbeton (λ 0.18)'],
+    ['unbekannt',     'Unbekannt → Default Bauperiode']
+  ],
+  daemmung: [
+    ['auto',          'Standard Bauperiode (auto)'],
+    ['keine',         'Keine Dämmung'],
+    ['mineralwolle',  'Mineralwolle (λ 0.040)'],
+    ['eps',           'EPS Polystyrol (λ 0.038)'],
+    ['xps',           'XPS (λ 0.034)'],
+    ['pur',           'PUR/PIR (λ 0.025)'],
+    ['holzfaser',     'Holzfaser (λ 0.045)'],
+    ['unbekannt',     'Unbekannt → konservativ (λ 0.045)']
+  ],
+  putzInnen: [
+    ['auto',         'Standard (auto)'],
+    ['kalkgips',     'Kalkgips-Putz (λ 0.70)'],
+    ['gipskarton',   'Gipskartonplatte (λ 0.21)'],
+    ['lehmputz',     'Lehmputz (λ 0.91)'],
+    ['keiner',       'Kein Innenputz']
+  ],
+  putzAussen: [
+    ['auto',         'Standard (auto)'],
+    ['zement',       'Zementputz (λ 1.00)'],
+    ['kalk',         'Kalkputz (λ 0.80)'],
+    ['holzfassade',  'Hinterlüftete Holzfassade (λ ≈ 0)'],
+    ['keiner',       'Kein Aussenputz']
+  ]
+};
+const MATERIAL_LAMBDA = {
+  tragschicht: { vollziegel: 0.81, backstein: 0.81, hochloch_alt: 0.40, hochloch_neu: 0.29, kalksandstein: 0.99, beton: 2.30, holzbau: 0.13, holzsparren: 0.13, leichtbeton: 0.18 },
+  daemmung:    { mineralwolle: 0.040, eps: 0.038, xps: 0.034, pur: 0.025, holzfaser: 0.045, unbekannt: 0.045 },
+  putzInnen:   { kalkgips: 0.70, gipskarton: 0.21, lehmputz: 0.91 },
+  putzAussen:  { zement: 1.00, kalk: 0.80, holzfassade: 0.04 }
+};
+/** Schicht-Reihenfolge pro Bauteil-Typ (innen → aussen). */
+const LAYERS_FOR_TYP = {
+  wand:  ['putzInnen', 'tragschicht', 'daemmung', 'putzAussen'],
+  dach:  ['tragschicht', 'daemmung'],
+  boden: ['tragschicht', 'daemmung']
+};
+const LAYER_LABELS = {
+  putzInnen:   'Innenputz',
+  tragschicht: 'Tragschicht',
+  daemmung:    'Dämmung',
+  putzAussen:  'Aussenputz'
+};
+
 /** Tür-Fallback-Tabelle (data/u-werte.json hat keine Tür-Daten). */
 const TUER_U_BY_BK = {
   vor1945: 3.0, '1946_1960': 2.8, '1961_1977': 2.5, '1978_1994': 2.0,
@@ -4525,36 +4652,35 @@ const BAUTEIL_FRT_DEFAULT = {
   wand: 1.0, fenster: 1.0, dach: 1.0, boden: 0.5, tueren: 1.0
 };
 
-/** Aufgelöste U-Werte aus Hülle: user-Override > Auto-Default aus u-werte.json. */
+/** Aufgelöste U-Werte aus Hülle.
+ *  Pro Bauteil wird der gleiche Resolver wie für Räume verwendet — d.h.
+ *  variant ('unbekannt'/'unsaniert'/'saniert'/'schichten'/'eigener') +
+ *  optionale layers + dach-form/fenster-gen treiben den U-Wert.
+ *  Backwards-Compat: alte u_user-Felder werden als 'eigener' interpretiert.
+ */
 function resolveHuelleUWerte(state){
   const det = state?.detail?.huelle || {};
   const obj = state?.objekt || {};
   let bk = bauklasseFromPeriode(obj.bauperiode);
   bk = applySanierung(bk, obj.sanierungsstand) || bk;
-  const typeKey = (obj.typ === 'mfh') ? 'MFH' : 'EFH';
   const out = {};
   const hints = {};
   for (const key of ['wand','fenster','dach','boden','tueren']){
     const slot = det[key] || {};
-    let auto = null;
-    if (_uWerteData && bk){
-      // tueren: existiert nicht in u-werte.json — Default 2.0 nach Bauklasse-Schätzung
-      if (key === 'tueren'){
-        auto = (bk === 'vor1945' || bk === '1946_1960') ? 2.5
-             : (bk === '1961_1977' || bk === '1978_1994') ? 2.0
-             : 1.4;
-      } else {
-        const u = lookupUWert(_uWerteData, {
-          bauteil: key, gebaeudetyp: typeKey, bauklasse: bk,
-          variant: slot.variant || undefined
-        });
-        auto = u ? Number(u.typ) : null;
-      }
-    }
-    const userVal = (slot.u_user === '' || slot.u_user == null) ? null : Number(slot.u_user);
-    const eff = (userVal != null && Number.isFinite(userVal) && userVal > 0) ? userVal : auto;
-    out[key] = eff || 0;
-    hints[key] = { auto, user: userVal, eff, bauklasse: bk };
+    let variant = slot.variant;
+    if (!variant && (slot.u_user != null && slot.u_user !== '')) variant = 'eigener';
+    if (!variant) variant = 'unbekannt';
+    const fakeB = {
+      typ: key, variant, layers: slot.layers,
+      u_override: slot.u_user,
+      anschluss: ANSCHLUSS_DEFAULT[key],
+      dach_variant: slot.dach_variant,
+      fenster_gen: slot.fenster_gen,
+      fenster_rahmen: slot.fenster_rahmen
+    };
+    const r = resolveBauteilUFrt(state, fakeB);
+    out[key] = r.u || 0;
+    hints[key] = { auto: r.u, user: slot.u_user, eff: r.u, bauklasse: bk, source: r.source };
   }
   return { uHuelle: out, hints, bauklasse: bk };
 }
@@ -4593,18 +4719,61 @@ function renderHuelleRow(s, key, uHuelle, hints, det){
   const slot = det[key] || {};
   const h = hints[key] || {};
   const label = BAUTEIL_LABELS[key];
-  const autoTxt = (h.auto != null) ? `Auto: ${fmt(h.auto, 2)} W/(m²·K)` : 'Auto: –';
-  const eff = (h.eff != null) ? `${fmt(h.eff, 2)}` : '–';
+  const variant = slot.variant || 'unbekannt';
+  const isSchichten = (variant === 'schichten');
+  const isEigener   = (variant === 'eigener');
+  const showsLayers = isSchichten && (key === 'wand' || key === 'dach' || key === 'boden');
+  // U + Quelle live aus Bauteil-Resolver (wie in den Räumen).
+  const fakeB = {
+    typ: key, variant, layers: slot.layers, u_override: slot.u_user,
+    anschluss: ANSCHLUSS_DEFAULT[key], dach_variant: slot.dach_variant,
+    fenster_gen: slot.fenster_gen, fenster_rahmen: slot.fenster_rahmen
+  };
+  const r = resolveBauteilUFrt(s, fakeB);
+  const uTxt = fmt(r.u, 2);
+  const opts = (key === 'fenster') ? BAUTEIL_VARIANT_OPTS.fensterGen : BAUTEIL_VARIANT_OPTS.std;
   return `
-    <div class="field">
-      <label class="field__label">${esc(label)} <span class="symbol">U</span></label>
-      <div class="input-group">
-        ${inputNumRaw(`detail.huelle.${key}.u_user`, slot.u_user || '', 0.01, 0, autoTxt.replace('Auto: ',''))}
-        <span class="input-group__unit">W/(m²·K)</span>
+    <div class="huelle-row col-span-2">
+      <div class="huelle-row__head">
+        <strong>${esc(label)}</strong>
+        <span class="huelle-row__u">U = <strong>${uTxt}</strong> W/(m²·K)</span>
+        <span class="huelle-row__src">${esc(r.source || '')}</span>
       </div>
-      <p class="field__hint" data-huelle-hint="${key}">${autoTxt} · effektiv: <strong>${eff}</strong></p>
-      ${infoBox('detail.huelle.' + key, esc(label) + ' — Hilfe')}
+      <div class="huelle-row__body grid grid--2">
+        <div class="field">
+          <label class="field__label">${key === 'fenster' ? 'Verglasung' : 'Bauweise / Variante'}</label>
+          ${select(`detail.huelle.${key}.variant`, variant, opts)}
+        </div>
+        ${key === 'dach' ? `
+        <div class="field">
+          <label class="field__label">Dach-Form</label>
+          ${select(`detail.huelle.${key}.dach_variant`, slot.dach_variant || 'steildach', BAUTEIL_VARIANT_OPTS.dachForm)}
+        </div>` : ''}
+        ${key === 'fenster' ? `
+        <div class="field">
+          <label class="field__label">Rahmen</label>
+          ${select(`detail.huelle.${key}.fenster_rahmen`, slot.fenster_rahmen || 'kunststoff', BAUTEIL_VARIANT_OPTS.fensterRahmen)}
+        </div>` : ''}
+        ${isEigener ? `
+        <div class="field">
+          <label class="field__label">U-Wert (manuell)</label>
+          <div class="input-group">${inputNumRaw(`detail.huelle.${key}.u_user`, slot.u_user || '', 0.01, 0, '0.40')}<span class="input-group__unit">W/(m²·K)</span></div>
+        </div>` : ''}
+      </div>
+      ${showsLayers ? renderLayerEditor(`detail.huelle.${key}`, fakeB, s) : ''}
     </div>`;
+}
+
+/** S7 — Hülle-Sektion komplett neu rendern (bei Variant-/Material-Changes). */
+function rebuildHuelleBauteile(state){
+  const sec = document.getElementById('sec-huelle');
+  if (!sec) return;
+  const grid = sec.querySelector('.block .grid');
+  if (!grid) return;
+  const { uHuelle, hints } = resolveHuelleUWerte(state);
+  const det = state.detail.huelle || {};
+  grid.innerHTML = ['wand','fenster','dach','boden','tueren']
+    .map(k => renderHuelleRow(state, k, uHuelle, hints, det)).join('');
 }
 
 function renderRaeume(s){
@@ -4707,6 +4876,55 @@ function renderRoom(r, idx){
  * Liefert immer ein Result, auch wenn keine Daten geladen sind (Fallback).
  */
 /**
+ * S7 — Layer-Resolver: pro Layer-Slot (tragschicht/daemmung/putzInnen/
+ * putzAussen) und Bauteil-Typ den Material+Dicke+λ Wert auflösen.
+ * Default-Material = 'auto' → Wert aus bauteilDefaults[typ][bauklasse].
+ * 'unbekannt' im Material → Lambda aus daemmstoffe.unbekannt (konservativ).
+ * Dicke leer → Default aus bauteilDefaults.
+ */
+function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
+  // Map ui-typ to data-key (boden bleibt boden, dach->dach, wand->aussenwand)
+  const dataTyp = (typ === 'wand') ? 'aussenwand' : typ;
+  const node = _uWerteData?.bauteilDefaults?.[dataTyp]?.[bauklasse] || null;
+  const slotDefault = node ? node[slot] : null;
+  const mat = cfg.mat || 'auto';
+
+  // 'keine'/'keiner' → kein Layer
+  if (mat === 'keine' || mat === 'keiner') return null;
+
+  // λ ermitteln
+  let lambda = null, label = '';
+  if (mat === 'auto'){
+    if (!slotDefault) return null;
+    lambda = slotDefault.lambda || (_uWerteData?.daemmstoffe?.[slotDefault.material]?.lambda) || null;
+    label  = slotDefault.label || (slotDefault.material ? _uWerteData?.daemmstoffe?.[slotDefault.material]?.label : '') || LAYER_LABELS[slot];
+  } else if (mat === 'unbekannt'){
+    lambda = (slot === 'daemmung') ? 0.045 : (MATERIAL_LAMBDA[slot]?.[slotDefault?.material] || 0.5);
+    label  = 'Unbekannt';
+  } else {
+    lambda = MATERIAL_LAMBDA[slot]?.[mat] || null;
+    if (!lambda && slot === 'daemmung'){
+      lambda = _uWerteData?.daemmstoffe?.[mat]?.lambda || 0.045;
+    }
+    label = (MATERIAL_CATALOG[slot] || []).find(o => o[0] === mat)?.[1] || mat;
+  }
+
+  // Dicke ermitteln
+  let d_m = null;
+  if (cfg.d_cm != null && cfg.d_cm !== '' && Number(cfg.d_cm) > 0){
+    d_m = Number(cfg.d_cm) / 100;
+  } else {
+    // 'unbekannt' bei Dicke ODER leer → Default aus Bauperiode
+    if (slot === 'daemmung'){
+      d_m = (slotDefault?.dicke != null) ? Number(slotDefault.dicke) : 0;
+    } else {
+      d_m = slotDefault?.d != null ? Number(slotDefault.d) : 0;
+    }
+  }
+  return { d: d_m, lambda, label, fromDefault: (cfg.mat === 'auto' || !cfg.mat) };
+}
+
+/**
  * S7 — Bauteil-Werte (U + f_RT) gemäss Variant/Anschluss/Bauperiode pro
  * Raum auflösen und in eine ENRICHED-Kopie schreiben. Wird vor compute/
  * computeBuildingDetailLoad in main.mjs aufgerufen, damit der Heatload-
@@ -4738,6 +4956,22 @@ function resolveBauteilUFrt(state, b){
   // User-Override
   if (variant === 'eigener' && b.u_override != null && b.u_override !== ''){
     return { u: Number(b.u_override), fRT, source: 'manuell · ' + fRT_src };
+  }
+  // Schichten-Berechnung: Layer für Layer auflösen, U via uFromLayers.
+  if (variant === 'schichten' && LAYERS_FOR_TYP[typ]){
+    const resolvedLayers = LAYERS_FOR_TYP[typ].map(slot =>
+      resolveLayerForBauteil(typ, slot, (b.layers || {})[slot] || {}, bk)
+    ).filter(L => L && L.lambda > 0);
+    const u = (function(layers){
+      let R = 0.13 + 0.04;
+      for (const L of layers){ if (L.d > 0 && L.lambda > 0) R += L.d / L.lambda; }
+      return R > 0 ? 1 / R : null;
+    })(resolvedLayers);
+    return {
+      u: u ?? 1.0,
+      fRT,
+      source: `Schichten-Aufbau · ${resolvedLayers.length} Lagen · ${esc(bk)}`
+    };
   }
 
   const data = _uWerteData;
@@ -4796,6 +5030,43 @@ function resolveBauteilUFrt(state, b){
   return { u, fRT, source: src + ' · ' + fRT_src };
 }
 
+/**
+ * S7 — Layer-Editor: Pro Schicht (innen→aussen) Material-Dropdown + Dicke-Input
+ * + Live-Anzeige des resolved λ und d (auch wenn 'auto' → Default-Werte).
+ * Pfad-Prefix erlaubt das Wiederverwenden in Hülle (global) und Räumen.
+ */
+function renderLayerEditor(pathPrefix, b, state){
+  const typ = b.typ || 'wand';
+  const slots = LAYERS_FOR_TYP[typ];
+  if (!slots) return '';
+  const obj = state?.objekt || {};
+  let bk = bauklasseFromPeriode(obj.bauperiode) || '1978_1994';
+  bk = applySanierung(bk, obj.sanierungsstand) || bk;
+  const layers = b.layers || {};
+  const rows = slots.map(slot => {
+    const cfg = layers[slot] || { mat: 'auto', d_cm: '' };
+    const res = resolveLayerForBauteil(typ, slot, cfg, bk);
+    const lambda = res ? fmt(res.lambda, 3) : '–';
+    const dCm    = res && res.d != null ? fmt(res.d * 100, 1) : '–';
+    return `
+    <div class="layer-row">
+      <span class="layer-row__name">${esc(LAYER_LABELS[slot])}</span>
+      <div class="layer-row__mat">
+        ${select(`${pathPrefix}.layers.${slot}.mat`, cfg.mat || 'auto', MATERIAL_CATALOG[slot])}
+      </div>
+      <div class="layer-row__d">
+        <div class="input-group">${inputNumRaw(`${pathPrefix}.layers.${slot}.d_cm`, cfg.d_cm == null ? '' : cfg.d_cm, 0.5, 0, 'auto')}<span class="input-group__unit">cm</span></div>
+      </div>
+      <span class="layer-row__resolved">λ ${lambda} · d ${dCm} cm ${res?.fromDefault ? '<em>(Default)</em>' : ''}</span>
+    </div>`;
+  }).join('');
+  return `
+  <div class="layer-editor">
+    <div class="layer-editor__head">Schichtenaufbau (innen → aussen) · leer / Default = aus Bauperiode-Tabelle</div>
+    ${rows}
+  </div>`;
+}
+
 function renderRoomBauteil(idx, j, b){
   const typeOpts = Object.entries(BAUTEIL_LABELS).map(([k, l]) => [k, l]);
   const typ = b.typ || 'wand';
@@ -4846,7 +5117,7 @@ function renderRoomBauteil(idx, j, b){
         <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
       </div>
       <div class="field bauteil__readout" style="min-width:160px;">
-        <label class="field__label">U-Wert (auto)</label>
+        <label class="field__label">U-Wert ${variant === 'eigener' ? '(manuell)' : variant === 'schichten' ? '(aus Schichten)' : '(auto)'}</label>
         ${eigenerVariant
           ? `<div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].u_override`, b.u_override || '', 0.01, 0, '0.40')}<span class="input-group__unit">W/(m²·K)</span></div>`
           : `<div class="bauteil__value" data-readout-u="${idx}-${j}">${fmt(r.u, 2)} <span class="bauteil__unit">W/(m²·K)</span></div>`}
@@ -4860,6 +5131,9 @@ function renderRoomBauteil(idx, j, b){
         <div class="bauteil__source" data-readout-src="${idx}-${j}">${r.source || '—'}</div>
       </div>
     </div>
+    ${variant === 'schichten' && (typ === 'wand' || typ === 'dach' || typ === 'boden')
+      ? renderLayerEditor(`detail.raeume[${idx}].bauteile[${j}]`, b, state)
+      : ''}
   </div>`;
 }
 
@@ -5479,9 +5753,18 @@ function onInputChange(ev){
   // die sichtbaren Felder ändern (Override-Input ↔ Readout, Anschluss ↔ Dach-
   // Form ↔ Fenster-Rahmen). Bauperiode/Sanierungsstand wirken auch auf alle
   // Bauteil-Lookups → Rebuild ebenfalls.
-  if (/\.bauteile\[\d+\]\.(typ|variant|anschluss|dach_variant|fenster_gen|fenster_rahmen)$/.test(path) ||
-      path === 'objekt.bauperiode' || path === 'objekt.sanierungsstand'){
-    setTimeout(() => rebuildRooms(_getState ? _getState() : null), 0);
+  if (/\.bauteile\[\d+\]\.(typ|variant|anschluss|dach_variant|fenster_gen|fenster_rahmen|layers\.[a-zA-Z]+\.mat)$/.test(path) ||
+      path === 'objekt.bauperiode' || path === 'objekt.sanierungsstand' ||
+      /^detail\.huelle\.[a-zA-Z]+\.(variant|layers\.[a-zA-Z]+\.mat)$/.test(path)){
+    setTimeout(() => {
+      const st = _getState ? _getState() : null;
+      if (st){
+        rebuildRooms(st);
+        // Hülle ebenfalls neu rendern, falls offen
+        const huelleBlock = document.getElementById('sec-huelle');
+        if (huelleBlock) rebuildHuelleBauteile(st);
+      }
+    }, 0);
   }
 }
 
