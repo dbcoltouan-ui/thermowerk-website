@@ -1,10 +1,28 @@
-Heizlast S7 - Bugfix: WW-Toggle Status-Hinweis + Reload-Detail-Modus
+Heizlast S7 - UX/Style-Pass: Navy/Red, eckig, Stepper-Wrap, FWS-Pure, Bugfixes
 
-* Live sichtbar machen, was die "Verbrauch enthält Warmwasser"-Toggle
-  bewirkt: zeigt jetzt aktuellen Abzug in kWh/a oder Warnhinweis "0 kWh
-  abgezogen, bitte Sektion 3 ausfuellen". Math war FWS-konform, aber
-  ohne Eingabe-Hinweis war der Toggle scheinbar wirkungslos.
-* Reload mit aktivem Detail-Modus: UI baute zuvor nur die FWS-Default-
-  Sektionen, weil rebuildOnDetailToggle nach loadActive() nicht aufgerufen
-  wurde. Fix: explizit aufrufen, wenn ein Projekt aus localStorage
-  wiederhergestellt wurde.
+Style:
+* CI auf Hauptseiten-Look gebracht: Navy #1B2A4A + Red #D93025, alle
+  Radien auf 2-3px (eckig). Topbar dunkelnavy mit Red-Akzentleiste.
+* Stepper jetzt 2-Zeilen-Card-Grid statt horizontalem Slider, Steps als
+  kleine Karten mit Schatten und Aktiv-Hervorhebung.
+* Modal/Projekt-Karten/Buttons in einheitlichem Navy/Red-Schema.
+
+UX/FWS-Pure-Mode:
+* Foerderung, Baubewilligung, Notizen erscheinen NUR im Detail-Modus.
+  Im FWS-Default-View ist die Oberflaeche genauso minimal wie im
+  Final-Heizlast-Tool — keine ablenkenden Sektionen fuer reine
+  Verbrauchs-Heizlast-Berechnung.
+* Inline-WW-Eingabe (Personen / l/Pers oder V_W,u) jetzt direkt unter
+  "Verbrauch enthaelt Warmwasser"-Toggle in Sektion 2 — gleiche
+  State-Paths wie Sektion 3, beide Stellen synchron, jeder Tipp greift
+  sofort.
+
+Bugfixes:
+* Energietraeger-Wechsel (Heizoel ↔ Erdgas ↔ Pellets ↔ ...) hat das
+  Unit-Label nicht aktualisiert (zeigte z.B. weiterhin l/a obwohl m³/a
+  erwartet). Fix: data-period-energy-Attribut + Diff-Check in
+  syncPeriodsCount → rebuild bei Wechsel.
+* eta-Override-Feld war zu schmal (7 Felder im 6-Spalten-Grid).
+  Period-Grid auf 7 Spalten umgestellt mit minmax-Definitionen.
+* Erklaer-Box-Labels: Frage-Form ("Wozu Gemeinde?", "Wozu Bauperiode?")
+  durch neutrales "Hinweis" ersetzt. Body bleibt wie gehabt.

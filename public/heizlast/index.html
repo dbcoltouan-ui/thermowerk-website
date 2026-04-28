@@ -26,17 +26,21 @@
   --ink-800: #1e293b;
   --ink-900: #0f172a;
 
-  --brand-50:  #ecfeff;
-  --brand-100: #cffafe;
-  --brand-300: #67e8f9;
-  --brand-500: #0e7490;
-  --brand-600: #0a5e75;
-  --brand-700: #0a4d61;
+  /* Thermowerk-CI: Navy + Red — passt zur Hauptseite (Layout.astro) */
+  --brand-50:  #eef1f6;
+  --brand-100: #d8dde8;
+  --brand-300: #243658;   /* navy-light */
+  --brand-500: #1B2A4A;   /* navy */
+  --brand-600: #111D33;   /* navy-dark */
+  --brand-700: #0b1424;
+
+  --accent-500: #D93025;  /* Red — wie auf der Hauptseite */
+  --accent-600: #B71C1C;  /* Red hover */
 
   --ok-500:    #16a34a;
   --warn-500:  #d97706;
-  --bad-500:   #dc2626;
-  --info-500:  #2563eb;
+  --bad-500:   #D93025;   /* Brand-Red — einheitlich */
+  --info-500:  #1B2A4A;
 
   /* ---- Typografie ---- */
   --ff:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -52,7 +56,8 @@
   /* ---- Spacing & Radius ---- */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px;
   --s-8: 32px; --s-10: 40px; --s-12: 48px;
-  --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px;
+  /* Eckig — minimaler Radius (passt zur Hauptseite) */
+  --r-xs: 0px; --r-sm: 2px; --r-md: 3px; --r-lg: 3px; --r-xl: 4px;
 
   --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
   --shadow-md: 0 4px 12px rgba(15,23,42,.08);
@@ -102,8 +107,9 @@ sub, sup { font-size: 0.75em; line-height: 0; }
 
 /* ---- Header / Topbar ---- */
 .topbar {
-  background: var(--ink-0);
-  border-bottom: 1px solid var(--c-border);
+  background: var(--brand-600);
+  color: #fff;
+  border-bottom: 2px solid var(--accent-500);
   position: sticky;
   top: 0;
   z-index: 30;
@@ -121,15 +127,16 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   align-items: baseline;
   gap: var(--s-2);
   font-weight: 700;
-  color: var(--ink-900);
+  color: #fff;
   font-size: var(--fs-lg);
   letter-spacing: -0.01em;
+  text-decoration: none;
 }
 .brand__mark {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  border-radius: var(--r-sm);
+  background: var(--accent-500);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -139,7 +146,7 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   align-self: center;
 }
 .brand__sub {
-  color: var(--c-text-mute);
+  color: rgba(255,255,255,0.7);
   font-weight: 500;
   font-size: var(--fs-sm);
 }
@@ -150,15 +157,17 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   gap: var(--s-3);
   flex-wrap: wrap;
 }
+.topbar .switch span:not(.switch__track) { color: rgba(255,255,255,0.85); }
 .login-status {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
   font-size: var(--fs-sm);
-  color: var(--c-text-mute);
+  color: rgba(255,255,255,0.75);
   padding: var(--s-1) var(--s-3);
-  border-radius: 999px;
-  background: var(--ink-100);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .login-status__dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -176,35 +185,40 @@ sub, sup { font-size: 0.75em; line-height: 0; }
 }
 .stepper__inner {
   display: flex;
-  gap: var(--s-1);
-  overflow-x: auto;
-  padding: var(--s-2) 0;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: var(--s-3) 0;
 }
 .step {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-md);
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--c-text-mute);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  color: var(--ink-700);
   font-size: var(--fs-sm);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: background .15s, color .15s, border-color .15s;
+  transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+  box-shadow: var(--shadow-sm);
 }
-.step:hover { background: var(--ink-100); color: var(--ink-800); }
-.step.is-active {
+.step:hover {
   background: var(--brand-50);
-  color: var(--brand-700);
+  color: var(--brand-500);
   border-color: var(--brand-100);
+}
+.step.is-active {
+  background: var(--brand-500);
+  color: #fff;
+  border-color: var(--brand-500);
+  box-shadow: 0 2px 6px rgba(27,42,74,0.25);
 }
 .step__num {
   width: 22px; height: 22px;
-  border-radius: 50%;
+  border-radius: var(--r-sm);
   background: var(--ink-200);
   color: var(--ink-700);
   display: inline-flex;
@@ -212,8 +226,13 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   justify-content: center;
   font-size: var(--fs-xs);
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
-.step.is-active .step__num { background: var(--brand-500); color: #fff; }
+.step.is-active .step__num { background: var(--accent-500); color: #fff; }
+@media (max-width: 640px) {
+  .step { padding: 6px 10px; font-size: var(--fs-xs); }
+  .step__num { width: 18px; height: 18px; }
+}
 
 /* ---- Main / Sections ---- */
 .app-main {
@@ -458,11 +477,17 @@ sub, sup { font-size: 0.75em; line-height: 0; }
 .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--brand-100); }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .btn--primary {
+  background: var(--accent-500);
+  color: #fff;
+  border-color: var(--accent-500);
+}
+.btn--primary:hover { background: var(--accent-600); border-color: var(--accent-600); color: #fff; }
+.btn--secondary {
   background: var(--brand-500);
   color: #fff;
   border-color: var(--brand-500);
 }
-.btn--primary:hover { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
+.btn--secondary:hover { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
 .btn--ghost {
   background: transparent;
   border-color: transparent;
@@ -475,7 +500,7 @@ sub, sup { font-size: 0.75em; line-height: 0; }
 /* ---- Period-Liste / Add-Button ---- */
 .period {
   display: grid;
-  grid-template-columns: 1fr 130px 130px 1fr 1fr 32px;
+  grid-template-columns: minmax(140px,1fr) 130px 130px minmax(120px,1fr) minmax(180px,1.4fr) 110px 32px;
   gap: var(--s-2);
   align-items: end;
   padding: var(--s-3);
@@ -1156,6 +1181,123 @@ body.modal-open { overflow: hidden; }
    ========================================================================= */
 .export-opts { display: flex; flex-direction: column; gap: var(--s-2); }
 .export-opts .chk { padding: 8px 0; }
+
+
+/* =========================================================================
+   S7 — Restyle: Navy/Red CI + eckig (Hauptseiten-konform)
+   ========================================================================= */
+
+/* Topbar-Action-Buttons (auf dunklem Navy-Grund) */
+.topbar-actions .btn {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--r-sm);
+  font-weight: 500;
+}
+.topbar-actions .btn:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.28);
+  color: #fff;
+}
+.topbar-actions .btn--primary {
+  background: var(--accent-500);
+  border-color: var(--accent-500);
+  color: #fff;
+}
+.topbar-actions .btn--primary:hover {
+  background: var(--accent-600);
+  border-color: var(--accent-600);
+}
+
+/* Modal eckig + Navy-Akzent */
+.modal__panel {
+  border-radius: var(--r-md) !important;
+  border-top: 3px solid var(--brand-500);
+}
+.modal__head {
+  background: var(--brand-50);
+}
+.modal__title { color: var(--brand-500); font-weight: 700; }
+.modal__close { border-radius: var(--r-sm); }
+
+/* Login-Modal: Navy-Akzent für Passwort-Bereich */
+#modalLogin .modal__panel { border-top-color: var(--accent-500); }
+#modalLogin .modal__title { color: var(--accent-500); }
+#modalLogin .input { font-size: var(--fs-md); padding: 10px 12px; }
+
+/* Projekte-Karten: eckig + dünne Navy-Akzentleiste */
+.proj-card {
+  border-radius: var(--r-sm) !important;
+  border-left: 3px solid var(--brand-500);
+}
+.proj-card__title { color: var(--brand-500); }
+.proj-badge { border-radius: var(--r-sm); font-weight: 700; }
+.proj-badge--cloud { background: var(--brand-500); color: #fff; }
+.proj-badge--local { background: var(--ink-200); color: var(--ink-700); border: 1px solid var(--ink-300); }
+.auth-pill { border-radius: var(--r-sm); }
+.auth-pill--on { background: var(--ok-500); color: #fff; }
+
+/* Buttons / Inputs / Cards: Radius an eckiges Profil anpassen */
+.btn { border-radius: var(--r-sm); }
+.input, .select, .input-group { border-radius: var(--r-sm); }
+.section { border-radius: var(--r-md); }
+.kpi { border-radius: var(--r-sm); }
+.kpi--hero { border-radius: var(--r-md); background: linear-gradient(135deg, var(--brand-500), var(--brand-700)) !important; }
+.method, .block, .period, .card { border-radius: var(--r-sm); }
+.foerder-card, .bewilligung-box, .info-box { border-radius: var(--r-sm); }
+.toast { border-radius: var(--r-sm); }
+.btn--danger { color: var(--accent-500); }
+.btn--danger:hover { background: rgba(217, 48, 37, 0.08); color: var(--accent-600); }
+
+/* Stepper aktive Step in Navy */
+.step.is-active {
+  background: var(--brand-500);
+  color: #fff !important;
+  border-color: var(--brand-500);
+}
+.step.is-active .step__num {
+  background: var(--accent-500) !important;
+  color: #fff !important;
+}
+.step:hover { background: var(--brand-50); color: var(--brand-500); }
+
+/* Section-Titel: Navy */
+.section__title { color: var(--brand-500); }
+.section__num { color: var(--accent-500); font-weight: 700; }
+
+/* Switch-Track aktiv: Navy statt Teal */
+.switch input:checked + .switch__track { background: var(--accent-500); }
+
+/* Method-Header */
+.method__num { background: var(--brand-500) !important; color: #fff !important; border-radius: var(--r-sm); }
+
+/* Inline WW-Block (Sektion 2) */
+.ww-inline {
+  margin: 0 0 var(--s-3) 30px;
+  padding: var(--s-3);
+  background: var(--ink-50);
+  border-left: 2px solid var(--brand-500);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.ww-inline[hidden] { display: none; }
+
+/* Block-Title kompakter */
+.block { background: var(--ink-0); border: 1px solid var(--c-border); }
+.block__title { color: var(--brand-500); }
+
+/* Footer */
+.app-footer {
+  background: var(--brand-600);
+  color: rgba(255,255,255,0.7);
+  border-top: 2px solid var(--accent-500);
+}
+.app-footer a { color: rgba(255,255,255,0.85); }
+
+/* Print: Eckig auch im Print-Bericht */
+@media print {
+  body { background: #fff; }
+}
 
 </style>
 </head>
@@ -3416,8 +3558,9 @@ const STEPS_DETAIL = [
   { id: 'sec-geraet',       num: '9', label: 'Gerät',         detail: true }
 ];
 const STEPS_FOERDER = [
-  { id: 'sec-foerderung',     num: 'F', label: 'Förderungen' },
-  { id: 'sec-baubewilligung', num: 'B', label: 'Baubewilligung' }
+  { id: 'sec-foerderung',     num: 'F', label: 'Förderungen',   detail: true },
+  { id: 'sec-baubewilligung', num: 'B', label: 'Baubewilligung', detail: true },
+  { id: 'sec-notizen',        num: '📝', label: 'Notizen',       detail: true }
 ];
 const STEPS_END = [
   { id: 'sec-ergebnis',   num: '∑', label: 'Ergebnis' }
@@ -3425,9 +3568,9 @@ const STEPS_END = [
 function stepsForState(s){
   return s?.detail?.aktiv
     ? [...STEPS_BASE, ...STEPS_DETAIL, ...STEPS_FOERDER, ...STEPS_END]
-    : [...STEPS_BASE, ...STEPS_FOERDER, ...STEPS_END];
+    : [...STEPS_BASE, ...STEPS_END];
 }
-let STEPS = STEPS_BASE.concat(STEPS_FOERDER).concat(STEPS_END);
+let STEPS = STEPS_BASE.concat(STEPS_END);
 
 // CH-Kantone (Vollständig) — Code → Label
 const CH_KANTONE = [
@@ -3549,17 +3692,18 @@ function renderSections(s){
     renderZuschlaege(s),
     renderSpeicher(s)
   ];
+  // FWS-Default-View: NUR die FWS-Sektionen + Ergebnis (1:1 wie Final-Heizlast).
+  // Detail-Modus: zusätzlich Hülle, Räume, Wärmeübergabe, Gerät, Förderung,
+  // Baubewilligung, Notizen.
   if (s?.detail?.aktiv){
     out.push(renderHuelle(s));
     out.push(renderRaeume(s));
     out.push(renderVerteilung(s));
     out.push(renderGeraet(s));
+    out.push(renderFoerderung(s));
+    out.push(renderBaubewilligung(s));
+    out.push(renderNotizen(s));
   }
-  // S6 — in beiden Modi sichtbar
-  out.push(renderFoerderung(s));
-  out.push(renderBaubewilligung(s));
-  // S7 — Notizen (3 Bereiche, exportierbar)
-  out.push(renderNotizen(s));
   out.push(renderErgebnis(s));
   return out.join('');
 }
@@ -3674,15 +3818,16 @@ const ERKLAER = {
   'baubewilligung.lwwp':  'LSV-Schallnachweis: Planungswert nachts in der Empfindlichkeitsstufe II ist −10 dB(A) gegenüber dem Immissionsgrenzwert (60 → 50 dB(A) tags, 50 → 40 dB(A) nachts).'
 };
 
-function infoBox(key, label){
+function infoBox(key /*, label (deprecated, ignoriert) */){
   const txt = ERKLAER[key];
   if (!txt) return '';
-  const labelTxt = label || 'Info';
+  // S7-Refactor: keine Frage-Form mehr ("Wozu Gemeinde?"), sondern neutrales
+  // "Hinweis" als Toggle-Label. Beschreibung steht im Body.
   return `
     <details class="info-box">
       <summary class="info-box__sum">
         <span class="info-box__icon" aria-hidden="true">ⓘ</span>
-        <span class="info-box__label">${esc(labelTxt)}</span>
+        <span class="info-box__label">Hinweis</span>
       </summary>
       <div class="info-box__body">${txt}</div>
     </details>`;
@@ -3805,6 +3950,38 @@ function renderStammdaten(s){
   </section>`;
 }
 
+/**
+ * S7 — Kompakte WW-Eingabe (Modus, Personen + l/Pers·Tag ODER V_W,u).
+ * Wird in BEIDEN Sektionen verwendet (Verbrauchs-Methode UND Sektion 3 WW),
+ * gleiche State-Paths → beide Stellen synchron. Suffix `inst` differenziert
+ * IDs/Radio-Names, damit zwei Instanzen sich nicht in die Quere kommen.
+ */
+function renderInlineWw(s, inst = 'g'){
+  const w = s.warmwasser || {};
+  const isPers = w.modus === 'personen';
+  return `
+  <div class="ww-inline" id="wwInline-${inst}" data-on="${s?.heizung?.verbrauchInklWW || inst!=='v'}">
+    <div class="grid grid--2">
+      <div class="field">
+        <label class="field__label">Eingabe-Modus</label>
+        ${segRadio('wwmod-' + inst, 'warmwasser.modus', w.modus || 'direkt', [['direkt','V<sub>W,u</sub> direkt'],['personen','Personen × l/d']])}
+      </div>
+      <div class="field" id="wwf-direkt-${inst}" ${isPers ? 'hidden' : ''}>
+        <label class="field__label">WW-Nutzvolumen V<sub>W,u</sub></label>
+        <div class="input-group">${inputNumRaw('warmwasser.VW_u', w.VW_u || '', 1, 0, '180')}<span class="input-group__unit">l/d</span></div>
+      </div>
+      <div class="field" id="wwf-pers-${inst}" ${isPers ? '' : 'hidden'}>
+        <label class="field__label">Personen</label>
+        ${inputNumRaw('warmwasser.personen', w.personen || '', 1, 0, '4')}
+      </div>
+      <div class="field" id="wwf-lpd-${inst}" ${isPers ? '' : 'hidden'}>
+        <label class="field__label">l / Person · Tag</label>
+        ${inputNumRaw('warmwasser.lProPerson', w.lProPerson, 5, 5, '40')}
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderHeizlast(s){
   const h = s.heizung;
   return `
@@ -3835,7 +4012,8 @@ function renderHeizlast(s){
           <input type="checkbox" data-path="heizung.verbrauchInklWW" ${h.verbrauchInklWW ? 'checked' : ''}>
           <span><strong>Verbrauch enthält Warmwasser</strong> — wird automatisch abgezogen</span>
         </label>
-        <p class="field__hint" id="wwDeductHint" style="margin:0 0 var(--s-3) 30px;">—</p>
+        <p class="field__hint" id="wwDeductHint" style="margin:0 0 var(--s-2) 30px;">—</p>
+        ${renderInlineWw(s, 'v')}
         <div id="periodsList"></div>
         <button class="add-row" type="button" id="btnAddPeriod">+ Energieträger hinzufügen</button>
         <p class="field__hint" style="margin-top:var(--s-2);">
@@ -4704,7 +4882,7 @@ function renderPeriod(p, idx){
   const energyOpts = Object.entries(HEIZWERT).map(([k, v]) => [k, v.name]);
   const etaOpts = (h.etaPresets || []).map(e => [e.key, e.eta != null ? `${e.label} (η ${e.eta})` : e.label]);
   return `
-  <div class="period" data-period-idx="${idx}">
+  <div class="period" data-period-idx="${idx}" data-period-energy="${escAttr(p.energy)}">
     <div class="field">
       <label class="field__label">Energieträger</label>
       ${select(`heizung.perioden[${idx}].energy`, p.energy, energyOpts)}
@@ -4738,7 +4916,19 @@ function syncPeriodsCount(state){
   if (!list) return;
   const ps = state.heizung.perioden || [];
   const dom = list.querySelectorAll('.period');
-  if (dom.length !== ps.length) rebuildPeriods(state);
+  if (dom.length !== ps.length){ rebuildPeriods(state); return; }
+  // S7-Bugfix: bei Energieträger-Wechsel (Heizöl ↔ Erdgas ↔ Pellets …)
+  // muss Unit-Label/Preset-Liste neu gerendert werden — sonst klebt z. B.
+  // bei Heizöl noch das alte 'mn³'-Label.
+  let needRebuild = false;
+  for (let i = 0; i < ps.length; i++){
+    const el = dom[i];
+    if (!el) { needRebuild = true; break; }
+    if (el.getAttribute('data-period-energy') !== String(ps[i].energy)){
+      needRebuild = true; break;
+    }
+  }
+  if (needRebuild) rebuildPeriods(state);
 }
 
 /* =========================================================================
@@ -5545,6 +5735,17 @@ function applyAllConditionals(s){
   setHidden('wwField-direkt',         s.warmwasser.modus !== 'direkt');
   setHidden('wwField-personen-pers',  s.warmwasser.modus !== 'personen');
   setHidden('wwField-personen-lpd',   s.warmwasser.modus !== 'personen');
+  // S7 — Inline-WW in Sektion 2 (Verbrauchs-Methode)
+  const wwInlineV = document.getElementById('wwInline-v');
+  if (wwInlineV){
+    wwInlineV.hidden = !s.heizung.verbrauchInklWW;
+    setHidden('wwf-direkt-v', s.warmwasser.modus !== 'direkt');
+    setHidden('wwf-pers-v',   s.warmwasser.modus !== 'personen');
+    setHidden('wwf-lpd-v',    s.warmwasser.modus !== 'personen');
+  }
+  // S7 — beide WW-Eingabe-Stellen synchron halten (Werte spiegeln, Focus
+  // nicht stomen).
+  syncWwInputValues(s);
   const spActive = !!s.zuschlaege.sperrzeitAktiv;
   const spF = document.getElementById('sperrzeitFields');
   if (spF){
@@ -5566,6 +5767,40 @@ function applyAllConditionals(s){
   // S6 — WP-Quelle nur bei Heizungsersatz relevant
   const wpQ = document.getElementById('wpQuelleField');
   if (wpQ) wpQ.style.opacity = (s.projekt && s.projekt.massnahme === 'heizungsersatz') ? '1' : '0.45';
+}
+
+/**
+ * S7 — WW-Eingabewerte synchron halten zwischen Sektion 2 (inline) und Sektion 3.
+ * Beide Sektionen binden an die gleichen state-Paths — wenn der User in einer
+ * Sektion tippt, soll der Wert in der anderen gleich nachgezogen werden, ohne
+ * den aktiven Focus zu stören.
+ */
+function syncWwInputValues(s){
+  const ww = s?.warmwasser || {};
+  const map = {
+    'warmwasser.modus':       ww.modus || 'direkt',
+    'warmwasser.personen':    ww.personen,
+    'warmwasser.lProPerson':  ww.lProPerson,
+    'warmwasser.VW_u':        ww.VW_u
+  };
+  Object.keys(map).forEach(path => {
+    const target = map[path];
+    document.querySelectorAll(`[data-path="${path}"]`).forEach(el => {
+      if (el === document.activeElement) return; // Focus nicht stomen
+      if (el.type === 'radio'){
+        el.checked = (el.value === String(target));
+      } else if (el.type === 'checkbox'){
+        el.checked = !!target;
+      } else {
+        const v = (target == null || target === 0 && (el.placeholder || el.dataset.allowEmpty)) ? '' : target;
+        // 0 ist gültiger Wert für `dT/lProPerson/etc.` — nur unterdrücken,
+        // wenn das Feld typischerweise leer dargestellt wird (placeholder).
+        if (target === 0 && el.placeholder) el.value = '';
+        else if (target == null) el.value = '';
+        else el.value = String(target);
+      }
+    });
+  });
 }
 
 function initActiveStepObserver(stepperEl){
