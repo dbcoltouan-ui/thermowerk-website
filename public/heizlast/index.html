@@ -114,21 +114,22 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   z-index: 30;
   box-shadow: var(--shadow-sm);
 }
-.topbar__brand-row {
+.topbar__brand-row { border-bottom: 1px solid var(--ink-100); }
+.topbar__action-row { /* leer — Inhalt im Inner-Container */ }
+.topbar__inner {
+  max-width: 1100px;
+  margin: 0 auto;
   padding: 14px var(--s-5) 12px;
   display: flex;
   align-items: center;
   gap: 18px;
-  border-bottom: 1px solid var(--ink-100);
   flex-wrap: wrap;
+  width: 100%;
 }
-.topbar__action-row {
+.topbar__action-row .topbar__inner {
   padding: 8px var(--s-5);
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
-  flex-wrap: wrap;
 }
 .brand {
   display: inline-flex;
@@ -203,12 +204,10 @@ sub, sup { font-size: 0.75em; line-height: 0; }
 
 /* Mobile: kompakter, Buttons nur Icons */
 @media (max-width: 640px) {
-  .topbar__brand-row { padding: 10px var(--s-4) 8px; gap: 10px; }
+  .topbar__brand-row .topbar__inner { padding: 10px var(--s-4) 8px; gap: 10px; }
   .brand__logo { max-height: 32px; }
-  .brand__firma { font-size: 10px; padding-left: 10px; }
-  .brand__firma strong { font-size: var(--fs-xs); }
   .brand__sub { display: none; }
-  .topbar__action-row { padding: 6px var(--s-4); gap: var(--s-2); }
+  .topbar__action-row .topbar__inner { padding: 6px var(--s-4); gap: var(--s-2); }
   .actions { gap: 2px; }
   .actions .btn span { display: none; }
   .actions .btn { padding: 6px 8px; }
@@ -1376,24 +1375,25 @@ body.modal-open { overflow: hidden; }
 
     <!-- ============================================================
          HEADER / TOPBAR — Brand-Row (Logo + Anschrift) und Action-Row
+         Volle Breite aussen, innen zentriert auf max-width 1100px.
          ============================================================ -->
     <header class="topbar">
-      <div class="container topbar__brand-row">
-        <a class="brand" href="https://thermowerk.ch" aria-label="Thermowerk — Startseite">
-          <img class="brand__logo" src="https://thermowerk.ch/img/logo-thermowerk.svg" alt="Thermowerk">
-        </a>
-        <div class="brand__firma">
-          <strong>Gebäudetechnik Coltouan</strong>
-          <span>Rankstrasse 18 · 8413 Neftenbach · +41 76 504 03 68 · info@thermowerk.ch</span>
+      <div class="topbar__brand-row">
+        <div class="topbar__inner">
+          <a class="brand" href="https://thermowerk.ch" aria-label="Thermowerk — Startseite">
+            <img class="brand__logo" src="./img/Logo.png" alt="Thermowerk">
+          </a>
+          <span class="brand__sub">Heizlast-Auslegung</span>
         </div>
-        <span class="brand__sub">Heizlast-Auslegung</span>
       </div>
-      <div class="container topbar__action-row">
-        <span class="project-tag">
-          <span class="project-tag__label">Projekt</span>
-          <span class="project-tag__value" id="topProjectName">Neues Projekt</span>
-        </span>
-        <div id="topbarActions" class="actions"><!-- via projects.mjs gefüllt --></div>
+      <div class="topbar__action-row">
+        <div class="topbar__inner">
+          <span class="project-tag">
+            <span class="project-tag__label">Projekt</span>
+            <span class="project-tag__value" id="topProjectName">Neues Projekt</span>
+          </span>
+          <div id="topbarActions" class="actions"><!-- via projects.mjs gefüllt --></div>
+        </div>
       </div>
     </header>
 
