@@ -224,12 +224,18 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   .project-tag__value { max-width: 18ch; }
 }
 
-/* ---- Stepper / Tab-Navigation ---- */
+/* ---- Stepper / Tab-Navigation ----
+   Stepper sitzt sticky direkt unter der Topbar. Da die Topbar 2 Zeilen hat
+   (Brand-Row + Action-Row) und je nach Viewport unterschiedlich hoch ist,
+   wird `--topbar-h` in src/main.mjs:syncStickyOffsets() per JS aus der echten
+   Topbar-Höhe gesetzt (auf load + resize). 112 px ist der CSS-Default fuer
+   Desktop, falls JS noch nicht gelaufen ist. */
+:root { --topbar-h: 112px; }
 .stepper {
   background: var(--ink-0);
   border-bottom: 1px solid var(--c-border);
   position: sticky;
-  top: 60px;
+  top: var(--topbar-h);
   z-index: 25;
 }
 .stepper__inner {
@@ -1013,7 +1019,9 @@ sub, sup { font-size: 0.75em; line-height: 0; }
     grid-template-columns: 1fr 1fr;
   }
   .topbar__inner { gap: var(--s-2); }
-  .stepper { top: 92px; }
+  /* `top: var(--topbar-h)` aus dem Default-Block übernimmt — JS misst die
+     reale Topbar-Höhe nach. Hier nur ein Fallback falls JS deaktiviert ist. */
+  .stepper { top: var(--topbar-h); }
 }
 @media (max-width: 480px) {
   .container { padding: 0 var(--s-3); }
@@ -1513,20 +1521,7 @@ body.modal-open { overflow: hidden; }
 
 /* S7 — Modal-Layout-Fix: Header + Footer schrumpfen nicht, Body scrollt */
 .modal__head, .modal__foot { flex-shrink: 0; }
-.modal__body { flex: 1 1 auto; min-height: 0; }
-#modalExport .modal__panel { width: 560px; max-width: 100%; }
-#modalExport .modal__foot { flex-wrap: wrap; }
-#modalExport .modal__foot .btn { min-width: 120px; }
-#modalExport .field__hint { margin-bottom: var(--s-3); }
-
-
-/* S7 — Mobile-Sticky-Fix: Topbar+Stepper beide sticky kollidieren auf
-   Mobile (Stepper schiebt Topbar mit beim Scroll). Stepper auf Mobile nicht
-   sticky → bleibt im normalen Document-Flow, Topbar ist die einzige sticky. */
-@media (max-width: 768px) {
-  .stepper { position: static !important; top: auto !important; }
-}
-
+.modal__body { flex: 1 1 auto; min
 </style>
 </head>
 <body>
@@ -1789,53 +1784,64 @@ __mods__["./state.mjs"] = { freshState, getState, setState, set, batch, subscrib
 // Ausgabe: { Qhl, Qw, Qoff, Qh, QnWW, VW_Sto, ... } in compute(state).
 
 /* ==========================================================================
-   KONSTANTEN (1:1 aus fws-original.html, Zeilen 767–895)
+   KONSTANTEN — Heizwerte (Hi), Konvention suissetec-FWS-Online-Tool.
+   Die alte Property `Ho` heisst jetzt `Hi` und enthält den unteren Heizwert.
+   Backwards-Compat: ein nicht-aufzählbarer Getter `Ho` liefert denselben Zahlenwert.
    ========================================================================== */
 
 const HEIZWERT = {
-  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Ho: 10.5,  useHi: false,
+  heizoel:   { name: 'Heizöl EL',            unit: 'l',     Hi: 9.91,
     etaPresets: [
       { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
       { key:'alt_ohneWW',  label:'älter, ohne WW',                eta:0.85 },
       { key:'alt_mitWW',   label:'älter, mit WW',                 eta:0.75 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Ho: 10.4,  useHi: false,
+  erdgas:    { name: 'Erdgas',               unit: 'mn³',   Hi: 10.04,
     etaPresets: [
       { key:'brennwert',   label:'neueres Modell, kondensierend', eta:0.95 },
       { key:'alt_ohneWW',  label:'älter, ohne WW',                eta:0.85 },
       { key:'alt_mitWW',   label:'älter, mit WW',                 eta:0.75 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  pellets:   { name: 'Pellets',              unit: 'kg',    Ho: 5.3,
+  pellets:   { name: 'Pellets',              unit: 'kg',    Hi: 5.0,
     etaPresets: [
       { key:'neu',         label:'Pelletkessel (neu)',            eta:0.72 },
       { key:'standard',    label:'Pelletkessel (Standard)',       eta:0.68 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  hartholz:  { name: 'Hartholz (Stückholz)', unit: 'Ster',  Ho: 2500,
+  hartholz:  { name: 'Hartholz (Stückholz)', unit: 'Ster',  Hi: 2500,
     etaPresets: [
       { key:'neu',         label:'Holzkessel neu',                eta:0.72 },
       { key:'alt',         label:'Holzkessel alt',                eta:0.55 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  nadelholz: { name: 'Nadelholz (Stückholz)', unit: 'Ster', Ho: 1800,
+  nadelholz: { name: 'Nadelholz (Stückholz)', unit: 'Ster', Hi: 1800,
     etaPresets: [
       { key:'neu',         label:'Holzkessel neu',                eta:0.72 },
       { key:'alt',         label:'Holzkessel alt',                eta:0.55 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  strom:     { name: 'Strom (Elektrospeicher)', unit: 'kWh', Ho: 1.0,
+  strom:     { name: 'Strom (Elektrospeicher)', unit: 'kWh', Hi: 1.0,
     etaPresets: [
       { key:'direkt',      label:'Elektrospeicher',               eta:0.95 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] },
-  fernwaerme:{ name: 'Fernwärme',            unit: 'kWh',   Ho: 1.0,
+  fernwaerme:{ name: 'Fernwärme',            unit: 'kWh',   Hi: 1.0,
     etaPresets: [
       { key:'fern',        label:'Fernwärme',                     eta:1.00 },
       { key:'custom',      label:'Eigener Wert…',                 eta:null }
     ] }
 };
+
+// Backwards-Compat: alter Property-Name `Ho` als Alias auf `Hi` (Read-only).
+// Externe Module / Tests, die noch h.Ho lesen, bekommen denselben Zahlenwert.
+for (const k of Object.keys(HEIZWERT)){
+  Object.defineProperty(HEIZWERT[k], 'Ho', {
+    get(){ return this.Hi; },
+    enumerable: false, configurable: true
+  });
+}
 
 const WW_PERSON_PRESETS = [
   { key:'sparsam',  label:'Sparsam (Dusche)',     lPd: 30 },
@@ -2006,7 +2012,8 @@ function plausiAmpel({ specWm2, bauperiode, gebaeudetyp }){
    ========================================================================== */
 
 /** Annualisierte Energie aus Brennstoff-Perioden.
- *  Qn = Σ [ Menge_Periode × (365/Tage_Periode) × Ho × η_Periode ] */
+ *  Qn = Σ [ Menge_Periode × (365/Tage_Periode) × Hi × η_Periode ]
+ *  Heizwert (Hi) ist konsistent mit suissetec-FWS-Online-Tool. */
 function computeQnVerbrauch(s){
   let Qn = 0;
   (s?.heizung?.perioden || []).forEach(p => {
@@ -2017,7 +2024,7 @@ function computeQnVerbrauch(s){
     const d = periodDays(p);
     const annual = menge * (365 / d);
     const eta = periodEta(p);
-    Qn += annual * h.Ho * eta;
+    Qn += annual * h.Hi * eta;
   });
   return Qn;
 }
@@ -2213,8 +2220,11 @@ function computePlausi(spez, s){
   });
 }
 
-/** Hauptkaskade — ein State rein, Resultat-Bundle raus. */
-function compute(s){
+/** Hauptkaskade — ein State rein, Resultat-Bundle raus.
+ *  Optionales `opts.phiHuelle` (kW) ersetzt das Verbrauchs-Q_hl als
+ *  Auslegungsgrundlage (für Hülle/Mixed-Mode-Bericht, AUDIT 3.12).
+ *  Q_w / Q_off / Q_h und spez/plausi werden dann mit phiHuelle gerechnet. */
+function compute(s, opts = {}){
   const m = {
     verbrauch:        computeMethodVerbrauch(s),
     betriebsstunden:  computeMethodBstd(s),
@@ -2227,7 +2237,11 @@ function compute(s){
     fallback = computeMethodBauperiode(s);
     if (fallback) primary = fallback;
   }
-  const Qhl = primary ? primary.Qhl : 0;
+  // AUDIT 3.12 — phiHuelle-Override: wenn der Aufrufer einen Hüllen-Q_hl in kW
+  // mitgibt, ersetzt er den Verbrauchs-Q_hl als Auslegungsgrundlage.
+  const phiHuelleOv = Number(opts.phiHuelle);
+  const usePhiHuelle = Number.isFinite(phiHuelleOv) && phiHuelleOv > 0;
+  const Qhl = usePhiHuelle ? phiHuelleOv : (primary ? primary.Qhl : 0);
   const qwDet = computeQwDetail(Qhl, s);
   const Qw   = qwDet.Qw;
   const Qoff = computeQoff(Qhl, s);
@@ -2254,7 +2268,8 @@ function compute(s){
   return {
     methods: m, methodList: mList, primary, fallback, ref,
     Qhl, Qw, qwDetail: qwDet, Qoff, Qas, Qh,
-    spez, plausi, VW_Sto, VP_Sto, QnWW, maxDev, A_WT, awtFactor
+    spez, plausi, VW_Sto, VP_Sto, QnWW, maxDev, A_WT, awtFactor,
+    phiHuelleUsed: usePhiHuelle
   };
 }
 
@@ -3370,7 +3385,670 @@ function raumFlaeche(g){
   return 0;
 }
 
-__mods__["./calc/envelope.mjs"] = { bauklasseFromBaujahr, bauklasseFromPeriode, applySanierung, lookupUWert, uFromLayers, defaultLayersForBauteil, aggregateAreas, huellflaeche, raumVolumen, raumFlaeche, RSI_RSE };
+/* ==========================================================================
+   MATERIAL-PICKER HELPERS (portiert aus Heizlast Pro · 2026-04-29 Session 2)
+   ==========================================================================
+   Additive Exports fuer src/calc/material-picker.mjs (5-Stufen-Picker:
+   Bauweise -> Dicke -> Daemmung j/n -> Material -> Dicke).
+   Quelle: Heizlast Pro/calc/envelope.mjs (Phase 12.5a / Refactor S2).
+   Bestehende Exports (bauklasseFromBaujahr, lookupUWert, uFromLayers,
+   defaultLayersForBauteil, RSI_RSE, etc.) bleiben unveraendert.
+   ========================================================================== */
+
+/** Alias auf bauklasseFromBaujahr — die Pro-API verwendet `baujahrklasse`. */
+const baujahrklasse = bauklasseFromBaujahr;
+
+/* --------------------------------------------------------------------------
+   DAEMMSTOFFE-Katalog (W/m·K) — synchron mit data/u-werte.json `daemmstoffe`.
+   -------------------------------------------------------------------------- */
+const DAEMMSTOFFE = {
+  mineralwolle: { label: 'Mineralwolle',                lambda: 0.040 },
+  eps:          { label: 'EPS (Polystyrol)',            lambda: 0.038 },
+  xps:          { label: 'XPS',                          lambda: 0.034 },
+  pur:          { label: 'PUR/PIR',                      lambda: 0.025 },
+  holzfaser:    { label: 'Holzfaser',                    lambda: 0.045 },
+  unbekannt:    { label: 'unbekannt / nicht prüfbar',    lambda: 0.045 },
+};
+
+/* --------------------------------------------------------------------------
+   BAUTEIL_DEFAULTS — Default-Schichtsaetze pro Bauteil-Typ x Baujahrsklasse.
+   Synchron mit data/u-werte.json `bauteilDefaults`. Dicke in Metern.
+   -------------------------------------------------------------------------- */
+const TR_VOLLZIEGEL_50  = { label: 'Vollziegel/Naturstein 50 cm', lambda: 0.81, d: 0.50 };
+const TR_BACKSTEIN_30   = { label: 'Backstein 30 cm',             lambda: 0.81, d: 0.30 };
+const TR_HLZ_30         = { label: 'Hochlochziegel 30 cm',        lambda: 0.40, d: 0.30 };
+const TR_HLZ_24         = { label: 'Hochlochziegel 24 cm',        lambda: 0.29, d: 0.24 };
+const TR_HLZ_175        = { label: 'Hochlochziegel 17,5 cm',      lambda: 0.29, d: 0.175 };
+const TR_SPARREN        = { label: 'Holzsparren + Schalung',      lambda: 0.13, d: 0.025 };
+const TR_BETONPLATTE_180= { label: 'Stahlbetonplatte 18 cm',      lambda: 1.70, d: 0.18 };
+const TR_BETONPLATTE_200= { label: 'Stahlbetonplatte 20 cm',      lambda: 1.70, d: 0.20 };
+const PUTZ_INNEN_15     = { label: 'Innenputz Kalkgips 15 mm',    lambda: 0.70, d: 0.015 };
+const PUTZ_INNEN_20     = { label: 'Innenputz Kalkgips 20 mm',    lambda: 0.70, d: 0.020 };
+const PUTZ_AUSSEN_10    = { label: 'Aussenputz Zement 10 mm',     lambda: 1.00, d: 0.010 };
+const PUTZ_AUSSEN_15    = { label: 'Aussenputz Zement 15 mm',     lambda: 1.00, d: 0.015 };
+const PUTZ_AUSSEN_20    = { label: 'Aussenputz Zement 20 mm',     lambda: 1.00, d: 0.020 };
+
+const BAUTEIL_DEFAULTS = {
+  aussenwand: {
+    vor1945:     { tragschicht: TR_VOLLZIEGEL_50, putzInnen: PUTZ_INNEN_20, putzAussen: PUTZ_AUSSEN_20, daemmung: { material: 'mineralwolle', dicke: 0.04 }, beschreibung: 'Bruchstein-/Vollziegel ungedaemmt; bei Sanierung typisch 4 cm Aussendaemmung.' },
+    '1946_1960': { tragschicht: TR_BACKSTEIN_30,  putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_20, daemmung: { material: 'mineralwolle', dicke: 0.06 }, beschreibung: 'Backsteinmauerwerk ohne Daemmung; Sanierung typisch 6 cm WDVS.' },
+    '1961_1977': { tragschicht: TR_HLZ_30,        putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_15, daemmung: { material: 'mineralwolle', dicke: 0.06 }, beschreibung: 'Hochloch-Ziegelmauerwerk, Erstdaemmung dünn oder fehlend. Sanierungs-Standard 1990er: 6 cm Mineralwolle.' },
+    '1978_1994': { tragschicht: TR_HLZ_24,        putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_15, daemmung: { material: 'mineralwolle', dicke: 0.08 }, beschreibung: 'Massivbau mit erster Aussendaemmung 6-10 cm Mineralwolle/EPS.' },
+    '1995_2000': { tragschicht: TR_HLZ_175,       putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_10, daemmung: { material: 'eps',          dicke: 0.12 }, beschreibung: 'WDVS Standard SIA 380/1 1995, 12 cm EPS.' },
+    '2001_2009': { tragschicht: TR_HLZ_175,       putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_10, daemmung: { material: 'eps',          dicke: 0.14 }, beschreibung: 'MuKEn 2008, 14 cm EPS auf Massiv-Mauerwerk.' },
+    '2010_2015': { tragschicht: TR_HLZ_175,       putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_10, daemmung: { material: 'eps',          dicke: 0.16 }, beschreibung: 'MuKEn 2014, 16 cm EPS oder Mineralwolle.' },
+    '2016_heute':{ tragschicht: TR_HLZ_175,       putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_10, daemmung: { material: 'eps',          dicke: 0.18 }, beschreibung: 'Aktueller MuKEn-Standard, 18 cm EPS.' },
+    minergie:    { tragschicht: TR_HLZ_175,       putzInnen: PUTZ_INNEN_15, putzAussen: PUTZ_AUSSEN_10, daemmung: { material: 'pur',          dicke: 0.22 }, beschreibung: 'Minergie-/Minergie-P-Standard, 22 cm PUR oder hochwertige Mineralwolle.' },
+  },
+  dach: {
+    vor1945:     { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.10 }, beschreibung: 'Steildach urspruenglich ungedaemmt; Sanierungs-Default 10 cm Zwischensparren.' },
+    '1946_1960': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.12 }, beschreibung: 'Sanierung typisch 12 cm Mineralwolle Zwischensparren.' },
+    '1961_1977': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.14 }, beschreibung: 'Erste Zwischensparrendaemmung dünn; Sanierungs-Standard 14 cm.' },
+    '1978_1994': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.16 }, beschreibung: 'Standard-Zwischensparren 16 cm.' },
+    '1995_2000': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.20 }, beschreibung: 'SIA 380/1 1995 mit 20 cm Mineralwolle.' },
+    '2001_2009': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.22 }, beschreibung: 'MuKEn 2008, 22 cm Mineralwolle.' },
+    '2010_2015': { tragschicht: TR_SPARREN, daemmung: { material: 'mineralwolle', dicke: 0.24 }, beschreibung: 'MuKEn 2014, 24 cm Zwischensparren + Aufsparren.' },
+    '2016_heute':{ tragschicht: TR_SPARREN, daemmung: { material: 'pur',          dicke: 0.20 }, beschreibung: 'Aktueller Standard mit PUR-Aufsparren.' },
+    minergie:    { tragschicht: TR_SPARREN, daemmung: { material: 'pur',          dicke: 0.26 }, beschreibung: 'Minergie-P, 26 cm PUR oder hochwertig Mineralwolle.' },
+  },
+  boden: {
+    vor1945:     { tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'eps', dicke: 0.04 }, beschreibung: 'Massive Bodenplatte ungedaemmt; Sanierung typisch 4 cm EPS auf Kellerdecke (von oben).' },
+    '1946_1960': { tragschicht: TR_BETONPLATTE_180, daemmung: { material: 'eps', dicke: 0.06 }, beschreibung: 'Sanierung typisch 6 cm EPS.' },
+    '1961_1977': { tragschicht: TR_BETONPLATTE_180, daemmung: { material: 'eps', dicke: 0.08 }, beschreibung: 'Erstdaemmung Bodenplatte dünn; Sanierung 8 cm EPS.' },
+    '1978_1994': { tragschicht: TR_BETONPLATTE_180, daemmung: { material: 'eps', dicke: 0.08 }, beschreibung: 'Standard 8 cm EPS unter Estrich.' },
+    '1995_2000': { tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'eps', dicke: 0.10 }, beschreibung: 'SIA 380/1 1995, 10 cm EPS.' },
+    '2001_2009': { tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'xps', dicke: 0.12 }, beschreibung: 'MuKEn 2008, 12 cm XPS Perimeter.' },
+    '2010_2015': { tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'xps', dicke: 0.14 }, beschreibung: 'MuKEn 2014, 14 cm XPS.' },
+    '2016_heute':{ tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'xps', dicke: 0.16 }, beschreibung: 'Aktueller Standard 16 cm XPS.' },
+    minergie:    { tragschicht: TR_BETONPLATTE_200, daemmung: { material: 'xps', dicke: 0.20 }, beschreibung: 'Minergie-P, 20 cm XPS.' },
+  },
+};
+
+/** Tiefe Kopie eines Default-Schichtsatzes — UI-Aufrufer kann override-editen. */
+function bauteilDefaultsFor(bauteilTyp, bk) {
+  const set = BAUTEIL_DEFAULTS[bauteilTyp]?.[bk];
+  if (!set) return null;
+  return JSON.parse(JSON.stringify(set));
+}
+
+/* --------------------------------------------------------------------------
+   uWertAusSchichten — vereinfachte Schicht-API der Default-Kaskade.
+   Schichten von innen nach aussen, je entweder
+     { material: 'mineralwolle' | ... , d: m }   (Lookup in DAEMMSTOFFE), oder
+     { lambda: W/mK,                  d: m }   (Tragschicht / Putz, direkt).
+   Verwendet die Tool-eigene RSI_RSE-Tabelle (Rsi/Rse Camel-Case).
+   -------------------------------------------------------------------------- */
+function uWertAusSchichten(schichten, opts = {}) {
+  const dir = opts.direction || 'horizontal';
+  const rsiRse = RSI_RSE[dir] || RSI_RSE.horizontal;
+  const list = Array.isArray(schichten) ? schichten : [];
+  let sumR = 0;
+  const enriched = list.map((s, i) => {
+    let lambda = null, label = null, materialKey = null;
+    if (s && typeof s === 'object') {
+      if (typeof s.material === 'string' && DAEMMSTOFFE[s.material]) {
+        materialKey = s.material;
+        lambda = DAEMMSTOFFE[s.material].lambda;
+        label = DAEMMSTOFFE[s.material].label;
+      } else if (typeof s.lambda === 'number' && isFinite(s.lambda)) {
+        lambda = s.lambda;
+        label = s.label || null;
+      }
+    }
+    const d = Number(s && s.d) || 0;
+    let r = 0;
+    if (lambda > 0 && d > 0) r = d / lambda;
+    sumR += r;
+    return { idx: i, material: materialKey, label, lambda, d, r };
+  });
+  const rTotal = rsiRse.Rsi + sumR + rsiRse.Rse;
+  const U = rTotal > 0 ? 1 / rTotal : null;
+  const marker = opts.markerSource || 'baujahr';
+  return { U, lambdaTotalReziprok: rTotal, marker, schichten: enriched };
+}
+
+/* --------------------------------------------------------------------------
+   BAUJAHR_UWERT + uValueFallback — Fallback-U-Wert aus Baujahrsklasse.
+   Wird vom Material-Picker bei „voll-unbekannt" angerufen, statt eine
+   fragwuerdige Schicht-Rekonstruktion zu bauen.
+   -------------------------------------------------------------------------- */
+const BAUJAHR_UWERT = {
+  wandUWert: {
+    EFH: {
+      vor1945:{typ:1.8},'1946_1960':{typ:1.2},'1961_1977':{typ:0.6},
+      '1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.2},
+      '2010_2015':{typ:0.2},'2016_heute':{typ:0.17}, minergie:{typ:0.15}
+    },
+    MFH: {
+      vor1945:{typ:1.8},'1946_1960':{typ:1.2},'1961_1977':{typ:0.6},
+      '1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.2},
+      '2010_2015':{typ:0.2},'2016_heute':{typ:0.17}, minergie:{typ:0.15}
+    }
+  },
+  dachUWert: {
+    steildach:{vor1945:{typ:1.5},'1946_1960':{typ:1.2},'1961_1977':{typ:0.8},'1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.2},'2010_2015':{typ:0.2},'2016_heute':{typ:0.17},minergie:{typ:0.15}},
+    flachdach:{vor1945:{typ:1.4},'1946_1960':{typ:1.4},'1961_1977':{typ:1.0},'1978_1994':{typ:0.6},'1995_2000':{typ:0.25},'2001_2009':{typ:0.2},'2010_2015':{typ:0.2},'2016_heute':{typ:0.17},minergie:{typ:0.15}},
+    pultdach: {vor1945:{typ:1.5},'1946_1960':{typ:1.2},'1961_1977':{typ:0.8},'1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.2},'2010_2015':{typ:0.2},'2016_heute':{typ:0.17},minergie:{typ:0.15}}
+  },
+  bodenUWert: {
+    gegenErdreich:     {vor1945:{typ:1.3},'1946_1960':{typ:1.1},'1961_1977':{typ:0.8},'1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.25},'2010_2015':{typ:0.25},'2016_heute':{typ:0.25},minergie:{typ:0.2}},
+    unbeheizterKeller: {vor1945:{typ:1.3},'1946_1960':{typ:1.1},'1961_1977':{typ:0.8},'1978_1994':{typ:0.5},'1995_2000':{typ:0.25},'2001_2009':{typ:0.25},'2010_2015':{typ:0.25},'2016_heute':{typ:0.25},minergie:{typ:0.2}}
+  },
+  fensterUWert: {
+    einfachverglasung:             {uFenster_holz:{typ:4.7}},
+    isolierglas_2fach_ohne_low_e:  {uFenster_holz:{typ:2.7}},
+    isolierglas_2fach_low_e_argon: {uFenster_holz:{typ:1.3}},
+    isolierglas_3fach_standard:    {uFenster_holz:{typ:0.9}},
+    isolierglas_3fach_high_end:    {uFenster_holz:{typ:0.8}}
+  }
+};
+
+function uValueFallback(params) {
+  const bk = baujahrklasse(params.baujahr);
+  const result = (u) => ({ u, baujahrklasse: bk, quelle: 'fallback_baujahr' });
+  if (!bk) return result(null);
+  switch (params.bauteilTyp) {
+    case 'aussenwand': {
+      const cat = params.gebaeudetyp === 'MFH' ? 'MFH' : 'EFH';
+      return result(BAUJAHR_UWERT.wandUWert[cat]?.[bk]?.typ ?? null);
+    }
+    case 'dach': {
+      const form = params.dachform === 'flachdach' ? 'flachdach'
+                 : params.dachform === 'pultdach'  ? 'pultdach'
+                 : 'steildach';
+      return result(BAUJAHR_UWERT.dachUWert[form]?.[bk]?.typ ?? null);
+    }
+    case 'kellerdecke':
+      return result(BAUJAHR_UWERT.bodenUWert.unbeheizterKeller?.[bk]?.typ ?? null);
+    case 'bodenPlatte':
+      return result(BAUJAHR_UWERT.bodenUWert.gegenErdreich?.[bk]?.typ ?? null);
+    case 'fenster': {
+      const t = params.fenstertyp && BAUJAHR_UWERT.fensterUWert[params.fenstertyp];
+      if (t) return result(t.uFenster_holz?.typ ?? null);
+      const y = parseInt(params.baujahr, 10);
+      if (!isFinite(y)) return result(null);
+      if (y < 1975) return result(BAUJAHR_UWERT.fensterUWert.einfachverglasung.uFenster_holz.typ);
+      if (y < 1995) return result(BAUJAHR_UWERT.fensterUWert.isolierglas_2fach_ohne_low_e.uFenster_holz.typ);
+      if (y < 2005) return result(BAUJAHR_UWERT.fensterUWert.isolierglas_2fach_low_e_argon.uFenster_holz.typ);
+      if (y < 2015) return result(BAUJAHR_UWERT.fensterUWert.isolierglas_3fach_standard.uFenster_holz.typ);
+      return result(BAUJAHR_UWERT.fensterUWert.isolierglas_3fach_high_end.uFenster_holz.typ);
+    }
+    default:
+      return result(null);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   FENSTER_GENERATIONEN — Generationen-Lookup (Uw direkt). Synchron mit
+   data/u-werte.json `fensterGenerationen`.
+   -------------------------------------------------------------------------- */
+const FENSTER_GENERATIONEN = {
+  einfach:               { label: 'Einfachverglasung (vor 1975)',             uw: 5.20 },
+  '2fach_unbeschichtet': { label: '2-fach unbeschichtet (1975-1995)',         uw: 2.80 },
+  '2fach_low_e':         { label: '2-fach Low-E + Argon (1995-2005)',         uw: 1.30 },
+  '3fach':               { label: '3-fach Standard (2005-2015)',              uw: 0.95 },
+  '3fach_passiv':        { label: '3-fach Passivhaus / Minergie-P (ab 2010)', uw: 0.80 },
+  unbekannt:             { label: 'unbekannt / nicht prüfbar (konservativ)',  uw: 2.80 },
+};
+
+__mods__["./calc/envelope.mjs"] = { bauklasseFromBaujahr, bauklasseFromPeriode, applySanierung, lookupUWert, uFromLayers, defaultLayersForBauteil, aggregateAreas, huellflaeche, raumVolumen, raumFlaeche, bauteilDefaultsFor, uWertAusSchichten, uValueFallback, RSI_RSE, baujahrklasse, DAEMMSTOFFE, BAUTEIL_DEFAULTS, BAUJAHR_UWERT, FENSTER_GENERATIONEN };
+})();
+
+// === ./calc/material-picker.mjs ===
+(function(){
+/**
+ * Material-Picker · Refactor S2 Session 1 (2026-04-27)
+ * =====================================================
+ * Daten- und Rechen-Modul fuer den gestaffelten Material-Picker im
+ * Einfach-Modus (Refactor-Plan-Einfach-Modus-V2 §3 Schritt 2).
+ *
+ * Aufgabe:
+ *   Liefert pro Bauteil (aussenwand/dach/boden/fenster) die UI-Stufen-
+ *   Definition (Bauweise → Dicke → Daemmung ja/nein → Daemm-Material →
+ *   Daemm-Dicke) und berechnet daraus einen U-Wert.
+ *
+ * „Unbekannt"-Pattern:
+ *   Pro Stufe gibt es eine `null`-Option („— Unbekannt (Pauschalwert)").
+ *   Wenn der User Stufe X = unbekannt waehlt, wird NUR diese Stufe mit
+ *   dem Default aus `data/uwerte.json` (Baujahrsklasse + Bauteil)
+ *   pauschalisiert, alle bekannten Stufen bleiben exakt. Die U-Wert-
+ *   Schichtformel kombiniert.
+ *
+ * Sonderregel Doppelmauerwerk (zweischaliges Mauerwerk):
+ *   `hatDaemmung` ist auto-`true` und nicht ueberschreibbar, da
+ *   zweischalige Konstruktionen praktisch immer eine Kerndaemmung
+ *   zwischen den Schalen haben.
+ *
+ * Modul ist reiner Rechenkern + Datenmodell (kein DOM, keine UI).
+ * Fuer den UI-Aufbau (besichtigung.html-Integration) folgt S2 Session 2.
+ *
+ * @see docs/REFACTOR-PLAN-EINFACH-MODUS-V2.md §3 Schritt 2
+ * @see calc/envelope.mjs — DAEMMSTOFFE, BAUTEIL_DEFAULTS, uWertAusSchichten
+ * @see data/uwerte.json — bauteilDefaults, daemmstoffe, fensterGenerationen
+ */
+
+const { DAEMMSTOFFE, BAUTEIL_DEFAULTS, bauteilDefaultsFor, uWertAusSchichten, uValueFallback, baujahrklasse, FENSTER_GENERATIONEN } = __mods__["./envelope.mjs"];
+
+/* ==============================================================
+   Fenster-Generations-Default pro Baujahrsklasse.
+   Synchron mit data/uwerte.json `fensterGenerationDefault`.
+   ============================================================== */
+const FENSTER_GEN_DEFAULT_BY_BK = {
+  vor1945: 'einfach',
+  '1946_1960': 'einfach',
+  '1961_1977': '2fach_unbeschichtet',
+  '1978_1994': '2fach_unbeschichtet',
+  '1995_2000': '2fach_low_e',
+  '2001_2009': '2fach_low_e',
+  '2010_2015': '3fach',
+  '2016_heute': '3fach',
+  minergie: '3fach_passiv',
+};
+
+/* ==============================================================
+   Bauweisen-Tabelle pro Bauteil.
+   --------------------------------------------------------------
+   Pro Eintrag:
+     key            — interner Schluessel (User-Selektion)
+     label          — UI-Text
+     lambda         — Material-Lambda (W/mK), null bei Komposit (holzbau, doppelmauerwerk)
+     dicken         — Liste typischer Dicken in m (Stufe-2-Optionen)
+     defaultDicke   — Pauschalwert wenn Dicke unbekannt
+     holzbau        — true bei Holzrahmen-Komposit (Schicht-Stack abweichend)
+     doppelmauerwerk — true bei zweischalig (Daemmung auto-on, locked)
+
+   Quelle: calc/envelope.mjs MATERIAL_CATALOG (Lambda-Werte) +
+           Praxis-typische Dicken aus Wissensbasis B + Phase-12.5a-
+           bauteilDefaults (typische Tragschicht-Staerken pro Baujahr).
+   ============================================================== */
+const BAUWEISEN = {
+  aussenwand: [
+    { key: 'vollziegel',      label: 'Vollziegel / Naturstein (Altbau)',  lambda: 0.81, dicken: [0.30, 0.40, 0.50, 0.60], defaultDicke: 0.50 },
+    { key: 'backstein',       label: 'Backstein massiv',                  lambda: 0.81, dicken: [0.24, 0.30, 0.40],       defaultDicke: 0.30 },
+    { key: 'hochlochziegel',  label: 'Hochlochziegel',                    lambda: 0.29, dicken: [0.175, 0.24, 0.30, 0.365], defaultDicke: 0.24 },
+    { key: 'kalksandstein',   label: 'Kalksandstein',                     lambda: 0.80, dicken: [0.150, 0.175, 0.24],     defaultDicke: 0.175 },
+    { key: 'porenbeton',      label: 'Porenbeton',                        lambda: 0.16, dicken: [0.24, 0.30, 0.365],      defaultDicke: 0.30 },
+    { key: 'stahlbeton',      label: 'Stahlbeton (Sichtbeton)',           lambda: 1.70, dicken: [0.18, 0.20, 0.25, 0.30], defaultDicke: 0.20 },
+    { key: 'holzbau',         label: 'Holzrahmenbau',                     lambda: null, dicken: [0.12, 0.16, 0.20, 0.24], defaultDicke: 0.16, holzbau: true },
+    { key: 'doppelmauerwerk', label: 'Doppelmauerwerk (zweischalig)',     lambda: null, dicken: [0.36, 0.40, 0.45],       defaultDicke: 0.40, doppelmauerwerk: true },
+  ],
+  dach: [
+    { key: 'steildach_holz',  label: 'Steildach Holzsparren',  lambda: 0.13, dicken: [0.16, 0.20, 0.24, 0.30], defaultDicke: 0.20 },
+    { key: 'flachdach_beton', label: 'Flachdach Stahlbeton',   lambda: 1.70, dicken: [0.18, 0.20, 0.25],       defaultDicke: 0.20 },
+    { key: 'pultdach_holz',   label: 'Pultdach Holzsparren',   lambda: 0.13, dicken: [0.16, 0.20, 0.24, 0.30], defaultDicke: 0.20 },
+    { key: 'walmdach_holz',   label: 'Walmdach Holzsparren',   lambda: 0.13, dicken: [0.16, 0.20, 0.24, 0.30], defaultDicke: 0.20 },
+  ],
+  boden: [
+    { key: 'stahlbeton',  label: 'Stahlbetonplatte',     lambda: 1.70, dicken: [0.15, 0.18, 0.20, 0.25], defaultDicke: 0.20 },
+    { key: 'holzbalken',  label: 'Holzbalkendecke',      lambda: 0.13, dicken: [0.18, 0.22, 0.26],       defaultDicke: 0.22 },
+    { key: 'naturstein',  label: 'Naturstein-Gewoelbe', lambda: 2.50, dicken: [0.25, 0.40, 0.60],       defaultDicke: 0.40 },
+  ],
+};
+
+/* ==============================================================
+   Daemm-Dicken-Optionen (m) — Stufe 5.
+   Quelle: typische CH-Praxis aus bauteilDefaults
+           (4-26 cm in 2-cm-Schritten).
+   ============================================================== */
+const DAEMM_DICKEN = [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26];
+
+/* ==============================================================
+   Bauteil-Typ-Aliasse + Richtungs-Lookup
+   ============================================================== */
+const BT_ALIAS = { aw: 'aussenwand' };
+
+const RICHTUNG = {
+  aussenwand: 'horizontal',
+  dach:       'aufwaerts',
+  boden:      'abwaerts',
+};
+
+function normBauteilTyp(t) {
+  return BT_ALIAS[t] || t;
+}
+
+function dickeLabel(d) {
+  const cm = d * 100;
+  return (Math.abs(cm - Math.round(cm)) < 0.05 ? cm.toFixed(0) : cm.toFixed(1)) + ' cm';
+}
+
+function defaultBauweiseFor(bt, bk) {
+  if (bt === 'aussenwand') {
+    if (bk === 'vor1945')     return 'vollziegel';
+    if (bk === '1946_1960')   return 'backstein';
+    return 'hochlochziegel';
+  }
+  if (bt === 'dach')  return 'steildach_holz';
+  if (bt === 'boden') return 'stahlbeton';
+  return null;
+}
+
+/**
+ * Baujahr-typisches `hatDaemmung`-Default fuer den Bestand
+ * (NICHT Sanierungs-Default). Vor 1978 typisch ungedaemmt,
+ * danach mit Daemmung gerechnet.
+ */
+function defaultHatDaemmungFor(bk) {
+  if (bk === 'vor1945' || bk === '1946_1960' || bk === '1961_1977') return false;
+  return true;
+}
+
+/**
+ * Liefert die UI-Stufen-Definition fuer ein Bauteil.
+ * Aufruf vom UI: rendere pro Stufe ein <select> mit options[],
+ * speichere User-Wahl in partialState und rufe `computeUWert`.
+ *
+ * @param {('aw'|'aussenwand'|'dach'|'boden'|'fenster')} bauteilTyp
+ * @param {number|string} baujahr
+ * @param {object} [partialState] — User-Selektionen (sel.bauweise etc.)
+ * @returns {{
+ *   bauteilTyp: string,
+ *   baujahrklasse: string,
+ *   fenster: boolean,
+ *   isDoppelmauerwerk?: boolean,
+ *   stufen: Array<{key,label,options,defaultIfUnknown,source,locked?:boolean}>
+ * }}
+ */
+function getStufen(bauteilTyp, baujahr, partialState) {
+  const bt = normBauteilTyp(bauteilTyp);
+  const bk = baujahrklasse(baujahr) || '1978_1994';
+  const sel = partialState || {};
+
+  /* ---- Fenster: nur EINE Stufe (Generation) ---- */
+  if (bt === 'fenster') {
+    const genOptions = Object.keys(FENSTER_GENERATIONEN)
+      .filter(k => k !== 'unbekannt')
+      .map(k => ({
+        value: k,
+        label: FENSTER_GENERATIONEN[k].label + ' (Uw=' + FENSTER_GENERATIONEN[k].uw.toFixed(2) + ')',
+      }));
+    genOptions.push({ value: null, label: '— Unbekannt (Pauschalwert)' });
+    return {
+      bauteilTyp: bt,
+      baujahrklasse: bk,
+      fenster: true,
+      stufen: [
+        {
+          key: 'generation',
+          label: 'Fenster-Generation',
+          options: genOptions,
+          defaultIfUnknown: FENSTER_GEN_DEFAULT_BY_BK[bk] || '2fach_unbeschichtet',
+          source: 'fensterGenerationDefault[' + bk + ']',
+        },
+      ],
+    };
+  }
+
+  /* ---- AW / Dach / Boden: 5 Stufen ---- */
+  const bws = BAUWEISEN[bt] || [];
+  const defaults = bauteilDefaultsFor(bt, bk) || null;
+  const isDoppel = sel.bauweise === 'doppelmauerwerk';
+
+  // Stufe 1 — Bauweise
+  const bauweiseOptions = bws.map(b => ({ value: b.key, label: b.label, lambda: b.lambda }));
+  bauweiseOptions.push({ value: null, label: '— Unbekannt (Pauschalwert)' });
+  const defaultBwKey = defaultBauweiseFor(bt, bk) || (bws[0] && bws[0].key) || null;
+
+  const activeBwKey = sel.bauweise || defaultBwKey;
+  const activeBw = bws.find(b => b.key === activeBwKey) || bws[0];
+
+  // Stufe 2 — Dicke
+  const dickenOptions = (activeBw ? activeBw.dicken : []).map(d => ({ value: d, label: dickeLabel(d) }));
+  dickenOptions.push({ value: null, label: '— Unbekannt (Pauschalwert)' });
+
+  // Stufe 3 — Daemmung ja/nein (Doppelmauerwerk: locked-true)
+  const daemmungOptions = isDoppel
+    ? [{ value: true, label: 'Ja (Kerndaemmung — fix bei Doppelmauerwerk)' }]
+    : [
+        { value: true,  label: 'Ja' },
+        { value: false, label: 'Nein' },
+        { value: null,  label: '— Unbekannt (Pauschalwert)' },
+      ];
+
+  // Stufe 4 — Daemm-Material
+  const daemmstoffOptions = Object.keys(DAEMMSTOFFE)
+    .filter(k => k !== 'unbekannt')
+    .map(k => ({ value: k, label: DAEMMSTOFFE[k].label + ' (λ=' + DAEMMSTOFFE[k].lambda.toFixed(3) + ')' }));
+  daemmstoffOptions.push({ value: null, label: '— Unbekannt (Pauschalwert)' });
+
+  // Stufe 5 — Daemm-Dicke
+  const daemmDickenOptions = DAEMM_DICKEN.map(d => ({ value: d, label: dickeLabel(d) }));
+  daemmDickenOptions.push({ value: null, label: '— Unbekannt (Pauschalwert)' });
+
+  return {
+    bauteilTyp: bt,
+    baujahrklasse: bk,
+    fenster: false,
+    isDoppelmauerwerk: isDoppel,
+    stufen: [
+      {
+        key: 'bauweise',
+        label: 'Bauweise',
+        options: bauweiseOptions,
+        defaultIfUnknown: defaultBwKey,
+        source: 'BAUWEISEN[' + bt + '] + bauteilDefaults[' + bk + ']',
+      },
+      {
+        key: 'dicke',
+        label: 'Dicke der Tragschicht',
+        options: dickenOptions,
+        defaultIfUnknown: activeBw ? activeBw.defaultDicke : null,
+        source: 'BAUWEISEN[' + bt + '][' + (activeBw ? activeBw.key : '?') + '].defaultDicke',
+      },
+      {
+        key: 'hatDaemmung',
+        label: 'Ist gedaemmt?',
+        options: daemmungOptions,
+        defaultIfUnknown: isDoppel ? true : defaultHatDaemmungFor(bk),
+        source: 'baujahrklasse-Default (vor 1978 = nein, ab 1978 = ja)',
+        locked: isDoppel,
+      },
+      {
+        key: 'daemmstoff',
+        label: 'Daemm-Material',
+        options: daemmstoffOptions,
+        defaultIfUnknown: defaults && defaults.daemmung ? defaults.daemmung.material : 'mineralwolle',
+        source: 'bauteilDefaults[' + bk + '].daemmung.material',
+      },
+      {
+        key: 'daemmDicke',
+        label: 'Daemm-Dicke',
+        options: daemmDickenOptions,
+        defaultIfUnknown: defaults && defaults.daemmung ? defaults.daemmung.dicke : 0.06,
+        source: 'bauteilDefaults[' + bk + '].daemmung.dicke',
+      },
+    ],
+  };
+}
+
+/**
+ * Berechnet den U-Wert + Quelle aus den User-Selektionen.
+ * Stufen mit `null` werden mit dem Baujahrs-/Bauteil-Default
+ * pauschalisiert; bekannte Stufen bleiben exakt.
+ *
+ * @param {('aw'|'aussenwand'|'dach'|'boden'|'fenster')} bauteilTyp
+ * @param {number|string} baujahr
+ * @param {object} selections
+ *   AW/Dach/Boden: {bauweise, dicke, hatDaemmung, daemmstoff, daemmDicke}
+ *   Fenster:       {generation}
+ * @returns {{
+ *   uWert: number|null,
+ *   quelle: 'voll-bekannt'|'gemischt'|'voll-unbekannt',
+ *   schichten: Array,
+ *   defaultsAngewendet: object,
+ *   unbekanntStufen: string[],
+ *   marker: string
+ * }}
+ */
+function computeUWert(bauteilTyp, baujahr, selections) {
+  const bt = normBauteilTyp(bauteilTyp);
+  const bk = baujahrklasse(baujahr) || '1978_1994';
+  const sel = selections || {};
+
+  /* ---- Fenster: 1 Stufe ---- */
+  if (bt === 'fenster') {
+    const wasUnknown = (sel.generation == null);
+    const gen = wasUnknown
+      ? (FENSTER_GEN_DEFAULT_BY_BK[bk] || '2fach_unbeschichtet')
+      : sel.generation;
+    const def = FENSTER_GENERATIONEN[gen] || FENSTER_GENERATIONEN['2fach_unbeschichtet'];
+    return {
+      uWert: def.uw,
+      quelle: wasUnknown ? 'voll-unbekannt' : 'voll-bekannt',
+      schichten: [],
+      defaultsAngewendet: { generation: gen },
+      unbekanntStufen: wasUnknown ? ['generation'] : [],
+      marker: wasUnknown ? 'baujahr' : 'gemessen',
+    };
+  }
+
+  /* ---- AW / Dach / Boden ---- */
+  const bws = BAUWEISEN[bt] || [];
+  const defaults = bauteilDefaultsFor(bt, bk) || null;
+  const unbekanntStufen = [];
+  const angewendet = {};
+
+  // Pre-Check: voll-unbekannt → direkter Baujahr-Lookup statt Schicht-Rekonstruktion
+  // (sonst liefert der Sanierungs-Default in bauteilDefaults einen zu niedrigen
+  // U-Wert fuer Altbauten, vgl. Refactor-Plan-Einfach-Modus-V2 §3 Schritt 2).
+  const allNull = (sel.bauweise == null) && (sel.dicke == null) && (sel.hatDaemmung == null) && (sel.daemmstoff == null) && (sel.daemmDicke == null);
+  if (allNull) {
+    const bauteilTypForFallback = bt === 'aussenwand' ? 'aussenwand'
+      : bt === 'dach' ? 'dach'
+      : bt === 'boden' ? 'bodenPlatte' : null;
+    const dachform = bt === 'dach' ? 'steildach' : undefined;
+    const fb = uValueFallback({
+      bauteilTyp: bauteilTypForFallback,
+      baujahr,
+      gebaeudetyp: 'EFH',
+      dachform,
+    });
+    return {
+      uWert: fb.u,
+      quelle: 'voll-unbekannt',
+      schichten: [],
+      defaultsAngewendet: { quelle: 'baujahr-typ-uwert', baujahrklasse: bk },
+      unbekanntStufen: ['bauweise', 'dicke', 'hatDaemmung', 'daemmstoff', 'daemmDicke'],
+      marker: 'baujahr',
+    };
+  }
+
+  // 1. bauweise
+  let bwKey = sel.bauweise;
+  if (bwKey == null) {
+    unbekanntStufen.push('bauweise');
+    bwKey = defaultBauweiseFor(bt, bk) || (bws[0] && bws[0].key);
+  }
+  angewendet.bauweise = bwKey;
+  const bwDef = bws.find(b => b.key === bwKey) || bws[0];
+  const isDoppel = bwKey === 'doppelmauerwerk';
+
+  // 2. dicke
+  let dicke = sel.dicke;
+  if (dicke == null) {
+    unbekanntStufen.push('dicke');
+    dicke = bwDef ? bwDef.defaultDicke : null;
+  }
+  angewendet.dicke = dicke;
+
+  // 3. hatDaemmung — bei Doppelmauerwerk locked auf true
+  let hatDaemmung;
+  if (isDoppel) {
+    hatDaemmung = true;
+  } else if (sel.hatDaemmung == null) {
+    unbekanntStufen.push('hatDaemmung');
+    hatDaemmung = defaultHatDaemmungFor(bk);
+  } else {
+    hatDaemmung = sel.hatDaemmung;
+  }
+  angewendet.hatDaemmung = hatDaemmung;
+
+  // 4 + 5. daemmstoff + daemmDicke (nur wenn hatDaemmung)
+  let daemmstoff = null;
+  let daemmDicke = 0;
+  if (hatDaemmung) {
+    daemmstoff = sel.daemmstoff;
+    if (daemmstoff == null) {
+      unbekanntStufen.push('daemmstoff');
+      daemmstoff = (defaults && defaults.daemmung) ? defaults.daemmung.material : 'mineralwolle';
+    }
+    angewendet.daemmstoff = daemmstoff;
+
+    daemmDicke = sel.daemmDicke;
+    if (daemmDicke == null) {
+      unbekanntStufen.push('daemmDicke');
+      daemmDicke = (defaults && defaults.daemmung) ? defaults.daemmung.dicke : 0.06;
+    }
+    angewendet.daemmDicke = daemmDicke;
+  }
+
+  // Schichten zusammenbauen
+  const schichten = [];
+  if (bwDef && bwDef.holzbau) {
+    // Holzrahmen-Komposit: Beplankung + Staender (mit/ohne Daemmung) + Aussenschalung
+    schichten.push({ label: 'Innenbeplankung Gipskarton', lambda: 0.21, d: 0.0125 });
+    if (hatDaemmung && daemmDicke > 0) {
+      schichten.push({ material: daemmstoff, d: daemmDicke });
+    } else {
+      // Ohne Daemmung: Hohlraum-Mittelwert (ungewoehnliche Wahl, aber nicht blockieren)
+      schichten.push({ label: 'Holzrahmen Hohlraum', lambda: 0.13, d: dicke });
+    }
+    schichten.push({ label: 'Aussenschalung Holz', lambda: 0.13, d: 0.022 });
+  } else if (isDoppel) {
+    // Zweischalig: Innenputz + Innenschale 17,5 cm + Kerndaemmung + Klinker-Vormauer 11,5 cm
+    schichten.push({ label: 'Innenputz Kalkgips', lambda: 0.70, d: 0.015 });
+    schichten.push({ label: 'Innenschale Mauerwerk', lambda: 0.81, d: 0.175 });
+    schichten.push({ material: daemmstoff, d: daemmDicke });
+    schichten.push({ label: 'Aussenschalung Holz', lambda: 0.13, d: 0.022 });
+  } else if (isDoppel) {
+    // Zweischalig: Innenputz + Innenschale 17,5 cm + Kerndaemmung + Klinker-Vormauer 11,5 cm
+    schichten.push({ label: 'Innenputz Kalkgips', lambda: 0.70, d: 0.015 });
+    schichten.push({ label: 'Innenschale Mauerwerk', lambda: 0.81, d: 0.175 });
+    schichten.push({ material: daemmstoff, d: daemmDicke });
+    schichten.push({ label: 'Aussenschale Klinker', lambda: 0.81, d: 0.115 });
+  } else {
+    // Massiv (Vollziegel/Backstein/HLZ/KSE/Porenbeton/Stahlbeton/Steildach/Flachdach/Boden)
+    if (defaults && defaults.putzInnen) schichten.push({ ...defaults.putzInnen });
+    if (bwDef) schichten.push({ label: bwDef.label, lambda: bwDef.lambda, d: dicke });
+    if (hatDaemmung && daemmDicke > 0) schichten.push({ material: daemmstoff, d: daemmDicke });
+    if (defaults && defaults.putzAussen) schichten.push({ ...defaults.putzAussen });
+  }
+
+  // U-Wert via Schichtformel
+  const dir = RICHTUNG[bt] || 'horizontal';
+  const r = uWertAusSchichten(schichten, { direction: dir, markerSource: 'material' });
+
+  // Quelle klassifizieren
+  const relevantCount = 2 + (isDoppel ? 0 : 1) + (hatDaemmung ? 2 : 0);
+  let quelle;
+  if (unbekanntStufen.length === 0) quelle = 'voll-bekannt';
+  else if (unbekanntStufen.length >= relevantCount) quelle = 'voll-unbekannt';
+  else quelle = 'gemischt';
+
+  // Marker passend zur Quelle
+  const marker = quelle === 'voll-bekannt' ? 'gemessen'
+                : quelle === 'voll-unbekannt' ? 'baujahr'
+                : 'gemischt';
+
+  return {
+    uWert: r.U,
+    quelle,
+    schichten: r.schichten,
+    defaultsAngewendet: angewendet,
+    unbekanntStufen,
+    marker,
+  };
+}
+
+export default {
+  BAUWEISEN,
+  DAEMM_DICKEN,
+  FENSTER_GEN_DEFAULT_BY_BK,
+  getStufen,
+  computeUWert,
+};
+
+__mods__["./calc/material-picker.mjs"] = { getStufen, computeUWert, FENSTER_GEN_DEFAULT_BY_BK, BAUWEISEN, DAEMM_DICKEN };
 })();
 
 // === ./calc/dhw.mjs ===
@@ -3773,6 +4451,7 @@ __mods__["./calc/foerderung.mjs"] = { filterFoerderungen, lookupBaubewilligung, 
 
 const { HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, TOFF_DEFAULTS, F_STO_PRESETS, A_WT_PRESETS, BAUPERIODE_KWH } = __mods__["./calc/fws.mjs"];
 const { bauklasseFromPeriode, applySanierung, lookupUWert } = __mods__["./calc/envelope.mjs"];
+const { getStufen, computeUWert } = __mods__["./calc/material-picker.mjs"];
 const { REF_AUSLEGUNG, plausibilitaetHeizflaeche, leistungsFaktor } = __mods__["./calc/distribution.mjs"];
 const { sicherheitsventilEmpfehlung, magVolumen, anlagenvolumenSchaetzung, rundeSpeicherMarkt, rundePufferMarkt, computeDhw } = __mods__["./calc/dhw.mjs"];
 const { nennleistungA7W35, maxVorlauf, aufstellung: wpAufstellung, schallTag: wpSchallTag, copA2W35 } = __mods__["./calc/heatpump.mjs"];
@@ -5054,6 +5733,101 @@ function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
   return { d: d_m, lambda, label, fromDefault: (mat === 'auto' || mat === 'unbekannt' || !cfg.d_cm) };
 }
 
+/* =========================================================================
+   MATERIAL-PICKER INTEGRATION (AUDIT 3.13 · Session 2 · 2026-04-29)
+   -------------------------------------------------------------------------
+   5-Stufen-Picker (Bauweise → Dicke → Daemmung j/n → Material → Dicke)
+   fuer Aussenwand/Dach/Boden, 1-Stufen-Picker (Generation) fuer Fenster.
+   State-Pfad: detail.raeume[i].bauteile[j].picker.{stufe-key}.
+   Wenn b.picker definiert ist, hat der Material-Picker Vorrang vor dem
+   alten variant/layers/eigener-Pfad. Tueren bleiben bei TUER_U_BY_BK.
+   ========================================================================= */
+
+/** Repraesentatives Baujahr aus FWS-Bauperiode (z. B. '1971-1980' → 1976). */
+function mapPeriodeToBaujahr(periode){
+  if (!periode || typeof periode !== 'string') return 2000;
+  if (periode === 'minergie') return 2018;
+  if (periode === '<1919') return 1900;
+  if (periode === '2011-heute') return 2018;
+  const m = periode.match(/(\d{4})\s*[-–]\s*(\d{4})/);
+  if (m) return Math.round((Number(m[1]) + Number(m[2])) / 2);
+  const m2 = periode.match(/(\d{4})/);
+  if (m2) return Number(m2[1]);
+  return 2000;
+}
+
+/** UI-Bauteil-Typ (`wand`) → Picker-Typ (`aussenwand`). */
+function pickerTypFor(typ){
+  if (typ === 'wand') return 'aussenwand';
+  if (typ === 'dach') return 'dach';
+  if (typ === 'boden') return 'boden';
+  if (typ === 'fenster') return 'fenster';
+  return null;
+}
+
+/** Normalisiert Picker-Selections (UI-Strings → null/Number/Boolean). */
+function normalizePicker(picker){
+  if (!picker || typeof picker !== 'object') return {};
+  const out = {};
+  const numKeys = ['dicke', 'daemmDicke'];
+  const boolKeys = ['hatDaemmung'];
+  for (const k of Object.keys(picker)){
+    let v = picker[k];
+    if (v === '' || v === undefined) { out[k] = null; continue; }
+    if (numKeys.includes(k)){
+      const n = Number(v);
+      out[k] = Number.isFinite(n) ? n : null;
+      continue;
+    }
+    if (boolKeys.includes(k)){
+      if (v === true || v === 'true') out[k] = true;
+      else if (v === false || v === 'false') out[k] = false;
+      else out[k] = null;
+      continue;
+    }
+    out[k] = v;
+  }
+  return out;
+}
+
+/** Rendert den 5-Stufen / 1-Stufen Picker fuer ein Bauteil. */
+function renderMaterialPicker(idx, j, b, state){
+  const ptyp = pickerTypFor(b.typ);
+  if (!ptyp) return '';
+  const baujahr = mapPeriodeToBaujahr(state?.objekt?.bauperiode);
+  const pickerState = normalizePicker(b.picker || {});
+  let def;
+  try { def = getStufen(ptyp, baujahr, pickerState); }
+  catch (e){ return `<div class="field__hint">Picker-Fehler: ${esc(String(e.message))}</div>`; }
+
+  const stufen = def.stufen.map(stf => {
+    const path = `detail.raeume[${idx}].bauteile[${j}].picker.${stf.key}`;
+    const cur = pickerState[stf.key];
+    let curStr;
+    if (cur === null || cur === undefined) curStr = '';
+    else if (typeof cur === 'boolean') curStr = cur ? 'true' : 'false';
+    else curStr = String(cur);
+    const opts = stf.options.map(o => {
+      let v;
+      if (o.value === null) v = '';
+      else if (typeof o.value === 'boolean') v = o.value ? 'true' : 'false';
+      else v = String(o.value);
+      return [v, o.label];
+    });
+    const lockedAttr = stf.locked ? ' (fix)' : '';
+    return `
+      <div class="field" style="min-width:200px;">
+        <label class="field__label">${esc(stf.label)}${lockedAttr}</label>
+        ${select(path, curStr, opts)}
+      </div>`;
+  }).join('');
+
+  return `<div class="layer-editor">
+    <div class="layer-editor__head">Material-Picker · ${esc(def.fenster ? 'Fenster' : ptyp)} · Bauklasse ${esc(def.baujahrklasse)}${def.isDoppelmauerwerk ? ' · Doppelmauerwerk (Kerndaemmung fix)' : ''}</div>
+    <div class="bauteil__row1" style="flex-wrap:wrap;gap:var(--s-3);">${stufen}</div>
+  </div>`;
+}
+
 /**
  * S7 — Bauteil-Werte (U + f_RT) gemäss Variant/Anschluss/Bauperiode pro
  * Raum auflösen und in eine ENRICHED-Kopie schreiben. Wird vor compute/
@@ -5080,6 +5854,33 @@ function resolveBauteilUFrt(state, b){
   const typ = b.typ || 'wand';
   const variant = b.variant || 'unbekannt';
   const anschluss = b.anschluss || ANSCHLUSS_DEFAULT[typ] || 'aussenluft';
+  // ---- AUDIT 3.13: Material-Picker hat Vorrang, wenn b.picker definiert ----
+  // Tueren laufen weiter ueber TUER_U_BY_BK; alle anderen Bauteiltypen ueber
+  // computeUWert(). Picker-Type-Mapping: 'wand' → 'aussenwand', sonst identisch.
+  const _ptyp = pickerTypFor(typ);
+  if (_ptyp && b.picker && typeof b.picker === 'object'){
+    // fRT vorab berechnen wie unten
+    let _fRT;
+    if (anschluss === 'beheizt'){
+      const ti = Number(obj.tInnenAuslegung) || 20;
+      const te = Number(obj.tAussenAuslegung);
+      const teE = Number.isFinite(te) ? te : -8;
+      const tn = Number(b.theta_nb);
+      const tnE = Number.isFinite(tn) ? tn : 20;
+      const dt = ti - teE;
+      _fRT = dt !== 0 ? (ti - tnE) / dt : 0;
+    } else {
+      _fRT = ANSCHLUSS_FRT[anschluss] != null ? ANSCHLUSS_FRT[anschluss] : 1.0;
+    }
+    const _src = ANSCHLUSS_OPTS[anschluss] ? ANSCHLUSS_OPTS[anschluss][1] : '';
+    const _baujahr = mapPeriodeToBaujahr(obj.bauperiode);
+    const _sel = normalizePicker(b.picker);
+    const _r = computeUWert(_ptyp, _baujahr, _sel);
+    const _u = (typeof _r.uWert === 'number' && Number.isFinite(_r.uWert) && _r.uWert > 0) ? _r.uWert : 1.0;
+    const _unbek = (_r.unbekanntStufen || []).join(',');
+    const _quelle = `Picker · ${_r.quelle}${_unbek ? ' [unbek: ' + _unbek + ']' : ''}`;
+    return { u: _u, fRT: _fRT, source: _quelle + ' · ' + _src };
+  }
   // AUDIT 3.6: für 'beheizt' fRT formel-basiert aus θ_int/θ_nb/θ_e
   let fRT;
   if (anschluss === 'beheizt'){
@@ -5255,16 +6056,17 @@ function renderRoomBauteil(idx, j, b){
         <label class="field__label">Typ</label>
         ${select(`detail.raeume[${idx}].bauteile[${j}].typ`, typ, typeOpts)}
       </div>
+      ${(typ === 'tueren' || !b.picker) ? `
       <div class="field" style="flex:2;min-width:200px;">
         <label class="field__label">${isFenster ? 'Verglasung' : 'Bauweise / Variante'}</label>
         ${select(`detail.raeume[${idx}].bauteile[${j}].variant`, variant, variantOpts)}
-      </div>
-      ${isDach ? `
+      </div>` : ''}
+      ${(isDach && !b.picker) ? `
       <div class="field" style="min-width:140px;">
         <label class="field__label">Dach-Form</label>
         ${select(`detail.raeume[${idx}].bauteile[${j}].dach_variant`, b.dach_variant || 'steildach', BAUTEIL_VARIANT_OPTS.dachForm)}
       </div>` : ''}
-      ${isFenster ? `
+      ${(isFenster && !b.picker) ? `
       <div class="field" style="min-width:140px;">
         <label class="field__label">Rahmen</label>
         ${select(`detail.raeume[${idx}].bauteile[${j}].fenster_rahmen`, b.fenster_rahmen || 'kunststoff', BAUTEIL_VARIANT_OPTS.fensterRahmen)}
@@ -5301,9 +6103,11 @@ function renderRoomBauteil(idx, j, b){
         <div class="bauteil__source" data-readout-src="${idx}-${j}">${r.source || '—'}</div>
       </div>
     </div>
-    ${variant === 'schichten' && (typ === 'wand' || typ === 'dach' || typ === 'boden')
-      ? renderLayerEditor(`detail.raeume[${idx}].bauteile[${j}]`, b, state)
-      : ''}
+    ${b.picker && pickerTypFor(typ)
+      ? renderMaterialPicker(idx, j, b, state)
+      : (variant === 'schichten' && (typ === 'wand' || typ === 'dach' || typ === 'boden')
+          ? renderLayerEditor(`detail.raeume[${idx}].bauteile[${j}]`, b, state)
+          : '')}
   </div>`;
 }
 
@@ -5817,7 +6621,7 @@ function attachStaticHandlers(root, stepperEl, getState){
       const st = getState();
       const rs = (st.detail && st.detail.raeume || []).map(r => Object.assign({}, r, { bauteile: (r.bauteile || []).slice() }));
       if (!rs[idx]) return;
-      rs[idx].bauteile.push({ typ: 'wand', variant: 'unbekannt', anschluss: 'aussenluft', A: 0 });
+      rs[idx].bauteile.push({ typ: 'wand', variant: 'unbekannt', anschluss: 'aussenluft', A: 0, picker: {} });
       _set('detail.raeume', rs);
       return;
     }
@@ -6795,7 +7599,7 @@ function computeTvollHint(s){
   return `t<sub>voll</sub> = ${auto} h · ${esc(s.objekt.typ.toUpperCase())} · ${esc(s.objekt.lage)}`;
 }
 
-__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
+__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, mapPeriodeToBaujahr, pickerTypFor, normalizePicker, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
 })();
 
 // === ./persistence.mjs ===
@@ -6924,7 +7728,9 @@ function loadActive(){
     const env = JSON.parse(raw);
     if (!env || !env.state) return false;
     _activeMeta = Object.assign(freshMeta(), env.meta || {});
-    setState(deepMerge(freshState(), env.state));
+    const _next1 = deepMerge(freshState(), env.state);
+    migrateBauteilePicker(_next1);
+    setState(_next1);
     return true;
   } catch(e){ return false; }
 }
@@ -6964,6 +7770,7 @@ function loadProjectLocal(id){
   if (!env) { toast('Projekt nicht gefunden.'); return false; }
   _activeMeta = Object.assign(freshMeta(), env.meta || {});
   const next = deepMerge(freshState(), env.state || {});
+  migrateBauteilePicker(next);
   setState(next);
   saveActive();
   if (typeof _onLoaded === 'function') _onLoaded(getState());
@@ -7179,7 +7986,9 @@ async function cloudLoad(id){
       updated: p.updatedAt ? Date.parse(p.updatedAt) : Date.now(),
       cloudMirror: true
     };
-    setState(deepMerge(freshState(), loaded));
+    const _next2 = deepMerge(freshState(), loaded);
+    migrateBauteilePicker(_next2);
+    setState(_next2);
     saveActive();
     // Lokalen Mirror persistieren (damit er bei Drift-Cleanup nicht entfernt wird).
     const arr = listProjects();
@@ -7306,6 +8115,43 @@ function deepClone(obj){
   try { return JSON.parse(JSON.stringify(obj)); } catch(e){ return obj; }
 }
 
+/**
+ * AUDIT 3.13 (Session 2 · 2026-04-29) — Bauteil-Picker-Migration.
+ * Alte Projekte haben `b.variant` + `b.layers` aber kein `b.picker`. Damit
+ * der neue Material-Picker-Resolver greifen kann, bekommen Bauteile fuer
+ * Aussenwand/Dach/Boden/Fenster ein leeres `picker:{}`. Bei Fenster wird
+ * versucht, einen passenden Generation-Key aus der alten variant abzu-
+ * leiten, damit User-Eingaben nicht verloren gehen.
+ *
+ * Tueren bleiben unangetastet (kein Picker, alte Logik via TUER_U_BY_BK).
+ */
+const _FENSTER_VARIANT_TO_GEN = {
+  einfachverglasung:             'einfach',
+  isolierglas_2fach_ohne_low_e:  '2fach_unbeschichtet',
+  isolierglas_2fach_low_e_argon: '2fach_low_e',
+  isolierglas_3fach_standard:    '3fach',
+  isolierglas_3fach_high_end:    '3fach_passiv'
+};
+
+function migrateBauteilePicker(state){
+  if (!state || !state.detail || !Array.isArray(state.detail.raeume)) return state;
+  for (const r of state.detail.raeume){
+    if (!Array.isArray(r.bauteile)) continue;
+    for (const b of r.bauteile){
+      if (!b || typeof b !== 'object') continue;
+      if (b.typ === 'tueren') continue;
+      if (b.picker && typeof b.picker === 'object') continue;
+      // Default: leer (Resolver fällt auf Bauperiode-Pauschalwert).
+      b.picker = {};
+      // Fenster-Variant in Generation übernehmen, falls möglich:
+      if (b.typ === 'fenster' && b.variant && _FENSTER_VARIANT_TO_GEN[b.variant]){
+        b.picker.generation = _FENSTER_VARIANT_TO_GEN[b.variant];
+      }
+    }
+  }
+  return state;
+}
+
 function deepMerge(target, src){
   if (src == null) return target;
   if (typeof target !== 'object' || target === null) return src;
@@ -7322,7 +8168,7 @@ function deepMerge(target, src){
   return out;
 }
 
-__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, STORAGE_KEY, ACTIVE_KEY };
+__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, migrateBauteilePicker, STORAGE_KEY, ACTIVE_KEY };
 })();
 
 // === ./projects.mjs ===
@@ -7921,28 +8767,90 @@ function buildObjektdatenTable(s, c){
     <table class="brosch__kv-table"><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table>`;
 }
 
+// AUDIT 3.12 — Bericht-Logik Hülle/Mixed-Mode.
+// Erkennt, ob die Auslegung primär aus Verbrauch (FWS) oder Hülle (EN 12831)
+// kommt, und passt Q_hl, Q_w/Q_off und Q_h entsprechend an. Wenn Hülle primär
+// ist, wird compute(s, { phiHuelle }) erneut aufgerufen, damit Q_w und Q_off
+// auf dem Hüllen-Q_hl basieren.
 function buildLeistungenTable(s, c){
-  const rows = [['Norm-Heizlast Q<sub>hl</sub>', `${fmtKW(c.Qhl)} kW`]];
-  if (s.zuschlaege?.sperrzeitAktiv) rows.push(['Leistungszuschlag Sperrzeit Q<sub>off</sub>', `${fmtKW(c.Qoff)} kW`]);
-  if (s.warmwasser?.aktiv)          rows.push(['Leistungszuschlag Warmwasser Q<sub>w</sub>', `${fmtKW(c.Qw)} kW`]);
-  if (s.zuschlaege?.verbundenAktiv) rows.push(['Zuschlag verbundene Systeme Q<sub>as</sub>', `${fmtKW(c.Qas)} kW`]);
+  const detail = !!s?.detail?.aktiv;
+  const phiHuelle_kW = (c?.detail?.phiHL_total || 0) / 1000;
+  const QhlVerbrauch = Number(c?.Qhl) || 0;
+  const verbrauchAktiv = !!s?.heizung?.verbrauchAktiv && c?.primary?.key === 'verbrauch';
+  const huelleVorhanden = detail && phiHuelle_kW >= 0.1;
+
+  // Primary-Strategie ableiten und ggf. Cascade mit phiHuelle-Override neu rechnen.
+  let primaryQhl = QhlVerbrauch;
+  let basisLabel = '';
+  let mixedNote = '';
+  let cPrimary = c;
+
+  if (verbrauchAktiv && !huelleVorhanden){
+    // Fall 1 — Verbrauch primär (heutiger Default)
+    primaryQhl = QhlVerbrauch;
+    basisLabel = 'aus Verbrauchsmethode (FWS)';
+  } else if (huelleVorhanden && !verbrauchAktiv){
+    // Fall 2 — Hülle primär (Detail-Modus, kein Verbrauch)
+    const A_R = Number(c?.detail?.A_raeume) || 0;
+    const A_rest = Number(c?.detail?.A_rest) || 0;
+    const phiR_kW   = (Number(c?.detail?.phi_raeume) || 0) / 1000;
+    const phiRest_kW = (Number(c?.detail?.phi_rest)  || 0) / 1000;
+    if (A_R > 0 && A_rest > 0){
+      basisLabel = 'aus Mixed-Mode-Hüllenberechnung';
+      mixedNote  = `Σ Räume ${fmtKW(phiR_kW)} kW + Pauschal-Rest ${fmtKW(phiRest_kW)} kW`;
+    } else if (A_R > 0){
+      basisLabel = 'aus raumweiser EN-12831-Berechnung';
+    } else {
+      basisLabel = 'aus Pauschal-Hüllenberechnung (EBF × Globalhülle)';
+    }
+    primaryQhl = phiHuelle_kW;
+    // Q_w / Q_off / Q_h aus dem Hüllen-Q_hl neu rechnen.
+    try { cPrimary = compute(s, { phiHuelle: phiHuelle_kW }); }
+    catch(_){ cPrimary = c; }
+  } else if (verbrauchAktiv && huelleVorhanden){
+    // Fall 3 — beide aktiv: Verbrauch primär + Hülle als Vergleichswert
+    primaryQhl = QhlVerbrauch;
+    basisLabel = 'aus Verbrauchsmethode (FWS)';
+  } else {
+    // Fall 4 — nichts spezifisches (z. B. Bauperioden-Fallback ohne Detail)
+    primaryQhl = QhlVerbrauch;
+  }
+
+  const rows = [];
+  const labelText = basisLabel
+    ? `Norm-Heizlast Q<sub>hl</sub> ${basisLabel}`
+    : 'Norm-Heizlast Q<sub>hl</sub>';
+  rows.push([labelText, `${fmtKW(primaryQhl)} kW`]);
+  if (mixedNote){
+    rows.push([
+      '<span class="brosch__sub">└ Aufschlüsselung</span>',
+      `<span class="brosch__sub">${mixedNote}</span>`
+    ]);
+  }
+  if (verbrauchAktiv && huelleVorhanden){
+    rows.push(['Vergleichswert Hülle Q<sub>hl,Norm</sub>', `${fmtKW(phiHuelle_kW)} kW`]);
+  }
+  if (s.zuschlaege?.sperrzeitAktiv) rows.push(['Leistungszuschlag Sperrzeit Q<sub>off</sub>', `${fmtKW(cPrimary.Qoff)} kW`]);
+  if (s.warmwasser?.aktiv)          rows.push(['Leistungszuschlag Warmwasser Q<sub>w</sub>',  `${fmtKW(cPrimary.Qw)} kW`]);
+  if (s.zuschlaege?.verbundenAktiv) rows.push(['Zuschlag verbundene Systeme Q<sub>as</sub>', `${fmtKW(cPrimary.Qas)} kW`]);
   return `<h2 class="brosch__h2">Dimensionsrelevante Leistungen</h2>
     <table class="brosch__kv-table"><tbody>
       ${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}
-      <tr class="is-highlight"><td>Auslegungsleistung Wärmepumpe Q<sub>h</sub></td><td>${fmtKW(c.Qh)} kW</td></tr>
+      <tr class="is-highlight"><td>Auslegungsleistung Wärmepumpe Q<sub>h</sub></td><td>${fmtKW(cPrimary.Qh)} kW</td></tr>
     </tbody></table>`;
 }
 
 function buildDetailCockpitTable(s, c){
   if (!c.detail) return '';
-  const Qnorm = c.detail.Qhl_Norm;
-  const Qfws = c.Qhl;
+  // Property-Namen aus computeBuildingDetailLoad: Qhl_kW (kW), phi_raeume / phi_rest (W).
+  const Qnorm = Number(c.detail.Qhl_kW) || 0;
+  const Qfws = Number(c.Qhl) || 0;
   const v = vergleichNormVerbrauch(Qnorm, Qfws);
   const rows = [
-    ['Norm-Heizlast (EN 12831 raumweise) Q<sub>hl,Norm</sub>', `${fmtKW(Qnorm)} kW`],
+    ['Norm-Heizlast (EN 12831 raumweise + Pauschal-Rest) Q<sub>hl,Norm</sub>', `${fmtKW(Qnorm)} kW`],
     ['Verbrauchs-Heizlast (FWS) Q<sub>hl,FWS</sub>',           `${fmtKW(Qfws)} kW`],
-    ['Φ<sub>HL</sub> raumweise',         `${fmtKW((c.detail.phi_R||0)/1000)} kW`],
-    ['Φ<sub>HL</sub> Rest pauschal',     `${fmtKW((c.detail.phi_Rest||0)/1000)} kW`],
+    ['Φ<sub>HL</sub> raumweise',         `${fmtKW((c.detail.phi_raeume||0)/1000)} kW`],
+    ['Φ<sub>HL</sub> Rest pauschal',     `${fmtKW((c.detail.phi_rest||0)/1000)} kW`],
     ['Δ absolut',  v.delta != null ? `${fmtKW(v.delta)} kW` : '—'],
     ['Δ relativ',  v.proz != null ? `${fmt(v.proz,1)} %` : '—'],
     ['Bewertung', `<span class="brosch__ampel brosch__ampel--${esc(v.ampel||'grau')}">${esc((v.ampel||'grau').toUpperCase())}</span> ${esc(v.hinweis || '')}`]
@@ -8017,7 +8925,7 @@ function buildRaeumeTable(s, c){
     const phiTxt = (phi != null && Number.isFinite(phi)) ? `${fmt(phi/1000, 2)} kW` : '—';
     return `<tr><td>${i+1}</td><td>${esc(r.name || '—')}</td><td>${fmt(A_eff,1)} m²</td><td>${tInt} °C</td><td>${beheizt}</td><td>${phiTxt}</td></tr>`;
   }).join('');
-  const sum = c.detail ? `<tr class="is-highlight"><td colspan="5">Σ raumweise + Restpauschale</td><td>${fmtKW(c.detail.Qhl_Norm)} kW</td></tr>` : '';
+  const sum = c.detail ? `<tr class="is-highlight"><td colspan="5">Σ raumweise + Restpauschale</td><td>${fmtKW(c.detail.Qhl_kW)} kW</td></tr>` : '';
   return `<h2 class="brosch__h2">Räume</h2>
     <table class="brosch__kv-table brosch__kv-table--6col"><thead><tr><th>#</th><th>Name</th><th>Fläche</th><th>θ<sub>int</sub></th><th>beheizt</th><th>Φ<sub>HL</sub></th></tr></thead>
     <tbody>${rows}${sum}</tbody></table>`;
@@ -8367,7 +9275,7 @@ body { font-family:'Inter','Segoe UI',Roboto,sans-serif; color:var(--ink-900); m
 }
 `;
 
-__mods__["./export.mjs"] = { renderExportModal, initExportUi };
+__mods__["./export.mjs"] = { renderExportModal, initExportUi, buildLeistungenTable };
 })();
 
 // === ./main.mjs ===
@@ -8473,6 +9381,21 @@ async function boot(){
   initExportUi();
   installAutoSync();
 
+  // Sticky-Layering: Stepper sitzt direkt unter der Topbar. Da die Topbar
+  // 2 Zeilen hat und je nach Viewport unterschiedlich hoch ausfällt, messen
+  // wir die echte Höhe und setzen `--topbar-h` auf html. Stepper-CSS nutzt
+  // `top: var(--topbar-h)`. Auf load + resize + via ResizeObserver.
+  syncStickyOffsets();
+  window.addEventListener('resize', syncStickyOffsets);
+  window.addEventListener('load', syncStickyOffsets);
+  if (typeof ResizeObserver !== 'undefined'){
+    const tb = document.querySelector('.topbar');
+    if (tb){
+      const ro = new ResizeObserver(() => syncStickyOffsets());
+      ro.observe(tb);
+    }
+  }
+
   // Detail-Modus-Toggle ist ab S7 Teil der Topbar-Actions (renderTopbarActions),
   // wird also erst NACH boot() im DOM existieren. Listener hier scharf schalten.
   const tgl = document.getElementById('toggleDetail');
@@ -8518,6 +9441,19 @@ function extractWpList(d){
   if (Array.isArray(d?.hauptgeraete)) return d.hauptgeraete;
   if (Array.isArray(d?.heatPumps))    return d.heatPumps;
   return Array.isArray(d) ? d : [];
+}
+
+/** Misst die echte Höhe der sticky `.topbar` und schreibt sie als
+ *  CSS-Variable `--topbar-h` auf <html>. Stepper-CSS liest `top: var(--topbar-h)`,
+ *  damit der Stepper exakt unter der Topbar klebt — egal wie viele Zeilen
+ *  oder welcher Viewport. */
+function syncStickyOffsets(){
+  const tb = document.querySelector('.topbar');
+  if (!tb) return;
+  const h = Math.round(tb.getBoundingClientRect().height);
+  if (h > 0){
+    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  }
 }
 
 // (Detail-Toggle wird in boot() scharfgeschaltet — siehe oben. Der alte Top-
