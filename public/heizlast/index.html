@@ -8986,11 +8986,16 @@ function buildFoerderTable(s, c){
     if (b){
       const bewRows = [];
       if (b.heizungsersatz){
-        const t = b.heizungsersatz.bewilligung ? 'bewilligungspflichtig' : 'frei';
-        const bd = b.heizungsersatz.bedingungen ? ' · ' + esc(b.heizungsersatz.bedingungen) : '';
-        bewRows.push(['Heizungsersatz', t + bd]);
+        // Daten-Schema: bewilligungspflichtig (bool), kurz / details / frist (string).
+        // Vorher las der Code b.heizungsersatz.bewilligung — ein nicht
+        // existierendes Feld → fälschlich "frei" für jeden Kanton.
+        const pflicht = !!b.heizungsersatz.bewilligungspflichtig;
+        const head = pflicht ? 'Bewilligungspflichtig' : 'Meldepflichtig';
+        const kurz = b.heizungsersatz.kurz ? ' — ' + esc(b.heizungsersatz.kurz) : '';
+        const frist = b.heizungsersatz.frist ? ` · <em>Frist: ${esc(b.heizungsersatz.frist)}</em>` : '';
+        bewRows.push(['Heizungsersatz', head + kurz + frist]);
       }
-      const lswHinweis = (b.lwwp?.hinweis || '').trim();
+      const lswHinweis = (b.lwwp_aussen?.details || b.lwwp?.hinweis || '').trim();
       if (lswHinweis && lswHinweis !== '—'){
         bewRows.push(['Luft/Wasser-WP (LSV)', esc(lswHinweis)]);
       }
