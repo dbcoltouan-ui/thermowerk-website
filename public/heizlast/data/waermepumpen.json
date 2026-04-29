@@ -14,7 +14,40 @@
       "F5": "SHW-Bemerkungen verschaerft (eShop-Listenpreis Kunde nachreichen)",
       "F6": "75 Karteileichen kategorisiert deprecaten"
     },
-    "source_file": "Datenbank_Waermepumpen_v1.0.1.xlsx"
+    "source_file": "Datenbank_Waermepumpen_v1.0.1.xlsx",
+    "schema_extensions": [
+      {
+        "feld": "reversibel",
+        "typ": "bool|null",
+        "beschreibung": "Reversible WP (Kühlbetrieb möglich). null = unbekannt, von Daniel pro Modell zu verifizieren. true/false aus Pattern-Matching auf Bemerkung/Variante (positive: 'reversibel','Kühlfunktion','Heizen + Kühlen' etc.; negative: 'nur Heizen','kein Kühlbetrieb').",
+        "eingefuehrt_am": "2026-04-29",
+        "eingefuehrt_in": "Offerten-Modul Session 1",
+        "auto_true_count": 11,
+        "auto_false_count": 1,
+        "auto_null_count": 35,
+        "positive_pattern": [
+          "reversibel",
+          "reversible",
+          "kühlfunktion",
+          "kuehlfunktion",
+          "heizen + kühlen",
+          "heizen+kühlen",
+          "heizen und kühlen",
+          "heiz- und kühl",
+          "(heizen + kühlen)",
+          "kühlbetrieb"
+        ],
+        "negative_pattern": [
+          "nur heizen",
+          "kein kühl",
+          "kein kuehl",
+          "ohne kühl",
+          "nur heizen)",
+          "kein kühlbetrieb",
+          "kein kuehlbetrieb"
+        ]
+      }
+    ]
   },
   "hauptgeraete": [
     {
@@ -56,7 +89,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": "MUSTERVORLAGE"
+      "Bemerkung": "MUSTERVORLAGE",
+      "reversibel": null
     },
     {
       "ID": "BO-0002",
@@ -97,7 +131,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0003",
@@ -138,7 +173,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0004",
@@ -179,7 +215,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0005",
@@ -220,7 +257,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0006",
@@ -261,7 +299,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0007",
@@ -302,7 +341,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "BO-0008",
@@ -343,7 +383,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Refactor",
       "Im Lieferumfang (Inneneinheit)": "Inneneinheit + Elektroeinsatz 3/6/9 kW + Umstellventil BWW + Umwälzpumpe + Regelung UI800 + Connect-Key K30 RF",
-      "Bemerkung": null
+      "Bemerkung": null,
+      "reversibel": null
     },
     {
       "ID": "PA-0001",
@@ -384,7 +425,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 270 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01514. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig."
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 270 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01514. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig.",
+      "reversibel": null
     },
     {
       "ID": "PA-0002",
@@ -425,7 +467,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 360 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01514. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig."
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 360 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01514. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig.",
+      "reversibel": null
     },
     {
       "ID": "PA-0003",
@@ -466,7 +509,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 480 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01527. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig."
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 480 L (PDF-S. 48). Vorlauf 75°C bei -15°C Aussentemperatur. EHPA CH-HP-01527. T-CAP-Technologie. Reglermodul 14837.990 + R290-Detektor 14784.007 immer pflichtig.",
+      "reversibel": null
     },
     {
       "ID": "PA-0004",
@@ -507,7 +551,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 600 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01563. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]"
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 600 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01563. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]",
+      "reversibel": null
     },
     {
       "ID": "PA-0005",
@@ -548,7 +593,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 750 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01563. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]"
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 750 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01563. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]",
+      "reversibel": null
     },
     {
       "ID": "PA-0006",
@@ -589,7 +635,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-2",
       "Im Lieferumfang (Inneneinheit)": "Monoblock-Aussengerät + Zusatz-Gehäuseheizung + Dokumentenhalter + Suissetec Servicebuch (Reglermodul Control Modul separat)",
-      "Bemerkung": "Empfohlene Mindestspeichergrösse 900 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01564. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]"
+      "Bemerkung": "Empfohlene Mindestspeichergrösse 900 L (PDF-S. 48). Vorlauf 75°C bei -7°C Aussentemperatur. EHPA CH-HP-01564. T-CAP-Technologie. Reglermodul 14837.991 + R290-Detektor 14784.007 immer pflichtig. [v1.0.1 Bemerkung-Patch: Anlagenbuch Pflicht — R290 >= 3 kg (SUVA / Brandschutz Naturkaeltemittel).] [v1.0.1: Wartungsheft Pflicht — R290 >= 3 kg (lokale Brandschutz-Auflagen).]",
+      "reversibel": null
     },
     {
       "ID": "OE-0001",
@@ -630,7 +677,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-3",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 inkl. Antenne, 1 Vorlauffühler Heizgruppe, Aussenfühler NTC-2",
-      "Bemerkung": "Schalloptimiert (Kapselverdichter, EC-Lüfter, frei schwingende Verdichtergrundplatte). WPM Touch wandmontiert. R290 GWP=3, COeq vernachlässigbar. Inverter-Technologie."
+      "Bemerkung": "Schalloptimiert (Kapselverdichter, EC-Lüfter, frei schwingende Verdichtergrundplatte). WPM Touch wandmontiert. R290 GWP=3, COeq vernachlässigbar. Inverter-Technologie.",
+      "reversibel": null
     },
     {
       "ID": "OE-0002",
@@ -671,7 +719,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-3",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 + Aussenfühler NTC-2 + kompakte Inneneinheit (Pufferspeicher 100 L + SVGW-Wassererwärmer 277 L Nutzinhalt + 2/4/6 kW Notheizung + 1.5 kW Tauchheizkörper + Speicher- und Heizkreispumpe integriert)",
-      "Bemerkung": "Identische Ausseneinheit wie LAN 1118CP, kompakter Innenmodul integriert (HxBxT zusätzlich Innenmodul). Min-Pufferspeicher 100 L = integrierter Pufferspeicher; externer Puffer optional. Speicher- und Heizkreispumpe bereits eingebaut. [v1.0.1: Bauform-Familie auf gemeinsames Datenblatt aktualisiert.]"
+      "Bemerkung": "Identische Ausseneinheit wie LAN 1118CP, kompakter Innenmodul integriert (HxBxT zusätzlich Innenmodul). Min-Pufferspeicher 100 L = integrierter Pufferspeicher; externer Puffer optional. Speicher- und Heizkreispumpe bereits eingebaut. [v1.0.1: Bauform-Familie auf gemeinsames Datenblatt aktualisiert.]",
+      "reversibel": null
     },
     {
       "ID": "OE-0003",
@@ -712,7 +761,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-3",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 inkl. Antenne, 1 Vorlauffühler Heizgruppe, Aussenfühler NTC-2, Halterungen für Sockel",
-      "Bemerkung": "2 Verdichter (Inverter-Stufung). SCOP 35°C/55°C = 4.32/3.54 (mittleres Klima). R290 GWP=3 → CO2eq ≈ 0. Reversibel (Heizen+Kühlen). Systemtrennung Pflicht (R290)."
+      "Bemerkung": "2 Verdichter (Inverter-Stufung). SCOP 35°C/55°C = 4.32/3.54 (mittleres Klima). R290 GWP=3 → CO2eq ≈ 0. Reversibel (Heizen+Kühlen). Systemtrennung Pflicht (R290).",
+      "reversibel": true
     },
     {
       "ID": "OE-0004",
@@ -753,7 +803,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-3",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 inkl. Antenne, 1 Vorlauffühler Heizgruppe, Aussenfühler NTC-2",
-      "Bemerkung": "2 Verdichter. R407C (GWP 1774, CO2eq 9.93 t — Wartungsheft Pflicht ab 3 kg). Max VL 60 °C bei 2-Verdichter, 64 °C bei 1-Verdichter-Betrieb."
+      "Bemerkung": "2 Verdichter. R407C (GWP 1774, CO2eq 9.93 t — Wartungsheft Pflicht ab 3 kg). Max VL 60 °C bei 2-Verdichter, 64 °C bei 1-Verdichter-Betrieb.",
+      "reversibel": null
     },
     {
       "ID": "OE-0005",
@@ -794,7 +845,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-3",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 inkl. Antenne, 1 Vorlauffühler Heizgruppe, Aussenfühler NTC-2, Halterungen für Sockel",
-      "Bemerkung": "Lieferfrist auf Anfrage (▼). 2 Verdichter, 2 Ventilatoren. SCOP 35°C/55°C = 4.35/3.54. R290 7.6 kg — Wartungsheft Pflicht ab 3 kg. Heizen+Kühlen via 4-Weg-Ventil VWU 50E (extern, optional). Min Pufferspeicher 1000 L."
+      "Bemerkung": "Lieferfrist auf Anfrage (▼). 2 Verdichter, 2 Ventilatoren. SCOP 35°C/55°C = 4.35/3.54. R290 7.6 kg — Wartungsheft Pflicht ab 3 kg. Heizen+Kühlen via 4-Weg-Ventil VWU 50E (extern, optional). Min Pufferspeicher 1000 L.",
+      "reversibel": true
     },
     {
       "ID": "OE-0006",
@@ -835,7 +887,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Aussenfühler NTC-2; 1 Vorlauffühler Heizgruppe; integrierte drehzahlgeregelte Ladepumpe (A-Label); Brauchwasser-Umstellventil; Elektrische Notheizung 6.0 kW; NAVIGATOR 2.0 7\" Touchdisplay; Filterkugelhahn; 2 flexible Anschlussschläuche 1.0 m; Sicherheitsventil 2.5 bar; Rückschlagventil; Wandhängende vormontierte Inneneinheit",
-      "Bemerkung": "R290 GWP=3 → CO2eq vernachlässigbar. Inverter, Kühlfunktion. Max VL 70°C bis -10°C Aussentemperatur. Schalldruckpegel A2: 49 dB(A). EHPA CH-HP-01612. Modulation 2.1–8.3 kW. Mindest-Pufferspeicher 200 L (Hersteller) / 290 L (WPSM)."
+      "Bemerkung": "R290 GWP=3 → CO2eq vernachlässigbar. Inverter, Kühlfunktion. Max VL 70°C bis -10°C Aussentemperatur. Schalldruckpegel A2: 49 dB(A). EHPA CH-HP-01612. Modulation 2.1–8.3 kW. Mindest-Pufferspeicher 200 L (Hersteller) / 290 L (WPSM).",
+      "reversibel": true
     },
     {
       "ID": "OE-0007",
@@ -876,7 +929,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Aussenfühler NTC-2; 1 Vorlauffühler Heizgruppe; integrierte drehzahlgeregelte Ladepumpe (A-Label); Brauchwasser-Umstellventil; Elektrische Notheizung 6.0 kW; NAVIGATOR 2.0 7\" Touchdisplay; Filterkugelhahn; 2 flexible Anschlussschläuche 1.0 m; Sicherheitsventil 2.5 bar; Rückschlagventil; Wandhängende vormontierte Inneneinheit",
-      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Modulation 4.43–11.8 kW. EHPA CH-HP-01612. Mindest-Pufferspeicher 280/360 L (Hersteller/WPSM)."
+      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Modulation 4.43–11.8 kW. EHPA CH-HP-01612. Mindest-Pufferspeicher 280/360 L (Hersteller/WPSM).",
+      "reversibel": true
     },
     {
       "ID": "OE-0008",
@@ -917,7 +971,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Aussenfühler NTC-2; 1 Vorlauffühler Heizgruppe; integrierte drehzahlgeregelte Ladepumpe (A-Label); Brauchwasser-Umstellventil; Elektrische Notheizung 6.0 kW; NAVIGATOR 2.0 7\" Touchdisplay; Filterkugelhahn; 2 flexible Anschlussschläuche 1.0 m; Sicherheitsventil 2.5 bar; Rückschlagventil; Wandhängende vormontierte Inneneinheit",
-      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Modulation 5.99–14.51 kW. EHPA CH-HP-01612. Mindest-Pufferspeicher 350/470 L (Hersteller/WPSM)."
+      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Modulation 5.99–14.51 kW. EHPA CH-HP-01612. Mindest-Pufferspeicher 350/470 L (Hersteller/WPSM).",
+      "reversibel": true
     },
     {
       "ID": "OE-0009",
@@ -958,7 +1013,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Bodenstehende «All-in-One» Inneneinheit 2024x660x956 mm, 305 kg: BWW-Speicher 320 L emailliert mit Magnesium-Schutzanode, Pufferspeicher 100 L, integrierte Ladepumpe, Brauchwasser-Umstellventil, Mischerkreismodul mit Effizienzpumpe, Elektrische Notheizung 6.0 kW, NAVIGATOR 2.0, Smartguard 2.0 14835.815 + Antenne 14838.438, Aussenfühler NTC-2, Vorlauffühler. SVGW-Prüfzertifikat Wassererwärmer.",
-      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Schalldruck A2: 49 dB(A). EHPA CH-HP-01612. Pufferspeicher und Wassererwärmer integriert. WPSM-Empfehlung Min-Puffer 290 L; integrierter 100 L Puffer evtl. mit externem PLATZ-PUF erweitern."
+      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. Schalldruck A2: 49 dB(A). EHPA CH-HP-01612. Pufferspeicher und Wassererwärmer integriert. WPSM-Empfehlung Min-Puffer 290 L; integrierter 100 L Puffer evtl. mit externem PLATZ-PUF erweitern.",
+      "reversibel": true
     },
     {
       "ID": "OE-0010",
@@ -999,7 +1055,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Bodenstehende «All-in-One» Inneneinheit 2024x660x956 mm, 305 kg: BWW-Speicher 320 L emailliert mit Magnesium-Schutzanode, Pufferspeicher 100 L, integrierte Ladepumpe, Brauchwasser-Umstellventil, Mischerkreismodul mit Effizienzpumpe, Elektrische Notheizung 6.0 kW, NAVIGATOR 2.0, Smartguard 2.0 14835.815 + Antenne 14838.438. SVGW-Prüfzertifikat Wassererwärmer.",
-      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. EHPA CH-HP-01612. Pufferspeicher und Wassererwärmer integriert. WPSM-Empfehlung Min-Puffer 360 L; integrierter 100 L Puffer evtl. mit externem PLATZ-PUF erweitern."
+      "Bemerkung": "R290 GWP=3. Inverter. Kühlfunktion. Max VL 70°C bis -10°C. EHPA CH-HP-01612. Pufferspeicher und Wassererwärmer integriert. WPSM-Empfehlung Min-Puffer 360 L; integrierter 100 L Puffer evtl. mit externem PLATZ-PUF erweitern.",
+      "reversibel": true
     },
     {
       "ID": "OE-0011",
@@ -1040,7 +1097,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Aussenfühler NTC-2; 1 Vorlauffühler Heizgruppe; externe Inneneinheit 1005x550x280 mm, 28 kg; Trenntauscher-Set zwingend (Sicherheitskonzept R290 Propan); NAVIGATOR 2.0; Wartungsheft Pflicht (>3 kg R290).",
-      "Bemerkung": "Preis auf Anfrage (im Katalog 2026 keine separate Preisangabe). Trenntauscher Pflicht. R290 4.4 kg → Wartungsheft Pflicht. EHPA CH-HP-01613. Modulation 10.05–24.0 kW. Werte (Volumenstrom/Druckverlust) gelten primärseitig mit 30% Glykol (Jetfrost N)."
+      "Bemerkung": "Preis auf Anfrage (im Katalog 2026 keine separate Preisangabe). Trenntauscher Pflicht. R290 4.4 kg → Wartungsheft Pflicht. EHPA CH-HP-01613. Modulation 10.05–24.0 kW. Werte (Volumenstrom/Druckverlust) gelten primärseitig mit 30% Glykol (Jetfrost N).",
+      "reversibel": null
     },
     {
       "ID": "OE-0012",
@@ -1081,7 +1139,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-4",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; externe Inneneinheit 654x560x189 mm, 27 kg; Trenntauscher-Set Pflicht; NAVIGATOR 2.0; 2 Verdichter, 2 Ventilatoren; Wartungsheft Pflicht (>3 kg R290); Netzwerk-Set Kaskade 14861.090 + Teltonika RUT241 14835.792 im Lieferumfang Kaskaden-Set enthalten.",
-      "Bemerkung": "Preis auf Anfrage. Trenntauscher Pflicht. R290 4.8+4.9 kg = 9.7 kg total → Wartungsheft Pflicht. EHPA CH-HP-01614. Modulation 10.05–51.88 kW. Werte (Volumenstrom/Druckverlust) gelten primärseitig mit 30% Glykol (Jetfrost N)."
+      "Bemerkung": "Preis auf Anfrage. Trenntauscher Pflicht. R290 4.8+4.9 kg = 9.7 kg total → Wartungsheft Pflicht. EHPA CH-HP-01614. Modulation 10.05–51.88 kW. Werte (Volumenstrom/Druckverlust) gelten primärseitig mit 30% Glykol (Jetfrost N).",
+      "reversibel": null
     },
     {
       "ID": "OE-0013",
@@ -1122,7 +1181,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Stk. Vorlauffuehler Heizgruppe; Aussenfuehler NTC-2; Schalldaemmstreifen; WPM Touch integriert (auf-/abklappbar als drahtgebundene Fernbedienung mit Sonderzubehoer MS PGD).",
-      "Bemerkung": "Reversible Luft-Wasser WP für Innenaufstellung. Inverter, gekapselter Verdichterraum, frei schwingende Grundplatte. Eckaufstellung ohne Luftkanaele möglich; Wandaufstellung mit Luftkanaelen auf Ausblasseite. Geteilte Einbringung ueber Hindernisse moeglich. R410A 4.78 kg → Wartungsheft Pflicht (>3 kg). Min. Pufferspeicher 120 L (Hersteller). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Reversible Luft-Wasser WP für Innenaufstellung. Inverter, gekapselter Verdichterraum, frei schwingende Grundplatte. Eckaufstellung ohne Luftkanaele möglich; Wandaufstellung mit Luftkanaelen auf Ausblasseite. Geteilte Einbringung ueber Hindernisse moeglich. R410A 4.78 kg → Wartungsheft Pflicht (>3 kg). Min. Pufferspeicher 120 L (Hersteller). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": true
     },
     {
       "ID": "OE-0014",
@@ -1163,7 +1223,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Stk. Vorlauffuehler Heizgruppe; Aussenfuehler NTC-2; Schalldaemmstreifen; 3 flexible Anschlussschlaeuche 1\" 500 mm; integrierter 50 L Puffer + 2 kW Heizstab + 24 L MAG + Heizkreispumpe + Sicherheitsbaugruppe + Schmutzfaenger + Durchflusswaechter; WPM Touch integriert.",
-      "Bemerkung": "Kompaktbauweise — direkter Anschluss eines ungemischten Heizkreises (nicht bivalent geeignet). Optional Warmwasserbereitung. R410A 1.9 kg < 3 kg → kein Wartungsheft. Min. Pufferspeicher 50 L (integriert). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Kompaktbauweise — direkter Anschluss eines ungemischten Heizkreises (nicht bivalent geeignet). Optional Warmwasserbereitung. R410A 1.9 kg < 3 kg → kein Wartungsheft. Min. Pufferspeicher 50 L (integriert). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": null
     },
     {
       "ID": "OE-0015",
@@ -1204,7 +1265,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; 1 Stk. Vorlauffuehler Heizgruppe; Aussenfuehler NTC-2; Schalldaemmstreifen; integrierter 50 L Puffer + 2 kW Heizstab + 24 L MAG + Heizkreispumpe + Sicherheitsbaugruppe + Schmutzfaenger + Durchflusswaechter; WPM Touch integriert.",
-      "Bemerkung": "Kompaktbauweise — direkter Anschluss eines ungemischten Heizkreises (nicht bivalent geeignet). Optional Warmwasserbereitung. R410A 4.6 kg > 3 kg → Wartungsheft Pflicht. Min. Pufferspeicher 50 L (integriert). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Kompaktbauweise — direkter Anschluss eines ungemischten Heizkreises (nicht bivalent geeignet). Optional Warmwasserbereitung. R410A 4.6 kg > 3 kg → Wartungsheft Pflicht. Min. Pufferspeicher 50 L (integriert). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": null
     },
     {
       "ID": "OE-0016",
@@ -1245,7 +1307,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; Aussenfuehler NTC-2; Schalldaemmstreifen; Vor-/Ruecklauffuehler + Schmutzfaenger + Durchflusswaechter integriert; WPM Touch wandmontiert.",
-      "Bemerkung": "Heizungs-WP für Innenaufstellung mit zwei Verdichtern, integrierte Wärmemengenzaehlung. Wartungsheft Pflicht (R410A 4.6 kg > 3 kg). Min. Pufferspeicher 200 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Heizungs-WP für Innenaufstellung mit zwei Verdichtern, integrierte Wärmemengenzaehlung. Wartungsheft Pflicht (R410A 4.6 kg > 3 kg). Min. Pufferspeicher 200 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": true
     },
     {
       "ID": "OE-0017",
@@ -1286,7 +1349,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; Aussenfuehler NTC-2; Schalldaemmstreifen; Vor-/Ruecklauffuehler + Schmutzfaenger + Durchflusswaechter integriert; WPM Touch wandmontiert.",
-      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, geteilte Einbringung moeglich. Wartungsheft Pflicht (R410A 5.4 kg > 3 kg). Min. Pufferspeicher 400 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, geteilte Einbringung moeglich. Wartungsheft Pflicht (R410A 5.4 kg > 3 kg). Min. Pufferspeicher 400 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": true
     },
     {
       "ID": "OE-0018",
@@ -1327,7 +1391,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; Aussenfuehler NTC-2; Schalldaemmstreifen; Vor-/Ruecklauffuehler + Schmutzfaenger + Durchflusswaechter integriert; WPM Touch wandmontiert.",
-      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, geteilte Einbringung moeglich. Wartungsheft Pflicht (R410A 6.6 kg > 3 kg). Min. Pufferspeicher 400 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig."
+      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, geteilte Einbringung moeglich. Wartungsheft Pflicht (R410A 6.6 kg > 3 kg). Min. Pufferspeicher 400 L (Tech-Daten). — F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig.",
+      "reversibel": true
     },
     {
       "ID": "OE-0019",
@@ -1368,7 +1433,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Smartguard 2.0 14835.815 inkl. Antenne 14838.438; Aussenfuehler NTC-2; Schalldaemmstreifen; Vor-/Ruecklauffuehler + Schmutzfaenger + Durchflusswaechter integriert; WPM Touch wandmontiert.",
-      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, NUR Heizen (kein Kuehlbetrieb), max. VL 64°C. Wartungsheft Pflicht (R407C 5.6 kg > 3 kg). Min. Pufferspeicher 500 L (Tech-Daten). — F-Gas-Hinweis: R407C (5,6 kg) unterliegt der EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Bauform-Familie auf gemeinsames Datenblatt aktualisiert.]"
+      "Bemerkung": "Heizungs-WP fuer Innenaufstellung 2-Verdichter, NUR Heizen (kein Kuehlbetrieb), max. VL 64°C. Wartungsheft Pflicht (R407C 5.6 kg > 3 kg). Min. Pufferspeicher 500 L (Tech-Daten). — F-Gas-Hinweis: R407C (5,6 kg) unterliegt der EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Bauform-Familie auf gemeinsames Datenblatt aktualisiert.]",
+      "reversibel": false
     },
     {
       "ID": "OE-0020",
@@ -1409,7 +1475,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (200 L emailliert nach DIN 4753); Correx Fremdstromanode; integrierter 1.8 kW Elektroeinsatz; Reinigungsflansch; SVGW 1403-6238; SG Ready / PV Ready.",
-      "Bemerkung": "Brauchwarmwasser-WP — Aufstellung Innenraeume frostfrei. COP nach EN16147 = 3.25 (15°C). Zapfprofil L. Mischwasservolumen 255 L (40°C). Aufheizzeit 6:06 h (10→55°C). Heizleistung \"—\" da Brauchwarmwasser-Anwendung; Wert in Spalte 9 entspricht max. Stromverbrauch WP * COP."
+      "Bemerkung": "Brauchwarmwasser-WP — Aufstellung Innenraeume frostfrei. COP nach EN16147 = 3.25 (15°C). Zapfprofil L. Mischwasservolumen 255 L (40°C). Aufheizzeit 6:06 h (10→55°C). Heizleistung \"—\" da Brauchwarmwasser-Anwendung; Wert in Spalte 9 entspricht max. Stromverbrauch WP * COP.",
+      "reversibel": null
     },
     {
       "ID": "OE-0021",
@@ -1450,7 +1517,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (200 L emailliert) + Zusatzregister 0.93 m² fuer Oel-/Gasheizung; Correx Fremdstromanode; 1.8 kW Elektroeinsatz; SVGW 1403-6238; SG Ready / PV Ready.",
-      "Bemerkung": "TWH 200E Pro mit Zusatzregister fuer zweiten Waermeerzeuger. COP 3.33 (EN16147). Zapfprofil L. Mischwasservolumen 249 L."
+      "Bemerkung": "TWH 200E Pro mit Zusatzregister fuer zweiten Waermeerzeuger. COP 3.33 (EN16147). Zapfprofil L. Mischwasservolumen 249 L.",
+      "reversibel": null
     },
     {
       "ID": "OE-0022",
@@ -1491,7 +1559,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (250 L emailliert nach DIN 4753); Correx Fremdstromanode; 1.8 kW Elektroeinsatz; Reinigungsflansch; SVGW 1403-6238; SG Ready / PV Ready.",
-      "Bemerkung": "Brauchwarmwasser-WP. COP nach EN16147 = 3.63 (15°C). Zapfprofil XL. Mischwasservolumen 339 L (40°C). Aufheizzeit 8:08 h."
+      "Bemerkung": "Brauchwarmwasser-WP. COP nach EN16147 = 3.63 (15°C). Zapfprofil XL. Mischwasservolumen 339 L (40°C). Aufheizzeit 8:08 h.",
+      "reversibel": null
     },
     {
       "ID": "OE-0023",
@@ -1532,7 +1601,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (250 L emailliert) + Zusatzregister 0.93 m² fuer Oel-/Gasheizung; Correx Fremdstromanode; 1.8 kW Elektroeinsatz; SVGW 1403-6238; SG Ready / PV Ready.",
-      "Bemerkung": "TWH 250E Pro mit Zusatzregister. COP 3.54 (EN16147). Zapfprofil XL. Mischwasservolumen 322 L."
+      "Bemerkung": "TWH 250E Pro mit Zusatzregister. COP 3.54 (EN16147). Zapfprofil XL. Mischwasservolumen 322 L.",
+      "reversibel": null
     },
     {
       "ID": "OE-0024",
@@ -1573,7 +1643,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (270 L Stahl emailliert nach DIN 4753 — Magnesiumschutzanode); 1.0 kW Elektroeinsatz; Reinigungsflansch; SVGW 2407-7333; PV Ready.",
-      "Bemerkung": "Brauchwarmwasser-WP. COP nach EN16147 = 3.51 (15°C). Zapfprofil XL. Mischwasservolumen 353 L (40°C). Aufheizzeit 8:41 h. Aufstellraum min. 20 m³. Luftkanal max. 12 m."
+      "Bemerkung": "Brauchwarmwasser-WP. COP nach EN16147 = 3.51 (15°C). Zapfprofil XL. Mischwasservolumen 353 L (40°C). Aufheizzeit 8:41 h. Aufstellraum min. 20 m³. Luftkanal max. 12 m.",
+      "reversibel": null
     },
     {
       "ID": "OE-0025",
@@ -1614,7 +1685,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-5",
       "Im Lieferumfang (Inneneinheit)": "Wassererwaermer-WP integriert (265 L Stahl emailliert) + eingeschweisster Waermetauscher 0.9 m² fuer Oel-/Gasheizung; Magnesiumschutzanode; 1.0 kW Elektroeinsatz; SVGW 2407-7333; PV Ready.",
-      "Bemerkung": "DHW 301CHP mit Zusatzregister. COP 3.51 (EN16147). Zapfprofil XL. Mischwasservolumen 372 L (40°C)."
+      "Bemerkung": "DHW 301CHP mit Zusatzregister. COP 3.51 (EN16147). Zapfprofil XL. Mischwasservolumen 372 L (40°C).",
+      "reversibel": null
     },
     {
       "ID": "BO-0009",
@@ -1655,7 +1727,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydraulikeinheit AWE wandmontiert + 8 L MAG + Sicherheitsventil + Manometer + automatischer Entlüfter + Umwälzpumpe + Elektroeinsatz Notheizung 3/6/9 kW + Aussen-/Vorlauf-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0010",
@@ -1696,7 +1769,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydraulikeinheit AWE wandmontiert + 8 L MAG + Sicherheitsventil + Manometer + automatischer Entlüfter + Umwälzpumpe + Elektroeinsatz Notheizung 3/6/9 kW + Aussen-/Vorlauf-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0011",
@@ -1737,7 +1811,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydraulikeinheit AWE wandmontiert + 8 L MAG + Sicherheitsventil + Manometer + automatischer Entlüfter + Umwälzpumpe + Elektroeinsatz Notheizung 3/6/9 kW + Aussen-/Vorlauf-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 3.3 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 3.3 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0012",
@@ -1778,7 +1853,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydraulikeinheit AWE wandmontiert + 8 L MAG + Sicherheitsventil + Manometer + automatischer Entlüfter + Umwälzpumpe + Elektroeinsatz Notheizung 3/6/9 kW + Aussen-/Vorlauf-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 4.0 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 4.0 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0013",
@@ -1819,7 +1895,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydrauliktower AWMB + 17 L MAG + Pufferspeicher 120 L + Sicherheitsgruppe (Sicherheitsventil + Manometer) + automatischer Entlüfter + Umwälzpumpen + Elektroeinsatz Notheizung 3/6/9 kW + Umstellventil BWW + Aussen-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0014",
@@ -1860,7 +1937,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydrauliktower AWMB + 17 L MAG + Pufferspeicher 120 L + Sicherheitsgruppe (Sicherheitsventil + Manometer) + automatischer Entlüfter + Umwälzpumpen + Elektroeinsatz Notheizung 3/6/9 kW + Umstellventil BWW + Aussen-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1: Wartungsheft Pflicht — R410A (ChemRRV-CH synth. F-Gas).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0015",
@@ -1901,7 +1979,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydrauliktower AWMB + 17 L MAG + Pufferspeicher 120 L + Sicherheitsgruppe (Sicherheitsventil + Manometer) + automatischer Entlüfter + Umwälzpumpen + Elektroeinsatz Notheizung 3/6/9 kW + Umstellventil BWW + Aussen-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 3.3 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 3.3 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]",
+      "reversibel": null
     },
     {
       "ID": "BO-0016",
@@ -1942,7 +2021,8 @@
       "Verifiziert am": "27.04.2026",
       "Verifiziert von": "Cowork-Session-Korrektur",
       "Im Lieferumfang (Inneneinheit)": "Hydrauliktower AWMB + 17 L MAG + Pufferspeicher 120 L + Sicherheitsgruppe (Sicherheitsventil + Manometer) + automatischer Entlüfter + Umwälzpumpen + Elektroeinsatz Notheizung 3/6/9 kW + Umstellventil BWW + Aussen-/Warmwasserfühler + Connect-Key K40RF + Regelung HPC 400",
-      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 4.0 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]"
+      "Bemerkung": "F-Gas-Hinweis: R410A unterliegt EU-F-Gas-Verordnung (Phasedown). Service nur durch zertifizierte Fachpersonen, Dichtheitskontrolle pflichtig. [v1.0.1 Bemerkung-Patch: Wartungsheft Pflicht — R410A 4.0 kg >= 3 kg (ChemRRV / EU-F-Gas-VO 517/2014).]",
+      "reversibel": null
     }
   ],
   "komponenten_stamm": [
