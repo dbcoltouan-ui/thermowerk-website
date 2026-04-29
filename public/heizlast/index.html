@@ -6772,7 +6772,15 @@ function attachStaticHandlers(root, stepperEl, getState){
     if (!btn) return;
     const id = btn.getAttribute('data-step');
     const target = document.getElementById(id);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!target) return;
+    // Sticky-Offset selbst berechnen — scrollIntoView+scroll-margin-top wird
+    // vom Browser bei smooth-scrolling teils ignoriert (Chromium-Bug 2024+).
+    // Lese --sticky-h aus :root, fallback 220 px (Topbar+Stepper+Luft).
+    const rootStyles = getComputedStyle(document.documentElement);
+    const stickyVar = rootStyles.getPropertyValue('--sticky-h').trim();
+    const offset = parseInt(stickyVar, 10) || 220;
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   });
 }
 
