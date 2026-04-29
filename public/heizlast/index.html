@@ -1142,19 +1142,6 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   background: var(--ink-50);
 }
 .modal__foot--export .btn { min-width: 120px; }
-/* Mobile: 3 Buttons à 120 px passen nicht nebeneinander → Schliessen-Text
-   wurde links abgeschnitten. Auf schmalen Viewports unterhalb 520 px die
-   Buttons stapeln, jeder volle Breite. */
-@media (max-width: 520px) {
-  .modal__foot--export {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-  .modal__foot--export .btn {
-    min-width: 0;
-    width: 100%;
-  }
-}
 body.modal-open { overflow: hidden; }
 
 /* Toast */
@@ -1511,7 +1498,19 @@ body.modal-open { overflow: hidden; }
 .layer-row:last-child { border-bottom: 0; }
 .layer-row__name { font-weight: 600; color: var(--brand-500); }
 .layer-row__resolved { font-size: var(--fs-xs); color: var(--ink-500); font-style: italic; }
-.layer-row__resolved em { color: var(--ink-400); font-weight: 500;
+.layer-row__resolved em { color: var(--ink-400); font-weight: 500; }
+@media (max-width: 640px) {
+  .layer-row { grid-template-columns: 1fr 1fr; }
+  .layer-row__name { grid-column: 1 / -1; margin-bottom: 4px; }
+  .layer-row__resolved { grid-column: 1 / -1; margin-top: 4px; }
+}
+
+/* S7 — Hülle: jede Bauteil-Zeile als Karte */
+.huelle-row {
+  background: var(--ink-50);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: va
 </style>
 </head>
 <body>
@@ -1687,32 +1686,6 @@ function freshState(){
       speicher: '', geraet: '', foerder: '', bau: '',
       // Backwards-Compat: alte 5-Slot-Notizen (s1..s5)
       s1: '', s2: '', s3: '', s4: '', s5: ''
-    },
-    // Offerten-Modul (Session 2 · 2026-04-29) — siehe OFFERTEN-GAMEPLAN.md
-    // und src/calc/offerte.mjs. Wird im Detail-Modus als eigene Sektion
-    // sec-offerte gerendert. positionen[] sind die *aktuell gewählten*
-    // Offerten-Posten (kommen aus Paket-Auflösung + manuellen Inline-Editor).
-    // Pro Position: { id, position_id, menge, einheits_preis, bemerkung,
-    //                 _isCustom?, kritisch_check?, kategorie?, ... }.
-    // pre_sales_checks bündelt die 7 Ja/Nein-Antworten der Stolperstein-
-    // Checkliste (HAK / Asbest / Hydraulik / FBH-Verteiler / Cooling /
-    // Schall-lokal / GEAK-Pflicht). MwSt-Default 8.1 % (CH ab 2024).
-    // foerderung_chf wird aus dem Förderungs-Modul gespiegelt (manuelles
-    // Override möglich), wird vom Brutto subtrahiert → Netto-Investition.
-    offerte: {
-      paket_id: null,
-      positionen: [],
-      pre_sales_checks: {
-        hak: false,
-        asbest: false,
-        hydraulik: false,
-        fbhVerteiler: false,
-        cooling: false,
-        schallLokal: false,
-        geakPflicht: false
-      },
-      mwst_pct: 8.1,
-      foerderung_chf: 0
     }
   };
 }
@@ -1748,8 +1721,59 @@ function set(path, value){
     cur = nextRef;
   }
   const last = tokens[tokens.length - 1];
-  if (Array.isArray(cur)) cur
-__mods__["./state.mjs"] = { freshState, getState, setState, set };
+  if (Array.isArray(cur)) cur = cur.slice();
+  cur[last] = value;
+  if (parent != null) parent[parentKey] = cur;
+  else root[tokens[0]] = cur;
+  _state = root;
+  _notify();
+}
+
+function batch(fn){
+  _silent = true;
+  try { fn(); } finally {
+    _silent = false;
+    _notify();
+  }
+}
+
+function subscribe(fn){
+  if (typeof fn !== 'function') return () => {};
+  _listeners.add(fn);
+  return () => _listeners.delete(fn);
+}
+
+function resetState(){ setState(freshState()); }
+
+function _notify(){
+  if (_silent || _pending) return;
+  _pending = true;
+  Promise.resolve().then(() => {
+    _pending = false;
+    _listeners.forEach(fn => {
+      try { fn(_state); } catch (e) { console.error('[state] listener error', e); }
+    });
+  });
+}
+
+function _cloneShallow(obj){
+  if (Array.isArray(obj)) return obj.slice();
+  if (obj && typeof obj === 'object') return Object.assign({}, obj);
+  return obj;
+}
+
+function _parsePath(path){
+  const out = [];
+  String(path).split('.').forEach(seg => {
+    const m = /^([^\[]+)(?:\[(\d+)\])?$/.exec(seg);
+    if (!m) return;
+    out.push(m[1]);
+    if (m[2] !== undefined) out.push(parseInt(m[2], 10));
+  });
+  return out;
+}
+
+__mods__["./state.mjs"] = { freshState, getState, setState, set, batch, subscribe, resetState };
 })();
 
 // === ./calc/fws.mjs ===
