@@ -230,7 +230,7 @@ sub, sup { font-size: 0.75em; line-height: 0; }
    wird `--topbar-h` in src/main.mjs:syncStickyOffsets() per JS aus der echten
    Topbar-Höhe gesetzt (auf load + resize). 112 px ist der CSS-Default fuer
    Desktop, falls JS noch nicht gelaufen ist. */
-:root { --topbar-h: 112px; --stepper-h: 56px; --sticky-h: 180px; }
+:root { --topbar-h: 112px; --stepper-h: 70px; --sticky-h: 210px; }
 .stepper {
   background: var(--ink-0);
   border-bottom: 1px solid var(--c-border);
@@ -1609,6 +1609,20 @@ function freshState(){
         { id: 'p0', energy: 'erdgas', von: '', bis: '', menge: 0,
           etaPreset: 'brennwert', etaValue: '' }
       ],
+      // Eigener WW-Eingabe-Block für den Verbrauchs-Abzug — komplett
+      // unabhängig vom WW-Auslegungs-Block (warmwasser.*). Begründung:
+      // der Vorbesitzer-Verbrauch kann auf andere Personen-Anzahl /
+      // Tagesvolumen basieren als die zukünftige WP-Auslegung.
+      verbrauch_ww: {
+        modus: 'direkt',
+        VW_u: '',
+        personen: 0,
+        lProPerson: 40,
+        speicherverluste: 10,
+        zirkulation: 0,
+        ausstoss: 15,
+        dT: 50
+      },
       betriebsstundenAktiv: false,
       bstd_kwh: 0, bstd_stunden: 0, bstd_cop: 0,
       kwhAktiv: false, kwhManual: 0,
@@ -2029,7 +2043,7 @@ function effectiveVWu(s){
   return num(ww.VW_u);
 }
 
-/** Rohe WW-Jahresenergie ohne Sektion-3-Gate. */
+/** Rohe WW-Jahresenergie ohne Sektion-3-Gate (für WP-Q_w / Speicher). */
 function computeQnWWRaw(s){
   const V = effectiveVWu(s);
   if (V <= 0) return 0;
@@ -2042,6 +2056,44 @@ function computeQnWWRaw(s){
     fZirk: num(ww.zirkulation),
     fAusstoss: num(ww.ausstoss)
   });
+}
+
+/** Tagesvolumen für den VERBRAUCHS-WW-Abzug (eigener State-Block, völlig
+ *  unabhängig von der WP-WW-Auslegung). Backwards-compat: fällt auf
+ *  state.warmwasser zurück, wenn der `verbrauch_ww`-Block leer ist
+ *  (V_W,u = 0 UND personen = 0) — alte Projekte funktionieren weiter. */
+function effectiveVWuVerbrauch(s){
+  const vw = s?.heizung?.verbrauch_ww || {};
+  let V = 0;
+  if (vw.modus === 'personen'){
+    const pers = num(vw.personen);
+    const lp   = num(vw.lProPerson) || 40;
+    V = pers * lp;
+  } else {
+    V = num(vw.VW_u);
+  }
+  if (V > 0) return V;
+  // Backwards-Compat: wenn verbrauch_ww leer ist, nutze warmwasser-Werte
+  // (alte Projekte vor der Trennung).
+  return effectiveVWu(s);
+}
+
+/** Rohe WW-Jahresenergie für den VERBRAUCHS-Abzug. */
+function computeQnWWRawForVerbrauch(s){
+  const V = effectiveVWuVerbrauch(s);
+  if (V <= 0) return 0;
+  // Verlustfaktoren ebenfalls aus verbrauch_ww — wenn nicht gesetzt,
+  // Fallback auf warmwasser-Werte.
+  const vw = s?.heizung?.verbrauch_ww || {};
+  const ww = s?.warmwasser || {};
+  const dT = num(vw.dT) || num(ww.dT) || 50;
+  const fSpeicher = (vw.speicherverluste !== undefined && vw.speicherverluste !== '')
+    ? num(vw.speicherverluste) : num(ww.speicherverluste);
+  const fZirk = (vw.zirkulation !== undefined && vw.zirkulation !== '')
+    ? num(vw.zirkulation) : num(ww.zirkulation);
+  const fAusstoss = (vw.ausstoss !== undefined && vw.ausstoss !== '')
+    ? num(vw.ausstoss) : num(ww.ausstoss);
+  return qnwwJahr({ V_l_d: V, cp: 4.2, dT, fSpeicher, fZirk, fAusstoss });
 }
 
 /** Qn,WW für Sektion-3-Auswertungen (Qw, Speicher). 0 wenn Gate AUS. */
@@ -2111,7 +2163,7 @@ function computeMethodVerbrauch(s){
   if (!s?.heizung?.verbrauchAktiv) return null;
   const Qn = computeQnVerbrauch(s);
   if (Qn <= 0) return null;
-  const QnWW = s.heizung.verbrauchInklWW ? computeQnWWRaw(s) : 0;
+  const QnWW = s.heizung.verbrauchInklWW ? computeQnWWRawForVerbrauch(s) : 0;
   const QnH = Math.max(0, Qn - QnWW);
   const tv = effectiveTvoll(s);
   const Qhl_roh = qhlAusQn({ QnH, tvoll: tv });
@@ -2294,7 +2346,7 @@ function freshFwsState(){
   };
 }
 
-__mods__["./calc/fws.mjs"] = { num, periodEta, qnwwJahr, qhlAusQn, qwDetail, qoffFormel, speichervolumen, plausiAmpel, computeQnVerbrauch, effectiveVWu, computeQnWWRaw, computeQnWW, tvollAuto, effectiveTvoll, sanFactor, measureSavingKW, computeMethodVerbrauch, computeMethodBstd, computeMethodKwh, computeMethodBauperiode, computeQwDetail, computeQw, computeQoff, computeVWSto, computePlausi, compute, freshFwsState, HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, BAUPERIODE_KWH, SPEZ_BAND, TOFF_DEFAULTS, SANIERUNG_PRESETS, F_STO_PRESETS, A_WT_PRESETS };
+__mods__["./calc/fws.mjs"] = { num, periodEta, qnwwJahr, qhlAusQn, qwDetail, qoffFormel, speichervolumen, plausiAmpel, computeQnVerbrauch, effectiveVWu, computeQnWWRaw, effectiveVWuVerbrauch, computeQnWWRawForVerbrauch, computeQnWW, tvollAuto, effectiveTvoll, sanFactor, measureSavingKW, computeMethodVerbrauch, computeMethodBstd, computeMethodKwh, computeMethodBauperiode, computeQwDetail, computeQw, computeQoff, computeVWSto, computePlausi, compute, freshFwsState, HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, BAUPERIODE_KWH, SPEZ_BAND, TOFF_DEFAULTS, SANIERUNG_PRESETS, F_STO_PRESETS, A_WT_PRESETS };
 })();
 
 // === ./calc/heatload.mjs ===
@@ -4918,26 +4970,32 @@ function renderStammdaten(s){
  * IDs/Radio-Names, damit zwei Instanzen sich nicht in die Quere kommen.
  */
 function renderInlineWw(s, inst = 'g'){
-  const w = s.warmwasser || {};
+  // Bei inst='v' (Verbrauchs-Section) liest/schreibt der Inline-Block in
+  // einen EIGENEN State-Ast `heizung.verbrauch_ww.*` — komplett unabhängig
+  // vom WP-WW-Auslegungs-Block `warmwasser.*`. So kann der Vorbesitzer-
+  // Verbrauch auf andere Personen-Anzahl basieren als die WP-Auslegung.
+  const isVerbr = inst === 'v';
+  const basePath = isVerbr ? 'heizung.verbrauch_ww' : 'warmwasser';
+  const w = isVerbr ? (s.heizung?.verbrauch_ww || {}) : (s.warmwasser || {});
   const isPers = w.modus === 'personen';
   return `
   <div class="ww-inline" id="wwInline-${inst}" data-on="${s?.heizung?.verbrauchInklWW || inst!=='v'}">
     <div class="grid grid--2">
       <div class="field">
         <label class="field__label">Eingabe-Modus</label>
-        ${segRadio('wwmod-' + inst, 'warmwasser.modus', w.modus || 'direkt', [['direkt','V<sub>W,u</sub> direkt'],['personen','Personen × l/d']])}
+        ${segRadio('wwmod-' + inst, basePath + '.modus', w.modus || 'direkt', [['direkt','V<sub>W,u</sub> direkt'],['personen','Personen × l/d']])}
       </div>
       <div class="field" id="wwf-direkt-${inst}" ${isPers ? 'hidden' : ''}>
         <label class="field__label">WW-Nutzvolumen V<sub>W,u</sub></label>
-        <div class="input-group">${inputNumRaw('warmwasser.VW_u', w.VW_u || '', 1, 0, '180')}<span class="input-group__unit">l/d</span></div>
+        <div class="input-group">${inputNumRaw(basePath + '.VW_u', w.VW_u || '', 1, 0, '180')}<span class="input-group__unit">l/d</span></div>
       </div>
       <div class="field" id="wwf-pers-${inst}" ${isPers ? '' : 'hidden'}>
         <label class="field__label">Personen</label>
-        ${inputNumRaw('warmwasser.personen', w.personen || '', 1, 0, '4')}
+        ${inputNumRaw(basePath + '.personen', w.personen || '', 1, 0, '4')}
       </div>
       <div class="field" id="wwf-lpd-${inst}" ${isPers ? '' : 'hidden'}>
         <label class="field__label">l / Person · Tag</label>
-        ${inputNumRaw('warmwasser.lProPerson', w.lProPerson, 5, 5, '40')}
+        ${inputNumRaw(basePath + '.lProPerson', w.lProPerson, 5, 5, '40')}
       </div>
     </div>
   </div>`;
@@ -6856,7 +6914,7 @@ function updateMethodStatus(s, c){
     } else if (m && m.QnWW > 0){
       hint.innerHTML = `Aktuell <strong>${fmtKWh(m.QnWW)} kWh/a</strong> Warmwasser-Anteil aus dem Verbrauch abgezogen → Q<sub>n,H</sub> = ${fmtKWh(m.QnH)} kWh/a.`;
     } else if (s.heizung.verbrauchInklWW){
-      hint.innerHTML = `<em style="color:var(--warn-500)">Aktuell <strong>0 kWh/a</strong> abgezogen — bitte unten <strong>Personen</strong> oder <strong>V<sub>W,u</sub></strong> eingeben, damit der Abzug greift. (Eingabe wird mit Sektion Warmwasser geteilt.)</em>`;
+      hint.innerHTML = `<em style="color:var(--warn-500)">Aktuell <strong>0 kWh/a</strong> abgezogen — bitte unten <strong>Personen</strong> oder <strong>V<sub>W,u</sub></strong> eingeben, damit der Abzug greift. (Eigener Wert für den Verbrauchs-Abzug — unabhängig von der WP-WW-Auslegung in Schritt 4.)</em>`;
     } else {
       hint.innerHTML = '—';
     }
@@ -9533,9 +9591,10 @@ function syncStickyOffsets(){
   }
   // Gesamt-Sticky-Höhe für scroll-margin-top der Sections — damit Section-
   // Überschrift beim Klick im Stepper nicht hinter Topbar+Stepper verschwindet.
-  // +12 px Luft, damit die Überschrift nicht direkt am unteren Stepper-Rand klebt.
+  // +28 px Luft, damit die Überschrift sichtbar unter dem Stepper sitzt
+  // (vorher 12 — war auf Daniels Browser zu knapp).
   if (topbarH > 0 || stepperH > 0){
-    document.documentElement.style.setProperty('--sticky-h', (topbarH + stepperH + 12) + 'px');
+    document.documentElement.style.setProperty('--sticky-h', (topbarH + stepperH + 28) + 'px');
   }
 }
 
