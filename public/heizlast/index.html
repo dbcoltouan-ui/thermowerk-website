@@ -8987,17 +8987,25 @@ function buildFoerderTable(s, c){
       const bewRows = [];
       if (b.heizungsersatz){
         // Daten-Schema: bewilligungspflichtig (bool), kurz / details / frist (string).
-        // Vorher las der Code b.heizungsersatz.bewilligung — ein nicht
-        // existierendes Feld → fälschlich "frei" für jeden Kanton.
+        // Aufgeteilt in mehrere Zeilen, damit "Bewilligungspflicht / Hinweis /
+        // Frist" sauber lesbar bleiben. Der `kurz`-Text beginnt in einigen
+        // Kantonen bereits mit "Bewilligungspflichtig" — wir strippen das
+        // Wort vorne, damit es nicht doppelt erscheint.
         const pflicht = !!b.heizungsersatz.bewilligungspflichtig;
-        const head = pflicht ? 'Bewilligungspflichtig' : 'Meldepflichtig';
-        const kurz = b.heizungsersatz.kurz ? ' — ' + esc(b.heizungsersatz.kurz) : '';
-        const frist = b.heizungsersatz.frist ? ` · <em>Frist: ${esc(b.heizungsersatz.frist)}</em>` : '';
-        bewRows.push(['Heizungsersatz', head + kurz + frist]);
+        const status = pflicht ? 'Bewilligungspflichtig' : 'Meldepflichtig';
+        bewRows.push(['Heizungsersatz', '<strong>' + status + '</strong>']);
+        let kurz = (b.heizungsersatz.kurz || '').trim();
+        kurz = kurz.replace(/^(Bewilligungs?pflichtig|Meldepflichtig|bewilligungs?pflichtig|meldepflichtig)[\s\.\:\-—()a-zäöü]*?\.?\s*/i, '').trim();
+        if (kurz) bewRows.push(['Hinweis', esc(kurz)]);
+        const details = (b.heizungsersatz.details || '').trim();
+        if (details && details !== kurz) bewRows.push(['Detail', esc(details)]);
+        if (b.heizungsersatz.frist){
+          bewRows.push(['Frist', '<em>' + esc(b.heizungsersatz.frist) + '</em>']);
+        }
       }
       const lswHinweis = (b.lwwp_aussen?.details || b.lwwp?.hinweis || '').trim();
       if (lswHinweis && lswHinweis !== '—'){
-        bewRows.push(['Luft/Wasser-WP (LSV)', esc(lswHinweis)]);
+        bewRows.push(['Lärmschutz Luft/Wasser-WP', esc(lswHinweis)]);
       }
       if (bewRows.length){
         bewBox = `<h2 class="brosch__h2">Baubewilligung — ${esc(kantonLabel(s.projekt.kanton))}</h2>
