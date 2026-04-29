@@ -230,7 +230,7 @@ sub, sup { font-size: 0.75em; line-height: 0; }
    wird `--topbar-h` in src/main.mjs:syncStickyOffsets() per JS aus der echten
    Topbar-Höhe gesetzt (auf load + resize). 112 px ist der CSS-Default fuer
    Desktop, falls JS noch nicht gelaufen ist. */
-:root { --topbar-h: 112px; }
+:root { --topbar-h: 112px; --stepper-h: 56px; --sticky-h: 180px; }
 .stepper {
   background: var(--ink-0);
   border-bottom: 1px solid var(--c-border);
@@ -238,6 +238,11 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   top: var(--topbar-h);
   z-index: 25;
 }
+/* Stepper-Klick scrollt zur Section. Damit der Section-Header NICHT hinter
+   Topbar+Stepper verschwindet, bekommt jede Section ein scroll-margin-top
+   in Höhe des kompletten Sticky-Stacks. `--sticky-h` wird in main.mjs:
+   syncStickyOffsets() auf topbar-h + stepper-h + 12 px Luft gesetzt. */
+.section { scroll-margin-top: var(--sticky-h, 180px); }
 .stepper__inner {
   display: flex;
   flex-wrap: wrap;
@@ -1505,21 +1510,7 @@ body.modal-open { overflow: hidden; }
   background: var(--ink-50);
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
-  padding: var(--s-3);
-  margin-bottom: var(--s-3);
-  grid-column: 1 / -1;
-}
-.huelle-row__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-3);
-  align-items: baseline;
-  margin-bottom: var(--s-2);
-  padding-bottom: var(--s-2);
-  border-bottom: 1px solid var(--c-border);
-}
-.huelle-row__head strong { font-size: var(--fs-md); color: var(--brand-500); }
-.huelle-row__u { font-size: var(--fs-md); c
+  padding: va
 </style>
 </head>
 <body>
@@ -9470,11 +9461,11 @@ async function boot(){
   window.addEventListener('resize', syncStickyOffsets);
   window.addEventListener('load', syncStickyOffsets);
   if (typeof ResizeObserver !== 'undefined'){
+    const ro = new ResizeObserver(() => syncStickyOffsets());
     const tb = document.querySelector('.topbar');
-    if (tb){
-      const ro = new ResizeObserver(() => syncStickyOffsets());
-      ro.observe(tb);
-    }
+    const sp = document.querySelector('.stepper');
+    if (tb) ro.observe(tb);
+    if (sp) ro.observe(sp);
   }
 
   // Detail-Modus-Toggle ist ab S7 Teil der Topbar-Actions (renderTopbarActions),
@@ -9530,10 +9521,21 @@ function extractWpList(d){
  *  oder welcher Viewport. */
 function syncStickyOffsets(){
   const tb = document.querySelector('.topbar');
-  if (!tb) return;
-  const h = Math.round(tb.getBoundingClientRect().height);
-  if (h > 0){
-    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  const sp = document.querySelector('.stepper');
+  let topbarH = 0, stepperH = 0;
+  if (tb){
+    topbarH = Math.round(tb.getBoundingClientRect().height);
+    if (topbarH > 0) document.documentElement.style.setProperty('--topbar-h', topbarH + 'px');
+  }
+  if (sp){
+    stepperH = Math.round(sp.getBoundingClientRect().height);
+    if (stepperH > 0) document.documentElement.style.setProperty('--stepper-h', stepperH + 'px');
+  }
+  // Gesamt-Sticky-Höhe für scroll-margin-top der Sections — damit Section-
+  // Überschrift beim Klick im Stepper nicht hinter Topbar+Stepper verschwindet.
+  // +12 px Luft, damit die Überschrift nicht direkt am unteren Stepper-Rand klebt.
+  if (topbarH > 0 || stepperH > 0){
+    document.documentElement.style.setProperty('--sticky-h', (topbarH + stepperH + 12) + 'px');
   }
 }
 
