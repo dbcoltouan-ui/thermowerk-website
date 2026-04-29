@@ -1142,6 +1142,19 @@ sub, sup { font-size: 0.75em; line-height: 0; }
   background: var(--ink-50);
 }
 .modal__foot--export .btn { min-width: 120px; }
+/* Mobile: 3 Buttons à 120 px passen nicht nebeneinander → Schliessen-Text
+   wurde links abgeschnitten. Auf schmalen Viewports unterhalb 520 px die
+   Buttons stapeln, jeder volle Breite. */
+@media (max-width: 520px) {
+  .modal__foot--export {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .modal__foot--export .btn {
+    min-width: 0;
+    width: 100%;
+  }
+}
 body.modal-open { overflow: hidden; }
 
 /* Toast */
@@ -1498,19 +1511,7 @@ body.modal-open { overflow: hidden; }
 .layer-row:last-child { border-bottom: 0; }
 .layer-row__name { font-weight: 600; color: var(--brand-500); }
 .layer-row__resolved { font-size: var(--fs-xs); color: var(--ink-500); font-style: italic; }
-.layer-row__resolved em { color: var(--ink-400); font-weight: 500; }
-@media (max-width: 640px) {
-  .layer-row { grid-template-columns: 1fr 1fr; }
-  .layer-row__name { grid-column: 1 / -1; margin-bottom: 4px; }
-  .layer-row__resolved { grid-column: 1 / -1; margin-top: 4px; }
-}
-
-/* S7 — Hülle: jede Bauteil-Zeile als Karte */
-.huelle-row {
-  background: var(--ink-50);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  padding: va
+.layer-row__resolved em { color: var(--ink-400); font-weight: 500;
 </style>
 </head>
 <body>
@@ -1594,8 +1595,8 @@ function freshState(){
       name: '', planer: '', strasse: '', plz: '', ort: '',
       bauherrschaft: '', kanton: '', gemeinde: '', notizen: '',
       // S6 — Förderungen / Baubewilligungen
-      massnahme: 'heizungsersatz', // 'heizungsersatz' | 'sanierung_huelle' | 'sanierung_dach' | 'sanierung_boden' | 'sanierung_fenster' | 'neubau_minergie' | 'thermische_solar' | 'pv' | 'geak'
-      wp_quelle: 'luft' // 'luft' | 'sole' | 'wasser' — relevant für Förder-Filter
+      massnahme: 'heizungsersatz',
+      wp_quelle: 'luft'
     },
     objekt: {
       typ: 'efh', lage: 'mittelland', bauperiode: '1986-1990',
@@ -1609,10 +1610,6 @@ function freshState(){
         { id: 'p0', energy: 'erdgas', von: '', bis: '', menge: 0,
           etaPreset: 'brennwert', etaValue: '' }
       ],
-      // Eigener WW-Eingabe-Block für den Verbrauchs-Abzug — komplett
-      // unabhängig vom WW-Auslegungs-Block (warmwasser.*). Begründung:
-      // der Vorbesitzer-Verbrauch kann auf andere Personen-Anzahl /
-      // Tagesvolumen basieren als die zukünftige WP-Auslegung.
       verbrauch_ww: {
         modus: 'direkt',
         VW_u: '',
@@ -1634,12 +1631,11 @@ function freshState(){
       VW_u: 0, personen: 0, lProPerson: 40,
       speicherverluste: 10, zirkulation: 0, ausstoss: 15,
       dT: 50, tLadeWW: 60,
-      // S5
-      speicher_aktiv: true,  speicher_v_user: '',   // leer = Auto-Vorschlag
+      speicher_aktiv: true,  speicher_v_user: '',
       puffer_aktiv:  false,  puffer_v_user:  '',
-      anlagenvolumen_user: '',                       // l (für MAG-Berechnung)
-      mag_pe: 2.5,                                   // Enddruck Sicherheitsventil-Ansprechdruck-0.5 bar
-      mag_p0: 1.0                                    // Vordruck (statische Höhe + 0.3 bar)
+      anlagenvolumen_user: '',
+      mag_pe: 2.5,
+      mag_p0: 1.0
     },
     zuschlaege: {
       sperrzeitAktiv: false, sperrzeitTyp: 'werktag',
@@ -1657,18 +1653,14 @@ function freshState(){
       },
       raeume: [],
       misch: { rest_global: true },
-      // S5 — Wärmeübergabe / Heizflächen / Heizkreise
       verteilung: {
         heizkreise: [{ id: 'k1', name: 'Heizkreis 1' }],
-        // Globaler Fallback wenn keine Räume erfasst:
         global: {
-          tVL_neu: 35, tRL_neu: 28,                  // Auslegung Vorlauf/Rücklauf [°C]
-          tVL_alt: 70, tRL_alt: 55,                  // Bestand (Sanierungs-Plausi)
-          typ: 'fbh'                                 // Bezugs-Heizflächentyp
+          tVL_neu: 35, tRL_neu: 28,
+          tVL_alt: 70, tRL_alt: 55,
+          typ: 'fbh'
         },
-        bestand_aktiv: false,                        // Sanierungs-Plausi-Modus
-        // Pro Raum: r.heizflaechen[] = [{ typ, A, kreis_id }]
-        // (gespeichert direkt im Raum-Objekt unter detail.raeume[i].heizflaechen)
+        bestand_aktiv: false
       }
     },
     geraet: {
@@ -1676,7 +1668,7 @@ function freshState(){
       vorlauftemperatur: null, bivalenz: null,
       filter: {
         toleranz_proz: 20, schallklasse_max: 60,
-        aufstellung: 'alle'  // 'alle' | 'Aussen' | 'Innen'
+        aufstellung: 'alle'
       }
     },
     ergebnis: {},
@@ -1684,8 +1676,31 @@ function freshState(){
       stamm: '', huelle: '', raeume: '', ww: '',
       verteilung: '', zuschlaege: '', heizlast: '',
       speicher: '', geraet: '', foerder: '', bau: '',
-      // Backwards-Compat: alte 5-Slot-Notizen (s1..s5)
       s1: '', s2: '', s3: '', s4: '', s5: ''
+    },
+    // Offerten-Modul (Session 2 · 2026-04-29) — siehe OFFERTEN-GAMEPLAN.md
+    // und src/calc/offerte.mjs. Wird im Detail-Modus als eigene Sektion
+    // sec-offerte gerendert. positionen[] sind die *aktuell gewählten*
+    // Offerten-Posten (kommen aus Paket-Aufloesung + manuellen Inline-Editor).
+    // Pro Position: { id, position_id, menge, einheits_preis, bemerkung,
+    //                 _isCustom?, kritisch_check?, kategorie?, ... }.
+    // pre_sales_checks: 7 Ja/Nein-Antworten der Stolperstein-Checkliste.
+    // mwst_pct Default 8.1 % (CH ab 2024).
+    // foerderung_chf aus dem Foerderungs-Modul gespiegelt -> Netto-Invest.
+    offerte: {
+      paket_id: null,
+      positionen: [],
+      pre_sales_checks: {
+        hak: false,
+        asbest: false,
+        hydraulik: false,
+        fbhVerteiler: false,
+        cooling: false,
+        schallLokal: false,
+        geakPflicht: false
+      },
+      mwst_pct: 8.1,
+      foerderung_chf: 0
     }
   };
 }
@@ -4477,6 +4492,984 @@ function gruppiereProgramme(programme, kontext){
 __mods__["./calc/foerderung.mjs"] = { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, vergleichNormVerbrauch, gruppiereProgramme };
 })();
 
+// === ./calc/offerte.mjs ===
+(function(){
+// src/calc/offerte.mjs
+//
+// Offerten-Modul – Schema-Validierung + Paket-Auflösung.
+// Reine Funktionen ohne DOM-Bindungen.
+//
+// @see OFFERTEN-GAMEPLAN.md (Session 1 – Datenmodell)
+// @see OFFERTEN-RESEARCH.md §7 (Standardpositionen A–K)
+// @see SYNTHESE.md §4 (Stolperstein-Positionen Kategorie L)
+
+const ERLAUBTE_KATEGORIEN = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+const ERLAUBTE_EINHEITEN = ['Stk','m','h','Pauschal','Jahr','%'];
+const ERLAUBTE_KRITISCH_CHECKS = [
+  'hak','asbest','hydraulik','fbh-verteiler',
+  'cooling','schall-lokal','geak-pflicht',
+];
+
+const POSITION_PFLICHT = ['id','kategorie','name','einheit','einheits_preis','default_menge'];
+
+/**
+ * Validiert eine einzelne Position.
+ * @returns {{ok: boolean, errors: string[]}}
+ */
+function validatePosition(p) {
+  const errors = [];
+  if (!p || typeof p !== 'object') {
+    return { ok: false, errors: ['Position ist kein Objekt'] };
+  }
+  for (const f of POSITION_PFLICHT) {
+    if (p[f] === undefined || p[f] === null) errors.push(`Pflichtfeld fehlt: ${f}`);
+  }
+  if (p.kategorie && !ERLAUBTE_KATEGORIEN.includes(p.kategorie)) {
+    errors.push(`Ungültige Kategorie '${p.kategorie}' (erlaubt: ${ERLAUBTE_KATEGORIEN.join(',')})`);
+  }
+  if (p.einheit && !ERLAUBTE_EINHEITEN.includes(p.einheit)) {
+    errors.push(`Ungültige Einheit '${p.einheit}' (erlaubt: ${ERLAUBTE_EINHEITEN.join(',')})`);
+  }
+  if (typeof p.einheits_preis !== 'number' || !Number.isFinite(p.einheits_preis) || p.einheits_preis < 0) {
+    errors.push(`einheits_preis muss endliche Zahl ≥ 0 sein (war ${p.einheits_preis})`);
+  }
+  if (typeof p.default_menge !== 'number' || p.default_menge < 0) {
+    errors.push(`default_menge muss Zahl ≥ 0 sein (war ${p.default_menge})`);
+  }
+  if (p.kritisch_check != null && !ERLAUBTE_KRITISCH_CHECKS.includes(p.kritisch_check)) {
+    errors.push(`Unbekannter kritisch_check '${p.kritisch_check}' (erlaubt: null oder ${ERLAUBTE_KRITISCH_CHECKS.join(',')})`);
+  }
+  if (p.einheit === 'h' && (p.stundensatz == null || typeof p.stundensatz !== 'number')) {
+    errors.push('Einheit "h" benötigt numerischen stundensatz');
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+/**
+ * Validiert die Positionen-Stammdaten (Array).
+ * @param {Array} positionen
+ * @returns {{ok: boolean, errors: string[], duplicate_ids: string[]}}
+ */
+function validatePositionen(positionen) {
+  const errors = [];
+  if (!Array.isArray(positionen)) {
+    return { ok: false, errors: ['positionen ist kein Array'], duplicate_ids: [] };
+  }
+  const ids = new Map();  // id -> count
+  positionen.forEach((p, i) => {
+    const r = validatePosition(p);
+    if (!r.ok) errors.push(`#${i} (${p?.id ?? '???'}): ${r.errors.join('; ')}`);
+    if (p?.id) ids.set(p.id, (ids.get(p.id) || 0) + 1);
+  });
+  const duplicate_ids = [...ids.entries()].filter(([, n]) => n > 1).map(([id]) => id);
+  duplicate_ids.forEach(id => errors.push(`Doppelte ID: ${id}`));
+  return { ok: errors.length === 0, errors, duplicate_ids };
+}
+
+/**
+ * Validiert ein Paket gegen die Positionen-Stammdaten.
+ * @returns {{ok: boolean, errors: string[]}}
+ */
+function validatePaket(paket, positionen) {
+  const errors = [];
+  if (!paket || typeof paket !== 'object') return { ok: false, errors: ['Paket ist kein Objekt'] };
+  if (!paket.id) errors.push('Paket-Pflichtfeld fehlt: id');
+  if (!paket.name) errors.push('Paket-Pflichtfeld fehlt: name');
+  if (!Array.isArray(paket.positionen)) {
+    errors.push('Paket-Pflichtfeld fehlt: positionen[]');
+    return { ok: false, errors };
+  }
+  const idMap = new Map(positionen.map(p => [p.id, p]));
+  paket.positionen.forEach((entry, i) => {
+    if (!entry?.position_id) errors.push(`Position #${i}: position_id fehlt`);
+    else if (!idMap.has(entry.position_id))
+      errors.push(`Position #${i}: unbekannte position_id '${entry.position_id}'`);
+    if (entry?.menge_override != null && (typeof entry.menge_override !== 'number' || entry.menge_override < 0))
+      errors.push(`Position #${i} (${entry.position_id}): menge_override muss Zahl ≥ 0 sein`);
+  });
+  return { ok: errors.length === 0, errors };
+}
+
+/**
+ * Löst ein Paket auf — fügt aus den Stammdaten die Position-Daten ein
+ * und wendet menge_override an.
+ *
+ * @param {object} paket  – Paket aus offerten-pakete.json
+ * @param {Array}  positionen – Stammdaten aus offerten-positionen.json
+ * @returns {Array<object>}  – Paket-Positionen mit `menge`, `subtotal`,
+ *                              `position` (vollständige Stammdaten-Position)
+ */
+function resolvePaket(paket, positionen) {
+  const idMap = new Map(positionen.map(p => [p.id, p]));
+  const resolved = [];
+  for (const entry of paket.positionen ?? []) {
+    const stamm = idMap.get(entry.position_id);
+    if (!stamm) continue;  // skipped unknown ids – Validierung sollte vorher laufen
+    const menge = entry.menge_override ?? stamm.default_menge ?? 0;
+    const stueck_preis = stamm.einheits_preis ?? 0;
+    const subtotal = stamm.einheit === '%'
+      ? 0  // Prozent-Positionen werden im Tool spät auf Bausumme angewendet
+      : menge * stueck_preis;
+    resolved.push({
+      position_id: stamm.id,
+      kategorie: stamm.kategorie,
+      kategorie_name: stamm.kategorie_name,
+      name: stamm.name,
+      einheit: stamm.einheit,
+      einheits_preis: stueck_preis,
+      menge,
+      subtotal,
+      bemerkung: stamm.bemerkung ?? '',
+      kritisch_check: stamm.kritisch_check ?? null,
+      ist_pauschal: !!stamm.ist_pauschal,
+      stundensatz: stamm.stundensatz ?? null,
+      npk_code: stamm.npk_code ?? null,
+      hersteller_garantie_jahre: stamm.hersteller_garantie_jahre ?? null,
+      _stamm: stamm,
+    });
+  }
+  return resolved;
+}
+
+/**
+ * Berechnet das Subtotal eines aufgelösten Pakets/einer Positionsliste.
+ * Prozent-Positionen (z. B. „Bauleitung 6 %") werden auf das Subtotal
+ * der nicht-prozentigen Positionen angewendet und sind im Total enthalten.
+ */
+function computePaketSubtotal(resolvedPositionen) {
+  const fix = resolvedPositionen.filter(p => p.einheit !== '%');
+  const proz = resolvedPositionen.filter(p => p.einheit === '%');
+  const fix_sum = fix.reduce((s, p) => s + (p.subtotal || 0), 0);
+  const proz_sum = proz.reduce((s, p) => s + (fix_sum * (p.einheits_preis / 100) * (p.menge || 1)), 0);
+  return {
+    fix_sum,
+    proz_sum,
+    netto_subtotal: fix_sum + proz_sum,
+  };
+}
+
+/**
+ * Wendet MwSt + Förderung-Abzug an.
+ * @param {number} netto_subtotal
+ * @param {object} opt – { mwst_pct=8.1, foerderung_chf=0 }
+ */
+function applyTaxAndFoerderung(netto_subtotal, { mwst_pct = 8.1, foerderung_chf = 0 } = {}) {
+  const mwst_chf = Math.round((netto_subtotal * mwst_pct / 100) * 100) / 100;
+  const brutto = netto_subtotal + mwst_chf;
+  const netto_invest = brutto - foerderung_chf;
+  return {
+    netto_subtotal,
+    mwst_pct,
+    mwst_chf,
+    brutto,
+    foerderung_chf,
+    netto_invest,
+  };
+}
+
+const _internal = {
+  ERLAUBTE_KATEGORIEN,
+  ERLAUBTE_EINHEITEN,
+  ERLAUBTE_KRITISCH_CHECKS,
+};
+
+/* ==========================================================================
+   SESSION 2 — Auto-Vorbelegung aus Heizlast-Auslegung
+   ==========================================================================
+   buildVorbelegung(state, calc, opts) baut die initiale Offerten-Positionsliste
+   basierend auf dem aktuellen Auslegungs-State + compute()-Resultat:
+     - state.projekt.wp_quelle  -> Paket-Vorschlag (luft -> LW-Paket, sole -> SW-Paket)
+     - calc.heatpump.sel        -> Stuekpreis + Modell-Name auf wp-lw-... / wp-sw-... ueberschreiben
+     - calc.heatpump.sel.reversibel === true -> Cooling-Position automatisch aktivieren
+     - calc.VW_Sto              -> WW-Speichervolumen 200/300/400 l auswaehlen
+     - calc.VP_Sto              -> Pufferspeicher 200/500/1000 l auswaehlen
+     - state.detail.verteilung.heizkreise -> fbh-stellantriebe Menge anpassen
+   Liefert { paket_id, positionen[] } mit Positionen in der gleichen Form, die
+   resolvePaket() liefert - so kann die UI beide Quellen einheitlich rendern.
+   ========================================================================== */
+
+const _PAKET_PER_QUELLE = {
+  luft:   'paket-lw-aussen-oel-ersatz',
+  sole:   'paket-sw-erdsonde-150m',
+  wasser: 'paket-sw-erdsonde-150m'   // Naechste sinnvolle Vorlage; Daniel kann wechseln
+};
+
+function _wpStammIdForQuelle(quelle){
+  if (quelle === 'sole')  return 'wp-sw-8-14kw';
+  if (quelle === 'wasser') return 'wp-sw-8-14kw';
+  return 'wp-lw-8-14kw';
+}
+
+function _wpModelLabel(sel){
+  if (!sel || typeof sel !== 'object') return null;
+  const teile = [sel.Marke, sel.Serie, sel.Modell].filter(Boolean);
+  return teile.length ? teile.join(' ') : null;
+}
+
+function _pickSpeicherId(V){
+  // ww-speicher-emailliert-200l/300l/400l (Stammdaten Kategorie C)
+  const v = Number(V) || 0;
+  if (v <= 250) return 'ww-speicher-emailliert-200l';
+  if (v <= 350) return 'ww-speicher-emailliert-300l';
+  return 'ww-speicher-emailliert-400l';
+}
+
+function _pickPufferId(V){
+  const v = Number(V) || 0;
+  if (v <= 350)  return 'pufferspeicher-200l';
+  if (v <= 750)  return 'pufferspeicher-500l';
+  return 'pufferspeicher-1000l';
+}
+
+/**
+ * Baut die initiale Offerten-Positionsliste.
+ * @param {object} state vollstaendiger State (aus state.mjs)
+ * @param {object} calc  compute()-Resultat (mit calc.heatpump.sel, calc.VW_Sto, calc.VP_Sto)
+ * @param {object} opts  { positionen, pakete } - Stammdaten
+ * @returns {{paket_id: string|null, positionen: Array}}
+ */
+function buildVorbelegung(state, calc, opts){
+  const stamm = (opts && Array.isArray(opts.positionen)) ? opts.positionen : [];
+  const pakete = (opts && Array.isArray(opts.pakete)) ? opts.pakete : [];
+  if (!stamm.length || !pakete.length){
+    return { paket_id: null, positionen: [] };
+  }
+  const quelle = (state && state.projekt && state.projekt.wp_quelle) || 'luft';
+  const paket_id = _PAKET_PER_QUELLE[quelle] || _PAKET_PER_QUELLE.luft;
+  const paket = pakete.find(p => p.id === paket_id);
+  if (!paket){
+    return { paket_id: null, positionen: [] };
+  }
+
+  // 1) Paket aufloesen
+  const resolved = resolvePaket(paket, stamm);
+
+  // 2) WP-Modell-Override: ersetze Stueckpreis + Bemerkung der WP-Position aus calc.heatpump.sel
+  const sel = calc && calc.heatpump && calc.heatpump.sel ? calc.heatpump.sel : null;
+  const wpStammId = _wpStammIdForQuelle(quelle);
+  if (sel){
+    const idx = resolved.findIndex(p => p.position_id === wpStammId);
+    if (idx >= 0){
+      const label = _wpModelLabel(sel);
+      const preisNeu = Number(sel.preis_chf || sel.listenpreis_chf) || resolved[idx].einheits_preis;
+      resolved[idx].einheits_preis = preisNeu;
+      resolved[idx].subtotal = (resolved[idx].menge || 1) * preisNeu;
+      if (label){
+        resolved[idx].bemerkung = (resolved[idx].bemerkung
+          ? resolved[idx].bemerkung + ' · '
+          : '') + 'Modell: ' + label;
+        resolved[idx].name = resolved[idx].name + ' (' + label + ')';
+      }
+    }
+  }
+
+  // 3) Speichervolumen anpassen anhand calc.VW_Sto
+  if (calc && calc.VW_Sto > 0){
+    const wantId = _pickSpeicherId(calc.VW_Sto);
+    const idx = resolved.findIndex(p => /ww-speicher-emailliert-\d+l/.test(p.position_id));
+    if (idx >= 0 && resolved[idx].position_id !== wantId){
+      const ersatz = stamm.find(s => s.id === wantId);
+      if (ersatz){
+        resolved[idx] = {
+          position_id: ersatz.id,
+          kategorie: ersatz.kategorie,
+          kategorie_name: ersatz.kategorie_name,
+          name: ersatz.name,
+          einheit: ersatz.einheit,
+          einheits_preis: ersatz.einheits_preis,
+          menge: 1,
+          subtotal: ersatz.einheits_preis,
+          bemerkung: ersatz.bemerkung || '',
+          kritisch_check: ersatz.kritisch_check || null,
+          ist_pauschal: !!ersatz.ist_pauschal,
+          stundensatz: ersatz.stundensatz || null,
+          npk_code: ersatz.npk_code || null,
+          hersteller_garantie_jahre: ersatz.hersteller_garantie_jahre || null,
+          _stamm: ersatz
+        };
+      }
+    }
+  }
+
+  // 4) Pufferspeicher anpassen anhand calc.VP_Sto (nur wenn schon ein Puffer im Paket ist)
+  if (calc && calc.VP_Sto > 0){
+    const wantId = _pickPufferId(calc.VP_Sto);
+    const idx = resolved.findIndex(p => /pufferspeicher-\d+l/.test(p.position_id));
+    if (idx >= 0 && resolved[idx].position_id !== wantId){
+      const ersatz = stamm.find(s => s.id === wantId);
+      if (ersatz){
+        resolved[idx] = {
+          position_id: ersatz.id,
+          kategorie: ersatz.kategorie,
+          kategorie_name: ersatz.kategorie_name,
+          name: ersatz.name,
+          einheit: ersatz.einheit,
+          einheits_preis: ersatz.einheits_preis,
+          menge: 1,
+          subtotal: ersatz.einheits_preis,
+          bemerkung: ersatz.bemerkung || '',
+          kritisch_check: ersatz.kritisch_check || null,
+          ist_pauschal: !!ersatz.ist_pauschal,
+          stundensatz: ersatz.stundensatz || null,
+          npk_code: ersatz.npk_code || null,
+          hersteller_garantie_jahre: ersatz.hersteller_garantie_jahre || null,
+          _stamm: ersatz
+        };
+      }
+    }
+  }
+
+  // 5) Stellantriebe-Menge aus Anzahl Heizkreise (nur wenn fbh-stellantriebe existiert
+  //    oder per Detail-Mode FBH gewaehlt - hier additiv hinzufuegen, wenn nicht im Paket)
+  const heizkreise = (state && state.detail && state.detail.verteilung
+                      && Array.isArray(state.detail.verteilung.heizkreise))
+                       ? state.detail.verteilung.heizkreise.length : 1;
+  if (heizkreise > 0){
+    const idxStell = resolved.findIndex(p => p.position_id === 'fbh-stellantriebe');
+    if (idxStell >= 0){
+      resolved[idxStell].menge = heizkreise;
+      resolved[idxStell].subtotal = heizkreise * resolved[idxStell].einheits_preis;
+    }
+  }
+
+  // 6) Cooling-Aufpreis automatisch hinzufuegen, wenn WP reversibel
+  if (sel && sel.reversibel === true){
+    const already = resolved.find(p => p.position_id === 'cooling-aufpreis-reversibel');
+    if (!already){
+      const cool = stamm.find(s => s.id === 'cooling-aufpreis-reversibel');
+      if (cool){
+        resolved.push({
+          position_id: cool.id,
+          kategorie: cool.kategorie,
+          kategorie_name: cool.kategorie_name,
+          name: cool.name,
+          einheit: cool.einheit,
+          einheits_preis: cool.einheits_preis,
+          menge: cool.default_menge || 1,
+          subtotal: (cool.default_menge || 1) * cool.einheits_preis,
+          bemerkung: 'Auto: WP ist reversibel.',
+          kritisch_check: cool.kritisch_check || null,
+          ist_pauschal: !!cool.ist_pauschal,
+          stundensatz: cool.stundensatz || null,
+          npk_code: cool.npk_code || null,
+          hersteller_garantie_jahre: cool.hersteller_garantie_jahre || null,
+          _stamm: cool
+        });
+      }
+    }
+  }
+
+  // 7) UI-State-Form: jede Position bekommt eine eindeutige Instanz-`id`,
+  //    damit der State sie im positionen[]-Array referenzieren kann.
+  const positionen = resolved.map((p, i) => Object.assign({}, p, {
+    id: p.position_id + '__' + i,
+    _isCustom: false
+  }));
+
+  return { paket_id, positionen };
+}
+
+/**
+ * Pre-Sales-Check -> Stammdaten-ID-Map (Kategorie L Stolperstein-Positionen).
+ * Liefert Mapping check_key -> position_id, damit das Pre-Sales-Modal
+ * angekreuzte Posten direkt in die Offerte heben kann.
+ */
+const PRE_SALES_TO_POSITION_ID = {
+  hak:           'hak-upgrade-25-40-63a',
+  asbest:        'asbest-schnelltest-sanierung',
+  hydraulik:     'rohrnetz-anpassung-hydraulik',
+  fbhVerteiler:  'fbh-verteiler-sanierung-stockwerk',
+  cooling:       'cooling-aufpreis-reversibel',
+  schallLokal:   'schallschutz-erweitert-innensplit',
+  geakPflicht:   'geak-pflicht-fr-vd-ne-ju'
+};
+
+/**
+ * Hebt Pre-Sales-Checks in Offerten-Positionen.
+ * @param {Array} positionen - aktuelle state.offerte.positionen
+ * @param {object} checks    - state.offerte.pre_sales_checks
+ * @param {Array} stamm      - Stammdaten-Positionen
+ * @returns {Array} neue positionen[] (alte werden behalten, neue addiert)
+ */
+function applyPreSalesChecks(positionen, checks, stamm){
+  if (!Array.isArray(positionen)) positionen = [];
+  if (!checks || typeof checks !== 'object') return positionen.slice();
+  if (!Array.isArray(stamm)) stamm = [];
+  const out = positionen.slice();
+  Object.keys(PRE_SALES_TO_POSITION_ID).forEach(key => {
+    if (!checks[key]) return;
+    const posId = PRE_SALES_TO_POSITION_ID[key];
+    const already = out.find(p => p.position_id === posId);
+    if (already) return;
+    const s = stamm.find(x => x.id === posId);
+    if (!s) return;
+    out.push({
+      id: posId + '__check_' + key,
+      position_id: s.id,
+      kategorie: s.kategorie,
+      kategorie_name: s.kategorie_name,
+      name: s.name,
+      einheit: s.einheit,
+      einheits_preis: s.einheits_preis,
+      menge: s.default_menge || 1,
+      subtotal: (s.default_menge || 1) * s.einheits_preis,
+      bemerkung: 'Auto aus Pre-Sales-Checkliste.',
+      kritisch_check: s.kritisch_check || null,
+      ist_pauschal: !!s.ist_pauschal,
+      stundensatz: s.stundensatz || null,
+      npk_code: s.npk_code || null,
+      hersteller_garantie_jahre: s.hersteller_garantie_jahre || null,
+      _isCustom: false,
+      _stamm: s
+    });
+  });
+  return out;
+}
+
+__mods__["./calc/offerte.mjs"] = { validatePosition, validatePositionen, validatePaket, resolvePaket, computePaketSubtotal, applyTaxAndFoerderung, buildVorbelegung, applyPreSalesChecks, _internal, PRE_SALES_TO_POSITION_ID };
+})();
+
+// === ./offerte-ui.mjs ===
+(function(){
+// src/offerte-ui.mjs
+// Session 2 (2026-04-29) — Offerten-Modul UI.
+//
+// Eigenes Modul, damit ui.mjs minimal angefasst wird (Edit-Tool hatte beim
+// grossen ui.mjs mehrfach Disk-Korruption verursacht — siehe OFFERTEN-
+// GAMEPLAN.md "Wichtige Eigenheiten / Risiken").
+//
+// Verantwortet:
+//   - Stammdaten-Container (positionen + pakete) + Setter setOffertenData()
+//   - renderOfferteSection(state) — HTML-Skelett der Sektion
+//   - updateOfferteSection(state, calc) — Live-Aktualisierung Live-Totals
+//   - attachOfferteHandlers(root, set, getState) — Event-Wiring
+//   - renderPreSalesModalHtml() / openPreSalesModal() — 7-Fragen-Checkliste
+//
+// Schreibt in state.offerte.{paket_id, positionen[], pre_sales_checks,
+// mwst_pct, foerderung_chf} (siehe state.mjs und CLAUDE.md §3).
+//
+// Auto-Vorbelegung kommt aus calc/offerte.mjs (buildVorbelegung) -
+// hier nur das UI dafuer.
+
+const { resolvePaket, computePaketSubtotal, applyTaxAndFoerderung, buildVorbelegung, applyPreSalesChecks, PRE_SALES_TO_POSITION_ID } = __mods__["./calc/offerte.mjs"];
+
+/* ============================================================
+   Stammdaten-Container
+   ============================================================ */
+let _positionen = [];
+let _pakete = [];
+
+function setOffertenData({ positionen, pakete } = {}){
+  _positionen = Array.isArray(positionen) ? positionen
+              : (positionen && Array.isArray(positionen.positionen)) ? positionen.positionen
+              : [];
+  _pakete = Array.isArray(pakete) ? pakete
+          : (pakete && Array.isArray(pakete.pakete)) ? pakete.pakete
+          : [];
+}
+function getOffertenPositionen(){ return _positionen; }
+function getOffertenPakete(){ return _pakete; }
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+const KATEGORIEN_ORDER = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+const PRE_SALES_FRAGEN = [
+  { key: 'hak',          label: 'HAK 25 A → 40/63 A Aufruestung erforderlich?',
+    info: 'EVU verlangt bei WP groesserer Leistung haeufig HAK-Verstaerkung. CHF 2k-5k.' },
+  { key: 'asbest',       label: 'Asbest-Schnelltest gewuenscht (Bestand <1990)?',
+    info: 'Pflicht bei Eingriff in altes Bausubstanz; Schnelltest plus ggf. Sanierung.' },
+  { key: 'hydraulik',    label: 'Bestehendes Rohrnetz ein hydraulisches Bottleneck (Δt 5 K)?',
+    info: 'Alte HK-Verteilung mit zu engen Querschnitten - Anpassung im Bestand noetig.' },
+  { key: 'fbhVerteiler', label: 'FBH-Verteiler ohne Taco-Setter / Einregulierung?',
+    info: 'Sanierung pro Stockwerk; ohne korrekte Einregulierung keine WP-Effizienz.' },
+  { key: 'cooling',      label: 'Reversible Kuehl-Funktion (Cooling) gewuenscht?',
+    info: 'Bei reversibler WP automatisch vorgeschlagen (Taupunktwaechter etc.).' },
+  { key: 'schallLokal',  label: 'Laermschutz-Vorgaben am Standort sensibel?',
+    info: 'Innensplit / erweiterter Schallschutz - relevant in Wohnzonen ES II.' },
+  { key: 'geakPflicht',  label: 'GEAK-Pflicht (FR / VD / NE / JU bei Verkauf)?',
+    info: 'In den vier Kantonen verpflichtend bei Handaenderungen.' }
+];
+
+function escAttr(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtCHF(v){
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '–';
+  return n.toLocaleString('de-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getOfferte(state){
+  const o = (state && state.offerte) || {};
+  return {
+    paket_id: o.paket_id || null,
+    positionen: Array.isArray(o.positionen) ? o.positionen : [],
+    pre_sales_checks: o.pre_sales_checks || {},
+    mwst_pct: typeof o.mwst_pct === 'number' ? o.mwst_pct : 8.1,
+    foerderung_chf: typeof o.foerderung_chf === 'number' ? o.foerderung_chf : 0
+  };
+}
+
+function ensurePositionId(p, fallbackIdx){
+  if (p && p.id) return p.id;
+  return (p && p.position_id ? p.position_id : 'pos') + '__' + fallbackIdx;
+}
+
+function groupByKategorie(positionen){
+  const out = {};
+  KATEGORIEN_ORDER.forEach(k => { out[k] = []; });
+  positionen.forEach((p, i) => {
+    const k = p.kategorie || (p._stamm && p._stamm.kategorie);
+    const bucket = out[k] || (out[k] = []);
+    bucket.push({ pos: p, idx: i });
+  });
+  return out;
+}
+
+function kategorieName(k){
+  const exemplar = _positionen.find(p => p.kategorie === k);
+  return exemplar ? (exemplar.kategorie_name || k) : k;
+}
+
+/* ============================================================
+   RENDER — Sektion
+   ============================================================ */
+function renderOfferteSection(state){
+  const o = getOfferte(state);
+  const sumBlock = computeTotals(o);
+  const grouped = groupByKategorie(o.positionen);
+
+  const paketOptions = ['<option value="">— Paket waehlen —</option>']
+    .concat(_pakete.map(p => `<option value="${escAttr(p.id)}"${p.id === o.paket_id ? ' selected' : ''}>${escHtml(p.name)}</option>`))
+    .join('');
+
+  const checksAktiv = Object.values(o.pre_sales_checks || {}).filter(Boolean).length;
+
+  return `
+  <section class="section" id="sec-offerte">
+    <header class="section__head">
+      <span class="section__num" data-step-num="sec-offerte"></span>
+      <h2 class="section__title">Offerte</h2>
+    </header>
+    <p class="section__intro">
+      Aus der Heizlast-Auslegung automatisch vorbelegte Offerten-Posten — pro Kategorie editierbar,
+      manuelle Posten via „+ Neue Position". MwSt 8.1 % wird einmal am Ende ausgewiesen,
+      Foerderung wird vom Brutto subtrahiert.
+    </p>
+
+    <div class="block">
+      <div class="grid grid--3">
+        <div class="field">
+          <label class="field__label" for="offPaket">Standardpaket</label>
+          <select class="input" id="offPaket" data-off-paket>
+            ${paketOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field__label">Auto-Vorbelegung</label>
+          <button type="button" class="btn btn--secondary" data-off-vorbelegen>Aus Auslegung uebernehmen</button>
+        </div>
+        <div class="field">
+          <label class="field__label">Stolperstein-Checkliste</label>
+          <button type="button" class="btn btn--secondary" data-off-presales>
+            ${checksAktiv > 0 ? checksAktiv + ' aktiv' : 'Pre-Sales-Fragen pruefen'}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="block" id="offerteListe">
+      ${renderListeByKategorie(grouped)}
+    </div>
+
+    <div class="block">
+      <h3 class="block__title">Live-Berechnung</h3>
+      <div class="grid grid--2">
+        <div class="field">
+          <label class="field__label" for="offMwst">MwSt %</label>
+          <input class="input" id="offMwst" type="number" step="0.1" min="0" value="${o.mwst_pct}" data-off-mwst>
+        </div>
+        <div class="field">
+          <label class="field__label" for="offFoerd">Foerderung-Abzug CHF</label>
+          <input class="input" id="offFoerd" type="number" step="100" min="0" value="${o.foerderung_chf}" data-off-foerderung>
+        </div>
+      </div>
+      <table class="table table--totals" id="offerteTotals">
+        <tbody>
+          <tr><td>Subtotal Fixposten netto</td><td class="num" data-off-fix>${fmtCHF(sumBlock.fix_sum)}</td></tr>
+          <tr><td>Prozent-Posten (Bauleitung etc.)</td><td class="num" data-off-proz>${fmtCHF(sumBlock.proz_sum)}</td></tr>
+          <tr><td><strong>Netto-Subtotal</strong></td><td class="num" data-off-netto><strong>${fmtCHF(sumBlock.netto_subtotal)}</strong></td></tr>
+          <tr><td>+ MwSt (<span data-off-mwst-pct>${o.mwst_pct}</span> %)</td><td class="num" data-off-mwst-chf>${fmtCHF(sumBlock.mwst_chf)}</td></tr>
+          <tr><td>= Brutto</td><td class="num" data-off-brutto>${fmtCHF(sumBlock.brutto)}</td></tr>
+          <tr><td>− Foerderung</td><td class="num" data-off-foerderung-show>${fmtCHF(sumBlock.foerderung_chf)}</td></tr>
+          <tr><td><strong>Netto-Investition Bauherrschaft</strong></td><td class="num" data-off-investition><strong>${fmtCHF(sumBlock.netto_invest)}</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>`;
+}
+
+function renderListeByKategorie(grouped){
+  const blocks = KATEGORIEN_ORDER.map(k => {
+    const items = grouped[k] || [];
+    return `
+      <details class="kat-block" data-off-kat="${escAttr(k)}" ${items.length ? 'open' : ''}>
+        <summary class="kat-block__sum"><strong>${escHtml(k)}</strong> · ${escHtml(kategorieName(k))} <span class="kat-block__count">(${items.length})</span></summary>
+        <div class="kat-block__body">
+          ${items.length ? items.map(({pos,idx}) => renderPositionRow(pos, idx)).join('') : '<p class="empty">— keine Position —</p>'}
+          <div class="kat-block__add">
+            <button type="button" class="btn btn--small" data-off-add="${escAttr(k)}">+ Neue Position in ${escHtml(k)}</button>
+          </div>
+          <div class="kat-block__editor" data-off-editor="${escAttr(k)}" hidden>
+            ${renderInlineEditor(k)}
+          </div>
+        </div>
+      </details>`;
+  }).join('');
+  return blocks;
+}
+
+function renderPositionRow(p, idx){
+  const id = ensurePositionId(p, idx);
+  const subtotal = (Number(p.menge) || 0) * (Number(p.einheits_preis) || 0);
+  const isCustom = !!p._isCustom;
+  return `
+    <div class="pos-row" data-off-pos="${escAttr(id)}">
+      <div class="pos-row__name">
+        ${isCustom ? '<span class="pos-row__custom" title="Manuell erfasst">⊕</span> ' : ''}
+        <strong>${escHtml(p.name || p.position_id || '–')}</strong>
+        ${p.npk_code ? ` <span class="pos-row__npk">${escHtml(p.npk_code)}</span>` : ''}
+      </div>
+      <div class="pos-row__inputs">
+        <input class="input input--xs" type="number" step="0.5" min="0" value="${Number(p.menge) || 0}" data-off-field="menge" title="Menge">
+        <span class="pos-row__einheit">${escHtml(p.einheit || '')}</span>
+        <input class="input input--sm" type="number" step="1" min="0" value="${Number(p.einheits_preis) || 0}" data-off-field="einheits_preis" title="Stueckpreis CHF">
+        <span class="pos-row__sub" data-off-subtotal>${fmtCHF(subtotal)}</span>
+        <button type="button" class="btn btn--icon btn--danger" data-off-remove title="Position entfernen">×</button>
+      </div>
+      <div class="pos-row__bem">
+        <input class="input input--sm" type="text" placeholder="Bemerkung" value="${escAttr(p.bemerkung || '')}" data-off-field="bemerkung">
+      </div>
+    </div>`;
+}
+
+function renderInlineEditor(k){
+  return `
+    <div class="grid grid--3">
+      <input class="input input--sm" type="text" placeholder="Bezeichnung" data-off-edit-name>
+      <select class="input input--sm" data-off-edit-einheit>
+        <option value="Stk">Stk</option>
+        <option value="m">m</option>
+        <option value="h">h</option>
+        <option value="Pauschal" selected>Pauschal</option>
+        <option value="Jahr">Jahr</option>
+        <option value="%">%</option>
+      </select>
+      <input class="input input--sm" type="number" step="0.5" min="0" value="1" data-off-edit-menge title="Menge">
+      <input class="input input--sm" type="number" step="1" min="0" value="0" data-off-edit-preis title="Stueckpreis CHF">
+      <input class="input input--sm" type="text" placeholder="Bemerkung (optional)" data-off-edit-bem>
+      <div>
+        <button type="button" class="btn btn--small btn--primary" data-off-edit-save="${escAttr(k)}">Hinzufuegen</button>
+        <button type="button" class="btn btn--small" data-off-edit-cancel="${escAttr(k)}">Abbrechen</button>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   LIVE-UPDATE — nur Totals + Subtotale, nicht den ganzen Baum
+   ============================================================ */
+function updateOfferteSection(state){
+  const o = getOfferte(state);
+  // Subtotale pro Position aktualisieren
+  if (typeof document !== 'undefined'){
+    o.positionen.forEach((p, idx) => {
+      const id = ensurePositionId(p, idx);
+      const row = document.querySelector(`[data-off-pos="${cssSafe(id)}"]`);
+      if (!row) return;
+      const subEl = row.querySelector('[data-off-subtotal]');
+      if (subEl){
+        const sub = (Number(p.menge) || 0) * (Number(p.einheits_preis) || 0);
+        subEl.textContent = fmtCHF(sub);
+      }
+    });
+    const totals = computeTotals(o);
+    setText('[data-off-fix]', fmtCHF(totals.fix_sum));
+    setText('[data-off-proz]', fmtCHF(totals.proz_sum));
+    const nettoEl = document.querySelector('[data-off-netto] strong');
+    if (nettoEl) nettoEl.textContent = fmtCHF(totals.netto_subtotal);
+    setText('[data-off-mwst-pct]', String(o.mwst_pct));
+    setText('[data-off-mwst-chf]', fmtCHF(totals.mwst_chf));
+    setText('[data-off-brutto]', fmtCHF(totals.brutto));
+    setText('[data-off-foerderung-show]', fmtCHF(totals.foerderung_chf));
+    const investEl = document.querySelector('[data-off-investition] strong');
+    if (investEl) investEl.textContent = fmtCHF(totals.netto_invest);
+  }
+}
+
+function setText(sel, txt){
+  if (typeof document === 'undefined') return;
+  const el = document.querySelector(sel);
+  if (el) el.textContent = txt;
+}
+
+function cssSafe(s){
+  return String(s).replace(/(["\\])/g, '\\$1');
+}
+
+function computeTotals(o){
+  const sub = computePaketSubtotal(o.positionen);
+  const tax = applyTaxAndFoerderung(sub.netto_subtotal, {
+    mwst_pct: o.mwst_pct, foerderung_chf: o.foerderung_chf
+  });
+  return Object.assign({}, sub, tax);
+}
+
+/* ============================================================
+   HANDLERS — Event-Wiring (delegiert)
+   ============================================================ */
+function attachOfferteHandlers(root, set, getState, rerender){
+  if (!root) return;
+  root.addEventListener('click', (ev) => {
+    const t = ev.target;
+    if (!(t instanceof HTMLElement)) return;
+
+    // Auto-Vorbelegung
+    if (t.matches('[data-off-vorbelegen]')){
+      const calc = getCalcSafe();
+      const out = buildVorbelegung(getState(), calc, { positionen: _positionen, pakete: _pakete });
+      if (out && out.paket_id){
+        set('offerte.paket_id', out.paket_id);
+        set('offerte.positionen', out.positionen || []);
+        if (typeof rerender === 'function') rerender();
+      }
+      return;
+    }
+
+    // Pre-Sales-Modal oeffnen
+    if (t.matches('[data-off-presales]')){
+      openPreSalesModal(set, getState, rerender);
+      return;
+    }
+
+    // Position entfernen
+    if (t.matches('[data-off-remove]')){
+      const row = t.closest('[data-off-pos]');
+      if (!row) return;
+      const id = row.getAttribute('data-off-pos');
+      const arr = (getState().offerte?.positionen || []).filter((p, i) => ensurePositionId(p, i) !== id);
+      set('offerte.positionen', arr);
+      if (typeof rerender === 'function') rerender();
+      return;
+    }
+
+    // Inline-Editor: oeffnen / speichern / abbrechen
+    const addK = t.getAttribute('data-off-add');
+    if (addK){
+      const ed = root.querySelector(`[data-off-editor="${cssSafe(addK)}"]`);
+      if (ed) ed.hidden = false;
+      return;
+    }
+    const cancelK = t.getAttribute('data-off-edit-cancel');
+    if (cancelK){
+      const ed = root.querySelector(`[data-off-editor="${cssSafe(cancelK)}"]`);
+      if (ed) ed.hidden = true;
+      return;
+    }
+    const saveK = t.getAttribute('data-off-edit-save');
+    if (saveK){
+      const ed = root.querySelector(`[data-off-editor="${cssSafe(saveK)}"]`);
+      if (!ed) return;
+      const name = (ed.querySelector('[data-off-edit-name]')?.value || '').trim();
+      const einheit = ed.querySelector('[data-off-edit-einheit]')?.value || 'Pauschal';
+      const menge = Number(ed.querySelector('[data-off-edit-menge]')?.value) || 0;
+      const preis = Number(ed.querySelector('[data-off-edit-preis]')?.value) || 0;
+      const bem = (ed.querySelector('[data-off-edit-bem]')?.value || '').trim();
+      if (!name){ alert('Bitte eine Bezeichnung eingeben.'); return; }
+      const arr = (getState().offerte?.positionen || []).slice();
+      const newPos = {
+        id: 'custom__' + saveK + '__' + Date.now(),
+        position_id: 'custom-' + saveK + '-' + Date.now(),
+        kategorie: saveK,
+        kategorie_name: kategorieName(saveK),
+        name,
+        einheit,
+        einheits_preis: preis,
+        menge,
+        subtotal: menge * preis,
+        bemerkung: bem,
+        kritisch_check: null,
+        ist_pauschal: einheit === 'Pauschal',
+        stundensatz: einheit === 'h' ? 110 : null,
+        npk_code: null,
+        hersteller_garantie_jahre: null,
+        _isCustom: true
+      };
+      arr.push(newPos);
+      set('offerte.positionen', arr);
+      if (typeof rerender === 'function') rerender();
+      return;
+    }
+
+    // Pre-Sales-Modal innerhalb
+    if (t.matches('[data-off-presales-close]')){
+      closePreSalesModal();
+      return;
+    }
+    if (t.matches('[data-off-presales-apply]')){
+      const checks = collectPreSalesAnswers();
+      Object.keys(checks).forEach(k => set('offerte.pre_sales_checks.' + k, !!checks[k]));
+      const cur = (getState().offerte?.positionen || []).slice();
+      const next = applyPreSalesChecks(cur, checks, _positionen);
+      set('offerte.positionen', next);
+      closePreSalesModal();
+      if (typeof rerender === 'function') rerender();
+      return;
+    }
+  });
+
+  root.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (!(t instanceof HTMLElement)) return;
+
+    // Paket-Wahl
+    if (t.matches('[data-off-paket]')){
+      const id = t.value || null;
+      set('offerte.paket_id', id);
+      if (id){
+        const paket = _pakete.find(p => p.id === id);
+        if (paket){
+          const resolved = resolvePaket(paket, _positionen).map((p, i) => Object.assign({}, p, {
+            id: p.position_id + '__' + i, _isCustom: false
+          }));
+          set('offerte.positionen', resolved);
+        }
+      }
+      if (typeof rerender === 'function') rerender();
+      return;
+    }
+
+    // MwSt / Foerderung
+    if (t.matches('[data-off-mwst]')){
+      set('offerte.mwst_pct', Number(t.value) || 0);
+      return;
+    }
+    if (t.matches('[data-off-foerderung]')){
+      set('offerte.foerderung_chf', Number(t.value) || 0);
+      return;
+    }
+  });
+
+  root.addEventListener('input', (ev) => {
+    const t = ev.target;
+    if (!(t instanceof HTMLElement)) return;
+    const field = t.getAttribute('data-off-field');
+    if (!field) return;
+    const row = t.closest('[data-off-pos]');
+    if (!row) return;
+    const id = row.getAttribute('data-off-pos');
+    const arr = (getState().offerte?.positionen || []).slice();
+    const idx = arr.findIndex((p, i) => ensurePositionId(p, i) === id);
+    if (idx < 0) return;
+    const next = Object.assign({}, arr[idx]);
+    if (field === 'bemerkung'){ next.bemerkung = t.value; }
+    else { next[field] = Number(t.value) || 0; }
+    next.subtotal = (Number(next.menge) || 0) * (Number(next.einheits_preis) || 0);
+    arr[idx] = next;
+    set('offerte.positionen', arr);
+  });
+}
+
+function getCalcSafe(){
+  try {
+    if (typeof window !== 'undefined' && window.__heizlast && window.__heizlast.lastCalc){
+      return window.__heizlast.lastCalc;
+    }
+  } catch(_){}
+  return null;
+}
+
+/* ============================================================
+   PRE-SALES MODAL
+   ============================================================ */
+let _modalRoot = null;
+let _onAfterApply = null;
+
+function openPreSalesModal(set, getState, rerender){
+  if (typeof document === 'undefined') return;
+  const checks = (getState().offerte?.pre_sales_checks) || {};
+  // Cooling-Frage automatisch markieren, wenn WP reversibel
+  let coolingAuto = false;
+  try {
+    const calc = getCalcSafe();
+    if (calc && calc.heatpump && calc.heatpump.sel && calc.heatpump.sel.reversibel === true){
+      coolingAuto = true;
+    }
+  } catch(_){}
+
+  const existingRoot = document.getElementById('offPreSalesModal');
+  if (existingRoot) existingRoot.remove();
+
+  const root = document.createElement('div');
+  root.id = 'offPreSalesModal';
+  root.className = 'modal modal--open';
+  root.innerHTML = `
+    <div class="modal__backdrop" data-off-presales-close></div>
+    <div class="modal__dialog">
+      <header class="modal__head">
+        <h3>Pre-Sales-Stolpersteine</h3>
+        <button type="button" class="modal__close" data-off-presales-close aria-label="Schliessen">×</button>
+      </header>
+      <div class="modal__body">
+        <p class="modal__intro">7 Ja/Nein-Fragen — bei <em>Ja</em> wird die zugehoerige Stolperstein-Position automatisch in die Offerte gehoben.</p>
+        <ul class="presales-list">
+          ${PRE_SALES_FRAGEN.map(f => `
+            <li class="presales-list__item">
+              <label>
+                <input type="checkbox" data-off-presales-q="${escAttr(f.key)}"
+                       ${checks[f.key] ? 'checked' : ''}
+                       ${f.key === 'cooling' && coolingAuto ? 'checked data-off-presales-auto' : ''}>
+                <strong>${escHtml(f.label)}</strong>
+                ${f.key === 'cooling' && coolingAuto ? ' <span class="badge badge--auto">Auto: WP reversibel</span>' : ''}
+              </label>
+              <p class="presales-list__info">${escHtml(f.info)}</p>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      <footer class="modal__foot">
+        <button type="button" class="btn" data-off-presales-close>Abbrechen</button>
+        <button type="button" class="btn btn--primary" data-off-presales-apply>Antworten anwenden</button>
+      </footer>
+    </div>`;
+  document.body.appendChild(root);
+  _modalRoot = root;
+}
+
+function closePreSalesModal(){
+  if (_modalRoot && _modalRoot.parentNode){
+    _modalRoot.parentNode.removeChild(_modalRoot);
+  }
+  _modalRoot = null;
+}
+
+function collectPreSalesAnswers(){
+  if (typeof document === 'undefined') return {};
+  const out = {};
+  document.querySelectorAll('[data-off-presales-q]').forEach(el => {
+    const k = el.getAttribute('data-off-presales-q');
+    if (k) out[k] = !!el.checked;
+  });
+  return out;
+}
+
+/* Re-Export von Utils, falls aussen jemand will */
+
+
+__mods__["./offerte-ui.mjs"] = { setOffertenData, getOffertenPositionen, getOffertenPakete, renderOfferteSection, updateOfferteSection, attachOfferteHandlers, computeOfferteTotals };
+})();
+
 // === ./ui.mjs ===
 (function(){
 // src/ui.mjs
@@ -4497,6 +5490,8 @@ const { REF_AUSLEGUNG, plausibilitaetHeizflaeche, leistungsFaktor } = __mods__["
 const { sicherheitsventilEmpfehlung, magVolumen, anlagenvolumenSchaetzung, rundeSpeicherMarkt, rundePufferMarkt, computeDhw } = __mods__["./calc/dhw.mjs"];
 const { nennleistungA7W35, maxVorlauf, aufstellung: wpAufstellung, schallTag: wpSchallTag, copA2W35 } = __mods__["./calc/heatpump.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
+// Session 2 (2026-04-29) — Offerten-Modul UI ist in eigenem Modul.
+const { setOffertenData: setOffertenDataInner, renderOfferteSection, updateOfferteSection, attachOfferteHandlers } = __mods__["./offerte-ui.mjs"];
 
 // U-Werte-Daten (S4): wird beim ersten Render geladen.
 let _uWerteData = null;
@@ -4512,6 +5507,8 @@ function getFoerderDb(){ return _foerderDb; }
 let _bauDb = null;
 function setBauDb(db){ _bauDb = db || null; }
 function getBauDb(){ return _bauDb; }
+// Offerten-Stammdaten + Pakete via offerte-ui.mjs.
+function setOffertenData(arg){ setOffertenDataInner(arg); }
 
 // Stepper-Definition — aufbauende Reihenfolge:
 // FWS-Default:  1 Stamm · 2 WW · 3 Zuschläge · 4 Heizlast · 5 Speicher · ∑ Ergebnis
@@ -4537,6 +5534,7 @@ const STEPS_DETAIL = [
   { id: 'sec-speicher',       num: '8', label: 'Speicher · Puffer · MAG' },
   { id: 'sec-geraet',         num: '9', label: 'Gerät',          detail: true },
   { id: 'sec-foerderung',     num: 'F', label: 'Förderungen',    detail: true },
+  { id: 'sec-offerte',        num: 'O', label: 'Offerte',         detail: true },
   { id: 'sec-baubewilligung', num: 'B', label: 'Baubewilligung', detail: true },
   { id: 'sec-ergebnis',       num: '∑', label: 'Ergebnis' }
 ];
@@ -4609,6 +5607,20 @@ function initUi({ root, stepperEl, set, getState }){
   applyAllConditionals(getState());
   syncSectionNums();
   initActiveStepObserver(stepperEl);
+  // Session 2 — Offerten-Handlers (delegiert)
+  attachOfferteHandlers(root, _set, getState, () => rebuildOfferteOnly(getState()));
+}
+
+/** Rendert nur die Offerten-Sektion neu, behaelt alle anderen Sections. */
+function rebuildOfferteOnly(state){
+  if (!_root || !state || !state.detail || !state.detail.aktiv) return;
+  const cur = document.getElementById('sec-offerte');
+  if (!cur) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = renderOfferteSection(state);
+  const next = wrap.firstElementChild;
+  if (next) cur.replaceWith(next);
+  syncSectionNums();
 }
 
 /** Re-Render bei Detail-Toggle: rebuilt Sections + Stepper, behält Listener. */
@@ -4641,6 +5653,8 @@ function updateUi(state, calc){
   // S6 — in beiden Modi sichtbar
   updateFoerderung(state, calc);
   updateBaubewilligung(state);
+  // Session 2 — Offerte Live-Totals (nur im Detail-Modus sichtbar)
+  if (state?.detail?.aktiv) updateOfferteSection(state, calc);
   applyAllConditionals(state);
   syncPeriodsCount(state);
   syncRoomsCount(state);
@@ -4673,9 +5687,10 @@ function syncSectionNums(){
     const sid = el.getAttribute('data-step-num');
     el.textContent = map[sid] != null ? ('Schritt ' + map[sid]) : '';
     // Sonderlabel: '∑' wird als Symbol ohne 'Schritt'-Präfix dargestellt
-    if (map[sid] === '∑' || map[sid] === 'F' || map[sid] === 'B'){
+    if (map[sid] === '∑' || map[sid] === 'F' || map[sid] === 'B' || map[sid] === 'O'){
       el.textContent = sid === 'sec-ergebnis' ? '∑'
                      : sid === 'sec-foerderung' ? 'Förderung'
+                     : sid === 'sec-offerte' ? 'Offerte'
                      : sid === 'sec-baubewilligung' ? 'Bewilligung'
                      : map[sid];
     }
@@ -4702,6 +5717,8 @@ function renderSections(s){
   if (detail){
     out.push(noted(renderGeraet(s), 'geraet'));
     out.push(noted(renderFoerderung(s), 'foerder'));
+    // Session 2 — Offerte-Sektion (Detail-only)
+    out.push(renderOfferteSection(s));
     out.push(noted(renderBaubewilligung(s), 'bau'));
   }
   out.push(renderErgebnis(s));
@@ -7680,7 +8697,7 @@ function computeTvollHint(s){
   return `t<sub>voll</sub> = ${auto} h · ${esc(s.objekt.typ.toUpperCase())} · ${esc(s.objekt.lage)}`;
 }
 
-__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, mapPeriodeToBaujahr, pickerTypFor, normalizePicker, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
+__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, setOffertenData, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, mapPeriodeToBaujahr, pickerTypFor, normalizePicker, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
 })();
 
 // === ./persistence.mjs ===
@@ -7811,6 +8828,7 @@ function loadActive(){
     _activeMeta = Object.assign(freshMeta(), env.meta || {});
     const _next1 = deepMerge(freshState(), env.state);
     migrateBauteilePicker(_next1);
+    migrateOffertenState(_next1);
     setState(_next1);
     return true;
   } catch(e){ return false; }
@@ -7852,6 +8870,7 @@ function loadProjectLocal(id){
   _activeMeta = Object.assign(freshMeta(), env.meta || {});
   const next = deepMerge(freshState(), env.state || {});
   migrateBauteilePicker(next);
+  migrateOffertenState(next);
   setState(next);
   saveActive();
   if (typeof _onLoaded === 'function') _onLoaded(getState());
@@ -8069,6 +9088,7 @@ async function cloudLoad(id){
     };
     const _next2 = deepMerge(freshState(), loaded);
     migrateBauteilePicker(_next2);
+    migrateOffertenState(_next2);
     setState(_next2);
     saveActive();
     // Lokalen Mirror persistieren (damit er bei Drift-Cleanup nicht entfernt wird).
@@ -8233,6 +9253,46 @@ function migrateBauteilePicker(state){
   return state;
 }
 
+
+/**
+ * Offerten-Modul (Session 2 · 2026-04-29) — Migration alter Projekte.
+ * deepMerge(freshState(), env.state) liefert state.offerte zwar bereits
+ * mit Defaults, weil freshState() den vollen Block haelt. Diese Funktion
+ * stellt zusaetzlich sicher, dass partielle Offerten-States (z. B. aus
+ * Tests oder Beta-Daten) alle erwarteten Sub-Keys haben.
+ */
+const _OFFERTE_DEFAULT = {
+  paket_id: null,
+  positionen: [],
+  pre_sales_checks: {
+    hak: false, asbest: false, hydraulik: false, fbhVerteiler: false,
+    cooling: false, schallLokal: false, geakPflicht: false
+  },
+  mwst_pct: 8.1,
+  foerderung_chf: 0
+};
+
+function migrateOffertenState(state){
+  if (!state || typeof state !== 'object') return state;
+  if (!state.offerte || typeof state.offerte !== 'object'){
+    state.offerte = JSON.parse(JSON.stringify(_OFFERTE_DEFAULT));
+    return state;
+  }
+  const o = state.offerte;
+  if (o.paket_id === undefined) o.paket_id = null;
+  if (!Array.isArray(o.positionen)) o.positionen = [];
+  if (!o.pre_sales_checks || typeof o.pre_sales_checks !== 'object'){
+    o.pre_sales_checks = Object.assign({}, _OFFERTE_DEFAULT.pre_sales_checks);
+  } else {
+    Object.keys(_OFFERTE_DEFAULT.pre_sales_checks).forEach(k => {
+      if (typeof o.pre_sales_checks[k] !== 'boolean') o.pre_sales_checks[k] = false;
+    });
+  }
+  if (typeof o.mwst_pct !== 'number') o.mwst_pct = 8.1;
+  if (typeof o.foerderung_chf !== 'number') o.foerderung_chf = 0;
+  return state;
+}
+
 function deepMerge(target, src){
   if (src == null) return target;
   if (typeof target !== 'object' || target === null) return src;
@@ -8249,7 +9309,7 @@ function deepMerge(target, src){
   return out;
 }
 
-__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, migrateBauteilePicker, STORAGE_KEY, ACTIVE_KEY };
+__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, migrateBauteilePicker, migrateOffertenState, STORAGE_KEY, ACTIVE_KEY };
 })();
 
 // === ./projects.mjs ===
@@ -8559,6 +9619,658 @@ async function bootProjectsUi(){
 __mods__["./projects.mjs"] = { showToast, renderTopbarActions, renderModals, openModal, closeModal, initProjectsUi, applyAuthUi, refreshProjectsList, bootProjectsUi };
 })();
 
+// === ./export-offerte.mjs ===
+(function(){
+// src/export-offerte.mjs
+// Session 3 (2026-04-29) — Offerten-PDF-Export.
+//
+// Eigenes Modul mit eigenem Layout (separat vom Auslegungsbericht aus
+// export.mjs). Wird aus export.mjs aufgerufen, wenn Daniel im Export-Modal
+// "Offerte PDF" wählt.
+//
+// Verantwortet:
+//   - buildOfferteHtml(state, calc, opts)  → standalone HTML-String fuer Browser-Print
+//   - buildCustomPositionenMd(state, opts) → Markdown-Stammdaten-Patch der Custom-Posten
+//   - exportOfferte(state, calc, opts)     → oeffnet Print-Tab + lädt MD-Datei
+//
+// Layout der Offerte:
+//   1. Briefkopf (Logo + Firma + UID)
+//   2. Empfaenger-Adresse aus state.projekt
+//   3. Anrede + Einleitungstext
+//   4. Positionstabelle gruppiert nach Kategorie A–L (nur nicht-leere)
+//   5. Subtotal Fix → Prozent-Posten → Netto-Subtotal → MwSt 8.1 % → Brutto
+//      → Förderung-Abzug → Netto-Investition Bauherrschaft
+//   6. Zahlungsplan (Daniel waehlt aus 3 Vorlagen, Default "klassisch")
+//   7. AGB-Block (Verweis OR 2026 + SIA 118 Korrigenda)
+//   8. Garantie-Block (Werkleistung 2 J + Hersteller-Garantie pro verbautem Geraet)
+//   9. Bank-Footer (UID + Bank + Kontakt)
+//
+// @see OFFERTEN-GAMEPLAN.md Session 3
+// @see SYNTHESE.md §3 (OR 2026 / SIA 118 Korrigenda)
+
+const { computePaketSubtotal, applyTaxAndFoerderung } = __mods__["./calc/offerte.mjs"];
+const { getActiveMeta } = __mods__["./persistence.mjs"];
+
+const FIRMA = {
+  name:  'Gebäudetechnik Coltouan',
+  adr:   'Rankstrasse 18, 8413 Neftenbach',
+  tel:   '+41 76 504 03 68',
+  email: 'info@thermowerk.ch',
+  web:   'thermowerk.ch',
+  uid:   'CHE-489.162.528',
+  bank_name: 'Raiffeisenbank Winterthur',
+  bank_iban: 'CH00 0000 0000 0000 0000 0',
+  bank_bic:  'RAIFCH22'
+};
+
+// 3 Zahlungsplan-Vorlagen (Research §5)
+const ZAHLUNGSPLAENE = {
+  klassisch: {
+    label: 'Klassisch (30 / 60 / 10)',
+    raten: [
+      { pct: 30,  text: 'Bei Auftragsbestätigung' },
+      { pct: 60,  text: 'Bei Materiallieferung auf Baustelle' },
+      { pct: 10,  text: 'Nach Abnahme + Inbetriebnahme-Protokoll' }
+    ]
+  },
+  drittel: {
+    label: 'Drittel (33 / 33 / 34)',
+    raten: [
+      { pct: 33, text: 'Bei Auftragsbestätigung' },
+      { pct: 33, text: 'Bei Beginn der Montagearbeiten' },
+      { pct: 34, text: 'Nach Abnahme + Inbetriebnahme-Protokoll' }
+    ]
+  },
+  schluss: {
+    label: 'Schluss (50 / 50)',
+    raten: [
+      { pct: 50, text: 'Bei Auftragsbestätigung' },
+      { pct: 50, text: 'Nach Abnahme + Inbetriebnahme-Protokoll' }
+    ]
+  }
+};
+
+const KATEGORIEN_ORDER = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+// ───────────────────────────────────────────────────────────────────
+// Public API
+// ───────────────────────────────────────────────────────────────────
+
+/**
+ * Baut den vollstaendigen HTML-String der Offerte (standalone, inline-CSS).
+ * @param {object} state  - vollstaendiger State
+ * @param {object} calc   - compute()-Resultat (optional, fuer WP-Modell)
+ * @param {object} opts   - { zahlungsplan?: 'klassisch'|'drittel'|'schluss', anrede?, einleitung? }
+ * @returns {string} HTML-Dokument
+ */
+function buildOfferteHtml(state, calc, opts){
+  opts = opts || {};
+  const offerte = (state && state.offerte) || {};
+  const positionen = Array.isArray(offerte.positionen) ? offerte.positionen : [];
+
+  const totals = computeTotals({
+    positionen,
+    mwst_pct: typeof offerte.mwst_pct === 'number' ? offerte.mwst_pct : 8.1,
+    foerderung_chf: typeof offerte.foerderung_chf === 'number' ? offerte.foerderung_chf : 0
+  });
+
+  const heute = new Date().toLocaleDateString('de-CH');
+  const meta = safeActiveMeta();
+  const projName = (state.projekt && state.projekt.name) || (meta && meta.name) || 'Heizlast-Projekt';
+  const offerteNr = buildOfferteNumber(meta);
+  const zahlungsplanKey = opts.zahlungsplan || 'klassisch';
+  const zahlungsplan = ZAHLUNGSPLAENE[zahlungsplanKey] || ZAHLUNGSPLAENE.klassisch;
+  const anrede = opts.anrede || defaultAnrede(state);
+  const einleitung = opts.einleitung || defaultEinleitung(state);
+
+  const parts = [];
+  parts.push(buildBriefkopf());
+  parts.push(buildAdressblock(state, offerteNr, heute));
+  parts.push(buildAnrede(anrede, einleitung, projName));
+  parts.push(buildPositionstabelle(positionen));
+  parts.push(buildTotalsTable(totals));
+  parts.push(buildZahlungsplan(zahlungsplan, totals));
+  parts.push(buildGarantieBlock(positionen));
+  parts.push(buildAgbBlock());
+  parts.push(buildBankFooter());
+
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"/>
+<title>Offerte ${escapeHtml(offerteNr)} — ${escapeHtml(projName)}</title>
+<style>${OFFERTE_CSS}</style>
+</head>
+<body class="off">
+${parts.join('\n')}
+</body></html>`;
+}
+
+/**
+ * Baut den Markdown-Patch für alle Custom-Positionen (_isCustom: true).
+ * Format: ein YAML-aehnlicher Block pro Position, den Claude in
+ * data/offerten-positionen.json einpflegen kann.
+ *
+ * @param {object} state
+ * @returns {string} Markdown
+ */
+function buildCustomPositionenMd(state){
+  const offerte = (state && state.offerte) || {};
+  const customs = (Array.isArray(offerte.positionen) ? offerte.positionen : [])
+                  .filter(p => p && p._isCustom);
+  const heute = new Date().toLocaleDateString('de-CH');
+  const projName = (state.projekt && state.projekt.name) || 'Heizlast-Projekt';
+  const lines = [];
+  lines.push(`# Custom-Positionen aus Offerte`);
+  lines.push('');
+  lines.push(`**Projekt:** ${projName}`);
+  lines.push(`**Erstellt:** ${heute}`);
+  lines.push(`**Anzahl Custom-Posten:** ${customs.length}`);
+  lines.push('');
+  lines.push(`> Diese Datei enthält alle manuell während der Offerten-Erstellung`);
+  lines.push(`> erfassten Positionen. Format ist als Patch für`);
+  lines.push(`> \`data/offerten-positionen.json\` gedacht — Claude in der`);
+  lines.push(`> nächsten Stammdaten-Pflege-Session direkt einarbeiten.`);
+  lines.push('');
+  if (!customs.length){
+    lines.push('_Keine Custom-Positionen erfasst._');
+    return lines.join('\n');
+  }
+  customs.forEach((p, i) => {
+    const idVorschlag = suggestId(p);
+    lines.push(`## ${i + 1}. ${p.name || '(unbenannt)'}`);
+    lines.push('');
+    lines.push('```json');
+    lines.push('{');
+    lines.push(`  "id": "${idVorschlag}",`);
+    lines.push(`  "kategorie": "${p.kategorie || ''}",`);
+    lines.push(`  "kategorie_name": "${p.kategorie_name || ''}",`);
+    lines.push(`  "name": ${JSON.stringify(p.name || '')},`);
+    lines.push(`  "einheit": "${p.einheit || 'Pauschal'}",`);
+    lines.push(`  "einheits_preis": ${Number(p.einheits_preis) || 0},`);
+    lines.push(`  "default_menge": ${Number(p.menge) || 1},`);
+    lines.push(`  "stundensatz": ${p.einheit === 'h' ? (p.stundensatz || 110) : 'null'},`);
+    lines.push(`  "default_stunden": null,`);
+    lines.push(`  "bemerkung": ${JSON.stringify(p.bemerkung || '')},`);
+    lines.push(`  "marke": null,`);
+    lines.push(`  "modell": null,`);
+    lines.push(`  "hersteller_garantie_jahre": null,`);
+    lines.push(`  "ist_pauschal": ${!!p.ist_pauschal},`);
+    lines.push(`  "npk_code": null,`);
+    lines.push(`  "kritisch_check": null,`);
+    lines.push(`  "herkunft": "custom-import"`);
+    lines.push('}');
+    lines.push('```');
+    lines.push('');
+    lines.push(`- **NPK-Code Slot:** _bitte ergänzen (z. B. NPK 384.xxx)_`);
+    if (p.bemerkung) lines.push(`- **Bemerkung:** ${p.bemerkung}`);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+/**
+ * Triggert den Print-Dialog mit dem Offerten-HTML + lädt die Custom-Posten-MD.
+ * @param {object} state
+ * @param {object} calc
+ * @param {object} opts
+ */
+function exportOfferte(state, calc, opts){
+  const html = buildOfferteHtml(state, calc, opts);
+  // Print-Tab
+  if (typeof window !== 'undefined' && typeof document !== 'undefined'){
+    let w = null;
+    try { w = window.open('', '_blank', 'width=900,height=1200'); } catch(_){}
+    if (w && !w.closed){
+      try {
+        w.document.open(); w.document.write(html); w.document.close();
+        setTimeout(() => { try { w.focus(); w.print(); } catch(_){} }, 400);
+      } catch(_){}
+    } else {
+      // Fallback: hidden iframe
+      const old = document.getElementById('offertePrintFrame');
+      if (old) old.remove();
+      const iframe = document.createElement('iframe');
+      iframe.id = 'offertePrintFrame';
+      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+      document.body.appendChild(iframe);
+      iframe.onload = () => { try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(_){} };
+      iframe.srcdoc = html;
+    }
+    // Custom-Positionen-MD herunterladen (nur wenn Custom-Posten vorhanden)
+    const customs = (state.offerte && Array.isArray(state.offerte.positionen) ? state.offerte.positionen : [])
+                    .filter(p => p && p._isCustom);
+    if (customs.length > 0){
+      const md = buildCustomPositionenMd(state);
+      const datum = new Date().toISOString().slice(0, 10);
+      const filename = `custom-positionen-${datum}.md`;
+      try { downloadText(md, filename, 'text/markdown;charset=utf-8'); } catch(_){}
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// Builders
+// ───────────────────────────────────────────────────────────────────
+
+function buildBriefkopf(){
+  const logoSrc = (typeof location !== 'undefined' && location.href.indexOf('/heizlast') >= 0)
+                    ? './img/Logo.png'
+                    : 'https://thermowerk.ch/heizlast/img/Logo.png';
+  return `
+  <header class="off__brief">
+    <img class="off__brief-logo" src="${logoSrc}" alt="Thermowerk" onerror="this.style.display='none'"/>
+    <div class="off__brief-firma">
+      <strong>${escapeHtml(FIRMA.name)}</strong>
+      <span>${escapeHtml(FIRMA.adr)}</span>
+      <span>${escapeHtml(FIRMA.tel)} · ${escapeHtml(FIRMA.email)}</span>
+      <span>${escapeHtml(FIRMA.web)} · UID ${escapeHtml(FIRMA.uid)}</span>
+    </div>
+  </header>`;
+}
+
+function buildAdressblock(state, offerteNr, heute){
+  const p = (state && state.projekt) || {};
+  const empfaenger = [];
+  if (p.bauherrschaft && p.bauherrschaft.trim()) empfaenger.push(escapeHtml(p.bauherrschaft));
+  if (p.strasse && p.strasse.trim()) empfaenger.push(escapeHtml(p.strasse));
+  const ortZeile = [p.plz, p.ort].filter(x => x && x.trim()).join(' ');
+  if (ortZeile) empfaenger.push(escapeHtml(ortZeile));
+  const empfHtml = empfaenger.length
+    ? empfaenger.map(z => `<span>${z}</span>`).join('')
+    : '<span class="off__placeholder">Empfänger-Adresse — bitte in Stammdaten ergänzen</span>';
+  return `
+  <div class="off__adress">
+    <div class="off__adress-empfaenger">
+      ${empfHtml}
+    </div>
+    <div class="off__adress-meta">
+      <div><strong>Offerte ${escapeHtml(offerteNr)}</strong></div>
+      <div>Datum: ${escapeHtml(heute)}</div>
+      <div>Gültig bis: ${escapeHtml(plus30Days(heute))}</div>
+    </div>
+  </div>`;
+}
+
+function buildAnrede(anrede, einleitung, projName){
+  return `
+  <div class="off__anrede">
+    <h1 class="off__title">Offerte zur Heizungssanierung</h1>
+    <p class="off__projekt"><strong>Projekt:</strong> ${escapeHtml(projName)}</p>
+    <p class="off__greeting">${escapeHtml(anrede)}</p>
+    <p class="off__intro">${escapeHtml(einleitung)}</p>
+  </div>`;
+}
+
+function buildPositionstabelle(positionen){
+  if (!positionen.length){
+    return `<div class="off__empty">— Keine Offerten-Positionen erfasst —</div>`;
+  }
+  const grouped = {};
+  KATEGORIEN_ORDER.forEach(k => { grouped[k] = []; });
+  positionen.forEach(p => {
+    const k = p.kategorie || (p._stamm && p._stamm.kategorie) || 'J';
+    if (!grouped[k]) grouped[k] = [];
+    grouped[k].push(p);
+  });
+
+  const blocks = KATEGORIEN_ORDER
+    .filter(k => grouped[k] && grouped[k].length > 0)
+    .map(k => {
+      const items = grouped[k];
+      const katName = items[0].kategorie_name || k;
+      const rows = items.map(p => {
+        const menge = Number(p.menge) || 0;
+        const preis = Number(p.einheits_preis) || 0;
+        const isProz = p.einheit === '%';
+        // Subtotal in der Tabelle: bei %-Positionen "auf Subtotal" anzeigen,
+        // weil der eigentliche CHF-Wert erst in computeTotals berechnet wird.
+        const subTxt = isProz ? '<em class="off__pct">auf Subtotal</em>' : fmtCHF(menge * preis);
+        const bem = p.bemerkung && p.bemerkung.trim() ? `<div class="off__pos-bem">${escapeHtml(p.bemerkung)}</div>` : '';
+        const npk = p.npk_code ? ` <span class="off__pos-npk">${escapeHtml(p.npk_code)}</span>` : '';
+        return `
+          <tr>
+            <td class="off__pos-name">
+              <strong>${escapeHtml(p.name || '–')}</strong>${npk}
+              ${bem}
+            </td>
+            <td class="num">${fmtNum(menge)}</td>
+            <td>${escapeHtml(p.einheit || '')}</td>
+            <td class="num">${isProz ? fmtNum(preis) + ' %' : fmtCHF(preis)}</td>
+            <td class="num">${subTxt}</td>
+          </tr>`;
+      }).join('');
+      return `
+        <h3 class="off__kat-title">${escapeHtml(k)} · ${escapeHtml(katName)}</h3>
+        <table class="off__pos-table">
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th class="num">Menge</th>
+              <th>Einheit</th>
+              <th class="num">Stückpreis</th>
+              <th class="num">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }).join('');
+  return `<section class="off__leistungen"><h2 class="off__h2">Leistungen</h2>${blocks}</section>`;
+}
+
+function buildTotalsTable(t){
+  return `
+  <section class="off__totals">
+    <h2 class="off__h2">Zusammenstellung</h2>
+    <table class="off__totals-table">
+      <tbody>
+        <tr><td>Subtotal Fixposten netto</td><td class="num">CHF ${fmtCHF(t.fix_sum)}</td></tr>
+        <tr><td>Prozent-Posten (Bauleitung etc.)</td><td class="num">CHF ${fmtCHF(t.proz_sum)}</td></tr>
+        <tr class="off__totals-sum"><td><strong>Netto-Subtotal</strong></td><td class="num"><strong>CHF ${fmtCHF(t.netto_subtotal)}</strong></td></tr>
+        <tr><td>+ MwSt (${fmtNum(t.mwst_pct)} %)</td><td class="num">CHF ${fmtCHF(t.mwst_chf)}</td></tr>
+        <tr class="off__totals-sum"><td><strong>Brutto inkl. MwSt</strong></td><td class="num"><strong>CHF ${fmtCHF(t.brutto)}</strong></td></tr>
+        <tr><td>− Förderung (Bund + Kanton, Schätzung)</td><td class="num">CHF ${fmtCHF(t.foerderung_chf)}</td></tr>
+        <tr class="off__totals-final"><td><strong>Netto-Investition Bauherrschaft</strong></td><td class="num"><strong>CHF ${fmtCHF(t.netto_invest)}</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="off__totals-note">Förderbeträge sind Richtwerte — verbindlich nur über das jeweilige Antragsportal. Antrag VOR Baubeginn stellen.</p>
+  </section>`;
+}
+
+function buildZahlungsplan(plan, t){
+  const summe = Number(t.brutto) || 0;
+  const rows = plan.raten.map(r => {
+    const chf = Math.round(summe * (r.pct / 100));
+    return `<tr><td>${escapeHtml(r.text)}</td><td class="num">${fmtNum(r.pct)} %</td><td class="num">CHF ${fmtCHF(chf)}</td></tr>`;
+  }).join('');
+  return `
+  <section class="off__zahlplan">
+    <h2 class="off__h2">Zahlungsplan</h2>
+    <p class="off__note">Vorlage: <strong>${escapeHtml(plan.label)}</strong>. Beträge berechnet auf Bruttosumme inkl. MwSt.</p>
+    <table class="off__zahlplan-table">
+      <thead><tr><th>Fälligkeit</th><th class="num">Anteil</th><th class="num">Betrag</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </section>`;
+}
+
+function buildGarantieBlock(positionen){
+  // Sammle Hersteller-Garantien aus den Positionen (Geräte mit hersteller_garantie_jahre).
+  const geraete = positionen
+    .filter(p => p && Number.isFinite(Number(p.hersteller_garantie_jahre)) && Number(p.hersteller_garantie_jahre) > 0)
+    .map(p => ({ name: p.name, jahre: Number(p.hersteller_garantie_jahre) }));
+  const dedup = [];
+  const seen = new Set();
+  for (const g of geraete){
+    const key = g.name + '__' + g.jahre;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    dedup.push(g);
+  }
+  const geraeteHtml = dedup.length
+    ? '<ul class="off__garantie-list">'
+      + dedup.map(g => `<li><strong>${escapeHtml(g.name)}:</strong> ${g.jahre} Jahre Hersteller-Garantie</li>`).join('')
+      + '</ul>'
+    : '<p class="off__note">Hersteller-Garantien gemäss Datenblatt der jeweiligen Geräte.</p>';
+  return `
+  <section class="off__garantie">
+    <h2 class="off__h2">Garantie</h2>
+    <p><strong>Werkleistung:</strong> 2 Jahre Garantie auf Montage- und Installationsleistungen ab Abnahme der Anlage.</p>
+    <p><strong>Geräte:</strong> Es gelten die Hersteller-Garantiebestimmungen pro verbautem Gerät:</p>
+    ${geraeteHtml}
+  </section>`;
+}
+
+function buildAgbBlock(){
+  return `
+  <section class="off__agb">
+    <h2 class="off__h2">Allgemeine Geschäftsbedingungen</h2>
+    <ol class="off__agb-list">
+      <li><strong>Vertragsgrundlagen:</strong> Es gelten die Bestimmungen des Schweizerischen Obligationenrechts (OR, Stand 2026) sowie die SIA-Norm 118 (inkl. Korrigenda 2026) als ergänzende Vertragsgrundlage.</li>
+      <li><strong>Gültigkeit der Offerte:</strong> Diese Offerte ist 30 Tage ab Ausstellungsdatum verbindlich. Preise verstehen sich in CHF, netto, exkl. 8.1 % MwSt.</li>
+      <li><strong>Mängelrechte:</strong> Mängelanzeigen erfolgen nach OR Art. 367 ff. (revidierte Fassung 2026). Versteckte Mängel sind unverzüglich nach Entdeckung anzuzeigen. Annahmeprotokoll bei Inbetriebnahme ist Voraussetzung für die Schlussrechnung.</li>
+      <li><strong>Förderbeiträge:</strong> Angaben zu Bundes-/Kantons-Förderbeiträgen sind Schätzungen aufgrund der aktuellen Programme. Verbindlich ist der Bescheid des Antragsportals. Auszahlung erfolgt direkt an die Bauherrschaft. Antrag VOR Baubeginn.</li>
+      <li><strong>Ausführungsfristen:</strong> Termine werden nach Auftragsbestätigung verbindlich vereinbart. Verzögerungen aufgrund höherer Gewalt, Lieferengpässen oder Witterung berechtigen nicht zu Schadenersatzforderungen.</li>
+      <li><strong>Eigentumsvorbehalt:</strong> Sämtliche Geräte und Materialien bleiben bis zur vollständigen Zahlung Eigentum der Auftragnehmerin.</li>
+      <li><strong>Gerichtsstand:</strong> Ausschliesslicher Gerichtsstand ist Winterthur ZH. Es gilt schweizerisches Recht.</li>
+    </ol>
+  </section>`;
+}
+
+function buildBankFooter(){
+  return `
+  <footer class="off__footer">
+    <div class="off__footer-grid">
+      <div>
+        <strong>${escapeHtml(FIRMA.name)}</strong><br>
+        ${escapeHtml(FIRMA.adr)}<br>
+        ${escapeHtml(FIRMA.tel)}<br>
+        ${escapeHtml(FIRMA.email)}
+      </div>
+      <div>
+        <strong>Bankverbindung</strong><br>
+        ${escapeHtml(FIRMA.bank_name)}<br>
+        IBAN ${escapeHtml(FIRMA.bank_iban)}<br>
+        BIC ${escapeHtml(FIRMA.bank_bic)}
+      </div>
+      <div>
+        <strong>Steuern / Register</strong><br>
+        UID: ${escapeHtml(FIRMA.uid)}<br>
+        MwSt-Pflichtig: Ja<br>
+        Web: ${escapeHtml(FIRMA.web)}
+      </div>
+    </div>
+  </footer>`;
+}
+
+// ───────────────────────────────────────────────────────────────────
+// Helpers
+// ───────────────────────────────────────────────────────────────────
+
+function safeActiveMeta(){
+  try { return getActiveMeta(); } catch(_){ return null; }
+}
+
+function buildOfferteNumber(meta){
+  const dt = new Date();
+  const yyyy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  const idTail = (meta && meta.id) ? String(meta.id).slice(0, 6).toUpperCase() : 'NEU';
+  return `${yyyy}${mm}${dd}-${idTail}`;
+}
+
+function plus30Days(dateStr){
+  const d = new Date();
+  d.setDate(d.getDate() + 30);
+  return d.toLocaleDateString('de-CH');
+}
+
+function defaultAnrede(state){
+  const p = (state && state.projekt) || {};
+  const bh = (p.bauherrschaft || '').trim();
+  if (bh){
+    return `Sehr geehrte Damen und Herren der ${bh}`;
+  }
+  return 'Sehr geehrte Damen und Herren';
+}
+
+function defaultEinleitung(state){
+  return 'Wir freuen uns, Ihnen für die geplante Heizungssanierung mit Wärmepumpe nachfolgende Offerte unterbreiten zu dürfen. Die Auslegung basiert auf der raumweisen Norm-Heizlast (EN 12831) bzw. dem Verbrauchsverfahren der Schweizer Wärmepumpen-Fachvereinigung. Sämtliche Komponenten sind aufeinander abgestimmt und entsprechen dem aktuellen Stand der Technik.';
+}
+
+function suggestId(p){
+  // Bsp: "Erweiterung Spuelung" → "erweiterung-spuelung"
+  const base = String(p.name || 'custom-position')
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const kat = (p.kategorie || 'X').toLowerCase();
+  return `${kat}-${base}`.slice(0, 60);
+}
+
+function computeTotals(o){
+  const sub = computePaketSubtotal(o.positionen);
+  const tax = applyTaxAndFoerderung(sub.netto_subtotal, {
+    mwst_pct: o.mwst_pct, foerderung_chf: o.foerderung_chf
+  });
+  return Object.assign({}, sub, tax);
+}
+
+function fmtCHF(v){
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '–';
+  return n.toLocaleString('de-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtNum(v){
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '–';
+  // Kein fixed: 0.5, 1, 6 etc. lesbar belassen
+  return Math.abs(n - Math.round(n)) < 1e-9
+    ? n.toLocaleString('de-CH', { maximumFractionDigits: 0 })
+    : n.toLocaleString('de-CH', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function downloadText(text, filename, mime){
+  if (typeof document === 'undefined') return;
+  const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
+}
+
+// ───────────────────────────────────────────────────────────────────
+// Inline-CSS — eigenes Layout, bewusst getrennt vom Auslegungsbericht
+// ───────────────────────────────────────────────────────────────────
+const OFFERTE_CSS = `
+:root {
+  --ink-50:#f7f9fb; --ink-100:#eef2f6; --ink-200:#e2e8f0;
+  --ink-300:#cbd5e1; --ink-400:#94a3b8; --ink-500:#64748b;
+  --ink-600:#475569; --ink-700:#334155; --ink-800:#1e293b;
+  --ink-900:#0f172a;
+  --navy:#1B2A4A; --accent:#D93025;
+}
+* { box-sizing: border-box; }
+body.off { font-family:'Inter','Segoe UI',Roboto,sans-serif; color:var(--ink-900); margin:0; background:#fff; }
+body.off { max-width:880px; margin:0 auto; padding:10mm 12mm; font-size:10pt; line-height:1.45; }
+
+.off__brief {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:18px; padding-bottom:8px; margin-bottom:12px;
+  border-bottom:2px solid var(--navy);
+}
+.off__brief-logo { max-height:42px; width:auto; flex-shrink:0; }
+.off__brief-firma { display:flex; flex-direction:column; gap:1px; text-align:right; font-size:9pt; color:var(--ink-700); }
+.off__brief-firma strong { color:var(--ink-900); font-size:10pt; }
+
+.off__adress { display:flex; justify-content:space-between; gap:24px; margin:18px 0; }
+.off__adress-empfaenger { display:flex; flex-direction:column; font-size:10.5pt; line-height:1.45; }
+.off__adress-meta { text-align:right; font-size:9.5pt; color:var(--ink-700); }
+.off__adress-meta div { margin-bottom:2px; }
+.off__placeholder { color:var(--ink-400); font-style:italic; }
+
+.off__anrede { margin:14px 0 18px; }
+.off__title { font-size:16pt; font-weight:700; color:var(--accent); margin:0 0 4px; }
+.off__projekt { margin:0 0 8px; font-size:10.5pt; }
+.off__greeting { margin:8px 0; }
+.off__intro { margin:6px 0; color:var(--ink-700); }
+
+.off__h2 {
+  font-size:12pt; font-weight:700; color:var(--ink-900);
+  margin:18px 0 8px; padding-bottom:4px;
+  border-bottom:1px solid var(--ink-300);
+}
+.off__kat-title {
+  font-size:10.5pt; font-weight:700; color:var(--navy);
+  margin:14px 0 6px; padding:4px 8px;
+  background:var(--ink-50); border-left:3px solid var(--navy);
+}
+
+.off__pos-table, .off__totals-table, .off__zahlplan-table {
+  width:100%; border-collapse:collapse; font-size:9.5pt;
+  margin:0 0 6px;
+}
+.off__pos-table th, .off__pos-table td,
+.off__totals-table td,
+.off__zahlplan-table th, .off__zahlplan-table td {
+  padding:5px 6px; border-bottom:1px solid var(--ink-100);
+  vertical-align:top; line-height:1.35;
+}
+.off__pos-table th, .off__zahlplan-table th {
+  background:var(--ink-50); color:var(--ink-700);
+  font-size:8.5pt; text-transform:uppercase; letter-spacing:0.04em;
+  font-weight:600; text-align:left;
+  border-bottom:2px solid var(--ink-300);
+}
+.off__pos-table th.num, .off__pos-table td.num,
+.off__totals-table td.num,
+.off__zahlplan-table th.num, .off__zahlplan-table td.num {
+  text-align:right; font-variant-numeric:tabular-nums;
+}
+.off__pos-table th { white-space:nowrap; }
+
+.off__pos-name strong { color:var(--ink-900); }
+.off__pos-bem { font-size:9pt; color:var(--ink-500); margin-top:2px; }
+.off__pos-npk {
+  display:inline-block; padding:1px 6px; margin-left:6px;
+  font-size:8pt; color:var(--ink-500);
+  border:1px solid var(--ink-300); border-radius:3px;
+  font-variant-numeric:tabular-nums;
+}
+.off__pct { color:var(--ink-500); font-style:italic; }
+
+.off__totals-table { max-width:520px; margin-left:auto; }
+.off__totals-table tr.off__totals-sum td {
+  border-top:1px solid var(--ink-700);
+  border-bottom:1px solid var(--ink-700);
+  background:var(--ink-50);
+}
+.off__totals-table tr.off__totals-final td {
+  background:var(--accent); color:#fff; font-size:11.5pt;
+  border:none; padding:8px 10px;
+}
+.off__totals-note { font-size:8.5pt; color:var(--ink-500); margin-top:4px; text-align:right; }
+
+.off__zahlplan-table { max-width:560px; }
+
+.off__garantie-list { margin:6px 0 0 18px; padding:0; }
+.off__garantie-list li { margin-bottom:3px; font-size:9.5pt; }
+
+.off__agb-list { margin:6px 0 0 22px; padding:0; }
+.off__agb-list li { margin-bottom:5px; font-size:9pt; line-height:1.45; }
+
+.off__footer {
+  margin-top:24px; padding-top:10px;
+  border-top:2px solid var(--ink-700);
+}
+.off__footer-grid {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;
+  font-size:8.5pt; color:var(--ink-700); line-height:1.45;
+}
+.off__footer-grid strong { color:var(--ink-900); display:block; margin-bottom:2px; }
+
+.off__empty { padding:20px; text-align:center; color:var(--ink-400); font-style:italic; border:1px dashed var(--ink-300); }
+.off__note { font-size:9pt; color:var(--ink-700); margin:4px 0; }
+
+@media print {
+  @page { margin:10mm 10mm; size:A4; }
+  body.off { padding:0; max-width:none; }
+  .off__leistungen, .off__totals, .off__zahlplan, .off__garantie, .off__agb { page-break-inside:avoid; }
+  .off__footer { page-break-inside:avoid; }
+}
+`;
+
+__mods__["./export-offerte.mjs"] = { buildOfferteHtml, buildCustomPositionenMd, exportOfferte, ZAHLUNGSPLAENE };
+})();
+
 // === ./export.mjs ===
 (function(){
 // src/export.mjs
@@ -8578,6 +10290,7 @@ const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
 const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
 const { getActiveMeta } = __mods__["./persistence.mjs"];
+const { exportOfferte } = __mods__["./export-offerte.mjs"];
 
 const FIRMA = {
   name:  'Gebäudetechnik Coltouan',
@@ -8630,11 +10343,21 @@ function renderExportModal(){
           <label class="chk" id="opt-vergleich-wrap"><input type="checkbox" id="opt-vergleich" checked> <span>Vergleich Verbrauch ↔ Norm-Heizlast (Detail-Modus)</span></label>
           <label class="chk" id="opt-huelle-wrap"><input type="checkbox" id="opt-huelle" checked> <span>Hülle &amp; Räume (Detail-Modus)</span></label>
           <label class="chk" id="opt-geraet-wrap"><input type="checkbox" id="opt-geraet" checked> <span>Geräte-Auswahl (Detail-Modus)</span></label>
+          <label class="chk" id="opt-offerte-wrap"><input type="checkbox" id="opt-offerte"> <span>Offerte exportieren (separates PDF mit Briefkopf, Positionen, Zahlungsplan, AGB)</span></label>
+        </div>
+        <div class="export-opts" id="exportOpts-offerte" style="margin-top:8px; display:none;">
+          <label class="field__label" for="opt-zahlungsplan">Zahlungsplan-Vorlage</label>
+          <select class="input" id="opt-zahlungsplan">
+            <option value="klassisch" selected>Klassisch (30 / 60 / 10)</option>
+            <option value="drittel">Drittel (33 / 33 / 34)</option>
+            <option value="schluss">Schluss (50 / 50)</option>
+          </select>
         </div>
       </div>
       <footer class="modal__foot modal__foot--export">
         <button class="btn btn--ghost"   type="button" data-close="modalExport">Schliessen</button>
-        <button class="btn btn--primary" type="button" id="btnExportPdf">PDF (Drucken)</button>
+        <button class="btn btn--primary" type="button" id="btnExportPdf">PDF (Auslegung)</button>
+        <button class="btn btn--primary" type="button" id="btnExportOfferte">Offerte PDF</button>
         <button class="btn btn--primary" type="button" id="btnExportJson">JSON (Rohdaten)</button>
       </footer>
     </div>
@@ -8648,6 +10371,14 @@ function initExportUi(){
     if (t.id === 'btnExport') openExportModal();
     else if (t.id === 'btnExportPdf')  doExport('pdf');
     else if (t.id === 'btnExportJson') doExport('json');
+    else if (t.id === 'btnExportOfferte') doExport('offerte');
+  });
+  // "Offerte exportieren"-Checkbox: Zahlungsplan-Selector ein-/ausblenden.
+  document.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (!t || t.id !== 'opt-offerte') return;
+    const wrap = document.getElementById('exportOpts-offerte');
+    if (wrap) wrap.style.display = t.checked ? '' : 'none';
   });
 }
 
@@ -8676,7 +10407,9 @@ function readOptions(){
     foerder:   !!document.getElementById('opt-foerder')?.checked,
     vergleich: !!document.getElementById('opt-vergleich')?.checked,
     huelle:    !!document.getElementById('opt-huelle')?.checked,
-    geraet:    !!document.getElementById('opt-geraet')?.checked
+    geraet:    !!document.getElementById('opt-geraet')?.checked,
+    offerte:   !!document.getElementById('opt-offerte')?.checked,
+    zahlungsplan: document.getElementById('opt-zahlungsplan')?.value || 'klassisch'
   };
 }
 
@@ -8695,6 +10428,20 @@ function doExport(format){
         exportedAt: new Date().toISOString(), options: opts };
       download(blob(JSON.stringify(payload, null, 2), 'application/json;charset=utf-8'),
                buildFilename(meta, 'json'));
+      closeExportModal();
+      return;
+    }
+
+    if (format === 'offerte'){
+      // Eigenes Layout — separat vom Auslegungsbericht. Lädt zusätzlich
+      // ein Markdown-File mit allen _isCustom-Positionen herunter, falls
+      // welche im State sind (Stammdaten-Patch fuer spaetere Pflege).
+      try {
+        exportOfferte(state, calc, { zahlungsplan: opts.zahlungsplan || 'klassisch' });
+      } catch(e){
+        console.error('[export-offerte] failed:', e);
+        alert('Offerten-Export fehlgeschlagen: ' + (e && e.message ? e.message : e));
+      }
       closeExportModal();
       return;
     }
@@ -9428,7 +11175,7 @@ const { compute } = __mods__["./calc/fws.mjs"];
 const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
-const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt } = __mods__["./ui.mjs"];
+const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt, setOffertenData } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
 // S7 — Persistenz + Modale
 const { loadActive, autosaveActive, installAutoSync, onLoaded, getActiveMeta, setLastCalc } = __mods__["./persistence.mjs"];
@@ -9501,6 +11248,7 @@ async function boot(){
       rebuildOnDetailToggle(state);
     }
     setLastCalc(calc);
+    if (typeof window !== 'undefined' && window.__heizlast) window.__heizlast.lastCalc = calc;
     updateUi(state, calc);
     autosaveActive();
     // Topbar-Projekt-Tag synchron halten.
@@ -9544,6 +11292,10 @@ async function boot(){
   }
 }
 
+// Session 2 — Offerten-Stammdaten werden waehrend loadDataFiles befuellt und
+// am Ende konsolidiert an offerte-ui.mjs uebergeben.
+let _offPos = null, _offPak = null;
+
 async function loadDataFiles(){
   const tries = [
     ['./data/u-werte.json',         (d) => setUWerteData(d)],
@@ -9553,14 +11305,21 @@ async function loadDataFiles(){
     ['./data/foerderungen.json',    (d) => setFoerderDb(d)],
     ['../data/foerderungen.json',   (d) => setFoerderDb(d)],
     ['./data/baubewilligungen.json',(d) => setBauDb(d)],
-    ['../data/baubewilligungen.json',(d) => setBauDb(d)]
+    ['../data/baubewilligungen.json',(d) => setBauDb(d)],
+    // Session 2 — Offerten-Stammdaten + Pakete
+    ['./data/offerten-positionen.json',  (d) => _offPos = d],
+    ['../data/offerten-positionen.json', (d) => _offPos = d],
+    ['./data/offerten-pakete.json',      (d) => _offPak = d],
+    ['../data/offerten-pakete.json',     (d) => _offPak = d]
   ];
   // Pro „Themen-File" einmal versuchen, in der Reihenfolge ./ dann ../.
   const buckets = [
     [tries[0], tries[1]],
     [tries[2], tries[3]],
     [tries[4], tries[5]],
-    [tries[6], tries[7]]
+    [tries[6], tries[7]],
+    [tries[8], tries[9]],
+    [tries[10], tries[11]]
   ];
   for (const bucket of buckets){
     for (const [url, apply] of bucket){
@@ -9573,6 +11332,10 @@ async function loadDataFiles(){
         }
       } catch(_){ /* try next */ }
     }
+  }
+  // Session 2 — Offerten-Stammdaten + Pakete an UI uebergeben.
+  if (_offPos || _offPak){
+    setOffertenData({ positionen: _offPos, pakete: _offPak });
   }
 }
 function extractWpList(d){
