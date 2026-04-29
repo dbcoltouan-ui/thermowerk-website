@@ -3627,7 +3627,7 @@ __mods__["./calc/envelope.mjs"] = { bauklasseFromBaujahr, bauklasseFromPeriode, 
  * @see data/uwerte.json — bauteilDefaults, daemmstoffe, fensterGenerationen
  */
 
-const { DAEMMSTOFFE, BAUTEIL_DEFAULTS, bauteilDefaultsFor, uWertAusSchichten, uValueFallback, baujahrklasse, FENSTER_GENERATIONEN } = __mods__["./envelope.mjs"];
+const { DAEMMSTOFFE, BAUTEIL_DEFAULTS, bauteilDefaultsFor, uWertAusSchichten, uValueFallback, baujahrklasse, FENSTER_GENERATIONEN } = __mods__["./calc/envelope.mjs"];
 
 /* ==============================================================
    Fenster-Generations-Default pro Baujahrsklasse.
@@ -4040,7 +4040,7 @@ function computeUWert(bauteilTyp, baujahr, selections) {
   };
 }
 
-export default {
+/* export default */ void {
   BAUWEISEN,
   DAEMM_DICKEN,
   FENSTER_GEN_DEFAULT_BY_BK,
