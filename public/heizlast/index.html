@@ -7029,7 +7029,10 @@ function updateVerteilungSection(s, c){
   const ghint = document.getElementById('verteilungGlobalHint');
   if (ghint){
     if (raeume.length === 0){
-      const f = leistungsFaktor({ typ: vert.global?.typ || 'fbh', tVL, tRL, tInnen: 20 });
+      // Bug 2026-04-29: nutzt lokale Variablen tVL_g/tRL_g, nicht das undefinierte
+      // tVL/tRL — vorher ReferenceError, der updateUi abbrach und in der Folge
+      // updateFoerderung + updateBaubewilligung gar nicht mehr lief.
+      const f = leistungsFaktor({ typ: vert.global?.typ || 'fbh', tVL: tVL_g, tRL: tRL_g, tInnen: 20 });
       const ref = REF_AUSLEGUNG[vert.global?.typ || 'fbh'];
       if (f != null){
         ghint.innerHTML = `Auslegung relativ zur Norm (${esc(vert.global?.typ || 'fbh')} bei ${ref.tVL}/${ref.tRL}): <strong>${(f*100).toFixed(0)} %</strong>. Bei niedrigem Faktor ist eine grössere Heizfläche oder höhere VL erforderlich.`;
@@ -8677,7 +8680,10 @@ function buildFullHtml(state, calc, opts, meta){
   parts.push(buildKundschaftTable(state));
   parts.push(buildObjektdatenTable(state, calc));
   parts.push(buildLeistungenTable(state, calc));
-  if (detail) parts.push(buildDetailCockpitTable(state, calc));
+  // buildDetailCockpitTable wird seit Daniel-Smoke-Test 2026-04-29 nicht mehr
+  // im Bericht angezeigt — der Inhalt (Norm + Verbrauchs-Heizlast) steht
+  // bereits in buildLeistungenTable inkl. Mixed-Mode-Aufschlüsselung. Funktion
+  // bleibt im Code für Tests / spätere Wiederverwendung erhalten.
   parts.push(buildSpeicherTable(state, calc));
   if (detail && opts.geraet && state?.geraet?.gewaehlt_id){
     parts.push(buildGeraeteTable(state, calc));
