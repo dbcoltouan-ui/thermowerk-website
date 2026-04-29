@@ -4564,6 +4564,7 @@ function initUi({ root, stepperEl, set, getState }){
   rebuildPeriods(getState());
   rebuildRooms(getState());
   applyAllConditionals(getState());
+  syncSectionNums();
   initActiveStepObserver(stepperEl);
 }
 
@@ -4576,6 +4577,7 @@ function rebuildOnDetailToggle(state){
   rebuildPeriods(state);
   rebuildRooms(state);
   applyAllConditionals(state);
+  syncSectionNums();
   initActiveStepObserver(_stepperEl);
 }
 
@@ -4614,6 +4616,27 @@ function renderStepper(){
       <span>${s.label}</span>
     </button>
   `).join('');
+}
+
+/** Schreibt die aktuelle Step-Nummer aus der STEPS-Liste in jede Section.
+ *  Sections tragen `data-step-num="sec-id"`, das nach renderSections() per
+ *  document.querySelectorAll gefuellt wird. So bleibt die Nummerierung im
+ *  Section-Header IMMER mit dem Stepper synchron. */
+function syncSectionNums(){
+  if (typeof document === 'undefined') return;
+  const map = {};
+  STEPS.forEach(st => { map[st.id] = st.num; });
+  document.querySelectorAll('[data-step-num]').forEach(el => {
+    const sid = el.getAttribute('data-step-num');
+    el.textContent = map[sid] != null ? ('Schritt ' + map[sid]) : '';
+    // Sonderlabel: '∑' wird als Symbol ohne 'Schritt'-Präfix dargestellt
+    if (map[sid] === '∑' || map[sid] === 'F' || map[sid] === 'B'){
+      el.textContent = sid === 'sec-ergebnis' ? '∑'
+                     : sid === 'sec-foerderung' ? 'Förderung'
+                     : sid === 'sec-baubewilligung' ? 'Bewilligung'
+                     : map[sid];
+    }
+  });
 }
 
 function renderSections(s){
@@ -4786,7 +4809,7 @@ function renderStammdaten(s){
   return `
   <section class="section" id="sec-stamm">
     <header class="section__head">
-      <span class="section__num">Schritt 1</span>
+      <span class="section__num" data-step-num="sec-stamm"></span>
       <h2 class="section__title">Stammdaten</h2>
     </header>
     <p class="section__intro">
@@ -4934,7 +4957,7 @@ function renderHeizlast(s){
   return `
   <section class="section" id="sec-heizlast">
     <header class="section__head">
-      <span class="section__num">Schritt 2</span>
+      <span class="section__num" data-step-num="sec-heizlast"></span>
       <h2 class="section__title">Heizlast nach Verbrauch (FWS)</h2>
     </header>
     <p class="section__intro">
@@ -5038,7 +5061,7 @@ function renderWarmwasser(s){
   return `
   <section class="section" id="sec-ww">
     <header class="section__head">
-      <span class="section__num">Schritt 3</span>
+      <span class="section__num" data-step-num="sec-ww"></span>
       <h2 class="section__title">Warmwasser Q<sub>n,WW</sub></h2>
     </header>
     <p class="section__intro">
@@ -5100,7 +5123,7 @@ function renderZuschlaege(s){
   return `
   <section class="section" id="sec-zuschlaege">
     <header class="section__head">
-      <span class="section__num">Schritt 4</span>
+      <span class="section__num" data-step-num="sec-zuschlaege"></span>
       <h2 class="section__title">Zuschläge</h2>
     </header>
     <p class="section__intro">
@@ -5150,7 +5173,7 @@ function renderSpeicher(s){
   return `
   <section class="section" id="sec-speicher">
     <header class="section__head">
-      <span class="section__num">Schritt 5</span>
+      <span class="section__num" data-step-num="sec-speicher"></span>
       <h2 class="section__title">Speicher · Puffer · MAG</h2>
     </header>
     <p class="section__intro">
@@ -5486,7 +5509,7 @@ function renderHuelle(s){
   return `
   <section class="section" id="sec-huelle">
     <header class="section__head">
-      <span class="section__num">Schritt 6</span>
+      <span class="section__num" data-step-num="sec-huelle"></span>
       <h2 class="section__title">Hülle — Bauteil-U-Werte</h2>
     </header>
     <p class="section__intro">
@@ -5576,7 +5599,7 @@ function renderRaeume(s){
   return `
   <section class="section" id="sec-raeume">
     <header class="section__head">
-      <span class="section__num">Schritt 7</span>
+      <span class="section__num" data-step-num="sec-raeume"></span>
       <h2 class="section__title">Räume</h2>
     </header>
     <p class="section__intro">
@@ -6196,7 +6219,7 @@ function renderVerteilung(s){
   return `
   <section class="section" id="sec-verteilung">
     <header class="section__head">
-      <span class="section__num">Schritt 8</span>
+      <span class="section__num" data-step-num="sec-verteilung"></span>
       <h2 class="section__title">Wärmeübergabe</h2>
     </header>
     <p class="section__intro">
@@ -6293,7 +6316,7 @@ function renderGeraet(s){
   return `
   <section class="section" id="sec-geraet">
     <header class="section__head">
-      <span class="section__num">Schritt 9</span>
+      <span class="section__num" data-step-num="sec-geraet"></span>
       <h2 class="section__title">Gerät — Wärmepumpen-Auswahl</h2>
     </header>
     <p class="section__intro">
@@ -6345,7 +6368,7 @@ function renderFoerderung(s){
   return `
   <section class="section" id="sec-foerderung">
     <header class="section__head">
-      <span class="section__num">Förderung</span>
+      <span class="section__num" data-step-num="sec-foerderung"></span>
       <h2 class="section__title">Förderprogramme</h2>
     </header>
     <p class="section__intro">
@@ -6380,7 +6403,7 @@ function renderBaubewilligung(s){
   return `
   <section class="section" id="sec-baubewilligung">
     <header class="section__head">
-      <span class="section__num">Bewilligung</span>
+      <span class="section__num" data-step-num="sec-baubewilligung"></span>
       <h2 class="section__title">Baubewilligung &amp; kantonale Auflagen</h2>
     </header>
     <p class="section__intro">
@@ -6398,7 +6421,7 @@ function renderErgebnis(s){
   return `
   <section class="section" id="sec-ergebnis">
     <header class="section__head">
-      <span class="section__num">${detail ? '∑' : 'Schritt 6'}</span>
+      <span class="section__num" data-step-num="sec-ergebnis"></span>
       <h2 class="section__title">Ergebnis</h2>
     </header>
     <p class="section__intro">
@@ -6842,7 +6865,7 @@ function updateMethodStatus(s, c){
     } else if (m && m.QnWW > 0){
       hint.innerHTML = `Aktuell <strong>${fmtKWh(m.QnWW)} kWh/a</strong> Warmwasser-Anteil aus dem Verbrauch abgezogen → Q<sub>n,H</sub> = ${fmtKWh(m.QnH)} kWh/a.`;
     } else if (s.heizung.verbrauchInklWW){
-      hint.innerHTML = `<em style="color:var(--warn-500)">Aktuell <strong>0 kWh/a</strong> abgezogen — bitte in <a href="#sec-ww">Schritt 3 (Warmwasser)</a> Personen oder V<sub>W,u</sub> erfassen, damit der Abzug greift.</em>`;
+      hint.innerHTML = `<em style="color:var(--warn-500)">Aktuell <strong>0 kWh/a</strong> abgezogen — bitte unten <strong>Personen</strong> oder <strong>V<sub>W,u</sub></strong> eingeben, damit der Abzug greift. (Eingabe wird mit Sektion Warmwasser geteilt.)</em>`;
     } else {
       hint.innerHTML = '—';
     }
