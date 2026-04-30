@@ -1,40 +1,19 @@
-Heizlast S7 - Quick-Bugs: Mobile-Sticky, eta-Eingabe, Layer-Labels, KPI-Refresh + Naming
+Heizlast: Sanierungs-Plausi Phase C (n_exponent + Stammdaten-Pfad)
 
-Naming klarer:
-* "Norm-Heizlast Q_hl" -> "Heizlast nach Verbrauch (FWS)" (top KPI + Section
-  4-Title) - das ist die Verbrauchs-Heizlast, nicht "Norm".
-* "Q_hl,Norm Detail" -> "Heizlast nach Gebaeudehuelle (EN 12831)" (Detail-
-  Cockpit Hero-KPI).
-* "Abweichung Norm <-> Verbrauch" -> "Abweichung Huelle <-> Verbrauch".
-* Cockpit-Block-Title: "Auslegung-Cockpit Norm vs. Verbrauch" ->
-  "Auslegung-Cockpit Huelle vs. Verbrauch".
+distribution.mjs erweitert: plausibilitaetHeizflaeche, leistungsFaktor und
+maxVorlauftemperatur akzeptieren n_exponent-Override aus Modell/Fallback
+(Konvektor-passiv n=1.40 vs Plattenheizkoerper n=1.30). computeDistribution()
+liest q_norm und n_exponent aus dem State und reicht sie an die Plausi durch.
+Gewichtung der Heizlast pro Heizflaeche nutzt q_norm wenn vorhanden, sonst
+REF_AUSLEGUNG-Fallback.
 
-eta-Eingabe entblockt:
-* Bisheriger Bug: rebuildPeriods auf jedem Tasten-Event in etaValue ->
-  Focus-Loss, User konnte nichts tippen. Ausserdem _set('etaPreset',
-  'custom') hat zusaetzlich rebuild getriggert.
-* Fix: Auto-Switch fuer Override-Eingabe nur per direktem DOM-Update
-  des Dropdowns (kein _set, kein Rebuild). rebuildPeriods nur noch
-  bei Preset-Wechsel im Dropdown selbst.
-* Gleiche Logik fuer Huelle u_user und Raeume-Bauteil u_override.
+ui.mjs::updateVerteilungSection reicht n_exponent an die Plausi durch.
+Damit ist die Sanierungs-Ampel auf Hersteller-Datenblatt-Genauigkeit -
+nicht mehr Pauschal-Schaetzung.
 
-Layer-Labels Bauteil-spezifisch:
-* LAYER_LABELS_BY_TYP statt globale Map. Wand: Innenputz/Tragschicht
-  Mauerwerk/Daemmung-Hohlraum/Aussenschale/Aussenputz. Dach: Sparren/
-  Holz-Tragwerk + Waermedaemmung Zwischensparren. Boden: Bodenplatte +
-  Bodendaemmung Perimeter.
-* "Tragschicht / Innenmauer" verwirrte beim Dach - jetzt korrekt
-  "Sparren / Holz-Tragwerk" fuer Dach.
+Bundle 514 KB, 341/341 Tests gruen (333 alt + 8 neue Sanierungs-Plausi-Tests
+in tests/sanierungs-plausi.test.mjs). Buderus T22 H600 L1000 trifft den
+DB-Wert q_norm_45_35 = 480 W exakt; bei VL 35/40/45 sinkt der Deckungsgrad
+monoton mit phi und steigt monoton mit der Vorlauftemperatur.
 
-Material-Wechsel triggert UI-Update:
-* User-Symptom: Export rechnet korrekt, aber Cockpit-Anzeige aendert sich
-  nicht bei Material/Dicke-Wechsel. Zusaetzlicher setState-Push nach
-  rebuildRooms/rebuildHuelle stellt sicher, dass subscribe -> compute ->
-  updateCockpit zuverlaessig laeuft.
-* Path-Trigger jetzt auch fuer .d_cm (Dicke-Aenderung) - vorher nur
-  .mat (Material-Aenderung) im Trigger.
-
-Mobile-Sticky-Topbar:
-* Bug: beim Mobile-Scroll lief der Stepper sticky-mit, drueckte die
-  Topbar zur Haelfte aus dem View. Fix: Stepper unter 768px nicht-
-  sticky -> nur die Topbar bleibt oben fixiert.
+Live-Deploy public/heizlast/index.html + public/heizlast/data/heizkoerper.json.

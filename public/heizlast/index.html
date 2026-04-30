@@ -2832,15 +2832,25 @@ function dTm({ tVL, tRL, tInnen = 20 } = {}){
 }
 
 /** Leistungsfaktor f = (ΔT_neu / ΔT_ref)^n (relativ zur Norm-Auslegung).
- *  null wenn Heizflächentyp unbekannt oder ΔT_ref nicht berechenbar. */
-function leistungsFaktor({ typ, tVL, tRL, tInnen = 20 } = {}){
+ *  null wenn Heizflächentyp unbekannt oder ΔT_ref nicht berechenbar.
+ *  @param {object} args
+ *  @param {string} args.typ          Heizflächentyp
+ *  @param {number} args.tVL          neue Vorlauftemperatur [°C]
+ *  @param {number} args.tRL          neue Rücklauftemperatur [°C]
+ *  @param {number} [args.tInnen=20]  Innentemperatur [°C]
+ *  @param {number} [args.n_exponent] Override für den Heizflächen-Exponent
+ *                                    (Phase C: aus Modell/Fallback gespiegelt
+ *                                    statt Default-Tabelle pro Typ).
+ */
+function leistungsFaktor({ typ, tVL, tRL, tInnen = 20, n_exponent } = {}){
   const ref = REF_AUSLEGUNG[typ];
   if (!ref) return null;
   const dT_neu = dTm({ tVL, tRL, tInnen });
   const dT_ref = dTm(ref);
   if (!(dT_ref > 0)) return null;
   if (!(dT_neu > 0)) return 0;
-  const n = N_EXPONENT[typ] || 1.3;
+  const n_override = Number(n_exponent);
+  const n = (Number.isFinite(n_override) && n_override > 0) ? n_override : (N_EXPONENT[typ] || 1.3);
   return Math.pow(dT_neu / dT_ref, n);
 }
 
@@ -2867,11 +2877,14 @@ function ampelFromDeckungsgrad(d){
  *  @param {number} [args.tRL_neu]        Geplante Rücklauftemperatur [°C] (Default: tVL−7 für FBH/Wand, tVL−10 für HK/Konv)
  *  @param {number} [args.tInnen=20]      Innentemperatur [°C]
  *  @param {number} [args.q_norm_W_pro_m2] Override für spez. Norm-Leistung
+ *  @param {number} [args.n_exponent]      Override für Heizflächen-Exponent
+ *                                         (Phase C: aus Modell/Fallback gespiegelt;
+ *                                         z. B. n=1.40 Konvektor passiv vs. n=1.30 HK)
  *  @returns {{ ampel, deckungsgrad, faktor, Q_real, hinweis }}
  */
 function plausibilitaetHeizflaeche({
   phiHL_raum, A_heizflaeche, typ,
-  tVL_neu, tRL_neu, tInnen = 20, q_norm_W_pro_m2
+  tVL_neu, tRL_neu, tInnen = 20, q_norm_W_pro_m2, n_exponent
 } = {}){
   const ref = REF_AUSLEGUNG[typ];
   if (!ref) return { ampel: 'grau', deckungsgrad: null, faktor: null, Q_real: 0, hinweis: 'Unbekannter Heizflächentyp' };
@@ -2883,7 +2896,7 @@ function plausibilitaetHeizflaeche({
   if (!(A > 0) || !(phi > 0)){
     return { ampel: 'grau', deckungsgrad: null, faktor: null, Q_real: 0, hinweis: 'Heizfläche oder Heizlast fehlt' };
   }
-  const f = leistungsFaktor({ typ, tVL, tRL, tInnen });
+  const f = leistungsFaktor({ typ, tVL, tRL, tInnen, n_exponent });
   if (f == null){
     return { ampel: 'grau', deckungsgrad: null, faktor: null, Q_real: 0, hinweis: 'Vorlauf-/Rücklauftemperatur ungültig' };
   }
@@ -2909,7 +2922,7 @@ function plausibilitaetHeizflaeche({
  */
 function maxVorlauftemperatur({
   phiHL_raum, A_heizflaeche, typ, tInnen = 20,
-  spreizung = null, q_norm_W_pro_m2
+  spreizung = null, q_norm_W_pro_m2, n_exponent
 } = {}){
   const ref = REF_AUSLEGUNG[typ];
   if (!ref) return null;
@@ -2917,7 +2930,8 @@ function maxVorlauftemperatur({
   const A = Number(A_heizflaeche) || 0;
   if (!(phi > 0) || !(A > 0)) return null;
   const q_norm = Number(q_norm_W_pro_m2) || ref.q_W_pro_m2;
-  const n = N_EXPONENT[typ] || 1.3;
+  const n_override = Number(n_exponent);
+  const n = (Number.isFinite(n_override) && n_override > 0) ? n_override : (N_EXPONENT[typ] || 1.3);
   const dT_ref = dTm(ref);
   if (!(dT_ref > 0)) return null;
   // Q = q_norm · A · (dT/dT_ref)^n  →  dT = dT_ref · (Q/(q_norm·A))^(1/n)
@@ -2989,12 +3003,15 @@ function computeDistribution(state, detailLoad){
     const rRes = roomResults[i] || null;
     const phiHL_raum = (rRes && Number.isFinite(rRes.phiHL)) ? rRes.phiHL : 0;
     const heizflaechen = Array.isArray(r.heizflaechen) ? r.heizflaechen : [];
-    // Verteile Heizlast proportional zu Heizflächen-Soll-Leistungsfähigkeit (gleichmässig falls 1 Fläche)
     if (heizflaechen.length === 0) continue;
-    // Gewichte: A · q_norm_typ (relativ)
+    // Phase C: Gewichte = q_norm (W absolut) wenn aus Stammdaten vorhanden,
+    // sonst Default (REF_AUSLEGUNG.q_W_pro_m2 × A). Räume mit gemischten
+    // Heizflächen (Picker + Pauschal) werden so korrekt nach realer
+    // Norm-Leistung gewichtet.
     const gewichte = heizflaechen.map(h => {
-      const ref = REF_AUSLEGUNG[h.typ];
       const A = Number(h.A) || 0;
+      if (Number(h.q_norm) > 0) return Number(h.q_norm); // q_norm = W absolut
+      const ref = REF_AUSLEGUNG[h.typ];
       return ref ? ref.q_W_pro_m2 * A : 0;
     });
     const sumG = gewichte.reduce((s, g) => s + g, 0);
@@ -3002,21 +3019,32 @@ function computeDistribution(state, detailLoad){
     const tRL_neu = (vert.global && Number(vert.global.tRL_neu)) || (tVL_neu - 7);
     for (let j = 0; j < heizflaechen.length; j++){
       const h = heizflaechen[j];
-      const phi_anteil = sumG > 0 ? phiHL_raum * (gewichte[j] / sumG) : (phiHL_raum / heizflaechen.length);
+      const phi_anteil = sumG > 0
+        ? phiHL_raum * (gewichte[j] / sumG)
+        : (phiHL_raum / heizflaechen.length);
+      // Phase C: q_norm/n_exponent aus dem State ziehen — Stammdaten-Genauigkeit.
+      const A_hf = Number(h.A) || 0;
+      const q_norm_W_pro_m2 = (Number(h.q_norm) > 0 && A_hf > 0) ? (h.q_norm / A_hf) : undefined;
+      const n_exp = (Number(h.n_exponent) > 0) ? Number(h.n_exponent) : undefined;
       const plausi = plausibilitaetHeizflaeche({
         phiHL_raum: phi_anteil,
-        A_heizflaeche: Number(h.A) || 0,
+        A_heizflaeche: A_hf,
         typ: h.typ,
-        tVL_neu, tRL_neu, tInnen
+        tVL_neu, tRL_neu, tInnen,
+        q_norm_W_pro_m2, n_exponent: n_exp
       });
       const tVL_req = maxVorlauftemperatur({
         phiHL_raum: phi_anteil,
-        A_heizflaeche: Number(h.A) || 0,
-        typ: h.typ, tInnen
+        A_heizflaeche: A_hf,
+        typ: h.typ, tInnen,
+        q_norm_W_pro_m2, n_exponent: n_exp
       });
       flat.push({
         raumIdx: i, raumName: r.name || ('Raum ' + (i + 1)),
-        bauteilIdx: j, typ: h.typ, A: Number(h.A) || 0, kreis: h.kreis_id || '–',
+        bauteilIdx: j, typ: h.typ, A: A_hf, kreis: h.kreis_id || '–',
+        modell: h.modell || '',
+        q_norm: Number(h.q_norm) || 0,
+        n_exponent: n_exp || null,
         phiHL: phi_anteil, plausi,
         tVL_max: tVL_req ? tVL_req.tVL_max : null,
         tRL_max: tVL_req ? tVL_req.tRL_max : null
@@ -4223,6 +4251,153 @@ function computeUWert(bauteilTyp, baujahr, selections) {
 };
 
 __mods__["./calc/material-picker.mjs"] = { getStufen, computeUWert, FENSTER_GEN_DEFAULT_BY_BK, BAUWEISEN, DAEMM_DICKEN };
+})();
+
+// === ./calc/heizkoerper.mjs ===
+(function(){
+// src/calc/heizkoerper.mjs
+// Wärmeübergabe Phase B (2026-04-30) — pure Helpers für die HK-Stammdatenbank.
+// Eingabe: data/heizkoerper.json (siehe data/heizkoerper.json `_meta.konvention`).
+// Keine DOM-Abhängigkeit → leicht testbar.
+//
+// Konventionen (DIN EN 442):
+//   q_norm_75_65 ist die Norm-Leistung in W bei 75/65/20 für Baulänge L = 1000 mm.
+//   Skalierung mit Länge: linear (Q(L) = q_norm * L_mm / 1000).
+//   Skalierung mit Temperatur über Exponent n (in distribution.mjs).
+//
+// Fallback-Tabelle (data.typen_fallback) liefert W/m² Frontfläche pro Bauart
+// für unbekannte Heizkörper.
+
+/* ==========================================================================
+   1) DB-LOOKUPS — DROPDOWN-INHALTE
+   ========================================================================== */
+
+/** Liefert die Liste aller Hersteller aus der DB (sortiert, deduped). */
+function getHersteller(db){
+  const set = new Set();
+  for (const m of (db?.modelle || [])){
+    if (m && m.hersteller) set.add(m.hersteller);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'de'));
+}
+
+/** Liefert die Modellreihen eines Herstellers (sortiert, deduped). */
+function getModellreihen(db, hersteller){
+  if (!hersteller) return [];
+  const set = new Set();
+  for (const m of (db?.modelle || [])){
+    if (m && m.hersteller === hersteller && m.modellreihe) set.add(m.modellreihe);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'de'));
+}
+
+/** Liefert die verfügbaren Bauhöhen einer Modellreihe (numerisch sortiert). */
+function getHoehen(db, hersteller, modellreihe){
+  if (!hersteller || !modellreihe) return [];
+  const set = new Set();
+  for (const m of (db?.modelle || [])){
+    if (m && m.hersteller === hersteller && m.modellreihe === modellreihe && Number(m.hoehe) > 0){
+      set.add(Number(m.hoehe));
+    }
+  }
+  return Array.from(set).sort((a, b) => a - b);
+}
+
+/** Liefert alle Modelle (Typen) zu Hersteller + Modellreihe + Höhe (sortiert nach Typ). */
+function findModelle(db, hersteller, modellreihe, hoehe){
+  if (!hersteller || !modellreihe || !(Number(hoehe) > 0)) return [];
+  return (db?.modelle || []).filter(m =>
+    m && m.hersteller === hersteller && m.modellreihe === modellreihe && Number(m.hoehe) === Number(hoehe)
+  ).sort((a, b) => String(a.typ).localeCompare(String(b.typ)));
+}
+
+/** Findet ein Modell anhand seiner ID. */
+function findModell(db, modellId){
+  if (!modellId) return null;
+  return (db?.modelle || []).find(m => m && m.id === modellId) || null;
+}
+
+/** Fallback-Eintrag für einen Bauart-Typ ('platte_t22', 'konvektor_passiv', …). */
+function getFallback(db, typ){
+  if (!typ) return null;
+  return (db?.typen_fallback || []).find(f => f && f.typ === typ) || null;
+}
+
+/** Liste aller Fallback-Bauarten (typ + label) — für „Unbekannt"-Dropdown. */
+function getFallbackTypen(db){
+  return (db?.typen_fallback || []).map(f => ({ typ: f.typ, label: f.label }));
+}
+
+/* ==========================================================================
+   2) Q_NORM-BERECHNUNG
+   ========================================================================== */
+
+/** Q_norm @ 75/65/20 für ein konkretes Modell, hochskaliert auf gewählte Baulänge.
+ *  @param {object} model    — DB-Modell-Eintrag (q_norm_75_65 ist W bei L=1000 mm)
+ *  @param {number} laenge_mm — gewählte Baulänge [mm]
+ *  @returns {number} W bei 75/65/20 — 0 falls Inputs ungültig.
+ */
+function qNormFromModell(model, laenge_mm){
+  if (!model || !(Number(model.q_norm_75_65) > 0)) return 0;
+  const L = Number(laenge_mm);
+  if (!(L > 0)) return 0;
+  return model.q_norm_75_65 * (L / 1000);
+}
+
+/** Q_norm @ 75/65/20 für einen Fallback-Typ × Frontfläche (W/m²-Front × A).
+ *  @param {object} fallback — Fallback-Eintrag (q_75_65_W_pro_m2_front)
+ *  @param {number} A_m2     — Frontfläche [m²]
+ *  @returns {number} W
+ */
+function qNormFromFallback(fallback, A_m2){
+  if (!fallback || !(Number(fallback.q_75_65_W_pro_m2_front) > 0)) return 0;
+  const A = Number(A_m2);
+  if (!(A > 0)) return 0;
+  return fallback.q_75_65_W_pro_m2_front * A;
+}
+
+/* ==========================================================================
+   3) GEOMETRIE-HELFER
+   ========================================================================== */
+
+/** Frontfläche aus Bauhöhe × Baulänge in m² (beide in mm). */
+function flaecheVonHL(hoehe_mm, laenge_mm){
+  const h = Number(hoehe_mm), l = Number(laenge_mm);
+  if (!(h > 0) || !(l > 0)) return 0;
+  return (h * l) / 1_000_000; // mm² → m²
+}
+
+/** Allgemein: Fläche aus 2 Massen in mm → m². */
+function flaecheVonLB(l_mm, b_mm){
+  const a = Number(l_mm), b = Number(b_mm);
+  if (!(a > 0) || !(b > 0)) return 0;
+  return (a * b) / 1_000_000;
+}
+
+/* ==========================================================================
+   4) VALIDIERUNG
+   ========================================================================== */
+
+/** Prüft, ob die Länge im Hersteller-Bereich [laenge_min, laenge_max] liegt. */
+function isLaengeValid(model, laenge_mm){
+  if (!model) return false;
+  const L = Number(laenge_mm);
+  if (!(L > 0)) return false;
+  const min = Number(model.laenge_min) || 0;
+  const max = Number(model.laenge_max) || Infinity;
+  return L >= min && L <= max;
+}
+
+/** Liefert das nächstkleinere Modell in der Reihe (Höhe kleiner, gleiche Modellreihe).
+ *  Hilft beim Re-Pick, wenn der User die Höhe wechselt und das alte Modell wegfällt.
+ */
+function pickModellByTyp(modelle, typ){
+  if (!Array.isArray(modelle) || modelle.length === 0) return null;
+  const found = modelle.find(m => m && m.typ === typ);
+  return found || modelle[0];
+}
+
+__mods__["./calc/heizkoerper.mjs"] = { getHersteller, getModellreihen, getHoehen, findModelle, findModell, getFallback, getFallbackTypen, qNormFromModell, qNormFromFallback, flaecheVonHL, flaecheVonLB, isLaengeValid, pickModellByTyp };
 })();
 
 // === ./calc/dhw.mjs ===
@@ -5609,6 +5784,8 @@ const { HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, TOFF_DEFAULTS, F_STO_PRESETS, 
 const { bauklasseFromPeriode, applySanierung, lookupUWert } = __mods__["./calc/envelope.mjs"];
 const { getStufen, computeUWert } = __mods__["./calc/material-picker.mjs"];
 const { REF_AUSLEGUNG, plausibilitaetHeizflaeche, leistungsFaktor } = __mods__["./calc/distribution.mjs"];
+const { getHersteller: hkHersteller, getModellreihen: hkModellreihen, getHoehen: hkHoehen, findModelle: hkFindModelle, findModell: hkFindModell, getFallback: hkGetFallback, getFallbackTypen: hkGetFallbackTypen, qNormFromModell, qNormFromFallback, flaecheVonHL, flaecheVonLB, isLaengeValid } = __mods__["./calc/heizkoerper.mjs"];
+const { freshHeizflaeche } = __mods__["./state.mjs"];
 const { sicherheitsventilEmpfehlung, magVolumen, anlagenvolumenSchaetzung, rundeSpeicherMarkt, rundePufferMarkt, computeDhw } = __mods__["./calc/dhw.mjs"];
 const { nennleistungA7W35, maxVorlauf, aufstellung: wpAufstellung, schallTag: wpSchallTag, copA2W35 } = __mods__["./calc/heatpump.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
@@ -5618,6 +5795,10 @@ const { setOffertenData: setOffertenDataInner, renderOfferteSection, updateOffer
 // U-Werte-Daten (S4): wird beim ersten Render geladen.
 let _uWerteData = null;
 function setUWerteData(data){ _uWerteData = data; }
+// Heizkoerper-Stammdaten (Phase B 2026-04-30): data/heizkoerper.json
+let _hkDb = null;
+function setHeizkoerperDb(data){ _hkDb = data || null; }
+function getHeizkoerperDb(){ return _hkDb; }
 // WP-DB (S5): wird beim ersten Render geladen.
 let _wpDb = [];
 function setWpDb(db){ _wpDb = Array.isArray(db) ? db : []; }
@@ -6793,6 +6974,22 @@ function rebuildRooms(state){
   list.innerHTML = rs.map((r, idx) => renderRoom(r, idx)).join('');
 }
 
+/** Phase B (2026-04-30) — Heizflächen-Liste in Schritt 5 (Wärmeübergabe) neu
+ *  rendern. Nötig, wenn sich Picker-/Toggle-Felder ändern (Picker ↔ Fallback,
+ *  A vs. l×b, Modell-Wechsel → andere Höhen-/Modell-Optionen). */
+function rebuildHeizflaechen(state){
+  const cont = document.getElementById('raumHeizflaechen');
+  if (!cont || !state) return;
+  const det = state.detail || {};
+  const raeume = det.raeume || [];
+  const kreise = (det.verteilung && det.verteilung.heizkreise) || [];
+  if (raeume.length === 0){
+    cont.innerHTML = `<p class="field__hint" style="padding:var(--s-3);background:var(--ink-50);border-radius:var(--r-sm);">Räume in Schritt 7 hinzufügen, um Heizflächen pro Raum zu erfassen.</p>`;
+    return;
+  }
+  cont.innerHTML = raeume.map((r, idx) => renderRaumHeizflaechen(r, idx, kreise)).join('');
+}
+
 function renderRoom(r, idx){
   const A_eff = (Number(r.A) || (Number(r.l) > 0 && Number(r.b) > 0 ? Number(r.l) * Number(r.b) : 0));
   const beheizt = r.beheizt !== false;
@@ -7341,7 +7538,21 @@ function renderRoomBauteil(idx, j, b){
     <div class="bauteil__row2">
       <div class="field" style="min-width:100px;">
         <label class="field__label">Fläche A</label>
+        ${b._useLB ? `
+        <div class="grid grid--3" style="gap:var(--s-1);">
+          <div class="input-group">${inputNumRaw(`${pathPrefix}._l_mm`, b._l_mm || '', 10, 0, 'l mm')}<span class="input-group__unit">mm</span></div>
+          <div class="input-group">${inputNumRaw(`${pathPrefix}._b_mm`, b._b_mm || '', 10, 0, 'b mm')}<span class="input-group__unit">mm</span></div>
+          <div class="bauteil__value">${fmt(Number(b.A) || flaecheVonLB(b._l_mm, b._b_mm) || 0, 2)} m²</div>
+        </div>
+        <label class="chk" style="margin-top:var(--s-1);">
+          <input type="checkbox" data-path="${pathPrefix}._useLB" checked>
+          <span style="font-size:var(--fs-sm);">l × b</span>
+        </label>` : `
         <div class="input-group">${inputNumRaw(`${pathPrefix}.A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
+        <label class="chk" style="margin-top:var(--s-1);">
+          <input type="checkbox" data-path="${pathPrefix}._useLB">
+          <span style="font-size:var(--fs-sm);">l × b</span>
+        </label>`}
       </div>
       <div class="field bauteil__readout" style="min-width:160px;">
         <label class="field__label">U-Wert ${hasOverride ? '(manuell)' : '(auto)'}</label>
@@ -7524,23 +7735,186 @@ function renderRaumHeizflaechen(r, idx, kreise){
 }
 
 function renderHeizflaecheRow(idx, j, h, typeOpts, kOpts){
+  const hf = freshHeizflaeche(h || {}); // füllt fehlende Defaults — ein einheitliches Schema
+  const typ = hf.typ || 'fbh';
+  const isHK = (typ === 'heizkoerper' || typ === 'konvektor');
+  const path = `detail.raeume[${idx}].heizflaechen[${j}]`;
+  const showLB = !!hf._useLB;
+
+  // Hauptzeile: Typ + Heizkreis + Ampel + Löschen
+  const headRow = `
+    <div class="hf-row" data-hf-idx="${idx}-${j}">
+      <div class="field" style="min-width:130px;">
+        <label class="field__label">Typ</label>
+        ${select(`${path}.typ`, typ, typeOpts)}
+      </div>
+      <div class="field" style="min-width:120px;">
+        <label class="field__label">Heizkreis</label>
+        ${select(`${path}.kreis_id`, hf.kreis_id || (kOpts[0] && kOpts[0][0]) || 'k1', kOpts)}
+      </div>
+      <span class="ampel ampel--grau" data-plausi-hf="${idx}-${j}"><span class="ampel__dot"></span><span>—</span></span>
+      <button class="btn btn--ghost" type="button" data-del-hf="${idx}-${j}" title="Heizfläche löschen">×</button>
+    </div>`;
+
+  // HK-/Konvektor-Picker-Block (Hersteller → Modellreihe → Höhe → Länge)
+  let pickerBlock = '';
+  if (isHK){
+    pickerBlock = renderHeizkoerperPicker(path, hf, _hkDb);
+  }
+
+  // Flächen-Block: A direkt ODER l×b (Toggle)
+  const flaechenBlock = renderHeizflaechenFlaeche(path, hf, showLB);
+
+  // Q_norm-Anzeige (read-only) wenn vorhanden
+  const qNormBlock = (Number(hf.q_norm) > 0) ? `
+    <p class="field__hint" style="margin-top:var(--s-2);">
+      Q<sub>norm</sub> @ 75/65/20 = <strong>${fmt(hf.q_norm, 0)} W</strong>
+      ${hf.tiefe ? ` · Bautiefe ${fmt(hf.tiefe, 0)} mm` : ''}
+    </p>` : '';
+
   return `
-  <div class="hf-row" data-hf-idx="${idx}-${j}">
-    <div class="field" style="min-width:130px;">
-      <label class="field__label">Typ</label>
-      ${select(`detail.raeume[${idx}].heizflaechen[${j}].typ`, h.typ || 'fbh', typeOpts)}
-    </div>
-    <div class="field" style="min-width:80px;">
-      <label class="field__label">A</label>
-      <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].heizflaechen[${j}].A`, h.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
-    </div>
-    <div class="field" style="min-width:120px;">
-      <label class="field__label">Heizkreis</label>
-      ${select(`detail.raeume[${idx}].heizflaechen[${j}].kreis_id`, h.kreis_id || (kOpts[0] && kOpts[0][0]) || 'k1', kOpts)}
-    </div>
-    <span class="ampel ampel--grau" data-plausi-hf="${idx}-${j}"><span class="ampel__dot"></span><span>—</span></span>
-    <button class="btn btn--ghost" type="button" data-del-hf="${idx}-${j}" title="Heizfläche löschen">×</button>
+  <div class="hf-block" data-hf-block="${idx}-${j}" style="border:1px solid var(--ink-100);border-radius:var(--r-sm);padding:var(--s-3);margin-bottom:var(--s-3);">
+    ${headRow}
+    ${pickerBlock}
+    ${flaechenBlock}
+    ${qNormBlock}
   </div>`;
+}
+
+/**
+ * Phase B — HK-/Konvektor-Picker (Hersteller → Modellreihe → Höhe → Länge).
+ * Bei hersteller='' (oder 'unbekannt'): Bauart-Dropdown aus typen_fallback.
+ * Tiefe + n_exponent werden aus dem gewählten Modell/Fallback gespiegelt.
+ */
+function renderHeizkoerperPicker(path, hf, db){
+  if (!db){
+    return `<p class="field__hint">Heizkörper-Stammdaten werden geladen …</p>`;
+  }
+  const hersteller = hf.hersteller || '';
+  const isUnbekannt = !hersteller;
+  const herstellerOpts = [['', '— Unbekannt / freie Eingabe —']]
+    .concat(hkHersteller(db).map(h => [h, h]));
+  const modellreihen = isUnbekannt ? [] : hkModellreihen(db, hersteller);
+  const hoehen = (isUnbekannt || !hf.modellreihe) ? [] : hkHoehen(db, hersteller, hf.modellreihe);
+  const modelleHH = (isUnbekannt || !hf.modellreihe || !(Number(hf.hoehe) > 0))
+    ? [] : hkFindModelle(db, hersteller, hf.modellreihe, Number(hf.hoehe));
+  const aktModell = hkFindModell(db, hf.modell);
+
+  // Modellreihe wird als Dropdown gerendert (auch leer wenn Hersteller leer)
+  const modellreihenOpts = [['', '— Modellreihe wählen —']].concat(modellreihen.map(r => [r, r]));
+  const hoehenOpts = [['', '— Höhe wählen —']].concat(hoehen.map(h => [String(h), h + ' mm']));
+  // Typ-Dropdown innerhalb gewählter Höhe (z. B. T11/T21/T22/T33)
+  const typOpts = [['', '— Bauart wählen —']].concat(
+    modelleHH.map(m => [m.id, m.typ.replace('platte_t', 'Typ ') + (m.tiefe ? ` (${m.tiefe} mm)` : '')])
+  );
+
+  if (isUnbekannt){
+    // Fallback-Modus — Bauart-Dropdown aus typen_fallback
+    const fallbackTypen = hkGetFallbackTypen(db);
+    const fallbackOpts = [['', '— Bauart wählen —']].concat(
+      fallbackTypen.map(f => [f.typ, f.label])
+    );
+    const fb = hkGetFallback(db, hf._fallbackTyp);
+    return `
+      <div class="hk-picker hk-picker--fallback" style="background:var(--ink-50);padding:var(--s-3);border-radius:var(--r-sm);margin-top:var(--s-2);">
+        <div class="grid grid--2" style="gap:var(--s-2);">
+          <div class="field">
+            <label class="field__label">Hersteller</label>
+            ${select(`${path}.hersteller`, '', herstellerOpts)}
+          </div>
+          <div class="field">
+            <label class="field__label">Bauart (Fallback)</label>
+            ${select(`${path}._fallbackTyp`, hf._fallbackTyp || '', fallbackOpts)}
+          </div>
+        </div>
+        ${fb ? `
+        <p class="field__hint" style="margin-top:var(--s-2);">
+          ${esc(fb.label)} · n = ${fb.n_exponent} · Tiefe ≈ ${fb.tiefe_typ_mm} mm · ${fb.q_75_65_W_pro_m2_front} W/m² @ 75/65/20.
+          <em>Q<sub>norm</sub> wird aus W/m²-Front × Frontfläche berechnet.</em>
+        </p>` : `
+        <p class="field__hint" style="margin-top:var(--s-2);">
+          Bauart wählen — Q<sub>norm</sub> wird aus Frontfläche × W/m² berechnet (Fallback aus <code>data/heizkoerper.json</code>).
+        </p>`}
+      </div>`;
+  }
+
+  // Modell-Picker
+  const lMin = aktModell ? aktModell.laenge_min : 0;
+  const lMax = aktModell ? aktModell.laenge_max : 0;
+  const laengeOk = aktModell ? isLaengeValid(aktModell, hf.laenge) : true;
+  return `
+    <div class="hk-picker" style="background:var(--ink-50);padding:var(--s-3);border-radius:var(--r-sm);margin-top:var(--s-2);">
+      <div class="grid grid--2" style="gap:var(--s-2);">
+        <div class="field">
+          <label class="field__label">Hersteller</label>
+          ${select(`${path}.hersteller`, hersteller, herstellerOpts)}
+        </div>
+        <div class="field">
+          <label class="field__label">Modellreihe</label>
+          ${select(`${path}.modellreihe`, hf.modellreihe || '', modellreihenOpts)}
+        </div>
+        <div class="field">
+          <label class="field__label">Bauhöhe</label>
+          ${select(`${path}.hoehe`, hf.hoehe ? String(hf.hoehe) : '', hoehenOpts)}
+        </div>
+        <div class="field">
+          <label class="field__label">Bauart / Modell</label>
+          ${select(`${path}.modell`, hf.modell || '', typOpts)}
+        </div>
+        <div class="field">
+          <label class="field__label">Baulänge ${aktModell ? `(${lMin}–${lMax} mm)` : '(mm)'}</label>
+          <div class="input-group">${inputNumRaw(`${path}.laenge`, hf.laenge || '', 50, 0, '1000')}<span class="input-group__unit">mm</span></div>
+          ${aktModell && hf.laenge && !laengeOk ? `<p class="field__hint" style="color:var(--err);">Länge ausserhalb ${lMin}–${lMax} mm.</p>` : ''}
+        </div>
+        <div class="field">
+          <label class="field__label">Bautiefe (aus Modell)</label>
+          <div class="bauteil__value">${hf.tiefe ? fmt(hf.tiefe, 0) + ' mm' : '—'}</div>
+        </div>
+      </div>
+      ${aktModell ? `
+        <p class="field__hint" style="margin-top:var(--s-2);">
+          ${esc(aktModell.hersteller)} ${esc(aktModell.modellreihe)} · ${esc(aktModell.typ)} ·
+          Q<sub>norm</sub>(L=1000 mm) = ${aktModell.q_norm_75_65} W · n = ${aktModell.n_exponent}
+        </p>` : ''}
+    </div>`;
+}
+
+/** Flächen-Block: direkter A-Eingabe ODER l×b-Toggle. */
+function renderHeizflaechenFlaeche(path, hf, showLB){
+  if (showLB){
+    return `
+    <div class="hf-flaeche" style="margin-top:var(--s-2);">
+      <label class="chk" style="margin-bottom:var(--s-2);">
+        <input type="checkbox" data-path="${path}._useLB" checked>
+        <span>Maße eingeben (l × b)</span>
+      </label>
+      <div class="grid grid--3" style="gap:var(--s-2);">
+        <div class="field">
+          <label class="field__label">l</label>
+          <div class="input-group">${inputNumRaw(`${path}._l_mm`, hf._l_mm || '', 10, 0, '1000')}<span class="input-group__unit">mm</span></div>
+        </div>
+        <div class="field">
+          <label class="field__label">b</label>
+          <div class="input-group">${inputNumRaw(`${path}._b_mm`, hf._b_mm || '', 10, 0, '600')}<span class="input-group__unit">mm</span></div>
+        </div>
+        <div class="field">
+          <label class="field__label">A (berechnet)</label>
+          <div class="bauteil__value">${fmt(Number(hf.A) || flaecheVonLB(hf._l_mm, hf._b_mm) || 0, 2)} m²</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="hf-flaeche" style="margin-top:var(--s-2);">
+      <label class="chk" style="margin-bottom:var(--s-2);">
+        <input type="checkbox" data-path="${path}._useLB">
+        <span>Maße eingeben (l × b)</span>
+      </label>
+      <div class="field" style="max-width:200px;">
+        <label class="field__label">Fläche A</label>
+        <div class="input-group">${inputNumRaw(`${path}.A`, hf.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
+      </div>
+    </div>`;
 }
 
 /* =========================================================================
@@ -7879,7 +8253,8 @@ function attachStaticHandlers(root, stepperEl, getState){
       const st = getState();
       const rs = (st.detail && st.detail.raeume || []).map(r => Object.assign({}, r, { bauteile: (r.bauteile || []).slice() }));
       if (!rs[idx]) return;
-      rs[idx].bauteile.push({ typ: 'wand', variant: 'unbekannt', anschluss: 'aussenluft', A: 0, picker: {} });
+      // Phase B: _useLB / _l_mm / _b_mm Defaults für l×b-Toggle.
+      rs[idx].bauteile.push({ typ: 'wand', variant: 'unbekannt', anschluss: 'aussenluft', A: 0, picker: {}, _useLB: false, _l_mm: 0, _b_mm: 0 });
       _set('detail.raeume', rs);
       return;
     }
@@ -7924,7 +8299,10 @@ function attachStaticHandlers(root, stepperEl, getState){
       const rs = (st.detail && st.detail.raeume || []).map(r => Object.assign({}, r, { heizflaechen: ((r.heizflaechen) || []).slice() }));
       if (!rs[idx]) return;
       const kreis_id = ((st.detail && st.detail.verteilung && st.detail.verteilung.heizkreise) || [{id:'k1'}])[0].id;
-      rs[idx].heizflaechen.push({ typ: 'fbh', A: 0, kreis_id });
+      // Phase B (2026-04-30): freshHeizflaeche() statt partiellem Objekt — alle
+      // neuen Felder (hersteller/modell/hoehe/laenge/tiefe/q_norm) sind so von
+      // Anfang an im State und stolpern weder Resolver noch Migration.
+      rs[idx].heizflaechen.push(freshHeizflaeche({ typ: 'fbh', A: 0, kreis_id }));
       _set('detail.raeume', rs);
       return;
     }
@@ -8001,6 +8379,26 @@ function onInputChange(ev){
     _set(`detail.huelle.${m[1]}.u_user`, '');
   }
 
+  // Phase B (2026-04-30) — Bauteil l × b → A automatisch nachziehen
+  const mBLB = path.match(/^detail\.raeume\[(\d+)\]\.bauteile\[(\d+)\]\.(_l_mm|_b_mm)$/);
+  if (mBLB){
+    const ri = parseInt(mBLB[1], 10);
+    const bi = parseInt(mBLB[2], 10);
+    setTimeout(() => {
+      const st = _getState ? _getState() : null;
+      const b = st && st.detail && st.detail.raeume && st.detail.raeume[ri] && st.detail.raeume[ri].bauteile && st.detail.raeume[ri].bauteile[bi];
+      if (!b) return;
+      const A = flaecheVonLB(b._l_mm, b._b_mm);
+      if (A > 0) _set(`detail.raeume[${ri}].bauteile[${bi}].A`, A);
+    }, 0);
+  }
+  // _useLB-Toggle bei Bauteil → Räume neu rendern (sichtbare Felder ändern sich)
+  if (/^detail\.raeume\[\d+\]\.bauteile\[\d+\]\._useLB$/.test(path)){
+    setTimeout(() => {
+      const st = _getState ? _getState() : null;
+      if (st) rebuildRooms(st);
+    }, 0);
+  }
   // S7: Strukturelle Bauteil-Änderungen (Typ/Variante/Anschluss/Dach-Form/
   // Fenster-Generation) triggern einen Rebuild der Räume-Liste, weil sich
   // die sichtbaren Felder ändern (Override-Input ↔ Readout, Anschluss ↔ Dach-
@@ -8053,6 +8451,129 @@ function onInputChange(ev){
   if (mBU && value !== '' && value != null && Number(value) > 0){
     const sel = document.querySelector(`[data-path="detail.raeume[${mBU[1]}].bauteile[${mBU[2]}].variant"]`);
     if (sel && sel.value !== 'eigener') sel.value = 'eigener';
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+  // Phase B (2026-04-30) — Wärmeübergabe / HK-Sanierungs-Plausi
+  // ──────────────────────────────────────────────────────────────────────────
+  // Bei Änderungen am HK-Picker (hersteller / modellreihe / hoehe / modell /
+  // laenge / _useLB / _l_mm / _b_mm / _fallbackTyp) müssen abgeleitete Felder
+  // (q_norm, A, tiefe, modell-clear) konsistent gesetzt UND die Heizflächen-
+  // Liste neu gerendert werden (sichtbare Felder ändern sich).
+  const mHF = path.match(/^detail\.raeume\[(\d+)\]\.heizflaechen\[(\d+)\]\.([_a-zA-Z]+)$/);
+  if (mHF){
+    const ri = parseInt(mHF[1], 10);
+    const hi = parseInt(mHF[2], 10);
+    const field = mHF[3];
+    setTimeout(() => {
+      const st = _getState ? _getState() : null;
+      if (!st) return;
+      const r = (st.detail && st.detail.raeume) ? st.detail.raeume[ri] : null;
+      const h = r && r.heizflaechen ? r.heizflaechen[hi] : null;
+      if (!h) return;
+      const base = `detail.raeume[${ri}].heizflaechen[${hi}]`;
+
+      // 1) Hersteller-Wechsel → Modellreihe/Höhe/Modell/Tiefe/q_norm löschen
+      if (field === 'hersteller'){
+        _set(`${base}.modellreihe`, '');
+        _set(`${base}.hoehe`, 0);
+        _set(`${base}.modell`, '');
+        _set(`${base}.tiefe`, 0);
+        _set(`${base}.q_norm`, 0);
+      }
+      // 2) Modellreihe-Wechsel → Höhe/Modell/Tiefe/q_norm löschen
+      if (field === 'modellreihe'){
+        _set(`${base}.hoehe`, 0);
+        _set(`${base}.modell`, '');
+        _set(`${base}.tiefe`, 0);
+        _set(`${base}.q_norm`, 0);
+      }
+      // 3) Höhe-Wechsel: Modell-ID kann ungültig werden → leeren + Tiefe/q_norm zurücksetzen
+      if (field === 'hoehe'){
+        // Hoehe kommt als String aus dem select; konvertieren
+        const hoehe = Number(value) || 0;
+        if (hoehe !== Number(h.hoehe)) _set(`${base}.hoehe`, hoehe);
+        _set(`${base}.modell`, '');
+        _set(`${base}.tiefe`, 0);
+        _set(`${base}.q_norm`, 0);
+      }
+      // 4) Modell-ID-Wechsel → Tiefe + q_norm aus Modell × Länge
+      if (field === 'modell' && _hkDb){
+        const mod = hkFindModell(_hkDb, value || '');
+        if (mod){
+          _set(`${base}.tiefe`, mod.tiefe || 0);
+          // n_exponent aus Modell speichern, damit distribution den richtigen Exponent nimmt
+          _set(`${base}.n_exponent`, mod.n_exponent || 1.30);
+          // Q_norm berechnen falls Länge bereits vorhanden
+          const L = Number(h.laenge) || 0;
+          if (L > 0){
+            _set(`${base}.q_norm`, qNormFromModell(mod, L));
+            // A automatisch aus Höhe × Länge übernehmen, wenn _useLB nicht aktiv
+            if (!h._useLB){
+              const A = flaecheVonHL(mod.hoehe, L);
+              if (A > 0) _set(`${base}.A`, A);
+            }
+          }
+        } else {
+          _set(`${base}.tiefe`, 0);
+          _set(`${base}.q_norm`, 0);
+        }
+      }
+      // 5) Länge-Wechsel → q_norm + A nachziehen
+      if (field === 'laenge' && _hkDb){
+        const L = Number(value) || 0;
+        const mod = hkFindModell(_hkDb, h.modell || '');
+        if (mod && L > 0){
+          _set(`${base}.q_norm`, qNormFromModell(mod, L));
+          if (!h._useLB){
+            const A = flaecheVonHL(mod.hoehe, L);
+            if (A > 0) _set(`${base}.A`, A);
+          }
+        } else if (L === 0){
+          _set(`${base}.q_norm`, 0);
+        }
+      }
+      // 6) Fallback-Typ-Wechsel (Unbekannt-Modus) → tiefe + n_exponent + q_norm
+      if (field === '_fallbackTyp' && _hkDb){
+        const fb = hkGetFallback(_hkDb, value || '');
+        if (fb){
+          _set(`${base}.tiefe`, fb.tiefe_typ_mm || 0);
+          _set(`${base}.n_exponent`, fb.n_exponent || 1.30);
+          _set(`${base}.q_norm`, qNormFromFallback(fb, Number(h.A) || 0));
+        } else {
+          _set(`${base}.tiefe`, 0);
+          _set(`${base}.q_norm`, 0);
+        }
+      }
+      // 7) l × b → A neu berechnen (auch im Fallback-Modus → q_norm nachziehen)
+      if (field === '_l_mm' || field === '_b_mm'){
+        const L = field === '_l_mm' ? Number(value) || 0 : Number(h._l_mm) || 0;
+        const B = field === '_b_mm' ? Number(value) || 0 : Number(h._b_mm) || 0;
+        const A = flaecheVonLB(L, B);
+        if (A > 0) _set(`${base}.A`, A);
+        // Wenn Fallback aktiv: q_norm aus W/m²-Front × A nachziehen
+        if (h._fallbackTyp && _hkDb){
+          const fb = hkGetFallback(_hkDb, h._fallbackTyp);
+          if (fb && A > 0) _set(`${base}.q_norm`, qNormFromFallback(fb, A));
+        }
+      }
+      // 8) Direkte A-Eingabe im Fallback-Modus → q_norm aus W/m²-Front × A
+      if (field === 'A' && h._fallbackTyp && _hkDb){
+        const fb = hkGetFallback(_hkDb, h._fallbackTyp);
+        const A = Number(value) || 0;
+        if (fb && A > 0) _set(`${base}.q_norm`, qNormFromFallback(fb, A));
+      }
+
+      // Sichtbarkeits-Trigger: Heizflächen-Liste neu rendern, weil sich
+      // sichtbare Felder ändern (HK-Picker ↔ Fallback ↔ A vs. l×b).
+      const reRenderTriggers = ['typ', 'hersteller', 'modellreihe', 'hoehe', 'modell', '_useLB', '_fallbackTyp'];
+      if (reRenderTriggers.includes(field)){
+        rebuildHeizflaechen(_getState());
+        try {
+          const stateMod = window.__heizlast;
+          if (stateMod && typeof stateMod.setState === 'function') stateMod.setState(stateMod.getState());
+        } catch(_){}
+      }
+    }, 0);
   }
 }
 
@@ -8256,8 +8777,13 @@ function updateVerteilungSection(s, c){
     const rRes = (detailLoad && detailLoad.roomResults) ? detailLoad.roomResults[i] : null;
     const phiHL = rRes ? Number(rRes.phiHL) || 0 : 0;
     const gewichte = hflaechen.map(h => {
+      // Phase B: wenn q_norm aus Picker/Fallback vorhanden → das nehmen,
+      // sonst REF_AUSLEGUNG-Default. So gewichten Räume mit Stammdaten
+      // korrekt nach realer Heizleistung.
+      const A = Number(h.A) || 0;
+      if (Number(h.q_norm) > 0) return Number(h.q_norm); // q_norm ist schon W absolut
       const ref = REF_AUSLEGUNG[h.typ];
-      return (ref ? ref.q_W_pro_m2 : 0) * (Number(h.A) || 0);
+      return (ref ? ref.q_W_pro_m2 : 0) * A;
     });
     const sumG = gewichte.reduce((s, g) => s + g, 0);
     let raumGruen = 0, raumTotal = 0;
@@ -8265,9 +8791,18 @@ function updateVerteilungSection(s, c){
       const h = hflaechen[j];
       const phi_anteil = (sumG > 0) ? phiHL * (gewichte[j] / sumG) : (hflaechen.length > 0 ? phiHL / hflaechen.length : 0);
       const { tvl, trl } = vlForHf(h);
+      // Phase B: q_norm-basierte Plausi (W/m² = q_norm / A) wenn Stammdaten
+      // vorhanden — sonst REF_AUSLEGUNG-Fallback.
+      // Phase C: n_exponent aus State (Modell/Fallback gespiegelt) ebenfalls
+      // an die Plausi durchreichen — z. B. Konvektor-passiv n=1.40 bricht
+      // bei niedriger VL stärker ein als Plattenheizkörper n=1.30.
+      const A_hf = Number(h.A) || 0;
+      const q_norm_W_pro_m2 = (Number(h.q_norm) > 0 && A_hf > 0) ? (h.q_norm / A_hf) : undefined;
+      const n_exp = (Number(h.n_exponent) > 0) ? Number(h.n_exponent) : undefined;
       const pl = plausibilitaetHeizflaeche({
-        phiHL_raum: phi_anteil, A_heizflaeche: Number(h.A) || 0,
-        typ: h.typ, tVL_neu: tvl, tRL_neu: trl, tInnen
+        phiHL_raum: phi_anteil, A_heizflaeche: A_hf,
+        typ: h.typ, tVL_neu: tvl, tRL_neu: trl, tInnen,
+        q_norm_W_pro_m2, n_exponent: n_exp
       });
       const span = document.querySelector(`[data-plausi-hf="${i}-${j}"]`);
       if (span){
@@ -8503,7 +9038,6 @@ function updateBaubewilligung(s){
     ${luftBox}
     ${erdBox}
     ${allgemein}
-    <div class="bewilligung-foot">
       <a class="bewilligung-portal" href="${escAttr(k.portal || '#')}" target="_blank" rel="noopener">${esc(k.portal_label || 'Kantonales Portal')} ↗</a>
       ${k.energieportal ? `<a class="bewilligung-portal" href="${escAttr(k.energieportal)}" target="_blank" rel="noopener">Energie-Förderportal ↗</a>` : ''}
       ${k.kontakt ? `<span class="bewilligung-kontakt">${esc(k.kontakt)}</span>` : ''}
@@ -8868,7 +9402,7 @@ function computeTvollHint(s){
   return `t<sub>voll</sub> = ${auto} h · ${esc(s.objekt.typ.toUpperCase())} · ${esc(s.objekt.lage)}`;
 }
 
-__mods__["./ui.mjs"] = { setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, setOffertenData, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, mapPeriodeToBaujahr, pickerTypFor, normalizePicker, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
+__mods__["./ui.mjs"] = { setUWerteData, setHeizkoerperDb, getHeizkoerperDb, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, setOffertenData, initUi, rebuildOnDetailToggle, updateUi, resolveHuelleUWerte, mapPeriodeToBaujahr, pickerTypFor, normalizePicker, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt };
 })();
 
 // === ./persistence.mjs ===
@@ -11395,7 +11929,7 @@ const { compute } = __mods__["./calc/fws.mjs"];
 const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
-const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt, setOffertenData } = __mods__["./ui.mjs"];
+const { initUi, updateUi, rebuildOnDetailToggle, setUWerteData, setWpDb, getWpDb, setFoerderDb, getFoerderDb, setBauDb, getBauDb, resolveHuelleUWerte, enrichRaeumeWithResolvedUFrt, setOffertenData, setHeizkoerperDb } = __mods__["./ui.mjs"];
 const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
 // S7 — Persistenz + Modale
 const { loadActive, autosaveActive, installAutoSync, onLoaded, getActiveMeta, setLastCalc } = __mods__["./persistence.mjs"];
@@ -11530,7 +12064,10 @@ async function loadDataFiles(){
     ['./data/offerten-positionen.json',  (d) => _offPos = d],
     ['../data/offerten-positionen.json', (d) => _offPos = d],
     ['./data/offerten-pakete.json',      (d) => _offPak = d],
-    ['../data/offerten-pakete.json',     (d) => _offPak = d]
+    ['../data/offerten-pakete.json',     (d) => _offPak = d],
+    // Phase B (2026-04-30) — Heizkoerper-Stammdaten (Sanierungs-Plausi)
+    ['./data/heizkoerper.json',          (d) => setHeizkoerperDb(d)],
+    ['../data/heizkoerper.json',         (d) => setHeizkoerperDb(d)]
   ];
   // Pro „Themen-File" einmal versuchen, in der Reihenfolge ./ dann ../.
   const buckets = [
@@ -11539,7 +12076,8 @@ async function loadDataFiles(){
     [tries[4], tries[5]],
     [tries[6], tries[7]],
     [tries[8], tries[9]],
-    [tries[10], tries[11]]
+    [tries[10], tries[11]],
+    [tries[12], tries[13]]
   ];
   for (const bucket of buckets){
     for (const [url, apply] of bucket){
