@@ -1484,6 +1484,81 @@ body.modal-open { overflow: hidden; }
 
 
 /* S7 — Layer-Editor (Schichtenaufbau pro Bauteil) */
+/* Material-Picker im Pro-Stil (vertikal, U-Wert oben rechts, Footer mit
+   Quelle / U-Wert-Formel / Default-Stufen). Eingeführt 2026-04-30 mit
+   dem Pro-UI-Refactor — ersetzt den alten Layer-Editor. */
+.mp-bauteil {
+  margin-top: var(--s-3);
+  padding: var(--s-3);
+  background: #fafbfe;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+}
+.mp-bauteil__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-border);
+}
+.mp-bauteil__title {
+  flex: 1;
+  font-weight: 700;
+  color: var(--brand-500);
+  font-size: var(--fs-md);
+}
+.mp-bauteil__chip {
+  display: inline-block;
+  margin-left: var(--s-2);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-600);
+  background: var(--ink-100);
+  border-radius: var(--r-pill, 12px);
+  vertical-align: middle;
+}
+.mp-bauteil__u {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--accent-500);
+}
+.mp-stufen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.mp-stufe {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mp-stufe__label {
+  font-size: var(--fs-xs);
+  color: var(--ink-700);
+  font-weight: 600;
+}
+.mp-stufe__hint {
+  font-size: 11px;
+  color: var(--ink-600);
+  line-height: 1.3;
+}
+.mp-stufe__lock {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-600);
+}
+.mp-foot {
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--c-border);
+  font-size: var(--fs-xs);
+  color: var(--ink-600);
+  line-height: 1.5;
+}
+
 .layer-editor {
   margin-top: var(--s-3);
   padding: var(--s-3);
@@ -1511,7 +1586,9 @@ body.modal-open { overflow: hidden; }
 .layer-row:last-child { border-bottom: 0; }
 .layer-row__name { font-weight: 600; color: var(--brand-500); }
 .layer-row__resolved { font-size: var(--fs-xs); color: var(--ink-500); font-style: italic; }
-.layer-row__resolved em { color: var(--ink-400); font-weight: 500;
+.layer-row__resolved em { color: var(--ink-400); font-weight: 500; }
+@media (max-width: 640px) {
+  .layer-row { grid-template-col
 </style>
 </head>
 <body>
@@ -1588,6 +1665,47 @@ const __mods__ = {};
 // src/state.mjs
 // Zentrale Datenstruktur + getState/setState/subscribe — keine externe Library.
 // Single Source of Truth für FWS-Default-View (S3) und Detail-Modus (S4+).
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// Heizflächen-Schema (state.detail.raeume[i].heizflaechen[j])
+// Ergänzt 2026-04-30 (Wärmeübergabe Phase A) — neue Felder optional, Default ''.
+//
+//   {
+//     typ:        'fbh' | 'wandheizung' | 'heizkoerper' | 'konvektor',
+//     A:          Number   // Heizfläche in m² (Frontfläche bei HK / Bodenfläche bei FBH)
+//     kreis_id:   String   // Verweis auf detail.verteilung.heizkreise[].id
+//
+//     // Phase A neu — HK-Stammdaten-Anbindung (Quelle data/heizkoerper.json)
+//     hersteller: String   // 'Buderus' | 'Kermi' | 'Zehnder' | … | '' = unbekannt
+//     modell:     String   // model.id aus heizkoerper.json
+//                          //   (z. B. 'buderus-logatrend-c-profil-22-h600')
+//                          //   '' = freie Eingabe / unbekannt → Fallback nach Typ
+//     hoehe:      Number   // Bauhöhe [mm]
+//     laenge:     Number   // Baulänge [mm]
+//     tiefe:      Number   // Bautiefe [mm]
+//     q_norm:     Number   // Direkt-Override Q_norm @ 75/65/20 [W]
+//                          //   (bei 0 / leer wird aus modell × Länge gerechnet)
+//   }
+//
+// freshHeizflaeche() liefert eine Default-Hülle. Bestehende Projekte bleiben
+// durch deepMerge() in persistence.mjs kompatibel — die neuen Felder werden
+// via migrateHeizkoerperFelder() (persistence.mjs) auf '' / 0 aufgefüllt.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Default-Hülle für eine neue Heizfläche. */
+function freshHeizflaeche(overrides){
+  return Object.assign({
+    typ: 'fbh',
+    A: 0,
+    kreis_id: '',
+    hersteller: '',
+    modell: '',
+    hoehe: 0,
+    laenge: 0,
+    tiefe: 0,
+    q_norm: 0
+  }, overrides || {});
+}
 
 function freshState(){
   return {
@@ -1645,11 +1763,11 @@ function freshState(){
     detail: {
       aktiv: false,
       huelle: {
-        wand:    { u_user: '', variant: '' },
-        fenster: { u_user: '', variant: '' },
-        dach:    { u_user: '', variant: 'steildach' },
-        boden:   { u_user: '', variant: 'gegenErdreich' },
-        tueren:  { u_user: '', variant: '' }
+        wand:    { u_user: '', picker: {} },
+        fenster: { u_user: '', picker: {} },
+        dach:    { u_user: '', picker: {}, dach_variant: 'steildach' },
+        boden:   { u_user: '', picker: {} },
+        tueren:  { u_user: '' }
       },
       raeume: [],
       misch: { rest_global: true },
@@ -1788,7 +1906,7 @@ function _parsePath(path){
   return out;
 }
 
-__mods__["./state.mjs"] = { freshState, getState, setState, set, batch, subscribe, resetState };
+__mods__["./state.mjs"] = { freshHeizflaeche, freshState, getState, setState, set, batch, subscribe, resetState };
 })();
 
 // === ./calc/fws.mjs ===
@@ -6555,16 +6673,11 @@ function resolveHuelleUWerte(state){
   const hints = {};
   for (const key of ['wand','fenster','dach','boden','tueren']){
     const slot = det[key] || {};
-    let variant = slot.variant;
-    if (!variant && (slot.u_user != null && slot.u_user !== '')) variant = 'eigener';
-    if (!variant) variant = 'unbekannt';
     const fakeB = {
-      typ: key, variant, layers: slot.layers,
+      typ: key,
+      picker: slot.picker,
       u_override: slot.u_user,
-      anschluss: ANSCHLUSS_DEFAULT[key],
-      dach_variant: slot.dach_variant,
-      fenster_gen: slot.fenster_gen,
-      fenster_rahmen: slot.fenster_rahmen
+      anschluss: ANSCHLUSS_DEFAULT[key]
     };
     const r = resolveBauteilUFrt(state, fakeB);
     out[key] = r.u || 0;
@@ -6605,21 +6718,18 @@ function renderHuelle(s){
 
 function renderHuelleRow(s, key, uHuelle, hints, det){
   const slot = det[key] || {};
-  const h = hints[key] || {};
   const label = BAUTEIL_LABELS[key];
-  const variant = slot.variant || 'unbekannt';
-  const isSchichten = (variant === 'schichten');
-  const isEigener   = (variant === 'eigener');
-  const showsLayers = isSchichten && (key === 'wand' || key === 'dach' || key === 'boden');
-  // U + Quelle live aus Bauteil-Resolver (wie in den Räumen).
+  const hasPicker = !!pickerTypFor(key); // wand/fenster/dach/boden
+  // U + Quelle live aus Bauteil-Resolver — Pfad: state.detail.huelle.<key>
   const fakeB = {
-    typ: key, variant, layers: slot.layers, u_override: slot.u_user,
-    anschluss: ANSCHLUSS_DEFAULT[key], dach_variant: slot.dach_variant,
-    fenster_gen: slot.fenster_gen, fenster_rahmen: slot.fenster_rahmen
+    typ: key,
+    picker: slot.picker,
+    u_override: slot.u_user,
+    anschluss: ANSCHLUSS_DEFAULT[key]
   };
   const r = resolveBauteilUFrt(s, fakeB);
   const uTxt = fmt(r.u, 2);
-  const opts = (key === 'fenster') ? BAUTEIL_VARIANT_OPTS.fensterGen : BAUTEIL_VARIANT_OPTS.std;
+
   return `
     <div class="huelle-row col-span-2">
       <div class="huelle-row__head">
@@ -6627,28 +6737,13 @@ function renderHuelleRow(s, key, uHuelle, hints, det){
         <span class="huelle-row__u">U = <strong>${uTxt}</strong> W/(m²·K)</span>
         <span class="huelle-row__src">${esc(r.source || '')}</span>
       </div>
-      <div class="huelle-row__body grid grid--2">
-        <div class="field">
-          <label class="field__label">${key === 'fenster' ? 'Verglasung' : 'Bauweise / Variante'}</label>
-          ${select(`detail.huelle.${key}.variant`, variant, opts)}
+      <div class="huelle-row__body">
+        <div class="field" style="max-width:280px;">
+          <label class="field__label">U-Wert manuell (optional)</label>
+          <div class="input-group">${inputNumRaw(`detail.huelle.${key}.u_user`, slot.u_user == null ? '' : slot.u_user, 0.01, 0, 'leer = aus Picker / Bauklasse')}<span class="input-group__unit">W/(m²·K)</span></div>
         </div>
-        ${key === 'dach' ? `
-        <div class="field">
-          <label class="field__label">Dach-Form</label>
-          ${select(`detail.huelle.${key}.dach_variant`, slot.dach_variant || 'steildach', BAUTEIL_VARIANT_OPTS.dachForm)}
-        </div>` : ''}
-        ${key === 'fenster' ? `
-        <div class="field">
-          <label class="field__label">Rahmen</label>
-          ${select(`detail.huelle.${key}.fenster_rahmen`, slot.fenster_rahmen || 'kunststoff', BAUTEIL_VARIANT_OPTS.fensterRahmen)}
-        </div>` : ''}
-        ${isEigener ? `
-        <div class="field">
-          <label class="field__label">U-Wert (manuell)</label>
-          <div class="input-group">${inputNumRaw(`detail.huelle.${key}.u_user`, slot.u_user || '', 0.01, 0, '0.40')}<span class="input-group__unit">W/(m²·K)</span></div>
-        </div>` : ''}
       </div>
-      ${showsLayers ? renderLayerEditor(`detail.huelle.${key}`, fakeB, s) : ''}
+      ${hasPicker ? renderMaterialPicker(`detail.huelle.${key}`, fakeB, s, label) : ''}
     </div>`;
 }
 
@@ -6802,7 +6897,7 @@ function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
     if (!lambda && slot === 'daemmung'){
       lambda = _uWerteData?.daemmstoffe?.[mat]?.lambda || 0.045;
     }
-    label = (MATERIAL_CATALOG[slot] || []).find(o => o[0] === mat)?.[1] || mat;
+    label = (((MATERIAL_CATALOG_BY_TYP[typ] && MATERIAL_CATALOG_BY_TYP[typ][slot]) || MATERIAL_CATALOG[slot]) || []).find(o => o[0] === mat)?.[1] || mat;
   }
 
   // Dicke ermitteln
@@ -6881,41 +6976,109 @@ function normalizePicker(picker){
   return out;
 }
 
-/** Rendert den 5-Stufen / 1-Stufen Picker fuer ein Bauteil. */
-function renderMaterialPicker(idx, j, b, state){
+/**
+ * Rendert den 5-Stufen / 1-Stufen Picker im Pro-Stil:
+ *  - Header mit Bauteil-Name links + U-Wert rechts
+ *  - Stufen vertikal (Label > Select > Default-Hint)
+ *  - Footer: Quelle + U-Wert-Formel + Default-Stufen
+ * pathPrefix steuert das State-Ziel, z. B.
+ *  'detail.raeume[0].bauteile[2]' oder 'detail.huelle.wand'.
+ * headerLabel ist optional; sonst wird ptyp genutzt.
+ */
+function renderMaterialPicker(pathPrefix, b, state, headerLabel){
   const ptyp = pickerTypFor(b.typ);
   if (!ptyp) return '';
   const baujahr = mapPeriodeToBaujahr(state?.objekt?.bauperiode);
   const pickerState = normalizePicker(b.picker || {});
-  let def;
-  try { def = getStufen(ptyp, baujahr, pickerState); }
-  catch (e){ return `<div class="field__hint">Picker-Fehler: ${esc(String(e.message))}</div>`; }
+  let def, computed;
+  try {
+    def = getStufen(ptyp, baujahr, pickerState);
+    computed = computeUWert(ptyp, baujahr, pickerState);
+  } catch (e){
+    return `<div class="field__hint">Picker-Fehler: ${esc(String(e.message))}</div>`;
+  }
 
-  const stufen = def.stufen.map(stf => {
-    const path = `detail.raeume[${idx}].bauteile[${j}].picker.${stf.key}`;
+  const stufenHtml = def.stufen.map(stf => {
+    const path = `${pathPrefix}.picker.${stf.key}`;
     const cur = pickerState[stf.key];
     let curStr;
     if (cur === null || cur === undefined) curStr = '';
     else if (typeof cur === 'boolean') curStr = cur ? 'true' : 'false';
     else curStr = String(cur);
-    const opts = stf.options.map(o => {
+    const optsList = stf.options.map(o => {
       let v;
       if (o.value === null) v = '';
       else if (typeof o.value === 'boolean') v = o.value ? 'true' : 'false';
       else v = String(o.value);
       return [v, o.label];
     });
-    const lockedAttr = stf.locked ? ' (fix)' : '';
+
+    // Default-Hint (Pro-Stil)
+    let hintHtml = '';
+    if ((cur === null || cur === undefined) && !stf.locked){
+      const dflt = stf.defaultIfUnknown;
+      let dfltLabel = '—';
+      if (dflt !== null && dflt !== undefined){
+        const matchOpt = stf.options.find(o => o.value === dflt);
+        if (matchOpt) dfltLabel = matchOpt.label.replace(/^—\s*/, '').replace(/\s*\(Pauschalwert\)$/, '');
+        else if (typeof dflt === 'number') dfltLabel = (dflt < 1 ? Math.round(dflt * 100) + ' cm' : String(dflt));
+        else dfltLabel = String(dflt);
+      }
+      hintHtml = `<div class="mp-stufe__hint">→ Default ${esc(dfltLabel)} aus Baujahr ${esc(def.baujahrklasse || '?')}</div>`;
+    }
+    if (stf.locked && def.isDoppelmauerwerk){
+      hintHtml = `<div class="mp-stufe__lock">→ fix bei Doppelmauerwerk (Kerndämmung in Schale)</div>`;
+    }
+
+    // Inline-Markup mit optional disabled
+    const opts = optsList.map(([k, label]) => `<option value="${escAttr(k)}" ${k === curStr ? 'selected' : ''}>${esc(label)}</option>`).join('');
+    const disabledAttr = stf.locked ? ' disabled' : '';
     return `
-      <div class="field" style="min-width:200px;">
-        <label class="field__label">${esc(stf.label)}${lockedAttr}</label>
-        ${select(path, curStr, opts)}
+      <div class="mp-stufe">
+        <label class="mp-stufe__label">${esc(stf.label)}</label>
+        <select class="select" data-path="${path}"${disabledAttr}>${opts}</select>
+        ${hintHtml}
       </div>`;
   }).join('');
 
-  return `<div class="layer-editor">
-    <div class="layer-editor__head">Material-Picker · ${esc(def.fenster ? 'Fenster' : ptyp)} · Bauklasse ${esc(def.baujahrklasse)}${def.isDoppelmauerwerk ? ' · Doppelmauerwerk (Kerndaemmung fix)' : ''}</div>
-    <div class="bauteil__row1" style="flex-wrap:wrap;gap:var(--s-3);">${stufen}</div>
+  // Header U-Wert
+  const u = (computed && Number.isFinite(computed.uWert)) ? computed.uWert.toFixed(2) : '–';
+  const titleTxt = headerLabel || (def.fenster ? 'Fenster' : ptyp);
+
+  // Footer: Quelle + Formel + Default-Stufen
+  const quelle = (computed && computed.quelle) || 'voll-unbekannt';
+  const unbek = (computed && computed.unbekanntStufen) || [];
+  let quelleLabel;
+  if (quelle === 'voll-bekannt') quelleLabel = 'voll bekannt';
+  else if (quelle === 'voll-unbekannt') quelleLabel = 'voll unbekannt (Pauschal)';
+  else quelleLabel = `gemischt (${unbek.length} Stufe${unbek.length === 1 ? '' : 'n'} Default)`;
+
+  const footerLines = [`Quelle: ${quelleLabel} · Baujahrklasse: ${def.baujahrklasse || '—'}`];
+
+  // U-Wert-Formel aus computed.schichten ableiten (DIN EN ISO 6946)
+  if (computed && Array.isArray(computed.schichten) && computed.schichten.length > 0){
+    const Rsi = 0.13, Rse = 0.04;
+    const teile = computed.schichten
+      .filter(L => L && L.lambda > 0 && L.d != null)
+      .map(L => `${(+L.d).toFixed(3)}/${(+L.lambda).toFixed(3)}`);
+    if (teile.length > 0){
+      footerLines.push(`U-Wert-Formel: 1/(${Rsi.toFixed(2)} + ${teile.join(' + ')} + ${Rse.toFixed(2)}) = ${u} W/m²K`);
+    }
+  }
+  if (unbek.length > 0){
+    footerLines.push(`Default-Stufen: ${unbek.join(', ')}`);
+  }
+
+  const doppelChip = def.isDoppelmauerwerk ? ' <span class="mp-bauteil__chip">Doppelmauerwerk · Kerndämmung fix</span>' : '';
+
+  return `
+  <div class="mp-bauteil">
+    <div class="mp-bauteil__head">
+      <span class="mp-bauteil__title">${esc(titleTxt)}${doppelChip}</span>
+      <span class="mp-bauteil__u">${u} W/m²K</span>
+    </div>
+    <div class="mp-stufen">${stufenHtml}</div>
+    <div class="mp-foot">${footerLines.map(esc).join('<br>')}</div>
   </div>`;
 }
 
@@ -6945,6 +7108,28 @@ function resolveBauteilUFrt(state, b){
   const typ = b.typ || 'wand';
   const variant = b.variant || 'unbekannt';
   const anschluss = b.anschluss || ANSCHLUSS_DEFAULT[typ] || 'aussenluft';
+
+  // fRT vorab — Anschluss-basiert oder formel-basiert für 'beheizt'
+  const _calcFrt = () => {
+    if (anschluss === 'beheizt'){
+      const ti = Number(obj.tInnenAuslegung) || 20;
+      const te = Number(obj.tAussenAuslegung);
+      const teE = Number.isFinite(te) ? te : -8;
+      const tn = Number(b.theta_nb);
+      const tnE = Number.isFinite(tn) ? tn : 20;
+      const dt = ti - teE;
+      return dt !== 0 ? (ti - tnE) / dt : 0;
+    }
+    return ANSCHLUSS_FRT[anschluss] != null ? ANSCHLUSS_FRT[anschluss] : 1.0;
+  };
+
+  // 0) Manueller U-Wert (Override) — höchste Priorität
+  const _override = (b.u_override != null && b.u_override !== '') ? Number(b.u_override) : null;
+  if (Number.isFinite(_override) && _override > 0){
+    const _src = ANSCHLUSS_OPTS[anschluss] ? ANSCHLUSS_OPTS[anschluss][1] : '';
+    return { u: _override, fRT: _calcFrt(), source: 'manuell · ' + _src };
+  }
+
   // ---- AUDIT 3.13: Material-Picker hat Vorrang, wenn b.picker definiert ----
   // Tueren laufen weiter ueber TUER_U_BY_BK; alle anderen Bauteiltypen ueber
   // computeUWert(). Picker-Type-Mapping: 'wand' → 'aussenwand', sonst identisch.
@@ -7109,7 +7294,7 @@ function renderLayerEditor(pathPrefix, b, state){
     <div class="layer-row">
       <span class="layer-row__name">${esc(layerLabel(typ, slot))}</span>
       <div class="layer-row__mat">
-        ${select(`${pathPrefix}.layers.${slot}.mat`, cfg.mat || 'auto', MATERIAL_CATALOG[slot])}
+        ${select(`${pathPrefix}.layers.${slot}.mat`, cfg.mat || 'auto', ((MATERIAL_CATALOG_BY_TYP[typ] && MATERIAL_CATALOG_BY_TYP[typ][slot]) || MATERIAL_CATALOG[slot]))}
       </div>
       <div class="layer-row__d">
         <div class="input-group">${inputNumRaw(`${pathPrefix}.layers.${slot}.d_cm`, cfg.d_cm == null ? '' : cfg.d_cm, 0.5, 0, 'auto')}<span class="input-group__unit">cm</span></div>
@@ -7127,58 +7312,40 @@ function renderLayerEditor(pathPrefix, b, state){
 function renderRoomBauteil(idx, j, b){
   const typeOpts = Object.entries(BAUTEIL_LABELS).map(([k, l]) => [k, l]);
   const typ = b.typ || 'wand';
-  const variant = b.variant || 'unbekannt';
   const isFenster = (typ === 'fenster');
-  const isDach = (typ === 'dach');
   const isTuer = (typ === 'tueren');
+  const hasPicker = !!pickerTypFor(typ); // wand/fenster/dach/boden
+  const pathPrefix = `detail.raeume[${idx}].bauteile[${j}]`;
 
   // Resolver-Aufruf — Werte sichtbar im UI
   const state = _getState ? _getState() : null;
   const r = state ? resolveBauteilUFrt(state, b) : { u: 1.0, fRT: 1.0, source: '—' };
 
-  const variantOpts = isFenster ? BAUTEIL_VARIANT_OPTS.fensterGen : BAUTEIL_VARIANT_OPTS.std;
   const anschlussOpts = anschlussOptsFor(typ);
-  const eigenerVariant = (variant === 'eigener');
+  const hasOverride = b.u_override != null && b.u_override !== '';
 
   return `
   <div class="bauteil" data-bauteil-idx="${idx}-${j}">
     <div class="bauteil__row1">
       <div class="field" style="flex:1;min-width:120px;">
         <label class="field__label">Typ</label>
-        ${select(`detail.raeume[${idx}].bauteile[${j}].typ`, typ, typeOpts)}
+        ${select(`${pathPrefix}.typ`, typ, typeOpts)}
       </div>
-      ${(typ === 'tueren' || !b.picker) ? `
-      <div class="field" style="flex:2;min-width:200px;">
-        <label class="field__label">${isFenster ? 'Verglasung' : 'Bauweise / Variante'}</label>
-        ${select(`detail.raeume[${idx}].bauteile[${j}].variant`, variant, variantOpts)}
-      </div>` : ''}
-      ${(isDach && !b.picker) ? `
-      <div class="field" style="min-width:140px;">
-        <label class="field__label">Dach-Form</label>
-        ${select(`detail.raeume[${idx}].bauteile[${j}].dach_variant`, b.dach_variant || 'steildach', BAUTEIL_VARIANT_OPTS.dachForm)}
-      </div>` : ''}
-      ${(isFenster && !b.picker) ? `
-      <div class="field" style="min-width:140px;">
-        <label class="field__label">Rahmen</label>
-        ${select(`detail.raeume[${idx}].bauteile[${j}].fenster_rahmen`, b.fenster_rahmen || 'kunststoff', BAUTEIL_VARIANT_OPTS.fensterRahmen)}
-      </div>` : ''}
       ${!isFenster && !isTuer ? `
       <div class="field" style="min-width:200px;">
         <label class="field__label">Anschluss</label>
-        ${select(`detail.raeume[${idx}].bauteile[${j}].anschluss`, b.anschluss || ANSCHLUSS_DEFAULT[typ], anschlussOpts)}
+        ${select(`${pathPrefix}.anschluss`, b.anschluss || ANSCHLUSS_DEFAULT[typ], anschlussOpts)}
       </div>` : ''}
       <button class="btn btn--ghost" type="button" data-del-bauteil="${idx}-${j}" title="Bauteil löschen">×</button>
     </div>
     <div class="bauteil__row2">
       <div class="field" style="min-width:100px;">
         <label class="field__label">Fläche A</label>
-        <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
+        <div class="input-group">${inputNumRaw(`${pathPrefix}.A`, b.A || '', 0.1, 0)}<span class="input-group__unit">m²</span></div>
       </div>
       <div class="field bauteil__readout" style="min-width:160px;">
-        <label class="field__label">U-Wert ${variant === 'eigener' ? '(manuell)' : variant === 'schichten' ? '(aus Schichten)' : '(auto)'}</label>
-        ${eigenerVariant
-          ? `<div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].u_override`, b.u_override || '', 0.01, 0, '0.40')}<span class="input-group__unit">W/(m²·K)</span></div>`
-          : `<div class="bauteil__value" data-readout-u="${idx}-${j}">${fmt(r.u, 2)} <span class="bauteil__unit">W/(m²·K)</span></div>`}
+        <label class="field__label">U-Wert ${hasOverride ? '(manuell)' : '(auto)'}</label>
+        <div class="bauteil__value" data-readout-u="${idx}-${j}">${fmt(r.u, 2)} <span class="bauteil__unit">W/(m²·K)</span></div>
       </div>
       <div class="field bauteil__readout" style="min-width:120px;">
         <label class="field__label">f<sub>RT</sub> (auto)</label>
@@ -7187,18 +7354,18 @@ function renderRoomBauteil(idx, j, b){
       ${b.anschluss === 'beheizt' ? `
       <div class="field" style="min-width:140px;">
         <label class="field__label">θ Nachbarraum</label>
-        <div class="input-group">${inputNumRaw(`detail.raeume[${idx}].bauteile[${j}].theta_nb`, b.theta_nb == null ? '' : b.theta_nb, 1, -20, '20')}<span class="input-group__unit">°C</span></div>
+        <div class="input-group">${inputNumRaw(`${pathPrefix}.theta_nb`, b.theta_nb == null ? '' : b.theta_nb, 1, -20, '20')}<span class="input-group__unit">°C</span></div>
       </div>` : ''}
+      <div class="field" style="min-width:160px;">
+        <label class="field__label">U-Wert manuell (optional)</label>
+        <div class="input-group">${inputNumRaw(`${pathPrefix}.u_override`, b.u_override == null ? '' : b.u_override, 0.01, 0, 'leer = auto')}<span class="input-group__unit">W/(m²·K)</span></div>
+      </div>
       <div class="field" style="flex:1;min-width:200px;">
         <label class="field__label">Quelle</label>
         <div class="bauteil__source" data-readout-src="${idx}-${j}">${r.source || '—'}</div>
       </div>
     </div>
-    ${b.picker && pickerTypFor(typ)
-      ? renderMaterialPicker(idx, j, b, state)
-      : (variant === 'schichten' && (typ === 'wand' || typ === 'dach' || typ === 'boden')
-          ? renderLayerEditor(`detail.raeume[${idx}].bauteile[${j}]`, b, state)
-          : '')}
+    ${hasPicker ? renderMaterialPicker(pathPrefix, b, state, BAUTEIL_LABELS[typ]) : ''}
   </div>`;
 }
 
@@ -8833,6 +9000,7 @@ function loadActive(){
     const _next1 = deepMerge(freshState(), env.state);
     migrateBauteilePicker(_next1);
     migrateOffertenState(_next1);
+    migrateHeizkoerperFelder(_next1);
     setState(_next1);
     return true;
   } catch(e){ return false; }
@@ -8875,6 +9043,7 @@ function loadProjectLocal(id){
   const next = deepMerge(freshState(), env.state || {});
   migrateBauteilePicker(next);
   migrateOffertenState(next);
+  migrateHeizkoerperFelder(next);
   setState(next);
   saveActive();
   if (typeof _onLoaded === 'function') _onLoaded(getState());
@@ -9093,6 +9262,7 @@ async function cloudLoad(id){
     const _next2 = deepMerge(freshState(), loaded);
     migrateBauteilePicker(_next2);
     migrateOffertenState(_next2);
+    migrateHeizkoerperFelder(_next2);
     setState(_next2);
     saveActive();
     // Lokalen Mirror persistieren (damit er bei Drift-Cleanup nicht entfernt wird).
@@ -9239,21 +9409,42 @@ const _FENSTER_VARIANT_TO_GEN = {
 };
 
 function migrateBauteilePicker(state){
-  if (!state || !state.detail || !Array.isArray(state.detail.raeume)) return state;
-  for (const r of state.detail.raeume){
-    if (!Array.isArray(r.bauteile)) continue;
-    for (const b of r.bauteile){
-      if (!b || typeof b !== 'object') continue;
-      if (b.typ === 'tueren') continue;
-      if (b.picker && typeof b.picker === 'object') continue;
-      // Default: leer (Resolver fällt auf Bauperiode-Pauschalwert).
-      b.picker = {};
-      // Fenster-Variant in Generation übernehmen, falls möglich:
-      if (b.typ === 'fenster' && b.variant && _FENSTER_VARIANT_TO_GEN[b.variant]){
-        b.picker.generation = _FENSTER_VARIANT_TO_GEN[b.variant];
+  if (!state || !state.detail) return state;
+
+  // (1) Räume-Bauteile (raumweise)
+  if (Array.isArray(state.detail.raeume)){
+    for (const r of state.detail.raeume){
+      if (!Array.isArray(r.bauteile)) continue;
+      for (const b of r.bauteile){
+        if (!b || typeof b !== 'object') continue;
+        if (b.typ === 'tueren') continue;
+        if (b.picker && typeof b.picker === 'object') continue;
+        // Default: leer (Resolver fällt auf Bauperiode-Pauschalwert).
+        b.picker = {};
+        // Fenster-Variant in Generation übernehmen, falls möglich:
+        if (b.typ === 'fenster' && b.variant && _FENSTER_VARIANT_TO_GEN[b.variant]){
+          b.picker.generation = _FENSTER_VARIANT_TO_GEN[b.variant];
+        }
       }
     }
   }
+
+  // (2) Hülle (global) — wand / fenster / dach / boden bekommen Picker.
+  // Tueren werden nicht migriert (kein Picker, läuft via TUER_U_BY_BK).
+  if (state.detail.huelle && typeof state.detail.huelle === 'object'){
+    const h = state.detail.huelle;
+    for (const key of ['wand', 'fenster', 'dach', 'boden']){
+      if (!h[key] || typeof h[key] !== 'object') h[key] = {};
+      const slot = h[key];
+      if (slot.picker && typeof slot.picker === 'object') continue;
+      slot.picker = {};
+      // Fenster: alte slot.variant in picker.generation überführen
+      if (key === 'fenster' && slot.variant && _FENSTER_VARIANT_TO_GEN[slot.variant]){
+        slot.picker.generation = _FENSTER_VARIANT_TO_GEN[slot.variant];
+      }
+    }
+  }
+
   return state;
 }
 
@@ -9297,6 +9488,31 @@ function migrateOffertenState(state){
   return state;
 }
 
+/**
+ * Wärmeübergabe Phase A (2026-04-30) — neue HK-Stammdaten-Felder pro
+ * heizflaeche. Bestehende Projekte haben weder hersteller/modell noch
+ * hoehe/laenge/tiefe/q_norm. Diese Migration füllt die Felder mit
+ * sicheren Defaults auf, damit die UI auf undefined nicht stolpert.
+ *
+ * Pure Funktion: mutiert nur state.detail.raeume[].heizflaechen[].
+ */
+function migrateHeizkoerperFelder(state){
+  if (!state || !state.detail || !Array.isArray(state.detail.raeume)) return state;
+  for (const r of state.detail.raeume){
+    if (!r || !Array.isArray(r.heizflaechen)) continue;
+    for (const h of r.heizflaechen){
+      if (!h || typeof h !== "object") continue;
+      if (typeof h.hersteller !== "string") h.hersteller = "";
+      if (typeof h.modell     !== "string") h.modell     = "";
+      if (typeof h.hoehe      !== "number") h.hoehe      = 0;
+      if (typeof h.laenge     !== "number") h.laenge     = 0;
+      if (typeof h.tiefe      !== "number") h.tiefe      = 0;
+      if (typeof h.q_norm     !== "number") h.q_norm     = 0;
+    }
+  }
+  return state;
+}
+
 function deepMerge(target, src){
   if (src == null) return target;
   if (typeof target !== 'object' || target === null) return src;
@@ -9313,7 +9529,7 @@ function deepMerge(target, src){
   return out;
 }
 
-__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, migrateBauteilePicker, migrateOffertenState, STORAGE_KEY, ACTIVE_KEY };
+__mods__["./persistence.mjs"] = { setLastCalc, uuid, freshMeta, listProjects, writeProjects, markLocalAsCloudMirror, getActiveMeta, setActiveMeta, loadActive, saveProject, saveProjectAs, loadProjectLocal, deleteProjectLocal, duplicateProjectLocal, newProject, resetActive, setActiveName, isAuthed, probeAuth, doLogin, doLogout, getCloudProjects, buildProjectPayload, cloudList, cloudSave, cloudLoad, cloudDelete, consolidatedProjects, installAutoSync, onToast, onAuthChange, onProjectsChange, onLoaded, autosaveActive, migrateBauteilePicker, migrateOffertenState, migrateHeizkoerperFelder, STORAGE_KEY, ACTIVE_KEY };
 })();
 
 // === ./projects.mjs ===
