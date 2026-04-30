@@ -1,19 +1,35 @@
-Heizlast: Sanierungs-Plausi Phase C (n_exponent + Stammdaten-Pfad)
+Heizlast: S1 Aufraeumen + Trivial-Fixes
 
-distribution.mjs erweitert: plausibilitaetHeizflaeche, leistungsFaktor und
-maxVorlauftemperatur akzeptieren n_exponent-Override aus Modell/Fallback
-(Konvektor-passiv n=1.40 vs Plattenheizkoerper n=1.30). computeDistribution()
-liest q_norm und n_exponent aus dem State und reicht sie an die Plausi durch.
-Gewichtung der Heizlast pro Heizflaeche nutzt q_norm wenn vorhanden, sonst
-REF_AUSLEGUNG-Fallback.
+BUG-NEU-1: export.mjs Mixed-Mode-Label nur bei phi_rest > 0.05 kW
+  UND s.detail.misch.rest_global !== false. Sonst raumweiser EN-12831.
 
-ui.mjs::updateVerteilungSection reicht n_exponent an die Plausi durch.
-Damit ist die Sanierungs-Ampel auf Hersteller-Datenblatt-Genauigkeit -
-nicht mehr Pauschal-Schaetzung.
+BUG-NEU-2: ui.mjs Cockpit-Hinweis "Bauperioden-Schaetzwert
+  (kein Verbrauch erfasst)" bei verbrauchAktiv=true ohne Mengen.
 
-Bundle 514 KB, 341/341 Tests gruen (333 alt + 8 neue Sanierungs-Plausi-Tests
-in tests/sanierungs-plausi.test.mjs). Buderus T22 H600 L1000 trifft den
-DB-Wert q_norm_45_35 = 480 W exakt; bei VL 35/40/45 sinkt der Deckungsgrad
-monoton mit phi und steigt monoton mit der Vorlauftemperatur.
+AUDIT 3.8: plausi.mjs aufgeraeumt — Stubs raus,
+  vergleichNormVerbrauch + plausiAmpel + computePlausi + SPEZ_BAND
+  verschoben. Caller umgebogen. stubs.test.mjs Sanity-Check.
 
-Live-Deploy public/heizlast/index.html + public/heizlast/data/heizkoerper.json.
+AUDIT 3.13 / Toter Code: ui.mjs MATERIAL_CATALOG/_BY_TYP,
+  MATERIAL_LAMBDA, LAYERS_FOR_TYP, LAYER_LABELS, layerLabel,
+  resolveLayerForBauteil, alter renderLayerEditor + variant=schichten
+  Pfad entfernt (Material-Picker hat sie 2026-04-30 abgeloest).
+
+UI-Mini-Bugs:
+  - inputNumRaw min=null moeglich; tAussenAuslegung Pfeile ins Minus.
+  - Material-Picker bei aktivem u_override ausgegraut + Hinweis.
+  - Pauschal-Rest-Toggle in Schritt 3 sichtbar.
+
+VL-Konsolidierung: heatpump.mjs + ui.mjs::updateGeraetSection lesen
+  detail.verteilung.global.tVL_neu (Fallback 55). Stammdaten-UI fuer
+  tVLMaxHeizung entfernt; State-Feld bleibt (Backwards-Compat).
+
+Doku Hi-Konvention:
+  - BEISPIELRECHNUNG.md: 10.4 → 10.04, Ho → Hi, Qhl = 8.871 kW.
+  - FWS-RECHENWEGE.md §12.1 aktualisiert.
+  - fws-original.html nach _archive/.
+
+Bridge-Cleanup main.mjs: orphan {...} Block + Doppel-boot() entfernt.
+  Bundle ist jetzt syntax-clean (vorher zufaellig durchkompilierbar).
+
+Tests 341/341 gruen. Bundle 511 KB, Live-Deploy aktualisiert.

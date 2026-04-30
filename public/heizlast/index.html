@@ -1558,6 +1558,19 @@ body.modal-open { overflow: hidden; }
   color: var(--ink-600);
   line-height: 1.5;
 }
+/* S1 / 3e — Picker bei aktivem manuellen U-Wert ausgegraut. */
+.mp-bauteil--inactive .mp-stufen,
+.mp-bauteil--inactive .mp-bauteil__u { opacity: 0.45; }
+.mp-bauteil--inactive .mp-stufen select { pointer-events: none; }
+.mp-foot--inactive {
+  margin-top: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  background: var(--warn-50, #fff7ed);
+  border: 1px solid var(--warn-300, #fdba74);
+  border-radius: var(--r-2, 6px);
+  color: var(--warn-700, #c2410c);
+  font-size: var(--fs-xs);
+}
 
 .layer-editor {
   margin-top: var(--s-3);
@@ -1588,7 +1601,56 @@ body.modal-open { overflow: hidden; }
 .layer-row__resolved { font-size: var(--fs-xs); color: var(--ink-500); font-style: italic; }
 .layer-row__resolved em { color: var(--ink-400); font-weight: 500; }
 @media (max-width: 640px) {
-  .layer-row { grid-template-col
+  .layer-row { grid-template-columns: 1fr 1fr; }
+  .layer-row__name { grid-column: 1 / -1; margin-bottom: 4px; }
+  .layer-row__resolved { grid-column: 1 / -1; margin-top: 4px; }
+}
+
+/* S7 — Hülle: jede Bauteil-Zeile als Karte */
+.huelle-row {
+  background: var(--ink-50);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+  margin-bottom: var(--s-3);
+  grid-column: 1 / -1;
+}
+.huelle-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: baseline;
+  margin-bottom: var(--s-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-border);
+}
+.huelle-row__head strong { font-size: var(--fs-md); color: var(--brand-500); }
+.huelle-row__u { font-size: var(--fs-md); color: var(--ink-700); }
+.huelle-row__u strong { color: var(--accent-500); }
+.huelle-row__src {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  font-style: italic;
+  margin-left: auto;
+}
+
+
+/* S7 — Modal-Layout-Fix: Header + Footer schrumpfen nicht, Body scrollt */
+.modal__head, .modal__foot { flex-shrink: 0; }
+.modal__body { flex: 1 1 auto; min-height: 0; }
+#modalExport .modal__panel { width: 560px; max-width: 100%; }
+#modalExport .modal__foot { flex-wrap: wrap; }
+#modalExport .modal__foot .btn { min-width: 120px; }
+#modalExport .field__hint { margin-bottom: var(--s-3); }
+
+
+/* S7 — Mobile-Sticky-Fix: Topbar+Stepper beide sticky kollidieren auf
+   Mobile (Stepper schiebt Topbar mit beim Scroll). Stepper auf Mobile nicht
+   sticky → bleibt im normalen Document-Flow, Topbar ist die einzige sticky. */
+@media (max-width: 768px) {
+  .stepper { position: static !important; top: auto !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1909,6 +1971,104 @@ function _parsePath(path){
 __mods__["./state.mjs"] = { freshHeizflaeche, freshState, getState, setState, set, batch, subscribe, resetState };
 })();
 
+// === ./calc/plausi.mjs ===
+(function(){
+// src/calc/plausi.mjs
+// Plausibilitäts-Checks für Heizlast-Auslegung.
+//
+// Konsolidiert (S1, 2026-04-30 — AUDIT 3.8):
+//   - vergleichNormVerbrauch  → kam aus foerderung.mjs
+//   - plausiAmpel + SPEZ_BAND → kam aus fws.mjs
+//   - computePlausi (Wrapper) → kam aus fws.mjs
+// Quelle: FWS Modul 3 §7 (spez. Heizleistung), wissensbasis-auszug.md.
+
+/* ==========================================================================
+   SPEZ-BAND-TABELLE
+   Bauperiode × Gebäudetyp → spez. Heizlast in W/m² (Plausi-Quercheck).
+   ========================================================================== */
+
+const SPEZ_BAND = {
+  '<1919':      { efh: [28,  63], mfh: [33,  58] },
+  '1919-1945':  { efh: [40,  68], mfh: [40,  60] },
+  '1946-1960':  { efh: [40,  70], mfh: [35,  58] },
+  '1961-1970':  { efh: [40,  73], mfh: [38,  60] },
+  '1971-1980':  { efh: [35,  63], mfh: [38,  58] },
+  '1981-1985':  { efh: [28,  53], mfh: [35,  53] },
+  '1986-1990':  { efh: [30,  48], mfh: [33,  48] },
+  '1991-1995':  { efh: [25,  45], mfh: [30,  43] },
+  '1996-2000':  { efh: [23,  43], mfh: [28,  38] },
+  '2001-2005':  { efh: [18,  40], mfh: [28,  38] },
+  '2006-2010':  { efh: [18,  38], mfh: [23,  33] },
+  '2011-heute': { efh: [15,  23], mfh: [15,  20] }
+};
+
+/* ==========================================================================
+   PLAUSI: spez. Heizlast gegen Bauperioden-Band
+   ========================================================================== */
+
+/** FWS §7 / §12.4 — Plausi-Ampel gegen SPEZ_BAND (W/m²).
+ *
+ * @param {object} args
+ * @param {number} args.specWm2     spez. Heizlast [W/m²]
+ * @param {string} args.bauperiode  Bauperiode-Key (FWS-Notation)
+ * @param {string} args.gebaeudetyp 'efh' | 'mfh'
+ * @returns {{ ampel: 'gruen'|'gelb'|'rot'|'grau', band: [number,number]|null, mean: number }}
+ */
+function plausiAmpel({ specWm2, bauperiode, gebaeudetyp }){
+  const bp = SPEZ_BAND[bauperiode];
+  if (!bp) return { ampel: 'grau', band: null, mean: 0 };
+  const band = bp[gebaeudetyp] || bp.efh;
+  const mean = (band[0] + band[1]) / 2;
+  let ampel = 'gruen';
+  if (specWm2 < band[0] * 0.8 || specWm2 > band[1] * 1.2) ampel = 'rot';
+  else if (specWm2 < band[0] || specWm2 > band[1]) ampel = 'gelb';
+  return { ampel, band, mean };
+}
+
+/** State-Wrapper für plausiAmpel — liest Bauperiode + Gebäudetyp aus state. */
+function computePlausi(spez, s){
+  return plausiAmpel({
+    specWm2: spez,
+    bauperiode: s?.objekt?.bauperiode,
+    gebaeudetyp: s?.objekt?.typ
+  });
+}
+
+/* ==========================================================================
+   VERGLEICH: Verbrauchs-Heizlast (FWS) ↔ Norm-Heizlast (EN 12831)
+   ========================================================================== */
+
+/** Vergleich Verbrauchs-Heizlast (FWS) vs. Norm-Heizlast (EN 12831).
+ *
+ * Schwellen (Spec S6):
+ *   <10 %   → grün (Werte stimmen gut überein)
+ *   10–25 % → gelb (Verbrauchsdaten prüfen)
+ *   >25 %   → rot  (Konflikt — einer der Werte stimmt nicht)
+ *
+ * @param {number} Qhl_norm_kW Norm-Heizlast (Detail) in kW
+ * @param {number} Qhl_fws_kW  FWS-Verbrauchs-Heizlast in kW
+ * @returns {{ abweichung_proz:(number|null), ampel:('gruen'|'gelb'|'rot'|'grau'), hinweis:string }}
+ */
+function vergleichNormVerbrauch(Qhl_norm_kW, Qhl_fws_kW){
+  const a = Number(Qhl_norm_kW), b = Number(Qhl_fws_kW);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0){
+    return { abweichung_proz: null, ampel: 'grau', hinweis: 'Werte unvollständig — Vergleich nicht möglich.' };
+  }
+  const abw = Math.abs(a - b) / Math.max(a, b) * 100;
+  if (abw < 10){
+    return { abweichung_proz: abw, ampel: 'gruen', hinweis: 'Werte stimmen gut überein — Auslegung plausibel.' };
+  }
+  if (abw < 25){
+    return { abweichung_proz: abw, ampel: 'gelb',
+      hinweis: 'Mittlere Abweichung — Verbrauchsdaten prüfen (Klimakorrektur, WW-Anteil, Stillstand).' };
+  }
+  return { abweichung_proz: abw, ampel: 'rot',
+    hinweis: 'Grosse Abweichung — einer der Werte stimmt nicht (Bauteilflächen / U-Werte / Verbrauchsbilanz).' };
+}
+
+__mods__["./calc/plausi.mjs"] = { plausiAmpel, computePlausi, vergleichNormVerbrauch, SPEZ_BAND };
+})();
+
 // === ./calc/fws.mjs ===
 (function(){
 // src/calc/fws.mjs
@@ -1918,6 +2078,14 @@ __mods__["./state.mjs"] = { freshHeizflaeche, freshState, getState, setState, se
 //
 // Eingabe: Datenstruktur `state` (siehe FRESH_STATE-Skizze unten).
 // Ausgabe: { Qhl, Qw, Qoff, Qh, QnWW, VW_Sto, ... } in compute(state).
+//
+// AUDIT 3.8 / S1: Plausi-Logik wurde nach `plausi.mjs` verschoben.
+// Re-Export hier für Backwards-Compat (Tests + Bundle-IIFEs).
+
+const { plausiAmpel: _plausiAmpel, computePlausi: _computePlausi, SPEZ_BAND: _SPEZ_BAND } = __mods__["./calc/plausi.mjs"];
+const SPEZ_BAND = _SPEZ_BAND;
+const plausiAmpel = _plausiAmpel;
+const computePlausi = _computePlausi;
 
 /* ==========================================================================
    KONSTANTEN — Heizwerte (Hi), Konvention suissetec-FWS-Online-Tool.
@@ -2010,20 +2178,7 @@ const BAUPERIODE_KWH = {
 };
 
 // Bauperiode × Gebäudetyp — spezifische Heizlast-Bänder W/m² (Plausi-Quercheck)
-const SPEZ_BAND = {
-  '<1919':      { efh: [28,  63], mfh: [33,  58] },
-  '1919-1945':  { efh: [40,  68], mfh: [40,  60] },
-  '1946-1960':  { efh: [40,  70], mfh: [35,  58] },
-  '1961-1970':  { efh: [40,  73], mfh: [38,  60] },
-  '1971-1980':  { efh: [35,  63], mfh: [38,  58] },
-  '1981-1985':  { efh: [28,  53], mfh: [35,  53] },
-  '1986-1990':  { efh: [30,  48], mfh: [33,  48] },
-  '1991-1995':  { efh: [25,  45], mfh: [30,  43] },
-  '1996-2000':  { efh: [23,  43], mfh: [28,  38] },
-  '2001-2005':  { efh: [18,  40], mfh: [28,  38] },
-  '2006-2010':  { efh: [18,  38], mfh: [23,  33] },
-  '2011-heute': { efh: [15,  23], mfh: [15,  20] }
-};
+// → Verschoben nach `./plausi.mjs` (S1 / AUDIT 3.8). Re-Export oben.
 
 const TOFF_DEFAULTS = { werktag: 2, sonntag: 4, keine: 0 };
 
@@ -2131,17 +2286,8 @@ function speichervolumen({ QWW_Tag, cp = 4.2, dT = 50, fSto = 1.0 }){
   return Math.ceil(V * fSto / 10) * 10;
 }
 
-/** FWS §7 / §12.4: Plausi-Ampel gegen SPEZ_BAND. */
-function plausiAmpel({ specWm2, bauperiode, gebaeudetyp }){
-  const bp = SPEZ_BAND[bauperiode];
-  if (!bp) return { ampel:'grau', band:null, mean:0 };
-  const band = bp[gebaeudetyp] || bp.efh;
-  const mean = (band[0] + band[1]) / 2;
-  let ampel = 'gruen';
-  if (specWm2 < band[0]*0.8 || specWm2 > band[1]*1.2) ampel = 'rot';
-  else if (specWm2 < band[0] || specWm2 > band[1]) ampel = 'gelb';
-  return { ampel, band, mean };
-}
+// FWS §7 / §12.4: Plausi-Ampel gegen SPEZ_BAND.
+// → Verschoben nach `./plausi.mjs` (S1 / AUDIT 3.8). Re-Export oben.
 
 /* ==========================================================================
    STATE-BASIERTE FUNKTIONEN
@@ -2386,13 +2532,7 @@ function computeVWSto(s){
   return speichervolumen({ QWW_Tag, cp: 4.2, dT, fSto });
 }
 
-function computePlausi(spez, s){
-  return plausiAmpel({
-    specWm2: spez,
-    bauperiode: s?.objekt?.bauperiode,
-    gebaeudetyp: s?.objekt?.typ
-  });
-}
+// computePlausi → verschoben nach `./plausi.mjs` (S1 / AUDIT 3.8). Re-Export oben.
 
 /** Hauptkaskade — ein State rein, Resultat-Bundle raus.
  *  Optionales `opts.phiHuelle` (kW) ersetzt das Verbrauchs-Q_hl als
@@ -2479,7 +2619,7 @@ function freshFwsState(){
   };
 }
 
-__mods__["./calc/fws.mjs"] = { num, periodEta, qnwwJahr, qhlAusQn, qwDetail, qoffFormel, speichervolumen, plausiAmpel, computeQnVerbrauch, effectiveVWu, computeQnWWRaw, effectiveVWuVerbrauch, computeQnWWRawForVerbrauch, computeQnWW, tvollAuto, effectiveTvoll, sanFactor, measureSavingKW, computeMethodVerbrauch, computeMethodBstd, computeMethodKwh, computeMethodBauperiode, computeQwDetail, computeQw, computeQoff, computeVWSto, computePlausi, compute, freshFwsState, HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, BAUPERIODE_KWH, SPEZ_BAND, TOFF_DEFAULTS, SANIERUNG_PRESETS, F_STO_PRESETS, A_WT_PRESETS };
+__mods__["./calc/fws.mjs"] = { num, periodEta, qnwwJahr, qhlAusQn, qwDetail, qoffFormel, speichervolumen, computeQnVerbrauch, effectiveVWu, computeQnWWRaw, effectiveVWuVerbrauch, computeQnWWRawForVerbrauch, computeQnWW, tvollAuto, effectiveTvoll, sanFactor, measureSavingKW, computeMethodVerbrauch, computeMethodBstd, computeMethodKwh, computeMethodBauperiode, computeQwDetail, computeQw, computeQoff, computeVWSto, compute, freshFwsState, SPEZ_BAND, plausiAmpel, computePlausi, HEIZWERT, WW_PERSON_PRESETS, TVOLL_TABLE, BAUPERIODE_KWH, TOFF_DEFAULTS, SANIERUNG_PRESETS, F_STO_PRESETS, A_WT_PRESETS };
 })();
 
 // === ./calc/heatload.mjs ===
@@ -3327,11 +3467,17 @@ function getSelectedWp(db, geraet){
 /** Bequemer All-in-one-Compute aus state + db.
  *  state: vollständiger State, db: hauptgeraete[].
  *  Qh_kW: Auslegungsleistung (aus FWS-Cascade).
+ *
+ * S1 (3f) — VL-Temp-Konsolidierung: WP-Filter liest die VL aus der
+ * Detail-Verteilung (`detail.verteilung.global.tVL_neu`); Fallback 55 °C
+ * wenn der Detail-Modus aus ist oder das Feld leer ist. Das alte
+ * `objekt.tVLMaxHeizung` bleibt im State für Backwards-Compat.
  */
 function computeHeatpumpResult(state, db, Qh_kW){
   const geraet = (state && state.geraet) || {};
   const filter = geraet.filter || {};
-  const tVL = Number((state && state.objekt && state.objekt.tVLMaxHeizung)) || 0;
+  const tVL_detail = Number(state?.detail?.verteilung?.global?.tVL_neu);
+  const tVL = Number.isFinite(tVL_detail) && tVL_detail > 0 ? tVL_detail : 55;
   const liste = filterWaermepumpen(db, {
     Qh_kw: Qh_kW,
     toleranz_proz: filter.toleranz_proz || 20,
@@ -4737,34 +4883,11 @@ function schaetzeBetrag(program, kontext){
   return grund + perUnit * menge;
 }
 
-/**
- * Vergleicht Norm-Heizlast mit FWS-Verbrauchs-Heizlast und liefert Ampel.
- *
- * Schwellen (Spezifikation S6):
- *   <10 %  → grün (Werte stimmen gut überein)
- *   10–25 % → gelb (Verbrauchsdaten prüfen)
- *   >25 %  → rot (Konflikt — einer der Werte stimmt nicht)
- *
- * @param {number} Qhl_norm_kW Norm-Heizlast (Detail) in kW
- * @param {number} Qhl_fws_kW  FWS-Verbrauchs-Heizlast in kW
- * @returns {{abweichung_proz:(number|null), ampel:('gruen'|'gelb'|'rot'|'grau'), hinweis:string}}
- */
-function vergleichNormVerbrauch(Qhl_norm_kW, Qhl_fws_kW){
-  const a = Number(Qhl_norm_kW), b = Number(Qhl_fws_kW);
-  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0){
-    return { abweichung_proz: null, ampel: 'grau', hinweis: 'Werte unvollständig — Vergleich nicht möglich.' };
-  }
-  const abw = Math.abs(a - b) / Math.max(a, b) * 100;
-  if (abw < 10){
-    return { abweichung_proz: abw, ampel: 'gruen', hinweis: 'Werte stimmen gut überein — Auslegung plausibel.' };
-  }
-  if (abw < 25){
-    return { abweichung_proz: abw, ampel: 'gelb',
-      hinweis: 'Mittlere Abweichung — Verbrauchsdaten prüfen (Klimakorrektur, WW-Anteil, Stillstand).' };
-  }
-  return { abweichung_proz: abw, ampel: 'rot',
-    hinweis: 'Grosse Abweichung — einer der Werte stimmt nicht (Bauteilflächen / U-Werte / Verbrauchsbilanz).' };
-}
+// vergleichNormVerbrauch → verschoben nach `./plausi.mjs` (S1 / AUDIT 3.8).
+// Re-Export hier für Backwards-Compat (`export … from` ist im IIFE-Bundler
+// nicht implementiert, daher import-then-export-const).
+const { vergleichNormVerbrauch: _vNV } = __mods__["./calc/plausi.mjs"];
+const vergleichNormVerbrauch = _vNV;
 
 /**
  * Gruppiert/aggregiert die Liste — sinnvoll fürs Cockpit.
@@ -4782,7 +4905,7 @@ function gruppiereProgramme(programme, kontext){
   return { bund, kanton, total_geschaetzt: any ? total : null };
 }
 
-__mods__["./calc/foerderung.mjs"] = { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, vergleichNormVerbrauch, gruppiereProgramme };
+__mods__["./calc/foerderung.mjs"] = { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch };
 })();
 
 // === ./calc/offerte.mjs ===
@@ -5788,7 +5911,8 @@ const { getHersteller: hkHersteller, getModellreihen: hkModellreihen, getHoehen:
 const { freshHeizflaeche } = __mods__["./state.mjs"];
 const { sicherheitsventilEmpfehlung, magVolumen, anlagenvolumenSchaetzung, rundeSpeicherMarkt, rundePufferMarkt, computeDhw } = __mods__["./calc/dhw.mjs"];
 const { nennleistungA7W35, maxVorlauf, aufstellung: wpAufstellung, schallTag: wpSchallTag, copA2W35 } = __mods__["./calc/heatpump.mjs"];
-const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
+const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
+const { vergleichNormVerbrauch } = __mods__["./calc/plausi.mjs"];
 // Session 2 (2026-04-29) — Offerten-Modul UI ist in eigenem Modul.
 const { setOffertenData: setOffertenDataInner, renderOfferteSection, updateOfferteSection, attachOfferteHandlers } = __mods__["./offerte-ui.mjs"];
 
@@ -6265,14 +6389,12 @@ function renderStammdaten(s){
       <div class="grid grid--3">
         <div class="field">
           <label class="field__label">Auslegungs-Aussentemperatur <span class="symbol">T<sub>N</sub></span></label>
-          <div class="input-group">${inputNumRaw('objekt.tAussenAuslegung', o.tAussenAuslegung, 0.5)}<span class="input-group__unit">°C</span></div>
+          <div class="input-group">${inputNumRaw('objekt.tAussenAuslegung', o.tAussenAuslegung, 0.5, null)}<span class="input-group__unit">°C</span></div>
           ${infoBox('objekt.tAussenAuslegung', 'T_N richtig?')}
         </div>
-        <div class="field">
-          <label class="field__label">Vorlauf Heizung <span class="symbol">T<sub>VL,H</sub></span></label>
-          <div class="input-group">${inputNumRaw('objekt.tVLMaxHeizung', o.tVLMaxHeizung, 1)}<span class="input-group__unit">°C</span></div>
-          ${infoBox('objekt.tVLMaxHeizung', 'Welcher Wert für T_VL?')}
-        </div>
+        <!-- S1 (3f): Vorlauf Heizung wird im Detail-Modus aus
+             detail.verteilung.global.tVL_neu gelesen (Schritt 5).
+             Stammdaten-Feld objekt.tVLMaxHeizung bleibt im State (Backwards-Compat). -->
         <div class="field" id="stammVlWwField" ${s.warmwasser.aktiv ? '' : 'hidden'}>
           <label class="field__label">Vorlauf WW <span class="symbol">T<sub>VL,WW</sub></span></label>
           <div class="input-group">${inputNumRaw('warmwasser.tLadeWW', s.warmwasser.tLadeWW, 1)}<span class="input-group__unit">°C</span></div>
@@ -6683,142 +6805,10 @@ function anschlussOptsFor(typ){
    Wird zusätzlich zur Tabellen-Variante angeboten; Detail-User können
    pro Bauteil Schichten anlegen, einzelne Felder sind individual als
    "Unbekannt" markierbar (zieht dann Default für Bauperiode). */
-/* Bauteil-spezifische Material-Listen — Dach kriegt Holz-/Tragwerk-Optionen
-   (kein Mauerwerk!), Boden kriegt Bodenplatte/Bohlen-Optionen. Wand bleibt
-   bei Mauerwerk + Holzbau. */
-const MATERIAL_CATALOG_BY_TYP = {
-  wand: {
-    tragschicht: [
-      ['auto',          'Standard Bauperiode (auto)'],
-      ['vollziegel',    'Vollziegel/Naturstein (λ 0.81)'],
-      ['backstein',     'Backstein (λ 0.81)'],
-      ['hochloch_alt',  'Hochlochziegel alt (λ 0.40)'],
-      ['hochloch_neu',  'Hochlochziegel modern (λ 0.29)'],
-      ['kalksandstein', 'Kalksandstein (λ 0.99)'],
-      ['beton',         'Stahlbeton (λ 2.30)'],
-      ['holzbau',       'Holzbau / BSP (λ 0.13)'],
-      ['leichtbeton',   'Leichtbeton (λ 0.18)'],
-      ['unbekannt',     'Unbekannt → Default Bauperiode']
-    ]
-  },
-  dach: {
-    tragschicht: [
-      ['auto',           'Standard Bauperiode (auto)'],
-      ['holzsparren',    'Holzsparren / Pfetten (λ 0.13)'],
-      ['holzbalken',     'Holzbalkendecke (λ 0.13)'],
-      ['holzbau',        'Brettsperrholz / BSP-Decke (λ 0.13)'],
-      ['stahlbeton',     'Stahlbeton-Decke (λ 2.30)'],
-      ['hourdis',        'Hourdis-Decke (λ 0.45)'],
-      ['unbekannt',      'Unbekannt → Default Bauperiode']
-    ]
-  },
-  boden: {
-    tragschicht: [
-      ['auto',           'Standard Bauperiode (auto)'],
-      ['stahlbeton',     'Stahlbeton-Bodenplatte (λ 2.30)'],
-      ['magerbeton',     'Magerbeton (λ 1.40)'],
-      ['holzbalken',     'Holzbalkendecke (λ 0.13)'],
-      ['ziegelgewoelbe', 'Ziegelgewölbe (λ 0.81)'],
-      ['unbekannt',      'Unbekannt → Default Bauperiode']
-    ]
-  }
-};
-
-const MATERIAL_CATALOG = {
-  tragschicht: [
-    ['auto',          'Standard Bauperiode (auto)'],
-    ['vollziegel',    'Vollziegel/Naturstein (λ 0.81)'],
-    ['backstein',     'Backstein (λ 0.81)'],
-    ['hochloch_alt',  'Hochlochziegel alt (λ 0.40)'],
-    ['hochloch_neu',  'Hochlochziegel modern (λ 0.29)'],
-    ['kalksandstein', 'Kalksandstein (λ 0.99)'],
-    ['beton',         'Stahlbeton (λ 2.30)'],
-    ['holzbau',       'Holzbau / BSP (λ 0.13)'],
-    ['holzsparren',   'Holzsparren + Schalung (λ 0.13)'],
-    ['leichtbeton',   'Leichtbeton (λ 0.18)'],
-    ['unbekannt',     'Unbekannt → Default Bauperiode']
-  ],
-  daemmung: [
-    ['auto',          'Standard Bauperiode (auto)'],
-    ['keine',         'Keine Dämmung'],
-    ['mineralwolle',  'Mineralwolle (λ 0.040)'],
-    ['eps',           'EPS Polystyrol (λ 0.038)'],
-    ['xps',           'XPS (λ 0.034)'],
-    ['pur',           'PUR/PIR (λ 0.025)'],
-    ['holzfaser',     'Holzfaser (λ 0.045)'],
-    ['zellulose',     'Zellulose / Einblasdämmung (λ 0.040)'],
-    ['perlite',       'Perlite (λ 0.050)'],
-    ['luftschicht',   'Luftschicht (Hohlraum, ungedämmt — λ 0.5)'],
-    ['unbekannt',     'Unbekannt → konservativ (λ 0.045)']
-  ],
-  // S7 — Aussenschale für Doppelmauerwerk (zweischaliges Mauerwerk).
-  // Default 'keine' = klassisches einschaliges Mauerwerk.
-  aussenschale: [
-    ['keine',          'Keine Aussenschale (einschaliges Mauerwerk)'],
-    ['backstein_12',   'Backstein-Sichtmauerwerk 12 cm (λ 0.81)'],
-    ['backstein_15',   'Backstein-Sichtmauerwerk 15 cm (λ 0.81)'],
-    ['kalksandstein',  'Kalksandstein-Vorsatzschale (λ 0.99)'],
-    ['vollziegel',     'Vollziegel-Vorsatzschale (λ 0.81)'],
-    ['naturstein',     'Naturstein-Vorsatzschale (λ 1.50)'],
-    ['holzfassade',    'Holzfassade hinterlüftet (λ ≈ 0)'],
-    ['unbekannt',      'Unbekannt → Default Backstein 12 cm']
-  ],
-  putzInnen: [
-    ['auto',         'Standard (auto)'],
-    ['kalkgips',     'Kalkgips-Putz (λ 0.70)'],
-    ['gipskarton',   'Gipskartonplatte (λ 0.21)'],
-    ['lehmputz',     'Lehmputz (λ 0.91)'],
-    ['keiner',       'Kein Innenputz']
-  ],
-  putzAussen: [
-    ['auto',         'Standard (auto)'],
-    ['zement',       'Zementputz (λ 1.00)'],
-    ['kalk',         'Kalkputz (λ 0.80)'],
-    ['holzfassade',  'Hinterlüftete Holzfassade (λ ≈ 0)'],
-    ['keiner',       'Kein Aussenputz']
-  ]
-};
-const MATERIAL_LAMBDA = {
-  tragschicht: { vollziegel: 0.81, backstein: 0.81, hochloch_alt: 0.40, hochloch_neu: 0.29, kalksandstein: 0.99, beton: 2.30, stahlbeton: 2.30, magerbeton: 1.40, holzbau: 0.13, holzsparren: 0.13, holzbalken: 0.13, leichtbeton: 0.18, hourdis: 0.45, ziegelgewoelbe: 0.81, unbekannt: 0.81 },
-  daemmung:    { mineralwolle: 0.040, eps: 0.038, xps: 0.034, pur: 0.025, holzfaser: 0.045, zellulose: 0.040, perlite: 0.050, luftschicht: 0.50, unbekannt: 0.045 },
-  putzInnen:   { kalkgips: 0.70, gipskarton: 0.21, lehmputz: 0.91 },
-  putzAussen:  { zement: 1.00, kalk: 0.80, holzfassade: 0.04 },
-  aussenschale:{ backstein_12: 0.81, backstein_15: 0.81, kalksandstein: 0.99, vollziegel: 0.81, naturstein: 1.50, holzfassade: 0.04, unbekannt: 0.81 }
-};
-const MATERIAL_DEFAULT_D = {
-  // Default-Dicken für Aussenschale, falls User keine eingibt
-  aussenschale: { backstein_12: 0.12, backstein_15: 0.15, kalksandstein: 0.12, vollziegel: 0.12, naturstein: 0.15, holzfassade: 0.025, unbekannt: 0.12 }
-};
-/** Schicht-Reihenfolge pro Bauteil-Typ (innen → aussen).
- *  Wand inkl. optionaler Aussenschale für Doppelmauerwerk. Default
- *  'keine' für aussenschale → Layer wird übersprungen. */
-const LAYERS_FOR_TYP = {
-  wand:  ['putzInnen', 'tragschicht', 'daemmung', 'aussenschale', 'putzAussen'],
-  dach:  ['tragschicht', 'daemmung'],
-  boden: ['tragschicht', 'daemmung']
-};
-/** Bauteil-spezifische Layer-Bezeichnungen (Wand vs. Dach vs. Boden). */
-const LAYER_LABELS_BY_TYP = {
-  wand: {
-    putzInnen:    'Innenputz',
-    tragschicht:  'Tragschicht (Mauerwerk / Holzbau)',
-    daemmung:     'Dämmung / Hohlraum',
-    aussenschale: 'Aussenschale (bei Doppelmauerwerk)',
-    putzAussen:   'Aussenputz / Verputz'
-  },
-  dach: {
-    tragschicht:  'Sparren / Holz-Tragwerk',
-    daemmung:     'Wärmedämmung (Zwischensparren / Aufsparren)'
-  },
-  boden: {
-    tragschicht:  'Bodenplatte / Tragschicht',
-    daemmung:     'Bodendämmung (Perimeter / Unterzement)'
-  }
-};
-function layerLabel(typ, slot){
-  return (LAYER_LABELS_BY_TYP[typ] && LAYER_LABELS_BY_TYP[typ][slot]) || slot;
-}
-const LAYER_LABELS = LAYER_LABELS_BY_TYP.wand; // Backwards-Compat (falls noch referenziert)
+// S1 / AUDIT 3.13: MATERIAL_CATALOG / MATERIAL_CATALOG_BY_TYP / MATERIAL_LAMBDA /
+// MATERIAL_DEFAULT_D / LAYERS_FOR_TYP / LAYER_LABELS_BY_TYP / layerLabel /
+// LAYER_LABELS entfernt — der Schichten-Editor wurde 2026-04-30 durch den
+// Material-Picker (Pro-Stil) abgelöst. Code in Backups.
 
 /** Tür-Fallback-Tabelle (data/u-werte.json hat keine Tür-Daten). */
 const TUER_U_BY_BK = {
@@ -6942,6 +6932,7 @@ function rebuildHuelleBauteile(state){
 
 function renderRaeume(s){
   const r = s.detail.raeume || [];
+  const restGlobal = !(s?.detail?.misch && s.detail.misch.rest_global === false);
   return `
   <section class="section" id="sec-raeume">
     <header class="section__head">
@@ -6954,6 +6945,17 @@ function renderRaeume(s){
       pauschaler Restflächen-Anteil mit den Hülle-Defaults aus Schritt 6.
     </p>
     <div class="block">
+      <div class="field" style="margin-bottom:var(--s-3);">
+        <label class="checkbox">
+          <input type="checkbox" data-path="detail.misch.rest_global" ${restGlobal ? 'checked' : ''}>
+          <span>Pauschal-Restfläche aktiv (Hüllen-Defaults für nicht erfasste Flächen)</span>
+        </label>
+        <p class="field__hint">
+          Aus = nur die hier erfassten Räume zählen, kein Mixed-Mode-Hülle. Wenn
+          alle relevanten Räume drin sind, schaltet das die Pauschal-Restfläche ab
+          und der Bericht zeigt „raumweiser EN-12831" statt „Mixed-Mode".
+        </p>
+      </div>
       <div id="roomsList" class="rooms-list"></div>
       <button class="add-row" type="button" id="btnAddRoom">+ Raum hinzufügen</button>
       <p class="field__hint" id="roomsSummary" style="margin-top:var(--s-3);">—</p>
@@ -7055,66 +7057,8 @@ function renderRoom(r, idx){
  * Nutzt data/u-werte.json + Bauperiode + Sanierungsstand + Variant + Anschluss.
  * Liefert immer ein Result, auch wenn keine Daten geladen sind (Fallback).
  */
-/**
- * S7 — Layer-Resolver: pro Layer-Slot (tragschicht/daemmung/putzInnen/
- * putzAussen) und Bauteil-Typ den Material+Dicke+λ Wert auflösen.
- * Default-Material = 'auto' → Wert aus bauteilDefaults[typ][bauklasse].
- * 'unbekannt' im Material → Lambda aus daemmstoffe.unbekannt (konservativ).
- * Dicke leer → Default aus bauteilDefaults.
- */
-function resolveLayerForBauteil(typ, slot, cfg, bauklasse){
-  // Map ui-typ to data-key (boden bleibt boden, dach->dach, wand->aussenwand)
-  const dataTyp = (typ === 'wand') ? 'aussenwand' : typ;
-  const node = _uWerteData?.bauteilDefaults?.[dataTyp]?.[bauklasse] || null;
-  const slotDefault = node ? node[slot] : null;
-  const mat = cfg.mat || (slot === 'aussenschale' ? 'keine' : 'auto');
-
-  // 'keine'/'keiner' → kein Layer (Aussenschale Default für einschalige Wand)
-  if (mat === 'keine' || mat === 'keiner') return null;
-
-  // λ ermitteln — bei 'unbekannt' werden Standardwerte gezogen.
-  let lambda = null, label = '';
-  if (mat === 'auto'){
-    if (!slotDefault) return null;
-    lambda = slotDefault.lambda || (_uWerteData?.daemmstoffe?.[slotDefault.material]?.lambda) || null;
-    label  = slotDefault.label || (slotDefault.material ? _uWerteData?.daemmstoffe?.[slotDefault.material]?.label : '') || LAYER_LABELS[slot];
-  } else if (mat === 'unbekannt'){
-    // Unbekannt = nutzt Standard für Bauperiode bzw. konservative Schätzung.
-    if (slot === 'daemmung'){
-      lambda = (_uWerteData?.daemmstoffe?.unbekannt?.lambda) || 0.045;
-    } else if (slot === 'aussenschale'){
-      lambda = MATERIAL_LAMBDA.aussenschale.unbekannt; // Backstein-Default 0.81
-    } else {
-      // tragschicht / Putze: nimm Bauperiode-Default
-      lambda = slotDefault?.lambda ?? 0.5;
-    }
-    label = 'Unbekannt — Standard';
-  } else {
-    lambda = MATERIAL_LAMBDA[slot]?.[mat] || null;
-    if (!lambda && slot === 'daemmung'){
-      lambda = _uWerteData?.daemmstoffe?.[mat]?.lambda || 0.045;
-    }
-    label = (((MATERIAL_CATALOG_BY_TYP[typ] && MATERIAL_CATALOG_BY_TYP[typ][slot]) || MATERIAL_CATALOG[slot]) || []).find(o => o[0] === mat)?.[1] || mat;
-  }
-
-  // Dicke ermitteln
-  let d_m = null;
-  if (cfg.d_cm != null && cfg.d_cm !== '' && Number(cfg.d_cm) > 0){
-    d_m = Number(cfg.d_cm) / 100;
-  } else {
-    // Default-Dicke je Slot/Material — auch bei 'unbekannt' wird ein
-    // sinnvoller Standardwert gezogen, damit U trotzdem berechnet wird.
-    if (slot === 'aussenschale'){
-      d_m = MATERIAL_DEFAULT_D.aussenschale[mat] ?? 0.12;
-    } else if (slot === 'daemmung'){
-      if (mat === 'luftschicht') d_m = 0.05; // typischer Doppelmauerwerk-Hohlraum
-      else d_m = (slotDefault?.dicke != null) ? Number(slotDefault.dicke) : 0;
-    } else {
-      d_m = slotDefault?.d != null ? Number(slotDefault.d) : 0;
-    }
-  }
-  return { d: d_m, lambda, label, fromDefault: (mat === 'auto' || mat === 'unbekannt' || !cfg.d_cm) };
-}
+// S1 / AUDIT 3.13: resolveLayerForBauteil entfernt — Material-Picker (Pro-Stil)
+// hat die Schichten-Layer-Logik 2026-04-30 abgelöst. Code in Backups.
 
 /* =========================================================================
    MATERIAL-PICKER INTEGRATION (AUDIT 3.13 · Session 2 · 2026-04-29)
@@ -7187,6 +7131,10 @@ function renderMaterialPicker(pathPrefix, b, state, headerLabel){
   if (!ptyp) return '';
   const baujahr = mapPeriodeToBaujahr(state?.objekt?.bauperiode);
   const pickerState = normalizePicker(b.picker || {});
+  // S1 / 3e: Bei aktivem manuellen U-Wert hat der Picker keinen Einfluss.
+  // Komplett ausgrauen (selects disabled) + Hinweisbanner.
+  const uOverrideActive = (b.u_override != null && b.u_override !== ''
+    && Number.isFinite(Number(b.u_override)) && Number(b.u_override) > 0);
   let def, computed;
   try {
     def = getStufen(ptyp, baujahr, pickerState);
@@ -7229,7 +7177,7 @@ function renderMaterialPicker(pathPrefix, b, state, headerLabel){
 
     // Inline-Markup mit optional disabled
     const opts = optsList.map(([k, label]) => `<option value="${escAttr(k)}" ${k === curStr ? 'selected' : ''}>${esc(label)}</option>`).join('');
-    const disabledAttr = stf.locked ? ' disabled' : '';
+    const disabledAttr = (stf.locked || uOverrideActive) ? ' disabled' : '';
     return `
       <div class="mp-stufe">
         <label class="mp-stufe__label">${esc(stf.label)}</label>
@@ -7267,13 +7215,18 @@ function renderMaterialPicker(pathPrefix, b, state, headerLabel){
   }
 
   const doppelChip = def.isDoppelmauerwerk ? ' <span class="mp-bauteil__chip">Doppelmauerwerk · Kerndämmung fix</span>' : '';
+  const overrideHint = uOverrideActive
+    ? `<div class="mp-foot mp-foot--inactive">⚠ Picker inaktiv durch manuellen U-Wert (${esc(String(b.u_override))} W/m²K). Feld leeren, um Picker wieder zu aktivieren.</div>`
+    : '';
+  const wrapperCls = uOverrideActive ? 'mp-bauteil mp-bauteil--inactive' : 'mp-bauteil';
 
   return `
-  <div class="mp-bauteil">
+  <div class="${wrapperCls}">
     <div class="mp-bauteil__head">
       <span class="mp-bauteil__title">${esc(titleTxt)}${doppelChip}</span>
       <span class="mp-bauteil__u">${u} W/m²K</span>
     </div>
+    ${overrideHint}
     <div class="mp-stufen">${stufenHtml}</div>
     <div class="mp-foot">${footerLines.map(esc).join('<br>')}</div>
   </div>`;
@@ -7373,22 +7326,8 @@ function resolveBauteilUFrt(state, b){
   if (variant === 'eigener' && b.u_override != null && b.u_override !== ''){
     return { u: Number(b.u_override), fRT, source: 'manuell · ' + fRT_src };
   }
-  // Schichten-Berechnung: Layer für Layer auflösen, U via uFromLayers.
-  if (variant === 'schichten' && LAYERS_FOR_TYP[typ]){
-    const resolvedLayers = LAYERS_FOR_TYP[typ].map(slot =>
-      resolveLayerForBauteil(typ, slot, (b.layers || {})[slot] || {}, bk)
-    ).filter(L => L && L.lambda > 0);
-    const u = (function(layers){
-      let R = 0.13 + 0.04;
-      for (const L of layers){ if (L.d > 0 && L.lambda > 0) R += L.d / L.lambda; }
-      return R > 0 ? 1 / R : null;
-    })(resolvedLayers);
-    return {
-      u: u ?? 1.0,
-      fRT,
-      source: `Schichten-Aufbau · ${resolvedLayers.length} Lagen · ${esc(bk)}`
-    };
-  }
+  // S1 / AUDIT 3.13: variant === 'schichten' Pfad entfernt — Material-Picker
+  // (Pro-Stil) hat den Schichten-Editor 2026-04-30 abgelöst.
 
   const data = _uWerteData;
   const pick = (entry) => {
@@ -7469,42 +7408,7 @@ function resolveBauteilUFrt(state, b){
   return { u, fRT, source: src + ' · ' + fRT_src };
 }
 
-/**
- * S7 — Layer-Editor: Pro Schicht (innen→aussen) Material-Dropdown + Dicke-Input
- * + Live-Anzeige des resolved λ und d (auch wenn 'auto' → Default-Werte).
- * Pfad-Prefix erlaubt das Wiederverwenden in Hülle (global) und Räumen.
- */
-function renderLayerEditor(pathPrefix, b, state){
-  const typ = b.typ || 'wand';
-  const slots = LAYERS_FOR_TYP[typ];
-  if (!slots) return '';
-  const obj = state?.objekt || {};
-  let bk = bauklasseFromPeriode(obj.bauperiode) || '1978_1994';
-  bk = applySanierung(bk, obj.sanierungsstand) || bk;
-  const layers = b.layers || {};
-  const rows = slots.map(slot => {
-    const cfg = layers[slot] || { mat: 'auto', d_cm: '' };
-    const res = resolveLayerForBauteil(typ, slot, cfg, bk);
-    const lambda = res ? fmt(res.lambda, 3) : '–';
-    const dCm    = res && res.d != null ? fmt(res.d * 100, 1) : '–';
-    return `
-    <div class="layer-row">
-      <span class="layer-row__name">${esc(layerLabel(typ, slot))}</span>
-      <div class="layer-row__mat">
-        ${select(`${pathPrefix}.layers.${slot}.mat`, cfg.mat || 'auto', ((MATERIAL_CATALOG_BY_TYP[typ] && MATERIAL_CATALOG_BY_TYP[typ][slot]) || MATERIAL_CATALOG[slot]))}
-      </div>
-      <div class="layer-row__d">
-        <div class="input-group">${inputNumRaw(`${pathPrefix}.layers.${slot}.d_cm`, cfg.d_cm == null ? '' : cfg.d_cm, 0.5, 0, 'auto')}<span class="input-group__unit">cm</span></div>
-      </div>
-      <span class="layer-row__resolved">λ ${lambda} · d ${dCm} cm ${res?.fromDefault ? '<em>(Default)</em>' : ''}</span>
-    </div>`;
-  }).join('');
-  return `
-  <div class="layer-editor">
-    <div class="layer-editor__head">Schichtenaufbau (innen → aussen) · leer / Default = aus Bauperiode-Tabelle</div>
-    ${rows}
-  </div>`;
-}
+// S1 / AUDIT 3.13: alter renderLayerEditor entfernt (Material-Picker abgelöst).
 
 function renderRoomBauteil(idx, j, b){
   const typeOpts = Object.entries(BAUTEIL_LABELS).map(([k, l]) => [k, l]);
@@ -8591,13 +8495,23 @@ function updateResult(s, c){
   setText('kpi-VPSto', fmtL(c.VP_Sto));
 
   const primary = c.primary;
+  // BUG-NEU-2: Wenn User Verbrauchs-Modus aktiv hat aber keine Periode mit
+  // Menge > 0 erfasst, bekommt er heute denselben Hint wie inaktiver
+  // Verbrauch ("Werte eingeben"). Klarer: explizit darauf hinweisen, dass
+  // im Hintergrund der Bauperioden-Schätzwert greift.
+  const verbrauchAktivOhneMenge = !!s?.heizung?.verbrauchAktiv
+    && Array.isArray(s?.heizung?.perioden)
+    && s.heizung.perioden.length > 0
+    && s.heizung.perioden.every(p => !(Number(p?.menge) > 0));
   const heroSub = primary
     ? `Methode: ${esc(primary.label)} · t<sub>voll</sub> = ${fmt(primary.tvoll, 0)} h`
-    : (c.fallback ? `Schätzung aus Bauperiode (Methode aktivieren für genauere Werte)` : 'Werte eingeben für Berechnung');
+    : (verbrauchAktivOhneMenge
+        ? `Bauperioden-Schätzwert (kein Verbrauch erfasst)`
+        : (c.fallback ? `Schätzung aus Bauperiode (Methode aktivieren für genauere Werte)` : 'Werte eingeben für Berechnung'));
   setHTML('kpi-Qh-sub', heroSub);
   setHTML('kpi-Qhl-sub', primary
     ? `aus ${fmtKWh(primary.QnH)} kWh/a · t<sub>voll</sub> ${fmt(primary.tvoll, 0)} h`
-    : '—');
+    : (verbrauchAktivOhneMenge ? `Bauperioden-Schätzwert (kein Verbrauch erfasst)` : '—'));
   setHTML('kpi-Qzus-sub', `Q<sub>w</sub> ${fmtKW(c.Qw)} + Q<sub>off</sub> ${fmtKW(c.Qoff)} kW${c.Qas > 0 ? ` (+ Q<sub>as</sub> ${fmtKW(c.Qas)})` : ''}`);
 
   const ampelEl = document.getElementById('kpi-ampel');
@@ -8852,7 +8766,9 @@ function updateGeraetSection(s, c){
   const ger = s.geraet || {};
   const flt = ger.filter || {};
   const Qh = c.Qh || 0;
-  const tVL = Number(s?.objekt?.tVLMaxHeizung) || 0;
+  // S1 (3f): VL aus detail.verteilung.global.tVL_neu (Fallback 55 °C).
+  const tVL_detail = Number(s?.detail?.verteilung?.global?.tVL_neu);
+  const tVL = Number.isFinite(tVL_detail) && tVL_detail > 0 ? tVL_detail : 55;
   const liste = filterWp(_wpDb, {
     Qh_kw: Qh, toleranz_proz: flt.toleranz_proz || 20,
     tVL_max: tVL, aufstellung: flt.aufstellung || 'alle',
@@ -9380,8 +9296,10 @@ function inputNum(path, value, step = 1, min = 0){
   return inputNumRaw(path, value, step, min);
 }
 function inputNumRaw(path, value, step = 1, min = 0, placeholder = ''){
+  // S1 — min === null/undefined → kein min-Attribut (z. B. Aussentemperatur).
   const v = (value === '' || value == null) ? '' : value;
-  return `<input class="input" type="number" data-path="${path}" value="${escAttr(v)}" step="${step}" min="${min}" placeholder="${escAttr(placeholder)}">`;
+  const minAttr = (min === null || min === undefined) ? '' : ` min="${min}"`;
+  return `<input class="input" type="number" data-path="${path}" value="${escAttr(v)}" step="${step}"${minAttr} placeholder="${escAttr(placeholder)}">`;
 }
 function select(path, value, options){
   const opts = options.map(([k, label]) => `<option value="${escAttr(k)}" ${k === value ? 'selected' : ''}>${esc(label)}</option>`).join('');
@@ -11042,7 +10960,8 @@ const { computeBuildingDetailLoad } = __mods__["./calc/heatload.mjs"];
 const { computeDistribution } = __mods__["./calc/distribution.mjs"];
 const { computeHeatpumpResult } = __mods__["./calc/heatpump.mjs"];
 const { resolveHuelleUWerte, getWpDb, getFoerderDb, getBauDb, enrichRaeumeWithResolvedUFrt, resolveBauteilUFrt } = __mods__["./ui.mjs"];
-const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme, vergleichNormVerbrauch } = __mods__["./calc/foerderung.mjs"];
+const { filterFoerderungen, lookupBaubewilligung, schaetzeBetrag, gruppiereProgramme } = __mods__["./calc/foerderung.mjs"];
+const { vergleichNormVerbrauch } = __mods__["./calc/plausi.mjs"];
 const { getActiveMeta } = __mods__["./persistence.mjs"];
 const { exportOfferte } = __mods__["./export-offerte.mjs"];
 
@@ -11389,7 +11308,12 @@ function buildLeistungenTable(s, c){
     const A_rest = Number(c?.detail?.A_rest) || 0;
     const phiR_kW   = (Number(c?.detail?.phi_raeume) || 0) / 1000;
     const phiRest_kW = (Number(c?.detail?.phi_rest)  || 0) / 1000;
-    if (A_R > 0 && A_rest > 0){
+    // BUG-NEU-1: Mixed-Mode-Label nur wenn echter Pauschal-Rest vorhanden ist
+    // (phi_rest > 0.05 kW UND Pauschal-Rest-Toggle nicht explizit aus).
+    // Sonst raumweiser EN-12831-Label, auch wenn rein technisch A_rest > 0.
+    const restGlobalAus = s?.detail?.misch?.rest_global === false;
+    const restRelevant  = !restGlobalAus && phiRest_kW > 0.05;
+    if (A_R > 0 && A_rest > 0 && restRelevant){
       basisLabel = 'aus Mixed-Mode-Hüllenberechnung';
       mixedNote  = `Σ Räume ${fmtKW(phiR_kW)} kW + Gebäudehülle ${fmtKW(phiRest_kW)} kW`;
     } else if (A_R > 0){
