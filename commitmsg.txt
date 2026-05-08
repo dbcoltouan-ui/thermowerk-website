@@ -1,4 +1,15 @@
-branding: Cover - Umlaut-Rendering im Ae fixed
+branding + meta: Matterhorn-Logo V4/V5 + Open Graph Tags
 
-Tagline jetzt in einem Draw-Call statt per-Char-Spacing,
-damit die Diaeresis ueber dem A korrekt sitzt.
+Logos:
+- V4 (ohne Kontakt) als Primaerlogo: branding/logos/thermowerk-logo-matterhorn.png
+- V5 (mit Kontakt) als Cover-Variante: branding/logos/thermowerk-logo-matterhorn-kontakt.png
+- Cover Google Business 1024x576 jetzt mit V5 Matterhorn-Motiv
+- Stacked 720x720 (transparent + weiss) jetzt mit V4
+- Veraltete navy Stacked-Variante entfernt
+
+OG/Twitter:
+- Open Graph Tags in Layout.astro (og:type, og:image, og:url, og:locale de_CH)
+- Twitter summary_large_image Card
+- Canonical URL gesetzt
+- og-image.jpg/png unter /public/img/ (1200x630 aus V5)
+- Profitieren automatisch alle Seiten (Index, Impressum, Datenschutz)
