@@ -1,7 +1,4 @@
-branding: Cover + Stacked-Variante neu - Icon-als-O, Tagline zentriert
+branding: Cover - Umlaut-Rendering im Ae fixed
 
-- Stacked 720x720 nutzt Original-Wordmark (THERM[icon]WERK + Tagline)
-  zentriert im Quadrat, navy-Variante mit invertierter Schrift
-- Cover 1024x576: Wortmark mittig oben, "WAERMEPUMPEN & KLIMATECHNIK"
-  zentriert darunter, plus dezente Kontaktzeile
-- Roter Akzent-Strich zwischen Wortmark und Tagline
+Tagline jetzt in einem Draw-Call statt per-Char-Spacing,
+damit die Diaeresis ueber dem A korrekt sitzt.
