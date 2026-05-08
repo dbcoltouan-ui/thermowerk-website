@@ -1,9 +1,7 @@
-branding: Logo-Set für Google Business + neue Favicons
+branding: Cover + Stacked-Variante neu - Icon-als-O, Tagline zentriert
 
-- Symbol-only 720x720 (transparent/weiss/navy) als Profilbild
-- Gestapelte Variante 720x720 mit THERMOWERK-Schriftzug + Tagline
-- Cover-Bild 1024x576 fuer Google Business
-- Favicon-Set ersetzt (16/32/180/192/512), alte Pipe-Frame-SVG raus
-
-Assets unter /branding/google-business/, Favicons in /public/img/.
-Layout.astro auf neue Favicon-Links umgestellt.
+- Stacked 720x720 nutzt Original-Wordmark (THERM[icon]WERK + Tagline)
+  zentriert im Quadrat, navy-Variante mit invertierter Schrift
+- Cover 1024x576: Wortmark mittig oben, "WAERMEPUMPEN & KLIMATECHNIK"
+  zentriert darunter, plus dezente Kontaktzeile
+- Roter Akzent-Strich zwischen Wortmark und Tagline
