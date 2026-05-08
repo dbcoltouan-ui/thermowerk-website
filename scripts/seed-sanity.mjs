@@ -21,7 +21,7 @@ async function seed() {
     companyName: 'Thermowerk',
     companyLegalName: 'Gebäudetechnik Coltouan',
     phone: '+41 76 504 03 68',
-    email: 'db.coltouan@gmail.com',
+    email: 'info@thermowerk.ch',
     emailPublic: 'info@thermowerk.ch',
     address: 'Rankstrasse 18',
     plz: '8413',
@@ -342,7 +342,7 @@ async function seed() {
     uid: 'CHE-489.162.528',
     mwst: 'CHE-489.162.528 MWST',
     phone: '+41 76 504 03 68',
-    email: 'db.coltouan@gmail.com',
+    email: 'info@thermowerk.ch',
     web: 'thermowerk.ch',
     sections: [
       { _key: 'imp1', title: '1. Inhalte', content: 'Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der bereitgestellten Informationen. Jegliche Haftungsansprüche gegen uns, die sich auf Schäden materieller oder ideeller Art beziehen \u2013 verursacht durch die Nutzung oder Nichtnutzung der dargebotenen Inhalte bzw. durch Nutzung fehlerhafter und unvollständiger Informationen \u2013 sind grundsätzlich ausgeschlossen.' },

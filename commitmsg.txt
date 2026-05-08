@@ -1,15 +1,7 @@
-branding + meta: Matterhorn-Logo V4/V5 + Open Graph Tags
+website: Impressum-Mail, Heizoel-Default, Schema.org, Social-Icons hidden
 
-Logos:
-- V4 (ohne Kontakt) als Primaerlogo: branding/logos/thermowerk-logo-matterhorn.png
-- V5 (mit Kontakt) als Cover-Variante: branding/logos/thermowerk-logo-matterhorn-kontakt.png
-- Cover Google Business 1024x576 jetzt mit V5 Matterhorn-Motiv
-- Stacked 720x720 (transparent + weiss) jetzt mit V4
-- Veraltete navy Stacked-Variante entfernt
-
-OG/Twitter:
-- Open Graph Tags in Layout.astro (og:type, og:image, og:url, og:locale de_CH)
-- Twitter summary_large_image Card
-- Canonical URL gesetzt
-- og-image.jpg/png unter /public/img/ (1200x630 aus V5)
-- Profitieren automatisch alle Seiten (Index, Impressum, Datenschutz)
+- Impressum-Mail in Code + Sanity-Seed: db.coltouan@gmail.com -> info@thermowerk.ch
+- Calculator-Default Heizoelpreis: 1.20 -> 1.30 CHF/l (Mai 2026 Marktwert)
+- Layout.astro: HVACBusiness Schema.org JSON-LD (Adresse, Service-Gebiete,
+  Oeffnungszeiten, Service-Katalog, knowsAbout) fuer Google Rich Results
+- Topbar: Social-Icons via display:none ausgeblendet bis Profile aktiv

@@ -48,6 +48,108 @@ const absoluteImage = new URL(image, SITE_URL).toString();
   <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/img/icon-512.png">
+
+  <!-- Strukturierte Daten (Schema.org) für Google Rich Results -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HVACBusiness",
+    "@id": `${SITE_URL}/#organization`,
+    "name": "Thermowerk",
+    "alternateName": "Gebäudetechnik Coltouan",
+    "legalName": "Gebäudetechnik Coltouan",
+    "description": "WPSM-zertifizierter Schweizer Fachbetrieb für Luft-Wasser-Wärmepumpen und Klimaanlagen. Persönliche Beratung, fachgerechte Montage und Förderberatung.",
+    "url": SITE_URL,
+    "logo": `${SITE_URL}/img/logo.png`,
+    "image": `${SITE_URL}/img/og-image.jpg`,
+    "telephone": "+41765040368",
+    "email": "info@thermowerk.ch",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Rankstrasse 18",
+      "postalCode": "8413",
+      "addressLocality": "Neftenbach",
+      "addressRegion": "ZH",
+      "addressCountry": "CH"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 47.5277,
+      "longitude": 8.6649
+    },
+    "areaServed": [
+      { "@type": "AdministrativeArea", "name": "Kanton Zürich" },
+      { "@type": "AdministrativeArea", "name": "Kanton Schaffhausen" },
+      { "@type": "AdministrativeArea", "name": "Kanton Thurgau" },
+      { "@type": "AdministrativeArea", "name": "Kanton Aargau" },
+      { "@type": "AdministrativeArea", "name": "Kanton Zug" },
+      { "@type": "AdministrativeArea", "name": "Kanton Schwyz" },
+      { "@type": "AdministrativeArea", "name": "Kanton Luzern" }
+    ],
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+      "opens": "07:00",
+      "closes": "18:00"
+    }],
+    "founder": {
+      "@type": "Person",
+      "name": "Beniamin-Daniel Coltouan"
+    },
+    "vatID": "CHE-489.162.528 MWST",
+    "taxID": "CHE-489.162.528",
+    "knowsAbout": [
+      "Wärmepumpen",
+      "Luft-Wasser-Wärmepumpen",
+      "Monoblock-Wärmepumpen",
+      "Klimaanlagen",
+      "Split-Klimaanlagen",
+      "Heizungssanierung",
+      "WPSM-Zertifizierung",
+      "Förderberatung Wärmepumpe",
+      "Heizlastberechnung",
+      "Kältetechnik"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Leistungen",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Wärmepumpen-Installation",
+            "description": "Planung, Lieferung und Montage von Luft-Wasser-Wärmepumpen für Ein- und Mehrfamilienhäuser inkl. Förderabwicklung."
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Klimaanlagen-Installation",
+            "description": "Split- und Multisplit-Klimaanlagen für Wohnräume, Büros und Gewerbe."
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Service & Wartung",
+            "description": "Wartung, Störungsbehebung und Optimierung bestehender Wärmepumpen- und Klimaanlagen."
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Heizlastberechnung & LiDAR-Gebäudescan",
+            "description": "Präzise Heizlastberechnung und LiDAR-basierte Gebäudeerfassung für massgeschneiderte Anlagenplanung."
+          }
+        }
+      ]
+    }
+  })} />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style is:global>
