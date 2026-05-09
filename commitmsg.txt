@@ -1,4 +1,12 @@
-seo: sitemap.xml + Sitemap-Hinweis in robots.txt
+docs: Antwort-Templates fuer Plattform-Anfragen als DOCX
 
-Behebt langsame/fehlende Google-Indexierung. 3 Seiten in
-sitemap.xml: Startseite, Impressum, Datenschutz.
+7 fertige Vorlagen in Schweizer Hochdeutsch:
+- Erstkontakt nach Anrufversuch + Direktnachricht
+- Terminbestaetigung
+- Nachfass +3 / +7 Tage
+- Hoefliche Absage Region / wirtschaftlich
+- Auftragsbestaetigung
+- Bewertungsbitte Standard / waermer
+
+Plus Tonprofil-Hinweise und Platzhalter-Uebersicht.
+Ablage: branding/dokumente/ (DOCX + PDF).
