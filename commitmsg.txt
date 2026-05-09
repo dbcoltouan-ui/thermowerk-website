@@ -1,7 +1,16 @@
-website: Impressum-Mail, Heizoel-Default, Schema.org, Social-Icons hidden
+docs: Besichtigungs-Gameplan als DOCX
 
-- Impressum-Mail in Code + Sanity-Seed: db.coltouan@gmail.com -> info@thermowerk.ch
-- Calculator-Default Heizoelpreis: 1.20 -> 1.30 CHF/l (Mai 2026 Marktwert)
-- Layout.astro: HVACBusiness Schema.org JSON-LD (Adresse, Service-Gebiete,
-  Oeffnungszeiten, Service-Katalog, knowsAbout) fuer Google Rich Results
-- Topbar: Social-Icons via display:none ausgeblendet bis Profile aktiv
+Vollstaendiger Leitfaden fuer Vor-Ort-Termine:
+- Vorbereitung + Roter-Faden-Skript
+- Heizungs-Grundlagen kompakt (VL/RL/Heizkurve, Heizflaechen, Hydraulik)
+- Bestandsanlage richtig "lesen" (Heizkurve, HK-Anfass-Test, Verbrauch)
+- Vor-Ort-Aufnahme (alles was Heizlast-Tool nicht erfasst)
+- WP-Grundwissen Antworten parat (Mono/Split, JAZ, R290 etc.)
+- Schall LSV / Cercle Bruit + R290 Sicherheitszonen
+- Bewilligungen + Foerderungen 7 Kantone (ZH/SH/TG/AG/ZG/SZ/LU)
+- Vom Termin zur Offerte
+- 10 haeufige Kundenfragen + Antworten
+- 4 Mitfuehr-Karten (Quick-Reference)
+
+Quelle: SHK-Lehrmittel + interne Wissensbasis A-N.
+Ablage: branding/dokumente/ (DOCX + PDF).
