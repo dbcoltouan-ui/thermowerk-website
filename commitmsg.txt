@@ -1,16 +1,6 @@
-docs: Besichtigungs-Gameplan als DOCX
+seo: Schema.org logo auf quadratisches icon-512.png umgestellt
 
-Vollstaendiger Leitfaden fuer Vor-Ort-Termine:
-- Vorbereitung + Roter-Faden-Skript
-- Heizungs-Grundlagen kompakt (VL/RL/Heizkurve, Heizflaechen, Hydraulik)
-- Bestandsanlage richtig "lesen" (Heizkurve, HK-Anfass-Test, Verbrauch)
-- Vor-Ort-Aufnahme (alles was Heizlast-Tool nicht erfasst)
-- WP-Grundwissen Antworten parat (Mono/Split, JAZ, R290 etc.)
-- Schall LSV / Cercle Bruit + R290 Sicherheitszonen
-- Bewilligungen + Foerderungen 7 Kantone (ZH/SH/TG/AG/ZG/SZ/LU)
-- Vom Termin zur Offerte
-- 10 haeufige Kundenfragen + Antworten
-- 4 Mitfuehr-Karten (Quick-Reference)
+Vorher: /img/logo.png (Wortmarke 2857x277, zu breit fuer Google
+Knowledge Panel). Jetzt: /img/icon-512.png (quadratisch, klar erkennbar).
 
-Quelle: SHK-Lehrmittel + interne Wissensbasis A-N.
-Ablage: branding/dokumente/ (DOCX + PDF).
+Indexing dauert typisch 1-4 Wochen bis sichtbar.
