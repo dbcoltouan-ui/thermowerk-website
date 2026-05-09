@@ -1,6 +1,4 @@
-seo: Schema.org logo auf quadratisches icon-512.png umgestellt
+seo: sitemap.xml + Sitemap-Hinweis in robots.txt
 
-Vorher: /img/logo.png (Wortmarke 2857x277, zu breit fuer Google
-Knowledge Panel). Jetzt: /img/icon-512.png (quadratisch, klar erkennbar).
-
-Indexing dauert typisch 1-4 Wochen bis sichtbar.
+Behebt langsame/fehlende Google-Indexierung. 3 Seiten in
+sitemap.xml: Startseite, Impressum, Datenschutz.
