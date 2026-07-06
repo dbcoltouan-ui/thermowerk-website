@@ -13,6 +13,22 @@
 
 ---
 
+## ⚠️ OFFENER PUNKT (Stand 2026-07-06) — Push-Zugang nach Laptop-Neuaufsetzung
+
+**Kontext:** Daniel hat den Laptop komplett neu aufgesetzt und dabei bewusst alle alten Verknüpfungen gekappt (Git/Node-Installation, Windows Defender-Ausnahmen, Controlled Folder Access, die alte "Desktop Commander"-Direktverbindung zum echten Windows-Rechner). Grund: diese Verknüpfungen hatten den Laptop stark verlangsamt. Sanity-Konto ist ausserdem leer (Projekt weg — noch nicht untersucht warum).
+
+**Gewählte neue Lösung:** GitHub Fine-grained Personal Access Token (PAT), Scope: nur Repo `thermowerk-website`, Permission "Contents: Read and write". Vorteil: kein Git/Node auf dem Windows-Laptop nötig, keine Defender-Ausnahmen, kein Controlled-Folder-Access-Eintrag — Push läuft komplett über Claudes eigene Cloud-Sandbox (Linux-VM), die den Ordner per virtiofs mountet.
+
+**Status:**
+1. Daniel hat den Token bereits erstellt und im Chat geteilt (nicht in dieser Datei gespeichert — Sicherheitsgrund: CLAUDE.md liegt im Git-Tracking, `.git/config` NICHT).
+2. Token muss in `.git/config` beim `remote "origin"` als `https://<TOKEN>@github.com/dbcoltouan-ui/thermowerk-website.git` eingetragen werden — **das MUSS über die Linux-Sandbox (Bash-Tool) laufen**, NICHT über Edit/Write-Tool (die blocken `.git/*`-Pfade als geschützten Bereich).
+3. **Blocker:** Cowork-eigene VM (Linux-Sandbox) startete in der Session vom 2026-07-06 nicht ("VM service not running"). Daniel installiert Cowork deshalb neu.
+4. **Nächste Schritte sobald VM läuft:** Token erneut von Daniel erfragen (falls nicht mehr im Chat-Verlauf vorhanden) → `git remote set-url origin https://<TOKEN>@github.com/dbcoltouan-ui/thermowerk-website.git` im Bash-Tool ausführen → Testcommit pushen → danach normalen Workflow (siehe Git-Commit-Workflow weiter unten) nutzen, aber Git-Befehle jetzt über das **Bash-Tool (Linux-Sandbox)**, NICHT mehr über Desktop Commander (existiert in dieser Session nicht mehr).
+5. **Noch offen:** Bild mit iStock-Wasserzeichen auf der Live-Seite muss ersetzt werden — Daniel wollte in der nächsten Session zeigen, welches Bild betroffen ist (noch nicht identifiziert).
+6. **Token-Ablauf:** Fine-grained PATs laufen nach der gewählten Frist ab (meist max. 1 Jahr) — Daniel rechtzeitig an Erneuerung erinnern.
+
+---
+
 ## Heizlast-Rechner — Single-File-Variante (aktueller Stand 2026-04-21)
 
 > **Überblick:** Der alte Astro-v2-Rechner unter `/heizlast` ist entfernt. Stattdessen läuft jetzt ein **Single-File-HTML-Rechner** (~184 KB) aus dem konsolidierten Master-Ordner `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\` (seit 2026-04-22; vorher `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`). Dieser wird für das Live-Deploy 1:1 nach `thermowerk-website/public/heizlast/` kopiert — keine Astro-Komponenten, kein Build-Schritt für den Rechner selbst.
