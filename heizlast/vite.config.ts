@@ -2,6 +2,19 @@
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import { fileURLToPath, URL } from 'node:url';
+import { execSync } from 'node:child_process';
+
+/** Build-Stempel (Commit + Zeit) als <meta> im index.html, damit ein Deploy per Fetch verifizierbar ist (KONTEXT §4). */
+function buildStempel() {
+  let sha = 'unbekannt';
+  try {
+    sha = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  } catch {
+    /* kein Git im Build-Container */
+  }
+  return `${sha} ${new Date().toISOString()}`;
+}
+
 
 // Staging-Pfad bis zum Go-Live (Session 12): /heizlast-neu/ — Live /heizlast/ bleibt unberührt.
 export const BASE_PFAD = '/heizlast-neu/';
@@ -17,7 +30,13 @@ const alias = {
 
 export default defineConfig({
   base: BASE_PFAD,
-  plugins: [preact()],
+  plugins: [
+    preact(),
+    {
+      name: 'thermowerk-build-stempel',
+      transformIndexHtml: (html) => html.replace('<head>', `<head>\n    <meta name="thermowerk-build" content="${buildStempel()}">`),
+    },
+  ],
   resolve: { alias },
   build: {
     // Output direkt in den Astro-public-Ordner der Website → Pages liefert ihn mit aus.

@@ -1,0 +1,1283 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "stand": "2026-10-29",
+    "beschreibung": "Fachdaten FWS-Modus (Verbrauchsmethode nach FWS/AWB Kurs Modul 3, Version 1-2025) inkl. Warmwasser, Zuschläge, Speicher, Puffer, Bivalenz. Keine Rechenlogik; jede Tabelle nennt ihre Quelle über `quelle` (IDs aus `_meta.quellen`). Werte in SI-nahen Einheiten (kWh, kW, h, l, K); Konvention siehe `heizwerte`.",
+    "quellen": [
+      {
+        "id": "fws-m3",
+        "titel": "FWS/AWB WP-Kurs Modul 3 «Dimensionierung», Skript Version 1-2025 (Peter Hubacher), 95 Folien",
+        "art": "Kursunterlage",
+        "fundort": "D:\\Samsung Kopie 2026\\Wärmepumpe\\FWS M3_1-25.pdf (Textauszug: docs/fws/FWS M3_1-25.txt)",
+        "datum": "2025-02-06"
+      },
+      {
+        "id": "fws-aufgaben",
+        "titel": "FWS/AWB WP-Kurs Modul 3, Aufgaben und Lösungen, Version 1-2025",
+        "art": "Kursunterlage",
+        "fundort": "docs/fws/FWS M3_Aufgaben und Lösungen 1-25.txt",
+        "datum": "2025"
+      },
+      {
+        "id": "schneider-2014",
+        "titel": "Schneider (2014): GIS Gebäudeenergie — zitiert in FWS M3 Folien 36/37 (Bauperioden kWh/m2a und W/m2)",
+        "art": "Sekundärquelle via Kurs"
+      },
+      {
+        "id": "sia-384-1-2022",
+        "titel": "SIA 384/1:2022 Heizungsanlagen in Gebäuden — Grundlagen und Anforderungen; Pos. 4.2.1.4 (Qh = Qhl+Qw+Qoff+Qas), Pos. 4.2.4 (Leistungszuschlag Warmwasser über Ladezeit)",
+        "art": "Norm (zitiert in FWS M3 Folien 11, 50)"
+      },
+      {
+        "id": "sia-385-2-2015",
+        "titel": "SIA 385/2:2015 Anlagen für Trinkwarmwasser in Gebäuden — Warmwasserbedarf, Gesamtanforderungen und Auslegung; Tab. Nutzwarmwasserbedarf, Personenbelegung Formel, §4.3.2.5 f_sto, Spitzendeckungsvolumen, Leitungsverluste",
+        "art": "Norm (zitiert in FWS M3 Folien 42, 43, 46, 54–56)"
+      },
+      {
+        "id": "prsia-385-2-2023",
+        "titel": "prSIA 385/2:2023 — Diagramm Speicherwärmeverluste bei dTheta = 45 K (FWS M3 Folie 45)",
+        "art": "Normentwurf (zitiert im Kurs)"
+      },
+      {
+        "id": "bfe-leistungsgarantie",
+        "titel": "BFE Leistungsgarantie Haustechnik — Formeln Heizleistung aus Energieverbrauch (Öl/Gas/Holz/Elektro), Heizwerte und Wirkungsgradbänder (FWS M3 Folien 12/13)",
+        "art": "Sekundärquelle via Kurs"
+      },
+      {
+        "id": "bfe-heizwerte-2014",
+        "titel": "BFE Faktenblatt «Anpassung der Heizwerte der Erdölprodukte in der Gesamtenergiestatistik», 2.5.2014 (erg. 7/2015): Heizöl extra-leicht Heizwert 42.9 MJ/kg, Brennwert 45.7 MJ/kg",
+        "art": "Behördenpublikation",
+        "url": "https://pubdb.bfe.admin.ch/de/publication/download/7442",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "bfe-gesamtenergiestatistik",
+        "titel": "BFE Schweizerische Gesamtenergiestatistik (Ausgaben 2013/2017), Fussnoten Tab. 1/6: Erdgas unterer Heizwert 36.3 MJ/m3n, Brennwert 40.3 MJ/m3n",
+        "art": "Behördenpublikation",
+        "url": "https://pubdb.bfe.admin.ch/de/publication/download/7518",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "wb-j",
+        "titel": "Wissensbasis J_Speicher.md (Tabellenbuch SHK B1/B4, Herstellerkonventionen) — Puffer-Richtwerte Luft-/Sole-WP",
+        "art": "Wissensbasis",
+        "fundort": "docs/wissensbasis/J_Speicher.md §3.4–3.6"
+      },
+      {
+        "id": "wb-d",
+        "titel": "Wissensbasis D_Warmwasser_TWE.md — WW-Richtwerte DE (B1 LF09 S.512)",
+        "art": "Wissensbasis",
+        "fundort": "docs/wissensbasis/D_Warmwasser_TWE.md §3.1"
+      },
+      {
+        "id": "tw-annahme",
+        "titel": "Thermowerk-Annahme (keine Norm; im Bericht als Annahme auszuweisen)",
+        "art": "Annahme"
+      }
+    ]
+  },
+  "tvoll": {
+    "beschreibung": "Volllaststunden t_voll [h/a] für die Dimensionierung (Verbrauchsmethode). Auswahl nach Bedarfsart x Standort (Mittelland / ab 800 m ü. M.). Alle Angaben für 20 °C Raumtemperatur. Richtwerte für massive Gebäude mit Baujahr 2000 oder älter.",
+    "quelle": [
+      "fws-m3"
+    ],
+    "fundstelle": "Folie 16 «Volllaststunden für die Dimensionierung»",
+    "hoehenschwelleM": 800,
+    "standorte": {
+      "mittelland": "Mittelland (< 800 m ü. M.)",
+      "ab800m": "ab 800 m ü. M."
+    },
+    "bedarfsarten": {
+      "raumwaerme_wohnen": {
+        "label": "Raumwärme, Wohngebäude (ohne Warmwasser)",
+        "gebaeudetypen": [
+          "Wohngebäude"
+        ],
+        "mittelland": 2000,
+        "ab800m": 2300
+      },
+      "raumwaerme_ww_wohnen": {
+        "label": "Raumwärme und Warmwasser, Wohngebäude",
+        "gebaeudetypen": [
+          "Wohngebäude"
+        ],
+        "mittelland": 2300,
+        "ab800m": 2500
+      },
+      "raumwaerme_wochenendabsenkung": {
+        "label": "Raumwärme mit Wochenendabsenkung (Schulhaus, Industrie, Gewerbe, Büro)",
+        "gebaeudetypen": [
+          "Schulhaus",
+          "Industrie",
+          "Gewerbe",
+          "Büro"
+        ],
+        "mittelland": 1900,
+        "ab800m": 2100
+      }
+    },
+    "hinweise": [
+      "Achtung bei Leichtbauweise, sehr hohem Glasanteil oder sehr geringem Energiebedarf (z. B. Minergie-P): vertiefte Berechnung nötig (Folie 16).",
+      "Bei sehr gut gedämmten Gebäuden (Minergie, Minergie-P) führt die Berechnung über Volllaststunden tendenziell zu einer Unterdimensionierung (Folie 10).",
+      "Keine Unterscheidung EFH/MFH und keine Kategorie «Jura» im Kurs (Befund FACH-06)."
+    ]
+  },
+  "heizwerte": {
+    "beschreibung": "Energieinhalt je Verbrauchseinheit und Kessel-Jahresnutzungsgrade. Zwei Konventionen: `fwsKurs` (Default im FWS-Modus; reproduziert die Kurslösungen) und `hi` (unterer Heizwert nach BFE; η muss dann auf Hi bezogen sein — siehe `etaBezugHinweis`). Die Konvention wird im Bericht ausgewiesen.",
+    "quelle": [
+      "fws-m3",
+      "bfe-leistungsgarantie",
+      "bfe-heizwerte-2014",
+      "bfe-gesamtenergiestatistik"
+    ],
+    "fundstelle": "Folie 12/13 (Formeln Qh = Ba·Ho·η/t_voll, Legende, Wirkungsgrade); Aufgaben S.2 (10.5 kWh/l, 10.4 kWh/mn3, 2500 kWh/Ster)",
+    "formel": "Qn [kWh/a] = Verbrauch [Einheit/a] × Heizwert [kWh/Einheit] × η;  Qhl [kW] = Qn / t_voll",
+    "konventionen": {
+      "fwsKurs": {
+        "label": "FWS-Kurs (Brennwert Ho gemäss Kurs, Kurs-η)",
+        "default": true,
+        "traeger": {
+          "heizoel": {
+            "label": "Heizöl EL",
+            "einheit": "l",
+            "kwhProEinheit": 10.5,
+            "bezug": "Brennwert Ho (Folie 12: 10.5 kWh/l)"
+          },
+          "erdgas": {
+            "label": "Erdgas",
+            "einheit": "m3n",
+            "kwhProEinheit": 10.4,
+            "bezug": "Brennwert Ho (Folie 12: 10.4 kWh/m3n)"
+          },
+          "hartholz": {
+            "label": "Hartholz (Stückholz)",
+            "einheit": "rm",
+            "kwhProEinheit": 2500,
+            "bezug": "GCV lufttrocken; 1 Ster Hartholz 500–530 kg (Folie 12)"
+          },
+          "nadelholz": {
+            "label": "Nadelholz (Stückholz)",
+            "einheit": "rm",
+            "kwhProEinheit": 1800,
+            "bezug": "GCV lufttrocken; 1 Ster Nadelholz 340–380 kg (Folie 12)"
+          },
+          "pellets": {
+            "label": "Pellets",
+            "einheit": "kg",
+            "kwhProEinheit": 5.35,
+            "spanne": [
+              5.2,
+              5.5
+            ],
+            "bezug": "GCV 5.2–5.5 kWh/kg (Folie 12); Mitte der Spanne"
+          },
+          "strom": {
+            "label": "Strom (Elektrospeicherheizung)",
+            "einheit": "kWh",
+            "kwhProEinheit": 1.0,
+            "bezug": "Folie 13"
+          },
+          "fernwaerme": {
+            "label": "Fernwärme (Wärmezähler)",
+            "einheit": "kWh",
+            "kwhProEinheit": 1.0,
+            "bezug": "Zählerwert = Nutzenergie am Übergabepunkt (Annahme)"
+          }
+        }
+      },
+      "hi": {
+        "label": "Unterer Heizwert Hi (BFE)",
+        "default": false,
+        "traeger": {
+          "heizoel": {
+            "label": "Heizöl EL",
+            "einheit": "l",
+            "kwhProEinheit": 10.0,
+            "bezug": "Heizwert 42.9 MJ/kg (BFE 2014) × Dichte 0.84 kg/l (Annahme, typ. HEL bei 15 °C) = 10.01 kWh/l; Brennwert wäre 45.7 MJ/kg → 10.66 kWh/l",
+            "unsicherheitProzent": 2
+          },
+          "erdgas": {
+            "label": "Erdgas",
+            "einheit": "m3n",
+            "kwhProEinheit": 10.08,
+            "bezug": "Unterer Heizwert 36.3 MJ/m3n (BFE Gesamtenergiestatistik); Brennwert 40.3 MJ/m3n = 11.19 kWh/m3n"
+          },
+          "hartholz": {
+            "label": "Hartholz (Stückholz)",
+            "einheit": "rm",
+            "kwhProEinheit": 2500,
+            "bezug": "kein separater Hi-Wert belegt → Kurswert"
+          },
+          "nadelholz": {
+            "label": "Nadelholz (Stückholz)",
+            "einheit": "rm",
+            "kwhProEinheit": 1800,
+            "bezug": "kein separater Hi-Wert belegt → Kurswert"
+          },
+          "pellets": {
+            "label": "Pellets",
+            "einheit": "kg",
+            "kwhProEinheit": 4.8,
+            "spanne": [
+              4.6,
+              4.9
+            ],
+            "bezug": "Hi ENplus A1 ≥ 4.6 kWh/kg, typ. 4.8 (Thermowerk-Annahme, nicht Primärquelle)"
+          },
+          "strom": {
+            "label": "Strom (Elektrospeicherheizung)",
+            "einheit": "kWh",
+            "kwhProEinheit": 1.0,
+            "bezug": "—"
+          },
+          "fernwaerme": {
+            "label": "Fernwärme (Wärmezähler)",
+            "einheit": "kWh",
+            "kwhProEinheit": 1.0,
+            "bezug": "—"
+          }
+        }
+      }
+    },
+    "etaBezugHinweis": "Die η-Bänder des Kurses (Folie 12) sind auf die Kurs-Heizwerte (Ho) bezogen. In der Konvention `hi` ist η auf Hi zu beziehen; ohne Anpassung sinkt Qn um Ho/Hi (Öl −4.8 %, Gas −3.1 %; Befund FACH-05). Korrekturfaktor für Kurs-η → η_Hi: heizoel 1.05, erdgas 1.032 (= Kurs-Ho / Hi).",
+    "etaPresets": {
+      "beschreibung": "Jahresnutzungsgrad η des bisherigen Wärmeerzeugers (Band nach Folie 12; `typ` = Mitte; `kurs` = in Kurslösungen verwendeter Wert).",
+      "heizoel": [
+        {
+          "key": "alt_mitWW",
+          "label": "Heizkessel älteres Modell, mit WW-Bereitung",
+          "min": 0.7,
+          "max": 0.75,
+          "typ": 0.725,
+          "kurs": 0.8,
+          "kursHinweis": "Aufgabe 2: 25 J., nicht kondensierend, Heizung+WW → 0.8"
+        },
+        {
+          "key": "alt_ohneWW",
+          "label": "Heizkessel älteres Modell, ohne WW-Bereitung",
+          "min": 0.8,
+          "max": 0.85,
+          "typ": 0.825,
+          "kurs": 0.85,
+          "kursHinweis": "Aufgabe 1A: 25 J., nicht kondensierend → 0.85"
+        },
+        {
+          "key": "brennwert",
+          "label": "Heizkessel neueres Modell, kondensierend",
+          "min": 0.85,
+          "max": 0.95,
+          "typ": 0.9,
+          "kurs": 0.92,
+          "kursHinweis": "Aufgabe 1B (Gas): 22 J., kondensierend → 0.92"
+        }
+      ],
+      "erdgas": [
+        {
+          "key": "alt_mitWW",
+          "label": "Heizkessel älteres Modell, mit WW-Bereitung",
+          "min": 0.7,
+          "max": 0.75,
+          "typ": 0.725
+        },
+        {
+          "key": "alt_ohneWW",
+          "label": "Heizkessel älteres Modell, ohne WW-Bereitung",
+          "min": 0.8,
+          "max": 0.85,
+          "typ": 0.825
+        },
+        {
+          "key": "brennwert",
+          "label": "Heizkessel neueres Modell, kondensierend",
+          "min": 0.85,
+          "max": 0.95,
+          "typ": 0.9,
+          "kurs": 0.92
+        }
+      ],
+      "hartholz": [
+        {
+          "key": "neu",
+          "label": "Holzheizkessel Stückholz, neu",
+          "min": 0.65,
+          "max": 0.75,
+          "typ": 0.7,
+          "kurs": 0.75,
+          "kursHinweis": "Aufgabe 1B: Hartholz → 0.75"
+        },
+        {
+          "key": "alt",
+          "label": "Holzheizkessel Stückholz, alt",
+          "min": 0.45,
+          "max": 0.65,
+          "typ": 0.55
+        }
+      ],
+      "nadelholz": [
+        {
+          "key": "neu",
+          "label": "Holzheizkessel Stückholz, neu",
+          "min": 0.65,
+          "max": 0.75,
+          "typ": 0.7
+        },
+        {
+          "key": "alt",
+          "label": "Holzheizkessel Stückholz, alt",
+          "min": 0.45,
+          "max": 0.65,
+          "typ": 0.55
+        }
+      ],
+      "pellets": [
+        {
+          "key": "pellets",
+          "label": "Holzheizkessel für Pellets",
+          "min": 0.65,
+          "max": 0.75,
+          "typ": 0.7
+        }
+      ],
+      "strom": [
+        {
+          "key": "elektrospeicher",
+          "label": "Elektrospeicherheizung",
+          "min": 0.95,
+          "max": 0.95,
+          "typ": 0.95
+        }
+      ],
+      "fernwaerme": [
+        {
+          "key": "fernwärme",
+          "label": "Fernwärme (Übergabestation)",
+          "min": 0.95,
+          "max": 1.0,
+          "typ": 0.98,
+          "hinweis": "Thermowerk-Annahme: Verluste Übergabestation/Verteilung im Haus; nicht im Kurs"
+        }
+      ]
+    }
+  },
+  "sperrzeit": {
+    "beschreibung": "Leistungszuschlag infolge Sperrzeiten des Elektrizitätswerks: Qoff = Qhl · (24/(24 − t_off) − 1), t_off = kumulierte Sperrzeit pro Tag in h. Tabelle = Faktor (Qhl+Qoff)/Qhl aus der Kursgrafik.",
+    "quelle": [
+      "fws-m3"
+    ],
+    "fundstelle": "Folien 30–32 «Sperrzeiten für Wärmepumpen»",
+    "formel": "Qoff = Qhl · (24 / (24 − toff) − 1)",
+    "toffMaxH": 8,
+    "faktorTabelle": {
+      "0": 1.0,
+      "1": 1.04,
+      "2": 1.09,
+      "3": 1.14,
+      "4": 1.2,
+      "5": 1.26,
+      "6": 1.33,
+      "7": 1.41,
+      "8": 1.5
+    },
+    "hinweise": [
+      "Sanierungen: effektive Sperrzeit immer berücksichtigen (Folie 30).",
+      "Neubauten (SIA 384/2): Sperrzeiten bis max. 2 h können vernachlässigt werden (Folie 30).",
+      "Eingabe: eine kumulierte Tages-Sperrzeit 0–8 h (keine Werktag/Sonntag-Unterscheidung; Befund FACH-08). Werte > 8 h: Plausi-Warnung.",
+      "Kursbeispiel Folie 31: Qhl 10 kW, toff 4 h → Qoff 2.0 kW."
+    ]
+  },
+  "bauperioden": {
+    "beschreibung": "Überschlagsmässiger spezifischer Heizwärmebedarf [kWh/m2a EBF] unsanierter Gebäude je Bauperiode (ohne Warmwasser) und überschlagsmässige spezifische Heizleistung [W/m2 EBF] (ohne WW) zur Plausibilitätskontrolle. Nur Fallback bzw. Kontrolle, nie Dimensionierungsgrundlage.",
+    "quelle": [
+      "fws-m3",
+      "schneider-2014"
+    ],
+    "fundstelle": "Folie 36 (kWh/m2a) und Folie 37 (W/m2)",
+    "perioden": [
+      {
+        "key": "vor1919",
+        "label": "vor 1919",
+        "von": null,
+        "bis": 1918,
+        "kwhM2a": {
+          "efh": [
+            55,
+            125
+          ],
+          "mfh": [
+            65,
+            115
+          ]
+        },
+        "wM2": {
+          "efh": [
+            28,
+            63
+          ],
+          "mfh": [
+            33,
+            58
+          ]
+        }
+      },
+      {
+        "key": "1919_1945",
+        "label": "1919–1945",
+        "von": 1919,
+        "bis": 1945,
+        "kwhM2a": {
+          "efh": [
+            80,
+            135
+          ],
+          "mfh": [
+            80,
+            120
+          ]
+        },
+        "wM2": {
+          "efh": [
+            40,
+            68
+          ],
+          "mfh": [
+            40,
+            60
+          ]
+        }
+      },
+      {
+        "key": "1946_1960",
+        "label": "1946–1960",
+        "von": 1946,
+        "bis": 1960,
+        "kwhM2a": {
+          "efh": [
+            80,
+            140
+          ],
+          "mfh": [
+            70,
+            115
+          ]
+        },
+        "wM2": {
+          "efh": [
+            40,
+            70
+          ],
+          "mfh": [
+            35,
+            58
+          ]
+        }
+      },
+      {
+        "key": "1961_1970",
+        "label": "1961–1970",
+        "von": 1961,
+        "bis": 1970,
+        "kwhM2a": {
+          "efh": [
+            80,
+            145
+          ],
+          "mfh": [
+            75,
+            120
+          ]
+        },
+        "wM2": {
+          "efh": [
+            40,
+            73
+          ],
+          "mfh": [
+            38,
+            60
+          ]
+        }
+      },
+      {
+        "key": "1971_1980",
+        "label": "1971–1980",
+        "von": 1971,
+        "bis": 1980,
+        "kwhM2a": {
+          "efh": [
+            70,
+            125
+          ],
+          "mfh": [
+            75,
+            115
+          ]
+        },
+        "wM2": {
+          "efh": [
+            35,
+            63
+          ],
+          "mfh": [
+            38,
+            58
+          ]
+        }
+      },
+      {
+        "key": "1981_1985",
+        "label": "1981–1985",
+        "von": 1981,
+        "bis": 1985,
+        "kwhM2a": {
+          "efh": [
+            55,
+            105
+          ],
+          "mfh": [
+            70,
+            105
+          ]
+        },
+        "wM2": {
+          "efh": [
+            28,
+            53
+          ],
+          "mfh": [
+            35,
+            53
+          ]
+        }
+      },
+      {
+        "key": "1986_1990",
+        "label": "1986–1990",
+        "von": 1986,
+        "bis": 1990,
+        "kwhM2a": {
+          "efh": [
+            60,
+            95
+          ],
+          "mfh": [
+            65,
+            95
+          ]
+        },
+        "wM2": {
+          "efh": [
+            30,
+            48
+          ],
+          "mfh": [
+            33,
+            48
+          ]
+        }
+      },
+      {
+        "key": "1991_1995",
+        "label": "1991–1995",
+        "von": 1991,
+        "bis": 1995,
+        "kwhM2a": {
+          "efh": [
+            50,
+            90
+          ],
+          "mfh": [
+            60,
+            85
+          ]
+        },
+        "wM2": {
+          "efh": [
+            25,
+            45
+          ],
+          "mfh": [
+            30,
+            43
+          ]
+        }
+      },
+      {
+        "key": "1996_2000",
+        "label": "1996–2000",
+        "von": 1996,
+        "bis": 2000,
+        "kwhM2a": {
+          "efh": [
+            45,
+            85
+          ],
+          "mfh": [
+            55,
+            75
+          ]
+        },
+        "wM2": {
+          "efh": [
+            23,
+            43
+          ],
+          "mfh": [
+            28,
+            38
+          ]
+        }
+      },
+      {
+        "key": "2001_2005",
+        "label": "2001–2005",
+        "von": 2001,
+        "bis": 2005,
+        "kwhM2a": {
+          "efh": [
+            35,
+            80
+          ],
+          "mfh": [
+            55,
+            75
+          ]
+        },
+        "wM2": {
+          "efh": [
+            18,
+            40
+          ],
+          "mfh": [
+            28,
+            38
+          ]
+        }
+      },
+      {
+        "key": "2006_2010",
+        "label": "2006–2010",
+        "von": 2006,
+        "bis": 2010,
+        "kwhM2a": {
+          "efh": [
+            35,
+            75
+          ],
+          "mfh": [
+            45,
+            65
+          ]
+        },
+        "wM2": {
+          "efh": [
+            18,
+            38
+          ],
+          "mfh": [
+            23,
+            33
+          ]
+        }
+      },
+      {
+        "key": "ab2011",
+        "label": "2011 – heute",
+        "von": 2011,
+        "bis": null,
+        "kwhM2a": {
+          "efh": [
+            30,
+            45
+          ],
+          "mfh": [
+            30,
+            40
+          ]
+        },
+        "wM2": {
+          "efh": [
+            15,
+            23
+          ],
+          "mfh": [
+            15,
+            20
+          ]
+        }
+      }
+    ],
+    "minergie": {
+      "beschreibung": "Spezifische Heizleistung sehr gut gedämmter Gebäude (Kurs, Aufgabe 3 Lösung): Minergie-P ca. 8–12 W/m2; Hinweis Kurs: Verbrauchsmethode liefert dort zu ungenaue Werte.",
+      "quelle": [
+        "fws-aufgaben"
+      ],
+      "wM2": {
+        "minergieP": [
+          8,
+          12
+        ]
+      }
+    },
+    "hinweiseKurs": [
+      "Warmwasser ist in den Richtwerten nicht enthalten; Werte gelten für unsanierte Gebäude der Bauperiode (Folie 36).",
+      "Spezifische Heizleistung = Norm-Heizleistung (ohne WW) / EBF; nur grobes Kontrollinstrument (Folie 37).",
+      "Kursbeispiel Aufgabe 2: EFH 1975, 46.5 W/m2 → plausibel, «nicht sanierte Gebäude aus dieser Zeit oft 40–50 W/m2»."
+    ]
+  },
+  "sanierungen": {
+    "beschreibung": "Einsparung des Heizwärmebedarfs durch Sanierungsmassnahmen in % (Band nach Folie 36; `typ` = in Kurslösung Aufgabe 2 verwendet bzw. Bandmitte). Anwendung multiplikativ je Massnahme: Faktor = 1 − p/100 (Kurs Aufgabe 2: 12.55 · 0.85 · 0.92 · 0.90 = 8.8 kW). Zeitliche Gewichtung über Verbrauchsjahre: siehe referenz/FWS-RECHENWEGE.md §3a (Kern, Session 3).",
+    "quelle": [
+      "fws-m3",
+      "fws-aufgaben"
+    ],
+    "fundstelle": "Folie 36 (Bänder), Aufgabe 2 Lösung (15 / 8 / 10 %)",
+    "massnahmen": [
+      {
+        "key": "fenster",
+        "label": "Fenster ersetzt",
+        "min": 10,
+        "max": 20,
+        "typ": 15,
+        "bauteile": [
+          "fenster"
+        ]
+      },
+      {
+        "key": "fassade",
+        "label": "Fassade (Aussenwand) gedämmt",
+        "min": 25,
+        "max": 40,
+        "typ": 32,
+        "bauteile": [
+          "aussenwand"
+        ]
+      },
+      {
+        "key": "estrich",
+        "label": "Estrichboden / Dach gedämmt",
+        "min": 10,
+        "max": 15,
+        "typ": 10,
+        "bauteile": [
+          "dach"
+        ],
+        "kursHinweis": "Aufgabe 2 verwendet 10 %"
+      },
+      {
+        "key": "kellerdecke",
+        "label": "Kellerdecke gedämmt",
+        "min": 8,
+        "max": 12,
+        "typ": 8,
+        "bauteile": [
+          "bodenKeller"
+        ],
+        "kursHinweis": "Aufgabe 2 verwendet 8 %"
+      },
+      {
+        "key": "individuell",
+        "label": "Individuell (Prozent eingeben)",
+        "min": 0,
+        "max": 60,
+        "typ": null,
+        "bauteile": []
+      }
+    ],
+    "hinweis": "Komfortlüftung/WRG ist im Kurs nicht als Einsparband genannt → nur über «individuell» mit eigener Begründung (Befund: alter Preset 8 % ohne Quelle)."
+  },
+  "warmwasser": {
+    "beschreibung": "Warmwasser-Tagesbedarf Q_WW = Q_W,u + Q_W,sto,ls + Q_W,hl,ls + Q_W,em,ls (additiv, Folie 41/49). Nutzwarmwasserbedarf je Person nach SIA 385/2:2015; Personenbelegung je Wohneinheit aus Nutzfläche.",
+    "quelle": [
+      "fws-m3",
+      "sia-385-2-2015",
+      "prsia-385-2-2023",
+      "fws-aufgaben"
+    ],
+    "fundstelle": "Folien 40–49",
+    "formelQwu": "Q_W,u [kWh/d] = V_W,u [l/d] · 4.2 kJ/(kgK) · 50 K / 3600  (= V_W,u · 0.05833)",
+    "deltaTNutzK": 50,
+    "cpKjKgK": 4.2,
+    "bedarfProPersonLiterTag": {
+      "beschreibung": "Nutzwarmwasserbedarf V_W,u,i je Person und Tag in Normlitern (60 °C-Äquivalent, dTheta 50 K) nach SIA 385/2:2015 (Folie 42).",
+      "quelle": [
+        "sia-385-2-2015"
+      ],
+      "werte": [
+        {
+          "key": "efh_einfach",
+          "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
+          "standard": "einfacher Standard",
+          "literProPersonTag": 40
+        },
+        {
+          "key": "efh_mittel",
+          "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
+          "standard": "mittlerer Standard",
+          "literProPersonTag": 45
+        },
+        {
+          "key": "efh_gehoben",
+          "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
+          "standard": "gehobener Standard",
+          "literProPersonTag": 55
+        },
+        {
+          "key": "mfh_allgemein",
+          "gebaeudeart": "Mehrfamilienhaus",
+          "standard": "allgemeiner Wohnungsbau",
+          "literProPersonTag": 35
+        },
+        {
+          "key": "mfh_gehoben",
+          "gebaeudeart": "Mehrfamilienhaus",
+          "standard": "gehobener Wohnungsbau",
+          "literProPersonTag": 45
+        },
+        {
+          "key": "buero",
+          "gebaeudeart": "Bürogebäude",
+          "standard": "ohne Personalrestaurant",
+          "literProPersonTag": 3
+        }
+      ],
+      "kursHinweis": "Aufgabe 4 rechnet EFH mit 4 Personen à 40 l/d; Aufgabe 3 MFH gehoben mit 45 l/P."
+    },
+    "personenbelegung": {
+      "beschreibung": "Personenbelegung n_P,i einer Wohneinheit aus der Nutzfläche A_NF (SIA 385/2:2015, Folie 43). Darf nicht-ganzzahlig sein.",
+      "quelle": [
+        "sia-385-2-2015"
+      ],
+      "formel": "n_P,i = 3.3 − 2 / (1 + (A_NF / A_0)^3)",
+      "a0M2": 100,
+      "stuetzpunkte": [
+        {
+          "anfM2": 50,
+          "personen": 1.52
+        },
+        {
+          "anfM2": 100,
+          "personen": 2.3
+        },
+        {
+          "anfM2": 150,
+          "personen": 2.84
+        },
+        {
+          "anfM2": 200,
+          "personen": 3.08
+        },
+        {
+          "anfM2": 300,
+          "personen": 3.23
+        }
+      ],
+      "kursHinweis": "Folie 48: Wohnung 150 m2 → 2.8 P/Whg."
+    },
+    "verluste": {
+      "beschreibung": "Verlustzuschläge in % bezogen auf Q_W,u, additiv (Folie 46/49: Q_WW = Q_W,u + 0.108·Q_W,u + 0.15·Q_W,u + 0.15·Q_W,u = 40.3 kWh/d bei Q_W,u 28.6). Kurslösungen Aufgabe 2/3/4 verketten dieselben Prozentsätze multiplikativ (1.1·1.15·1.15) — Kurs ist inkonsistent; Folien-Formel ist massgebend, Abweichung < 4 % (Befund FACH-40).",
+      "quelle": [
+        "fws-m3",
+        "sia-385-2-2015"
+      ],
+      "speicher": {
+        "ohneVolumen": {
+          "min": 8,
+          "max": 10,
+          "typ": 10,
+          "hinweis": "Speichervolumen unbekannt: 8–10 % von Q_W,u (Folie 45); Kurs rechnet 10 %"
+        },
+        "ausVolumen": {
+          "beschreibung": "Speicherwärmeverlust Q_W,sto,ls [kWh/d] bei dTheta = 45 K aus Diagramm prSIA 385/2:2023 (Folie 45, Kurve «Für Speicherdimensionierung»), Stützpunkte abgelesen (±0.15 kWh/d). Lineare Interpolation. Kursbeispiel: 800 l → 3.1 kWh/d (Folie 49).",
+          "quelle": [
+            "prsia-385-2-2023"
+          ],
+          "deltaThetaK": 45,
+          "stuetzpunkte": [
+            {
+              "liter": 0,
+              "kwhTag": 0.3
+            },
+            {
+              "liter": 100,
+              "kwhTag": 1.2
+            },
+            {
+              "liter": 200,
+              "kwhTag": 1.65
+            },
+            {
+              "liter": 300,
+              "kwhTag": 2.0
+            },
+            {
+              "liter": 500,
+              "kwhTag": 2.5
+            },
+            {
+              "liter": 800,
+              "kwhTag": 3.1
+            },
+            {
+              "liter": 1000,
+              "kwhTag": 3.4
+            },
+            {
+              "liter": 1500,
+              "kwhTag": 4.1
+            },
+            {
+              "liter": 2000,
+              "kwhTag": 4.65
+            }
+          ],
+          "naeherung": "Q ≈ 0.155 · V^0.447 (eigene Kurvenanpassung an die Stützpunkte, nur zur Kontrolle)"
+        }
+      },
+      "leitungen": {
+        "beschreibung": "Wärmeverluste warmgehaltener Leitungen (Zirkulation) nach SIA 385/2:2015 (Folie 46).",
+        "rohrAnRohrKwhProMeterTag": 0.15,
+        "rohrAnRohrHinweis": "Rohr-an-Rohr / Rohr-in-Rohr: 0.15 kWh/(m·d), Länge = Warmwasserleitung",
+        "separatKwhProMeterTag": 0.12,
+        "separatHinweis": "Separat wärmegedämmte WW- und Zirkulationsleitung: 0.12 kWh/(m·d), Länge = WW-Leitung + Zirkulationsleitung",
+        "laengeUnbekanntProzent": {
+          "min": 10,
+          "max": 15,
+          "typ": 15,
+          "hinweis": "Zirkulation vorhanden, Länge unbekannt: 10–15 % von Q_W,u; Kurs rechnet 15 %"
+        },
+        "warmhaltebandProzent": 0,
+        "warmhaltebandHinweis": "Elektro-Warmhalteband: keine Berücksichtigung bei der WP-Dimensionierung (Folie 46)",
+        "keineZirkulationProzent": 0
+      },
+      "ausstoss": {
+        "min": 15,
+        "max": 20,
+        "typ": 15,
+        "hinweis": "Ausstossverluste 15–20 % von Q_W,u (Folie 46); Kurs rechnet 15 %"
+      }
+    },
+    "leistungszuschlag": {
+      "beschreibung": "Leistungszuschlag Warmwasser nach SIA 384/1:2022 Pos. 4.2.4 über die Ladezeit pro Tag (Folie 50–52). Ladezeit t_d = Q_WW / Qhl [h]; Qw = Qhl · (24/(24 − t_d) − 1). Kein 12-h-Clamp (Befund FACH-09); Warnung ab t_d > 12 h (Thermowerk-Annahme).",
+      "quelle": [
+        "fws-m3",
+        "sia-384-1-2022"
+      ],
+      "formelTd": "td = Qww / Qhl",
+      "formelQw": "Qw = Qhl · (24 / (24 − td) − 1)",
+      "warnungTdAbH": 12,
+      "kursbeispiel": {
+        "qhlKW": 15.0,
+        "qwwKwhTag": 40.3,
+        "tdH": 2.69,
+        "qwKW": 1.89
+      }
+    },
+    "wwBisherUeberHeizung": {
+      "beschreibung": "Abzug des WW-Anteils vom bisherigen Verbrauch, wenn das Warmwasser bisher über den Heizkessel erzeugt wurde (Aufgabe 2: Qn = Qn,hww − Qn,ww; Qn,ww = V_W,u·4.2·50/3600·(1+Verluste)·365). Zwei getrennte Fragen im UI: «WW bisher über Heizung?» (Abzug) und «WW künftig über WP?» (Zuschlag).",
+      "quelle": [
+        "fws-aufgaben"
+      ],
+      "tageProJahr": 365
+    },
+    "richtwerteDE": {
+      "beschreibung": "Nur zur Information (deutsche Tabellenbuch-Werte, nicht FWS): V60 je Person und Tag einfach 10–20 l, gehoben 20–40 l, komfortabel 40–80 l.",
+      "quelle": [
+        "wb-d"
+      ]
+    }
+  },
+  "speicherWarmwasser": {
+    "beschreibung": "WW-Speichervolumen: V_W,sto [l] = Q_WW [kWh/d] / (1 kg/l · 4.2 kJ/(kgK) · 1/3600 kWh/kJ · (T_Sto,aus − T_Sto,ein)), T_Sto,ein = 10 °C (SIA 385/2). Anfangswert nach SIA 385/2:2015 §4.3.2.5: V_W,sto,1 = V_W,sto,cont,1 · f_sto.",
+    "quelle": [
+      "fws-m3",
+      "sia-385-2-2015"
+    ],
+    "fundstelle": "Folien 54–57",
+    "tKaltwasserC": 10,
+    "deltaTHinweis": "dT = T_Lade − 10 (eine Regel; Befund FACH-13)",
+    "fSto": [
+      {
+        "key": "mischUndKaltzone",
+        "label": "Misch- und Kaltzone vorhanden (innenliegender Wärmeübertrager)",
+        "wert": 1.25,
+        "default": true
+      },
+      {
+        "key": "nurMischzone",
+        "label": "Nur Mischzone (z. B. Ladung über aussenliegenden Wärmeübertrager)",
+        "wert": 1.1
+      },
+      {
+        "key": "keine",
+        "label": "Weder Misch- noch Kaltzone",
+        "wert": 1.0
+      }
+    ],
+    "spitzendeckung": {
+      "beschreibung": "Spitzendeckungsvolumen = Teilvolumen für die grösste kurzfristige Stundenspitze, in % des täglichen Nutzwarmwasserbedarfs V_W,u (Säulendiagramme SIA 385/2:2015, Folie 56). Maximum Wohnbauten: Sa/So Stunde 11 ca. 9 %, Mo–Fr Stunde 9 ca. 8.5 % (abgelesen).",
+      "quelle": [
+        "sia-385-2-2015"
+      ],
+      "anteilVwuMax": 0.09,
+      "unsicherheit": "Ablesung Diagramm ±1 %-Punkt"
+    },
+    "empfehlungen": {
+      "quelle": [
+        "fws-m3"
+      ],
+      "efh": {
+        "text": "Tagesbedarf à 60 °C → meistens 400 Liter (Hinweis Registerfläche)",
+        "literTypisch": 400,
+        "ladetemperaturC": 60
+      },
+      "mfh": {
+        "text": "2–3 Ladezyklen pro Tag",
+        "ladezyklenProTag": [
+          2,
+          3
+        ]
+      },
+      "hinweise": [
+        "WW-Speicher aus hygienischen Gründen nicht überdimensionieren; für PV-Eigenoptimierung nicht grösser dimensionieren (Folie 57).",
+        "SVGW-Merkblatt: kein stagnierendes Wasser, tägliche Erneuerung des Boilerinhalts, keine Parallelschaltung mehrerer Wassererwärmer (Folie 57)."
+      ]
+    },
+    "marktrundungLiter": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000,
+      1500,
+      2000
+    ],
+    "marktrundungHinweis": "Thermowerk-Annahme: Aufrundung auf nächstes marktübliches Nennvolumen; nicht aus dem Kurs."
+  },
+  "puffer": {
+    "beschreibung": "Heizungs-Pufferspeicher: Kurs nennt keine l/kW-Regel (Folie 91: Speicher für Abtauung bei Luft/Wasser-WP nötig; Sperrzeit-Überbrückung meist nicht realisierbar; gut überlegen). Regel Thermowerk: V_Puffer = max(Hersteller-Minimum aus wärmepumpen.json, Kriterium nach Quelle) mit Begründungszeile; Bezug Q_WP (nicht Qh). Kriterien aus Wissensbasis J (Herstellerkonventionen, DE).",
+    "quelle": [
+      "fws-m3",
+      "wb-j",
+      "tw-annahme"
+    ],
+    "fundstelle": "Folie 91; Wissensbasis J §3.4/3.5",
+    "kriterien": {
+      "luftWasser": {
+        "abtau": {
+          "label": "Abtauenergie-Reserve (kritisch bei L/W-WP)",
+          "literProKwMin": 10,
+          "literProKwMax": 20,
+          "empfehlungLiterProKw": [
+            30,
+            50
+          ],
+          "bezug": "Q_WP"
+        },
+        "takt": {
+          "label": "Takt-Minderung (Inverter)",
+          "literProKwMin": 20,
+          "empfehlungLiterProKw": [
+            30,
+            30
+          ],
+          "bezug": "Q_WP"
+        },
+        "sperrzeit": {
+          "label": "Sperrzeiten-Überbrückung (EVU 2×2 h/d)",
+          "literProKwMin": 50,
+          "literProKwMax": 100,
+          "empfehlungLiterProKw": [
+            100,
+            100
+          ],
+          "bezug": "Qhl",
+          "hinweis": "nach Kurs meist unrealistisch gross (Folie 91); nur informativ"
+        },
+        "err": {
+          "label": "Hydraulische Entkopplung bei Einzelraumregelung",
+          "trennpufferLiter": [
+            100,
+            200
+          ]
+        }
+      },
+      "soleWasser": {
+        "fbhOhneErr": {
+          "label": "Sole-WP mit FBH ohne ERR",
+          "literProKw": 0,
+          "hinweis": "oft keiner / kleine Weiche ca. 50 l"
+        },
+        "hkMitErr": {
+          "label": "Sole-WP mit Heizkörpern + Einzelraumregelung",
+          "literProKw": 20,
+          "art": "Reihenpuffer"
+        },
+        "sperrzeit": {
+          "label": "Sperrzeit-Tarif (Sole)",
+          "literProKw": 50,
+          "bezug": "Qhl"
+        }
+      },
+      "wasserWasser": {
+        "label": "Wasser-WP",
+        "literProKw": 0,
+        "hinweis": "meist keiner, ggf. Weiche"
+      }
+    },
+    "richtwerteEfh": {
+      "beschreibung": "Dimensionierungs-Richtwerte EFH (Wissensbasis J §3.6, Konvention): Qhl-Klasse → Heizungspuffer / TWW-Speicher.",
+      "quelle": [
+        "wb-j"
+      ],
+      "zeilen": [
+        {
+          "qhlKW": [
+            3,
+            5
+          ],
+          "wpKW": [
+            4,
+            6
+          ],
+          "pufferLiter": [
+            40,
+            80
+          ],
+          "twwLiter": [
+            200,
+            200
+          ]
+        },
+        {
+          "qhlKW": [
+            5,
+            8
+          ],
+          "wpKW": [
+            6,
+            8
+          ],
+          "pufferLiter": [
+            80,
+            200
+          ],
+          "twwLiter": [
+            200,
+            300
+          ]
+        },
+        {
+          "qhlKW": [
+            8,
+            12
+          ],
+          "wpKW": [
+            10,
+            12
+          ],
+          "pufferLiter": [
+            200,
+            400
+          ],
+          "twwLiter": [
+            300,
+            300
+          ]
+        },
+        {
+          "qhlKW": [
+            12,
+            16
+          ],
+          "wpKW": [
+            14,
+            16
+          ],
+          "pufferLiter": [
+            400,
+            500
+          ],
+          "twwLiter": [
+            300,
+            400
+          ]
+        }
+      ]
+    }
+  },
+  "bivalenz": {
+    "beschreibung": "Abschätzung des bivalenten Energieanteils der Wärmepumpe (Luft/Wasser) in Abhängigkeit des Leistungsanteils der WP an der Heizleistung (Folie 95). Für Bivalenz-Darstellung statt synthetischer Kennlinie (Befund FACH-42).",
+    "quelle": [
+      "fws-m3"
+    ],
+    "fundstelle": "Folie 95 «Bivalentanlagen mit Wärmepumpen»",
+    "tabelle": [
+      {
+        "leistungsanteilWP": 0.5,
+        "energieanteilWP": [
+          0.8,
+          0.85
+        ]
+      },
+      {
+        "leistungsanteilWP": 0.33,
+        "energieanteilWP": [
+          0.5,
+          0.6
+        ]
+      },
+      {
+        "leistungsanteilWP": 0.25,
+        "energieanteilWP": [
+          0.3,
+          0.4
+        ]
+      }
+    ],
+    "hinweise": [
+      "Bivalentanlagen erfordern höheren Planungsaufwand; Einsatz bei grösseren Heizleistungen ab ca. 50 kW (Folie 95).",
+      "Auslegungs-Prüfung Luft/Wasser-WP: Qh,min/max-Kennlinie und Einsatzgrenzen-Diagramm des Herstellers gegen Heizkurve Gebäude (max. erforderliche Heizleistung @ A−8 °C, max. Vorlauf Heizung/WW @ A−8 °C) prüfen (Folien 93/94)."
+    ]
+  },
+  "plausibilitaet": {
+    "beschreibung": "Vergleich Verbrauchsmethode vs. SIA 384/2: Kurs (Aufgabe 3 Diskussion): Berechnung nach SIA 384.2 beinhaltet in der Regel Reserven im Bereich von 10–20 %; Feldmessungen 2023: WP-Anlagen in der Schweiz im Durchschnitt ca. 30 % überdimensioniert (Folie 8).",
+    "quelle": [
+      "fws-aufgaben",
+      "fws-m3"
+    ],
+    "normReserveProzent": [
+      10,
+      20
+    ],
+    "feldmessungUeberdimensionierungProzent": 30,
+    "qhlNormMinusVerbrauchErwartungProzent": [
+      10,
+      25
+    ],
+    "erwartungHinweis": "Erwartung «Norm 10–25 % über Verbrauch» (Thermowerk-Annahme aus Kurs 10–20 % + Toleranz)."
+  },
+  "methodeB": {
+    "beschreibung": "Heizleistung aus WP-Betriebsstunden (Aufgabe 4): h/a = Zählerstand / Betriebsjahre; Qn = h/a · Q_WP,Nenn (oder Wärmezähler kWh); Qhl = Qn / t_voll. Nicht Q_WP selbst (Befund FACH-04). Kälteleistung Qk = Q_WP · (COP − 1)/COP; spezifische Entzugsleistung Erdsonde = Qk / L_Sonde.",
+    "quelle": [
+      "fws-aufgaben"
+    ],
+    "kursbeispiel": {
+      "zaehlerH": 14000,
+      "jahre": 10,
+      "qWpKW": 12,
+      "cop": 4.2,
+      "qnKwhA": 16800,
+      "qhlKW": 8.4,
+      "qkKW": 9.14,
+      "sondeM": 160,
+      "entzugWProM": 57
+    },
+    "entzugsleistungAmpelWProM": {
+      "gruenBis": 50,
+      "gelbBis": 60,
+      "hinweis": "Ampel nach referenz/FWS-RECHENWEGE.md §11.3 (SIA 384/6, nicht im Kurs-Skript belegt) — Annahme"
+    }
+  }
+}

@@ -1,0 +1,1424 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "stand": "2026-10-29",
+    "beschreibung": "Klimastationen SIA 2028:2010 (40 Stationen) mit Auslegungstemperatur θe «kalt» für die Norm-Heizlast (SIA 2028 Tabelle 6, Mittel der kältesten 4-Tagesmittel 1984–2003), 1-h-Minimum, Heizgradtage HGT 20/12 (SIA 2028-C1 Tabelle 6, Mittel 1984–2003), ATD 12 °C, Stationshöhe (MeteoSchweiz-Metadaten; SIA-2028-Tabelle 1a nicht öffentlich), Kanton. Zuordnung Standort → Station über PLZ-Präfix (2-/3-stellig) und Kanton (Thermowerk-Regel, kantonale Regeln wo bekannt), Höhenkorrektur-Regel. Jahresmittel nur aus Vorgängerdaten SIA 381/2 (alt). Keine Rechenlogik.",
+    "quellen": [
+      {
+        "id": "sia2028-c1",
+        "titel": "SIA 2028-C1:2015 Korrigenda C1 zum Merkblatt SIA 2028:2010 «Klimadaten für Bauphysik, Energie- und Gebäudetechnik»: Tabelle 1 (= Tabelle 6 Auslegungswerte Norm-Heizlast: θe «kalt», θ min 1 h), Tabelle 5 (ATD 12 °C), Tabelle 6 (Heizgradtage 20/12, Mittel 1984–2003), S. 4–7",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/882ade35-34e4-419f-8dd5-2c44bdfcc7f7/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia2028-e2010",
+        "titel": "«Ergänzung 2010 zum Merkblatt SIA 2028» (Feb. 2010): Verfahren 4-Tages-Auslegungsperiode (Mittel der kältesten 4-Tagesmittel über 20 Jahre; 1-h-Wert = 1 %-Quantil Januar), Ziff. 2.2/4.2",
+        "art": "Norm (öffentliche Ergänzung)",
+        "url": "https://shop.sia.ch/5ffec734-be1f-42ee-9449-f5835256f3b4/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia2028-c2",
+        "titel": "SIA 2028-C2:2023: betroffene Normen (inkl. SIA 384/2), Szenariodaten CH2018; Heizlast-Auslegung bleibt auf historischen Daten (Tabelle 10)",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/09ba1bdd-d8dd-43a6-bc82-9b9b3382a453/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia-liste-2026",
+        "titel": "SIA Publikationsliste Stand 30.07.2026: SIA 2028 weiterhin Ausgabe 2010",
+        "art": "Normenverzeichnis",
+        "url": "https://cms.sia.ch/de/api/getMedia/674",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "meteoschweiz-meta",
+        "titel": "MeteoSchweiz, Klimaszenarien Raumklima (SIA 2028), Metadatendatei «Klimaszenarien-Raumklima_Metadata.csv»: Stationsname, Abkürzung, Stationshöhe, Kanton (CC BY 4.0)",
+        "art": "Behördendaten",
+        "url": "https://data.geo.admin.ch/ch.meteoschweiz.klimaszenarien-raumklima/klimaszenarien-raumklima/klimaszenarien-raumklima_2056.csv.zip",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "wehrli-2024",
+        "titel": "Wehrli et al. 2024, «Building design in a changing climate – Future Swiss reference years», Climate Services 34, 100448, Tabelle A1 (Stationshöhen, Referenzperiode 1984–2003)",
+        "art": "Fachartikel",
+        "url": "https://www.sciencedirect.com/science/article/pii/S2405880724000037",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia384201-c1-2014",
+        "titel": "SIA 384.201-C1:2014 (SN EN 12831:2003 nationaler Anhang): ND.1.1 Norm-Aussentemperatur = SIA-2028-Auslegungswert, korrigiert nach Höhendifferenz Gebäude–Station und Gebäudezeitkonstante; ND.1.2 Jahresmittel nicht korrigiert; Tabelle ND.3 b_u",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/dfabd0f6-cdc4-42f5-b67e-0b0bebd5f9d5/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia384-2-vorschau",
+        "titel": "SIA 384/2:2020 Vorschau (2. Auflage 2024): Kap. 4 Norm-Aussentemperatur, Kap. 5 Gebäudeträgheit (Temperaturkorrektur), Anhang A/B",
+        "art": "Norm (Vorschau)",
+        "url": "https://shop.sia.ch/b483cf7c-0b7b-46ff-adef-d2c72f9eb54f/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "linear-sia384-2",
+        "titel": "LINEAR Revit V26 Knowledge Base «Heat load calculation acc. to SN SIA 384/2:2020»: Höhenkorrektur ab 200 m Höhendifferenz, Temperaturkorrektur nach Zeitkonstante",
+        "art": "Software-Dokumentation (Sekundärquelle)",
+        "url": "https://www.linear.eu/en/services/knowledge-base-revit/v26/analyzing-buildings/heat-load/heat-load-calculation-according-to-sn-sia-384/22020/",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "lesosai-sia381-2",
+        "titel": "LESOSAI 4 Manuale utente (EPFL/LESO 1997), Tabella 14: Stationen SIA 381/2 (58) mit Höhe, Te min (SIA 384/2:1982), Jahresmittel, HGT 20/12 (SIA 381/3) — nur Vergleich/Fallback",
+        "art": "Software-Handbuch (Vorgängerdaten)",
+        "url": "https://infoscience.epfl.ch/record/29698/files/Manuale%20utente%20LESOSAI%204_Leresche%20F..pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "kantone-zuordnung",
+        "titel": "Kantonale Stationsregeln: AG (Rheinfelden/Laufenburg → Basel-Binningen, Rest → Buchs-Aarau), GR BEV Anhang 5 (Gemeinde → Chur/Davos/Disentis/Samedan/Scuol/Robbia), VD (< 800 m Payerne, > 800 m Jura La Chaux-de-Fonds, Préalpes Adelboden), SH (Schaffhausen), BS (Basel-Binningen, keine Höhenkorrektur)",
+        "art": "Kantonale Vollzugshilfen",
+        "url": "https://www.vd.ch/fileadmin/user_upload/themes/environnement/energie/fichiers_pdf/Journ%C3%A9e_de_formation_2022.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "minergie-2015",
+        "titel": "Minergie Wegleitung 2015 N13: Klimazuschlag ab 800 m ü. M. (Davos 4, Engelberg 2, Gr. St. Bernhard 8, Samedan 8, Scuol 2, Zermatt 2 kWh/m²)",
+        "art": "Nachweisunterlage",
+        "url": "https://www.minergie.ch/media/wegleitungvers2015-dt.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "tw-abgeleitet",
+        "titel": "Thermowerk-Ableitung/Annahme (PLZ-Zuordnung, Höhengradient aus Stationspaaren); im Bericht als Annahme auszuweisen",
+        "art": "Ableitung"
+      }
+    ],
+    "ausgabe": "SIA 2028:2010 (+ C1:2015, C2:2023); keine neuere Ausgabe (SIA-Liste 30.07.2026)",
+    "definitionThetaE": "Auslegungswert «kalt» = Mittel der tiefsten 4-Tagesmittel über 20 Jahre (1984–2003); θ min 1 h = 1 %-Quantil der Januar-Stundenwerte (Ergänzung 2010 Ziff. 2.2/4.2)",
+    "definitionHgt": "HGT 20/12 = Σ (20 − θam) über Tage mit Tagesmittel ≤ 12 °C; Mittel der 20 Kalenderjahre 1984–2003 (SIA 2028-C1 Ziff. 2.4)",
+    "nichtBelegt": [
+      "Stationshöhen gemäss SIA 2028 Tabelle 1a (ersatzweise MeteoSchweiz-Metadaten)",
+      "Jahresmitteltemperaturen je Station nach SIA 2028 Tabelle 2 (nur alte SIA-381/2-Werte)",
+      "Höhengradient K/100 m und τ-Korrektur nach SIA 384/2 Kap. 4/5 (Normtext nicht öffentlich)",
+      "HGT-Normwerte 1991–2020 je Station (MeteoSchweiz nur Bereiche)"
+    ]
+  },
+  "stationen": [
+    {
+      "key": "adelboden",
+      "name": "Adelboden",
+      "abk": "ABO",
+      "kanton": "BE",
+      "hoeheM": 1321,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1320,
+      "thetaEC": -10,
+      "thetaMin1hC": -16,
+      "hgt2012Kd": 4669,
+      "atd12Kd": 2404,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "aigle",
+      "name": "Aigle",
+      "abk": "AIG",
+      "kanton": "VD",
+      "hoeheM": 381,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 381,
+      "thetaEC": -6,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 3152,
+      "atd12Kd": 1478,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "altdorf",
+      "name": "Altdorf",
+      "abk": "ALT",
+      "kanton": "UR",
+      "hoeheM": 438,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 449,
+      "thetaEC": -6,
+      "thetaMin1hC": -11,
+      "hgt2012Kd": 3201,
+      "atd12Kd": 1518,
+      "jahresmittelAltC": 9.2,
+      "hinweis": null
+    },
+    {
+      "key": "basel",
+      "name": "Basel-Binningen",
+      "abk": "BAS",
+      "kanton": "BL",
+      "hoeheM": 316,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 316,
+      "thetaEC": -7,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 3034,
+      "atd12Kd": 1402,
+      "jahresmittelAltC": 9.4,
+      "hinweis": null
+    },
+    {
+      "key": "bern",
+      "name": "Bern-Liebefeld (heute Bern/Zollikofen)",
+      "abk": "BER",
+      "kanton": "BE",
+      "hoeheM": 553,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 565,
+      "thetaEC": -7,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3513,
+      "atd12Kd": 1721,
+      "jahresmittelAltC": 8.6,
+      "hinweis": "SIA 2028:2010 bezieht sich auf Bern-Liebefeld; heutige Station Zollikofen 553 m, alte SIA-381/2-Höhe 572 m"
+    },
+    {
+      "key": "buchs_aarau",
+      "name": "Buchs-Aarau",
+      "abk": "BUS",
+      "kanton": "AG",
+      "hoeheM": 387,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 387,
+      "thetaEC": -7,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3325,
+      "atd12Kd": 1594,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "chur",
+      "name": "Chur",
+      "abk": "CHU",
+      "kanton": "GR",
+      "hoeheM": 556,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 555,
+      "thetaEC": -7,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3334,
+      "atd12Kd": 1610,
+      "jahresmittelAltC": 9.0,
+      "hinweis": null
+    },
+    {
+      "key": "davos",
+      "name": "Davos",
+      "abk": "DAV",
+      "kanton": "GR",
+      "hoeheM": 1594,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1590,
+      "thetaEC": -13,
+      "thetaMin1hC": -20,
+      "hgt2012Kd": 5689,
+      "atd12Kd": 3177,
+      "jahresmittelAltC": 3.1,
+      "hinweis": null
+    },
+    {
+      "key": "disentis",
+      "name": "Disentis",
+      "abk": "DIS",
+      "kanton": "GR",
+      "hoeheM": 1197,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1190,
+      "thetaEC": -10,
+      "thetaMin1hC": -16,
+      "hgt2012Kd": 4418,
+      "atd12Kd": 2272,
+      "jahresmittelAltC": 6.6,
+      "hinweis": null
+    },
+    {
+      "key": "engelberg",
+      "name": "Engelberg",
+      "abk": "ENG",
+      "kanton": "OW",
+      "hoeheM": 1036,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1035,
+      "thetaEC": -11,
+      "thetaMin1hC": -17,
+      "hgt2012Kd": 4511,
+      "atd12Kd": 2353,
+      "jahresmittelAltC": 5.7,
+      "hinweis": null
+    },
+    {
+      "key": "geneve",
+      "name": "Genève-Cointrin",
+      "abk": "GVE",
+      "kanton": "GE",
+      "hoeheM": 411,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 420,
+      "thetaEC": -4,
+      "thetaMin1hC": -10,
+      "hgt2012Kd": 3007,
+      "atd12Kd": 1383,
+      "jahresmittelAltC": 10.4,
+      "hinweis": null
+    },
+    {
+      "key": "glarus",
+      "name": "Glarus",
+      "abk": "GLA",
+      "kanton": "GL",
+      "hoeheM": 517,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 515,
+      "thetaEC": -8,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3610,
+      "atd12Kd": 1802,
+      "jahresmittelAltC": 8.0,
+      "hinweis": null
+    },
+    {
+      "key": "grand_st_bernard",
+      "name": "Grand-St-Bernard",
+      "abk": "GSB",
+      "kanton": "VS",
+      "hoeheM": 2472,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 2472,
+      "thetaEC": -15,
+      "thetaMin1hC": -19,
+      "hgt2012Kd": 7413,
+      "atd12Kd": 4558,
+      "jahresmittelAltC": -1.1,
+      "hinweis": null
+    },
+    {
+      "key": "guettingen",
+      "name": "Güttingen",
+      "abk": "GUT",
+      "kanton": "TG",
+      "hoeheM": 440,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 440,
+      "thetaEC": -7,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 3472,
+      "atd12Kd": 1681,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "interlaken",
+      "name": "Interlaken",
+      "abk": "INT",
+      "kanton": "BE",
+      "hoeheM": 577,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 580,
+      "thetaEC": -7,
+      "thetaMin1hC": -12,
+      "hgt2012Kd": 3630,
+      "atd12Kd": 1801,
+      "jahresmittelAltC": 8.2,
+      "hinweis": null
+    },
+    {
+      "key": "la_chaux_de_fonds",
+      "name": "La Chaux-de-Fonds",
+      "abk": "CDF",
+      "kanton": "NE",
+      "hoeheM": 1017,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1019,
+      "thetaEC": -10,
+      "thetaMin1hC": -18,
+      "hgt2012Kd": 4471,
+      "atd12Kd": 2292,
+      "jahresmittelAltC": 7.2,
+      "hinweis": null
+    },
+    {
+      "key": "la_fretaz",
+      "name": "La Frétaz (Bullet)",
+      "abk": "FRE",
+      "kanton": "VD",
+      "hoeheM": 1205,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1202,
+      "thetaEC": -10,
+      "thetaMin1hC": -16,
+      "hgt2012Kd": 4723,
+      "atd12Kd": 2434,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "locarno",
+      "name": "Locarno-Monti",
+      "abk": "OTL",
+      "kanton": "TI",
+      "hoeheM": 367,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 366,
+      "thetaEC": -1,
+      "thetaMin1hC": -4,
+      "hgt2012Kd": 2477,
+      "atd12Kd": 1041,
+      "jahresmittelAltC": 11.7,
+      "hinweis": null
+    },
+    {
+      "key": "lugano",
+      "name": "Lugano",
+      "abk": "LUG",
+      "kanton": "TI",
+      "hoeheM": 273,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 273,
+      "thetaEC": -1,
+      "thetaMin1hC": -4,
+      "hgt2012Kd": 2438,
+      "atd12Kd": 1009,
+      "jahresmittelAltC": 11.8,
+      "hinweis": null
+    },
+    {
+      "key": "luzern",
+      "name": "Luzern",
+      "abk": "LUZ",
+      "kanton": "LU",
+      "hoeheM": 454,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 456,
+      "thetaEC": -6,
+      "thetaMin1hC": -12,
+      "hgt2012Kd": 3317,
+      "atd12Kd": 1594,
+      "jahresmittelAltC": 8.7,
+      "hinweis": null
+    },
+    {
+      "key": "magadino",
+      "name": "Magadino (Cadenazzo)",
+      "abk": "MAG",
+      "kanton": "TI",
+      "hoeheM": 203,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 197,
+      "thetaEC": -3,
+      "thetaMin1hC": -8,
+      "hgt2012Kd": 2736,
+      "atd12Kd": 1264,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "montana",
+      "name": "Montana",
+      "abk": "MVE",
+      "kanton": "VS",
+      "hoeheM": 1423,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1508,
+      "thetaEC": -10,
+      "thetaMin1hC": -16,
+      "hgt2012Kd": 4770,
+      "atd12Kd": 2487,
+      "jahresmittelAltC": 5.8,
+      "hinweis": "Höhe Montana unsicher (1423 MeteoSchweiz vs. 1508 ETH/SIA 381/2)"
+    },
+    {
+      "key": "neuchatel",
+      "name": "Neuchâtel",
+      "abk": "NEU",
+      "kanton": "NE",
+      "hoeheM": 485,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 485,
+      "thetaEC": -5,
+      "thetaMin1hC": -11,
+      "hgt2012Kd": 3121,
+      "atd12Kd": 1455,
+      "jahresmittelAltC": 9.4,
+      "hinweis": null
+    },
+    {
+      "key": "payerne",
+      "name": "Payerne",
+      "abk": "PAY",
+      "kanton": "VD",
+      "hoeheM": 490,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 490,
+      "thetaEC": -7,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 3413,
+      "atd12Kd": 1649,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "piotta",
+      "name": "Piotta",
+      "abk": "PIO",
+      "kanton": "TI",
+      "hoeheM": 990,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1007,
+      "thetaEC": -7,
+      "thetaMin1hC": -12,
+      "hgt2012Kd": 3994,
+      "atd12Kd": 2017,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "pully",
+      "name": "Pully",
+      "abk": "PUY",
+      "kanton": "VD",
+      "hoeheM": 456,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 461,
+      "thetaEC": -4,
+      "thetaMin1hC": -10,
+      "hgt2012Kd": 2902,
+      "atd12Kd": 1301,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "robbia",
+      "name": "Robbia (Poschiavo)",
+      "abk": "ROB",
+      "kanton": "GR",
+      "hoeheM": 1078,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1078,
+      "thetaEC": -8,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 4233,
+      "atd12Kd": 2155,
+      "jahresmittelAltC": 6.6,
+      "hinweis": null
+    },
+    {
+      "key": "ruenenberg",
+      "name": "Rünenberg",
+      "abk": "RUE",
+      "kanton": "BL",
+      "hoeheM": 611,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 610,
+      "thetaEC": -8,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3550,
+      "atd12Kd": 1715,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "samedan",
+      "name": "Samedan",
+      "abk": "SAM",
+      "kanton": "GR",
+      "hoeheM": 1709,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1705,
+      "thetaEC": -18,
+      "thetaMin1hC": -26,
+      "hgt2012Kd": 6375,
+      "atd12Kd": 3772,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "san_bernardino",
+      "name": "San Bernardino",
+      "abk": "SBE",
+      "kanton": "GR",
+      "hoeheM": 1639,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1639,
+      "thetaEC": -11,
+      "thetaMin1hC": -17,
+      "hgt2012Kd": 5586,
+      "atd12Kd": 3075,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "st_gallen",
+      "name": "St. Gallen",
+      "abk": "STG",
+      "kanton": "SG",
+      "hoeheM": 776,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 779,
+      "thetaEC": -9,
+      "thetaMin1hC": -15,
+      "hgt2012Kd": 3844,
+      "atd12Kd": 1920,
+      "jahresmittelAltC": 7.7,
+      "hinweis": null
+    },
+    {
+      "key": "schaffhausen",
+      "name": "Schaffhausen",
+      "abk": "SHA",
+      "kanton": "SH",
+      "hoeheM": 438,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 437,
+      "thetaEC": -8,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3443,
+      "atd12Kd": 1681,
+      "jahresmittelAltC": 8.5,
+      "hinweis": null
+    },
+    {
+      "key": "scuol",
+      "name": "Scuol",
+      "abk": "SCU",
+      "kanton": "GR",
+      "hoeheM": 1304,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1298,
+      "thetaEC": -12,
+      "thetaMin1hC": -18,
+      "hgt2012Kd": 4866,
+      "atd12Kd": 2656,
+      "jahresmittelAltC": 4.8,
+      "hinweis": null
+    },
+    {
+      "key": "sion",
+      "name": "Sion",
+      "abk": "SIO",
+      "kanton": "VS",
+      "hoeheM": 482,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 482,
+      "thetaEC": -6,
+      "thetaMin1hC": -11,
+      "hgt2012Kd": 3195,
+      "atd12Kd": 1563,
+      "jahresmittelAltC": 9.9,
+      "hinweis": null
+    },
+    {
+      "key": "ulrichen",
+      "name": "Ulrichen",
+      "abk": "ULR",
+      "kanton": "VS",
+      "hoeheM": 1346,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1345,
+      "thetaEC": -16,
+      "thetaMin1hC": -24,
+      "hgt2012Kd": 5546,
+      "atd12Kd": 3198,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "vaduz",
+      "name": "Vaduz",
+      "abk": "VAD",
+      "kanton": "FL",
+      "hoeheM": 457,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 460,
+      "thetaEC": -8,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3213,
+      "atd12Kd": 1549,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "wynau",
+      "name": "Wynau",
+      "abk": "WYN",
+      "kanton": "BE",
+      "hoeheM": 422,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 422,
+      "thetaEC": -7,
+      "thetaMin1hC": -14,
+      "hgt2012Kd": 3536,
+      "atd12Kd": 1733,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "zermatt",
+      "name": "Zermatt",
+      "abk": "ZER",
+      "kanton": "VS",
+      "hoeheM": 1638,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 1638,
+      "thetaEC": -11,
+      "thetaMin1hC": -17,
+      "hgt2012Kd": 5388,
+      "atd12Kd": 2945,
+      "jahresmittelAltC": 3.4,
+      "hinweis": null
+    },
+    {
+      "key": "zuerich_kloten",
+      "name": "Zürich-Kloten",
+      "abk": "KLO",
+      "kanton": "ZH",
+      "hoeheM": 426,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 425,
+      "thetaEC": -8,
+      "thetaMin1hC": -15,
+      "hgt2012Kd": 3432,
+      "atd12Kd": 1671,
+      "jahresmittelAltC": null,
+      "hinweis": null
+    },
+    {
+      "key": "zuerich_fluntern",
+      "name": "Zürich-MeteoSchweiz (Fluntern)",
+      "abk": "SMA",
+      "kanton": "ZH",
+      "hoeheM": 556,
+      "hoeheMQuelle": "meteoschweiz-meta",
+      "hoeheMAlternativ": 556,
+      "thetaEC": -8,
+      "thetaMin1hC": -13,
+      "hgt2012Kd": 3440,
+      "atd12Kd": 1662,
+      "jahresmittelAltC": 8.5,
+      "hinweis": null
+    }
+  ],
+  "zuordnung": {
+    "beschreibung": "Standort → Station: 1. PLZ 3-stellig (plz3), 2. PLZ 2-stellig (plz2), 3. Kanton. Thermowerk-Regel (keine Norm): nächstgelegene, klimatisch vergleichbare Station; Höhendifferenz wird separat korrigiert. Kantonale Vorgaben (AG, GR, VD, SH, BS) sind eingearbeitet; UI erlaubt Override der Station mit Herkunft «override».",
+    "quelle": [
+      "tw-abgeleitet",
+      "kantone-zuordnung"
+    ],
+    "plz3": {
+      "134": "la_fretaz",
+      "145": "la_fretaz",
+      "165": "adelboden",
+      "166": "adelboden",
+      "187": "aigle",
+      "188": "montana",
+      "193": "grand_st_bernard",
+      "194": "montana",
+      "196": "montana",
+      "197": "montana",
+      "371": "adelboden",
+      "372": "adelboden",
+      "377": "adelboden",
+      "378": "adelboden",
+      "381": "adelboden",
+      "382": "adelboden",
+      "392": "zermatt",
+      "395": "zermatt",
+      "396": "zermatt",
+      "398": "ulrichen",
+      "399": "ulrichen",
+      "639": "engelberg",
+      "607": "engelberg",
+      "641": "altdorf",
+      "646": "altdorf",
+      "647": "altdorf",
+      "653": "magadino",
+      "654": "piotta",
+      "677": "piotta",
+      "678": "piotta",
+      "661": "locarno",
+      "662": "locarno",
+      "663": "locarno",
+      "716": "disentis",
+      "717": "disentis",
+      "718": "disentis",
+      "731": "davos",
+      "743": "san_bernardino",
+      "750": "samedan",
+      "751": "samedan",
+      "752": "samedan",
+      "753": "samedan",
+      "755": "scuol",
+      "756": "scuol",
+      "774": "robbia",
+      "811": "zuerich_kloten",
+      "874": "glarus",
+      "875": "glarus",
+      "878": "glarus",
+      "940": "vaduz",
+      "947": "vaduz",
+      "949": "vaduz"
+    },
+    "plz2": {
+      "10": "pully",
+      "11": "pully",
+      "12": "geneve",
+      "13": "pully",
+      "14": "payerne",
+      "15": "payerne",
+      "16": "payerne",
+      "17": "payerne",
+      "18": "aigle",
+      "19": "sion",
+      "20": "neuchatel",
+      "21": "neuchatel",
+      "22": "neuchatel",
+      "23": "la_chaux_de_fonds",
+      "24": "la_chaux_de_fonds",
+      "25": "neuchatel",
+      "26": "la_chaux_de_fonds",
+      "27": "la_chaux_de_fonds",
+      "28": "basel",
+      "29": "basel",
+      "30": "bern",
+      "31": "bern",
+      "32": "bern",
+      "33": "wynau",
+      "34": "bern",
+      "35": "bern",
+      "36": "interlaken",
+      "37": "interlaken",
+      "38": "interlaken",
+      "39": "sion",
+      "40": "basel",
+      "41": "basel",
+      "42": "ruenenberg",
+      "43": "basel",
+      "44": "ruenenberg",
+      "45": "wynau",
+      "46": "wynau",
+      "47": "wynau",
+      "48": "wynau",
+      "49": "wynau",
+      "50": "buchs_aarau",
+      "51": "buchs_aarau",
+      "52": "buchs_aarau",
+      "53": "buchs_aarau",
+      "54": "buchs_aarau",
+      "55": "buchs_aarau",
+      "56": "buchs_aarau",
+      "57": "wynau",
+      "60": "luzern",
+      "61": "luzern",
+      "62": "luzern",
+      "63": "zuerich_kloten",
+      "64": "altdorf",
+      "65": "magadino",
+      "66": "locarno",
+      "67": "piotta",
+      "68": "lugano",
+      "69": "lugano",
+      "70": "chur",
+      "71": "chur",
+      "72": "davos",
+      "73": "chur",
+      "74": "chur",
+      "75": "samedan",
+      "76": "scuol",
+      "77": "robbia",
+      "80": "zuerich_fluntern",
+      "81": "zuerich_kloten",
+      "82": "schaffhausen",
+      "83": "zuerich_kloten",
+      "84": "zuerich_kloten",
+      "85": "guettingen",
+      "86": "zuerich_fluntern",
+      "87": "glarus",
+      "88": "zuerich_fluntern",
+      "89": "zuerich_kloten",
+      "90": "st_gallen",
+      "91": "st_gallen",
+      "92": "st_gallen",
+      "93": "guettingen",
+      "94": "vaduz",
+      "95": "st_gallen",
+      "96": "st_gallen",
+      "97": "vaduz",
+      "98": "guettingen",
+      "99": "vaduz"
+    },
+    "kanton": {
+      "AG": "buchs_aarau",
+      "AI": "st_gallen",
+      "AR": "st_gallen",
+      "BE": "bern",
+      "BL": "basel",
+      "BS": "basel",
+      "FR": "payerne",
+      "GE": "geneve",
+      "GL": "glarus",
+      "GR": "chur",
+      "JU": "basel",
+      "LU": "luzern",
+      "NE": "neuchatel",
+      "NW": "luzern",
+      "OW": "luzern",
+      "SG": "st_gallen",
+      "SH": "schaffhausen",
+      "SO": "wynau",
+      "SZ": "zuerich_kloten",
+      "TG": "guettingen",
+      "TI": "lugano",
+      "UR": "altdorf",
+      "VD": "pully",
+      "VS": "sion",
+      "ZG": "zuerich_kloten",
+      "ZH": "zuerich_kloten",
+      "FL": "vaduz"
+    },
+    "kantonaleRegeln": {
+      "AG": "Bezirke Rheinfelden/Laufenburg und Gemeinden Mandach, Mönthal, Elfingen, Bözen, Effingen, Densbüren → Basel-Binningen; übriger Kanton → Buchs-Aarau",
+      "GR": "BEV Anhang 5: jede Gemeinde → Chur / Davos / Disentis / Samedan / Scuol / Robbia",
+      "VD": "< 800 m → Payerne; > 800 m Jura → La Chaux-de-Fonds; > 800 m Préalpes → Adelboden",
+      "SH": "Station Schaffhausen",
+      "BS": "Basel-Binningen, keine Höhen-/Lokalklimakorrektur (Heizkostenabrechnung)"
+    },
+    "praxisregelHoehe": "Alternativ Station mit der dem Gebäude nächstliegenden Höhe wählen (LESOSAI-Praxis); UI zeigt beide Vorschläge."
+  },
+  "hoehenkorrektur": {
+    "beschreibung": "SIA 384.201 ND.1.1 / SIA 384/2:2020 Kap. 4–5: θe wird nach Höhendifferenz Gebäude–Station und Gebäudezeitkonstante korrigiert (Jahresmittel nicht). Der Gradient ist im Normtext nicht öffentlich. Thermowerk-Regel: θe,Standort = θe,Station − g · (h_Standort − h_Station)/100 m, nur wenn |Δh| ≥ 200 m (Schwelle LINEAR-Software), g = 0.6 K/100 m (gerundetes Mittel von 10 Stationspaaren, 0.4–0.9; Standardatmosphäre 0.65); Ergebnis mit Herkunft «schaetzung», Unsicherheit ±1 K; Rundung auf ganze °C.",
+    "quelle": [
+      "sia384201-c1-2014",
+      "sia384-2-vorschau",
+      "linear-sia384-2",
+      "tw-abgeleitet"
+    ],
+    "schwelleDeltaHoeheM": 200,
+    "gradientKPro100m": 0.6,
+    "gradientSpanne": [
+      0.39,
+      0.94
+    ],
+    "gradientMittelStationspaare": 0.66,
+    "stationspaare": [
+      {
+        "von": "bern",
+        "nach": "adelboden",
+        "deltaHoeheM": 768,
+        "deltaThetaK": 3,
+        "kPro100m": 0.39
+      },
+      {
+        "von": "chur",
+        "nach": "davos",
+        "deltaHoeheM": 1038,
+        "deltaThetaK": 6,
+        "kPro100m": 0.58
+      },
+      {
+        "von": "sion",
+        "nach": "montana",
+        "deltaHoeheM": 941,
+        "deltaThetaK": 4,
+        "kPro100m": 0.43
+      },
+      {
+        "von": "luzern",
+        "nach": "engelberg",
+        "deltaHoeheM": 582,
+        "deltaThetaK": 5,
+        "kPro100m": 0.86
+      },
+      {
+        "von": "guettingen",
+        "nach": "st_gallen",
+        "deltaHoeheM": 336,
+        "deltaThetaK": 2,
+        "kPro100m": 0.6
+      },
+      {
+        "von": "chur",
+        "nach": "scuol",
+        "deltaHoeheM": 748,
+        "deltaThetaK": 5,
+        "kPro100m": 0.67
+      },
+      {
+        "von": "altdorf",
+        "nach": "engelberg",
+        "deltaHoeheM": 598,
+        "deltaThetaK": 5,
+        "kPro100m": 0.84
+      },
+      {
+        "von": "payerne",
+        "nach": "la_fretaz",
+        "deltaHoeheM": 715,
+        "deltaThetaK": 3,
+        "kPro100m": 0.42
+      },
+      {
+        "von": "neuchatel",
+        "nach": "la_chaux_de_fonds",
+        "deltaHoeheM": 532,
+        "deltaThetaK": 5,
+        "kPro100m": 0.94
+      },
+      {
+        "von": "lugano",
+        "nach": "piotta",
+        "deltaHoeheM": 717,
+        "deltaThetaK": 6,
+        "kPro100m": 0.84
+      }
+    ],
+    "unsicherheitK": 1.0,
+    "maxKorrekturK": 6,
+    "hinweisTraegheit": "Die zusätzliche Temperaturkorrektur nach Gebäudezeitkonstante τ (SIA 384/2 Kap. 5) wird nicht angewendet (Zahlen nicht belegt); im Bericht als Vereinfachung nennen (θe ohne Trägheitskorrektur = konservativ).",
+    "jahresmittel": "nicht korrigieren (ND.1.2)"
+  },
+  "klimazuschlagMinergie": {
+    "beschreibung": "Nur Information (Grenzwerte, nicht θe): Klimazuschlag kWh/m² ab 800 m",
+    "quelle": [
+      "minergie-2015"
+    ],
+    "werte": {
+      "davos": 4,
+      "engelberg": 2,
+      "grand_st_bernard": 8,
+      "samedan": 8,
+      "scuol": 2,
+      "zermatt": 2
+    }
+  },
+  "vergleichSia381_2": {
+    "beschreibung": "Vorgängerdaten SIA 381/2 (Te min nach SIA 384/2:1982, HGT nach SIA 381/3) für 58 Stationen — nur Vergleich/Plausibilisierung und Höhen-/Jahresmittel-Hilfe für Orte ohne SIA-2028-Station (z. B. Fribourg, Biel, Olten, Delémont). Weichen von SIA 2028 ab (älter, kälter).",
+    "quelle": [
+      "lesosai-sia381-2"
+    ],
+    "stationen": [
+      {
+        "name": "Airolo",
+        "hoeheM": 1167,
+        "teMinAltC": -8,
+        "jahresmittelC": 6.1,
+        "hgt2012AltKd": 4615
+      },
+      {
+        "name": "Altdorf",
+        "hoeheM": 449,
+        "teMinAltC": -6,
+        "jahresmittelC": 9.2,
+        "hgt2012AltKd": 3443
+      },
+      {
+        "name": "Arosa",
+        "hoeheM": 1865,
+        "teMinAltC": -12,
+        "jahresmittelC": 2.2,
+        "hgt2012AltKd": 6317
+      },
+      {
+        "name": "Bad Ragaz",
+        "hoeheM": 518,
+        "teMinAltC": -9,
+        "jahresmittelC": 8.8,
+        "hgt2012AltKd": 3581
+      },
+      {
+        "name": "Basel-Binningen",
+        "hoeheM": 316,
+        "teMinAltC": -8,
+        "jahresmittelC": 9.4,
+        "hgt2012AltKd": 3348
+      },
+      {
+        "name": "Beatenberg",
+        "hoeheM": 1180,
+        "teMinAltC": -8,
+        "jahresmittelC": 6.7,
+        "hgt2012AltKd": 4404
+      },
+      {
+        "name": "Bern",
+        "hoeheM": 572,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.6,
+        "hgt2012AltKd": 3668
+      },
+      {
+        "name": "Bever",
+        "hoeheM": 1712,
+        "teMinAltC": -16,
+        "jahresmittelC": 1.2,
+        "hgt2012AltKd": 6688
+      },
+      {
+        "name": "Beznau",
+        "hoeheM": 330,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.9,
+        "hgt2012AltKd": 3510
+      },
+      {
+        "name": "Biel/Bienne",
+        "hoeheM": 434,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.6,
+        "hgt2012AltKd": 3672
+      },
+      {
+        "name": "Château-d'Œx",
+        "hoeheM": 994,
+        "teMinAltC": -11,
+        "jahresmittelC": 6.0,
+        "hgt2012AltKd": 4673
+      },
+      {
+        "name": "Chippis",
+        "hoeheM": 522,
+        "teMinAltC": -7,
+        "jahresmittelC": 9.5,
+        "hgt2012AltKd": 3381
+      },
+      {
+        "name": "Chur",
+        "hoeheM": 582,
+        "teMinAltC": -8,
+        "jahresmittelC": 9.0,
+        "hgt2012AltKd": 3527
+      },
+      {
+        "name": "Comprovasco",
+        "hoeheM": 544,
+        "teMinAltC": -4,
+        "jahresmittelC": 9.4,
+        "hgt2012AltKd": 3304
+      },
+      {
+        "name": "Davos",
+        "hoeheM": 1561,
+        "teMinAltC": -14,
+        "jahresmittelC": 3.1,
+        "hgt2012AltKd": 5884
+      },
+      {
+        "name": "Delémont",
+        "hoeheM": 416,
+        "teMinAltC": -7,
+        "jahresmittelC": 8.4,
+        "hgt2012AltKd": 3683
+      },
+      {
+        "name": "Disentis/Mustér",
+        "hoeheM": 1173,
+        "teMinAltC": -9,
+        "jahresmittelC": 6.6,
+        "hgt2012AltKd": 4439
+      },
+      {
+        "name": "Einsiedeln",
+        "hoeheM": 914,
+        "teMinAltC": -10,
+        "jahresmittelC": 6.3,
+        "hgt2012AltKd": 4540
+      },
+      {
+        "name": "Engelberg",
+        "hoeheM": 1018,
+        "teMinAltC": -10,
+        "jahresmittelC": 5.7,
+        "hgt2012AltKd": 4786
+      },
+      {
+        "name": "Fey (Nendaz)",
+        "hoeheM": 780,
+        "teMinAltC": -9,
+        "jahresmittelC": 8.3,
+        "hgt2012AltKd": 3780
+      },
+      {
+        "name": "Fribourg",
+        "hoeheM": 677,
+        "teMinAltC": -9,
+        "jahresmittelC": 8.1,
+        "hgt2012AltKd": 3872
+      },
+      {
+        "name": "Genève",
+        "hoeheM": 405,
+        "teMinAltC": -5,
+        "jahresmittelC": 10.4,
+        "hgt2012AltKd": 3072
+      },
+      {
+        "name": "Glarus",
+        "hoeheM": 480,
+        "teMinAltC": -9,
+        "jahresmittelC": 8.0,
+        "hgt2012AltKd": 3876
+      },
+      {
+        "name": "Göschenen",
+        "hoeheM": 1109,
+        "teMinAltC": -9,
+        "jahresmittelC": 5.6,
+        "hgt2012AltKd": 4849
+      },
+      {
+        "name": "Grand-St-Bernard",
+        "hoeheM": 2472,
+        "teMinAltC": -17,
+        "jahresmittelC": -1.1,
+        "hgt2012AltKd": 7679
+      },
+      {
+        "name": "Heiden",
+        "hoeheM": 809,
+        "teMinAltC": -10,
+        "jahresmittelC": 6.9,
+        "hgt2012AltKd": 4332
+      },
+      {
+        "name": "Interlaken",
+        "hoeheM": 568,
+        "teMinAltC": -7,
+        "jahresmittelC": 8.2,
+        "hgt2012AltKd": 3800
+      },
+      {
+        "name": "Jungfraujoch",
+        "hoeheM": 3576,
+        "teMinAltC": -21,
+        "jahresmittelC": -8.1,
+        "hgt2012AltKd": 10235
+      },
+      {
+        "name": "Kreuzlingen",
+        "hoeheM": 446,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.6,
+        "hgt2012AltKd": 3668
+      },
+      {
+        "name": "La Chaux-de-Fonds",
+        "hoeheM": 990,
+        "teMinAltC": -10,
+        "jahresmittelC": 7.2,
+        "hgt2012AltKd": 4185
+      },
+      {
+        "name": "Langenbruck",
+        "hoeheM": 740,
+        "teMinAltC": -9,
+        "jahresmittelC": 7.4,
+        "hgt2012AltKd": 4132
+      },
+      {
+        "name": "Langnau i.E.",
+        "hoeheM": 692,
+        "teMinAltC": -9,
+        "jahresmittelC": 7.8,
+        "hgt2012AltKd": 3961
+      },
+      {
+        "name": "Lausanne",
+        "hoeheM": 589,
+        "teMinAltC": -6,
+        "jahresmittelC": 9.5,
+        "hgt2012AltKd": 3377
+      },
+      {
+        "name": "Leysin",
+        "hoeheM": 1350,
+        "teMinAltC": -9,
+        "jahresmittelC": 6.0,
+        "hgt2012AltKd": 4722
+      },
+      {
+        "name": "Locarno-Monti",
+        "hoeheM": 379,
+        "teMinAltC": -2,
+        "jahresmittelC": 11.7,
+        "hgt2012AltKd": 2631
+      },
+      {
+        "name": "Lugano",
+        "hoeheM": 275,
+        "teMinAltC": -2,
+        "jahresmittelC": 11.8,
+        "hgt2012AltKd": 2644
+      },
+      {
+        "name": "Luzern",
+        "hoeheM": 498,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.7,
+        "hgt2012AltKd": 3653
+      },
+      {
+        "name": "Marsens",
+        "hoeheM": 721,
+        "teMinAltC": -9,
+        "jahresmittelC": 7.9,
+        "hgt2012AltKd": 3933
+      },
+      {
+        "name": "Meiringen",
+        "hoeheM": 605,
+        "teMinAltC": -7,
+        "jahresmittelC": 8.3,
+        "hgt2012AltKd": 3730
+      },
+      {
+        "name": "Mont-Soleil",
+        "hoeheM": 1183,
+        "teMinAltC": -10,
+        "jahresmittelC": 5.5,
+        "hgt2012AltKd": 4909
+      },
+      {
+        "name": "Montana",
+        "hoeheM": 1509,
+        "teMinAltC": -9,
+        "jahresmittelC": 5.8,
+        "hgt2012AltKd": 4779
+      },
+      {
+        "name": "Montreux",
+        "hoeheM": 376,
+        "teMinAltC": -5,
+        "jahresmittelC": 10.1,
+        "hgt2012AltKd": 3133
+      },
+      {
+        "name": "Neuchâtel",
+        "hoeheM": 487,
+        "teMinAltC": -7,
+        "jahresmittelC": 9.4,
+        "hgt2012AltKd": 3414
+      },
+      {
+        "name": "Oeschberg",
+        "hoeheM": 483,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.0,
+        "hgt2012AltKd": 3876
+      },
+      {
+        "name": "Olten",
+        "hoeheM": 412,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.8,
+        "hgt2012AltKd": 3588
+      },
+      {
+        "name": "Rigi Kulm",
+        "hoeheM": 1775,
+        "teMinAltC": -11,
+        "jahresmittelC": 2.5,
+        "hgt2012AltKd": 6207
+      },
+      {
+        "name": "Robbia",
+        "hoeheM": 1078,
+        "teMinAltC": -7,
+        "jahresmittelC": 6.6,
+        "hgt2012AltKd": 4371
+      },
+      {
+        "name": "S. Gottardo",
+        "hoeheM": 2095,
+        "teMinAltC": -14,
+        "jahresmittelC": 0.1,
+        "hgt2012AltKd": 7199
+      },
+      {
+        "name": "Säntis",
+        "hoeheM": 2500,
+        "teMinAltC": -16,
+        "jahresmittelC": -2.1,
+        "hgt2012AltKd": 8035
+      },
+      {
+        "name": "Schaffhausen",
+        "hoeheM": 435,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.5,
+        "hgt2012AltKd": 3695
+      },
+      {
+        "name": "Scuol",
+        "hoeheM": 1253,
+        "teMinAltC": -12,
+        "jahresmittelC": 4.8,
+        "hgt2012AltKd": 5119
+      },
+      {
+        "name": "Sion",
+        "hoeheM": 549,
+        "teMinAltC": -7,
+        "jahresmittelC": 9.9,
+        "hgt2012AltKd": 3237
+      },
+      {
+        "name": "St. Gallen",
+        "hoeheM": 664,
+        "teMinAltC": -10,
+        "jahresmittelC": 7.7,
+        "hgt2012AltKd": 4046
+      },
+      {
+        "name": "St. Moritz",
+        "hoeheM": 1833,
+        "teMinAltC": -14,
+        "jahresmittelC": 2.0,
+        "hgt2012AltKd": 6407
+      },
+      {
+        "name": "Weissfluhjoch",
+        "hoeheM": 2667,
+        "teMinAltC": -17,
+        "jahresmittelC": -2.6,
+        "hgt2012AltKd": 8238
+      },
+      {
+        "name": "Zermatt",
+        "hoeheM": 1610,
+        "teMinAltC": -12,
+        "jahresmittelC": 3.4,
+        "hgt2012AltKd": 5830
+      },
+      {
+        "name": "Zürich SMA",
+        "hoeheM": 556,
+        "teMinAltC": -8,
+        "jahresmittelC": 8.5,
+        "hgt2012AltKd": 3717
+      },
+      {
+        "name": "Zürich-Stadt",
+        "hoeheM": 411,
+        "teMinAltC": -7,
+        "jahresmittelC": 9.8,
+        "hgt2012AltKd": 3260
+      }
+    ]
+  },
+  "faustwerteAlt": {
+    "beschreibung": "Alte Empfehlung SIA 384/2:1982 (BFE-Merkblatt-Beispiel Bern): θa −8 °C, unbeheizt 5 °C, Erdreich 0 °C — veraltet, nur als Plausibilisierung",
+    "quelle": [
+      "tw-abgeleitet"
+    ],
+    "thetaAC": -8,
+    "thetaUnbeheiztC": 5,
+    "thetaErdreichC": 0
+  }
+}

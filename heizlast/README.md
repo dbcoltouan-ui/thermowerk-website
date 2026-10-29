@@ -9,7 +9,8 @@ Verbindliche Grundlage: `docs/revision/KONTEXT.md` (Zweck, Architektur-Entscheid
 | Session | Stand | Inhalt |
 |---|---|---|
 | 1 | **erledigt** (2026-10-29) | Repo-Ordner, Stack, Pages-Build, Referenzmaterial, Shell + Schritt 0, Design-Tokens |
-| 2–12 | offen | siehe `docs/revision/PLAN.md` §3 |
+| 2 | **erledigt** (2026-10-29) | Datenbasis `data/*.json` (6 Dateien, Quellen je Tabelle), Daten-Tests (141), `docs/datenquellen.md`, Recherche-Berichte `docs/recherche/` |
+| 3–12 | offen | siehe `docs/revision/PLAN.md` §3 |
 
 Staging-URL: `https://thermowerk.ch/heizlast-neu/` (bzw. `*.pages.dev/heizlast-neu/`). Das Live-Tool unter `/heizlast/` bleibt bis Session 12 unverändert.
 
@@ -64,10 +65,13 @@ Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Ast
 
 ## Datenquellen
 
-Session 2 füllt `data/`. Primärquellen: SIA 2028, SIA 380/1, SIA 384/2:2020, SN EN 12831-1, EN 442, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter. Jede Zahl mit Quelle in `docs/datenquellen.md` (ab Session 2).
+`data/` enthält sechs JSON-Dateien (Übersicht in `data/README.md`): `fws.json`, `waermepumpen.json`, `klimastationen.json`, `huelle-epochen.json`, `sia384-2.json`, `heizkoerper-tabellen.json`. Primärquellen: SIA 2028-C1:2015, SIA 384.201-C1:2014 / SN EN 12831-1-C1:2020, SIA 380/1-Vollzugshilfen, BFE Bauteilekatalog 2002, GEAK/BFE-UFELD, EnFK Merkblatt Fenster 2021, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter (Buderus, Kermi, Purmo, V&N, Stelrad, Brugman, HG-TEC, Zehnder, JOCO, Uponor, WEM …). Stichproben mit Zahl/Quelle/Datum: `docs/datenquellen.md`; vollständige Recherche-Berichte: `docs/recherche/`. Tests: `tests/daten/*.test.ts` (Schema je Datei, Plausibilität, externe Referenzwerte wie Kurslösungen und Befund-Beispiele B1–B3).
+
+Als Annahme gekennzeichnet (nicht öffentlich belegbar): Höhengradient θe 0.6 K/100 m, SIA 384/2 Anhang A/B (ersetzt durch ND.3 / ISO-13370-Tabelle), ΔU_WB 0.10/0.05, SIA-2024-Innentemperaturen, Exponent Gliederradiatoren, FBH bei exakt 35/28, Epochenzuordnung Böden/Türen.
 
 ## Offene Punkte
 
-- Sessions 2–12 gemäss Plan.
+- Sessions 3–12 gemäss Plan.
+- Offene fachliche Fragen an Daniel (Session 2): Marken im CH-Bestand für die Modell-DB (Arbonia/Runtal/Schäfer/Roca fehlen), Bad-Default 24 °C vs. SIA (wie Haupträume), Flur innerhalb Wohnung 15 oder 20 °C.
 - Screenshot-Referenz des alten Tools: `docs/revision/shots/`; des Neubaus: `docs/revision/shots-neu/`.
 - Zurückgestellt (nicht im Umfang): Hydraulik-Schemas (`referenz/alt-data/hydraulik-schemas-katalog.json` nur zum Nachschlagen).

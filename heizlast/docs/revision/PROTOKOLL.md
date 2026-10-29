@@ -56,3 +56,30 @@ Prompt: Repo klonen, PC-Zugriff, `heizlast/` anlegen (Vite+Preact+Signals+TS str
 Radien der neuen Schritt-0-Seite bestätigt (eckig bleibt). Neu Regel 10: Daniel ist kein Entwickler; Entwicklung/Backend/Deploy/Konfiguration inkl. Prüfung sind Claudes Arbeit, Daniel nur Backup-Tester; bei Wartezeiten erneut prüfen, erst abschliessen wenn bestätigt.
 → KONTEXT.md (§2 Design, §3 Regel 10, §4 Definition of Done «Deploy von Claude verifiziert»), PLAN.md (§3 Prüfspalte, §4 alle Prompts: «Daniel bestätigt/Review/Secret setzen» → Claude prüft selbst) angepasst; in Repo, Projekt-Wissensbasis und REVISION-Ordner nachgeführt.
 → Deploy Session 1 von Claude verifiziert: https://thermowerk.ch/heizlast-neu/ liefert HTTP 200 mit der neuen Shell; /heizlast/ unverändert 200.
+
+## 2026-10-29 16:39 — Session 2: Datenbasis & Fachgrundlagen (Fable-Prompt aus PLAN §4, ausgeführt mit Fable 5.1)
+Prompt: Alle Fachdaten als JSON unter `heizlast/data/` mit `_meta` und Quelle je Tabelle; sechs Dateien; Vitest-Schema/Plausi; `docs/datenquellen.md`; fachliche Fragen bündeln.
+
+### Entscheide
+- Quellenlage: FWS-PDFs vom PC gestaged (Folien 12/13/30/43/45/54–57/91–95 als Bild gelesen — Formeln, η-Bänder, Speicherverlust-Diagramm, f_sto, Spitzendeckung, Bivalenz). Vier Recherche-Agents (Klima/SIA, Hülle, Platten-HK, übrige Heizflächen) mit Belegpflicht (URL + Seite + Abrufdatum); Berichte unter `docs/recherche/`.
+- FACH-12 teilweise revidiert: f_sto 1.25/1.10/1.00 ist belegt (SIA 385/2:2015 §4.3.2.5, Folie 54); Kurs-Empfehlung EFH 400 l / MFH 2–3 Ladezyklen übernommen.
+- Heizwerte: zwei Konventionen `fwsKurs` (10.5/10.4, Default) und `hi` (BFE 42.9 MJ/kg → 10.0 kWh/l; Erdgas Hu 36.3 MJ/m³n → 10.08) mit Korrekturfaktor für Kurs-η.
+- Klima: alle 40 SIA-2028-Stationen aus der öffentlichen Korrigenda C1:2015 (θe «kalt», 1-h-Min, HGT 20/12). Höhenkorrektur-Regel belegt (ND.1.1, SIA 384/2 Kap. 4/5), Gradient nicht öffentlich → 0.6 K/100 m aus 10 Stationspaaren (0.4–0.9) ab 200 m Differenz, als Annahme. PLZ-Zuordnung 2-/3-stellig = Thermowerk-Regel inkl. kantonaler Vorgaben (AG, GR, VD, SH, BS).
+- SIA 384/2: n_min aus Tabelle NA.7 (SN EN 12831-1/C1:2020, gleichzeitig mit SIA 384/2 in Kraft), b_u aus SIA 384.201-C1:2014 Tabelle ND.3; Anhang A/B und ΔU_WB nicht öffentlich → ISO-13370-Tabelle (Wissensbasis B 3.8, Spalten als R-Stufen 0/0.5/1/2 geordnet) und DIN-Pauschale 0.10/0.05 als Annahme.
+- Hülle: Epochen-Defaults BESTAND als Schichtketten (λ aus BFE-Bauteilekatalog 2002/SIA D0170/SIA 279); Spannen aus GEAK, BFE-UFELD, Bauteilekatalog, eREN, SIA 380/1-Grenzwerten; Kontrollwert je Default nachgerechnet (Test). Monotonie gilt für die Spannen (min/max) über die Epochen; der Default-U selbst kann steigen (Holzbalkendecke mit Schlacke 0.9 → Betondecke 3.0), dokumentiert. Zwei effektive λ kalibriert (Bruchstein 0.9, Schlacke 0.2).
+- Heizkörper: Platten W/m = Mittel aus sechs Datenblättern (Buderus, Kermi, Purmo/Radson, V&N, Stelrad, Brugman; Belege je Wert in `platten.belege`); Typ 30 liegt physikalisch unter Typ 22 (keine Konvektorbleche) → Test prüft 10<11<20<21<22<33 und 20<30<33 statt der im Prompt genannten Reihe. Eine Exponententabelle (Mittel der Datenblätter). Guss DIN 4703 HG-TEC/Buderus, Charleston (60.9 W/Glied H600 3-Säuler vs. Wissensbasis 60), Konvektor n 1.40 (JOCO 1.41, Terraline 1.37–1.55), Bad Kermi Basic-D, FBH Floortec (EN 1264) + Viessmann-Kontrolle, Wandheizung WEM/Variotherm. Alte Modell-DB komplett ersetzt (205 belegte Einträge, Buderus/Stelrad-Dublette aufgelöst, Purmo 22/600 = 1709 W/m statt 1462, Charleston korrigiert).
+- WP-DB: nur `hauptgeraete`, 41 Heizung / 6 Brauchwasser, Zahlen/null, Preis null = auf Anfrage, 9 Geräte mit Plausibilitätsflag (BO-0003/4/7/8, OE-0001/2/3/5/13); Verifikationsstatus ehrlich («KI-Session, nicht fachlich geprüft»).
+
+### Änderungen
+- Neu: `data/fws.json`, `data/waermepumpen.json`, `data/klimastationen.json`, `data/huelle-epochen.json`, `data/sia384-2.json`, `data/heizkoerper-tabellen.json`, `data/README.md`; `tests/daten/*.test.ts` (7 Dateien, 141 Tests); `docs/datenquellen.md`; `docs/recherche/2026-10-29_*.md` (4 Berichte); README aktualisiert.
+- Kein Rechencode; keine Änderung an `src/`.
+
+### Prüfung
+- `npm test` 141/141 grün (Meta-Konvention je Datei, Quellen-IDs auflösbar, kein Eszett/keine ae-oe-ue-Umschreibung in Werten; Plausi: U-Spannen monoton über Epochen, ISO-6946-Nachrechnung = Kontrollwert, Dämmung↑ ⇒ U↓; HK W/m steigend über Höhe, W/m² Front fallend, Typ-Reihenfolge, Exponenten in [1.0, 1.45], 55/45-Kontrollwerte, Befund B1/B2/B3, Charleston 60 W, Konvektor 45/35 → 0.27, 90/70 → 0.795; Kurslösungen 40.3 kWh/d, 2.69 h, 1.89 kW, Sperrzeit 24/(24−t), Bauperioden-Bänder; Klima-Stichproben und Korrelationen; n_min/b_u/U_eq-Monotonie). `npm run lint` ohne Fehler, `npm run build` ok.
+- Deploy: Commit + Push, Cloudflare-Build; Staging `https://thermowerk.ch/heizlast-neu/` per Fetch geprüft (siehe Chat-Bericht), Live `/heizlast/` unverändert.
+
+### Offene fachliche Fragen an Daniel (Fragerunde 3)
+1. Marken im CH-Bestand für die Modell-DB: Arbonia/Runtal/Schäfer/Roca-Radiatoren fehlen (nur Fallback-Tabellen); welche Marken sieht Thermowerk am häufigsten?
+2. Bad-Innentemperatur: Default 24 °C (DIN/Komfort) oder SIA-konform wie Haupträume (20–22 °C)?
+3. Flur innerhalb einer Wohnung: 15 °C (DIN) oder 20 °C (CH-Praxis, keine Türen)?
+4. WW-Standard-Default für EFH: «mittlerer Standard» 45 l/P·d oder Kurs-Rechenwert 40 l/P·d (Aufgabe 4)?

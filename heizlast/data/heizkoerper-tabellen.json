@@ -1,0 +1,6770 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "stand": "2026-10-29",
+    "beschreibung": "Heizflächen-Tabellen für das Wärmeabgabe-Modul: Normwärmeleistung EN 442 bei 75/65/20 °C (Δθ_log 49.83 K) je Bauart aus Massen (Platten W/m je Typ × Höhe als Mittel mehrerer Hersteller; Glieder W/Glied je Nabenabstand × Tiefe; Röhren W/Element je Säulen × Höhe; Konvektoren W/m je Höhe × Tiefe; Bad-HK, Vertikal-HK, FBH W/m², Wandheizung), eine Exponenten-Tabelle, Minderungsfaktoren, Umrechnungs-Kontrollwerte und bereinigte Modell-DB (nur Datenblatt-belegte Zahlen, `abgeleitet` gekennzeichnet). Keine Rechenlogik: der Kern interpoliert/rechnet selbst (Session 5).",
+    "quellen": [
+      {
+        "id": "en442",
+        "titel": "EN 442-2: Normwärmeleistung bei 75/65/20 °C, logarithmische Übertemperatur Δθ_log = (θV−θR)/ln((θV−θi)/(θR−θi)); Q = Q_N·(Δθ_log/Δθ_log,N)^n",
+        "art": "Norm (zitiert über Herstellerdatenblätter)"
+      },
+      {
+        "id": "wb-e",
+        "titel": "Wissensbasis E_Heizkoerper.md (Fachkunde SHK B1 LF07 S.435 Tab. 3.5 Säulenradiator; Tabellenbuch B4 S.368/373; Technische Mathematik B2 Kap. 8 S.240–243 Minderungsfaktoren f1–f5)",
+        "art": "Wissensbasis (DE)",
+        "fundort": "docs/wissensbasis/E_Heizkoerper.md"
+      },
+      {
+        "id": "wb-f",
+        "titel": "Wissensbasis F_Flaechenheizung.md (B4 S.372–378: EN-1264-Grenzwerte, Richtwerte FBH-Nachrüstung Tab. 3.10)",
+        "art": "Wissensbasis (DE)",
+        "fundort": "docs/wissensbasis/F_Flaechenheizung.md"
+      },
+      {
+        "id": "hgtec-guss",
+        "titel": "HG-TEC GmbH «Gussradiatoren nach DIN 4703 und EN 442, Technische Daten 8/2009» (Reg.-Nr. 6 R 0548), W/Glied bei 75/65/20, 70/55/20, 55/45/20, Gliedlänge 60 mm",
+        "art": "Hersteller-/Importeurdatenblatt",
+        "url": "https://www.hg-tec.de/downloads/technischedatengussradiatoren.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "hgtec-stahl",
+        "titel": "HG-TEC GmbH «Stahlradiatoren nach DIN 4703 und EN 442, Technische Daten 8/2009» (Reg.-Nr. 6 R 0303), W/Glied, Gliedlänge 50 mm",
+        "art": "Hersteller-/Importeurdatenblatt",
+        "url": "https://www.hg-tec.de/downloads/technischedatenstahlradiatorenmailversion.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "buderus-teil5",
+        "titel": "Buderus Katalog Teil 5 «Heizflächen und Fussbodenheizungen» 04/2026: Gussradiator DIN 4703 (S. 4055, PDF 295–296) und Arbonia Röhrenradiator (S. 4006 ff., PDF 245–248), nur 70/55/20 und 55/45/20",
+        "art": "Herstellerkatalog",
+        "url": "https://www.buderus.lu/resource/blob/13242/4918e5254be2f62c97ea874c8d06f22c/Teil-5_Heizflaechen-Fussbodenheizungen_09_2022.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "vn-modernisierung",
+        "titel": "Vogel & Noot «Modernisierung» Technik-Information 08/2010, S. 06: DIN-Gliederradiatoren W/lfm bei 90/70/20",
+        "art": "Herstellerunterlage",
+        "url": "https://www.vogelundnoot.com/static_files/int/media/downloads/replacement_komplett_technik_information.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "zehnder-charleston-uk",
+        "titel": "Zehnder Charleston Product data sheet V20200518 UK_en, PDF S. 2–3: W/Element EN 442 75/65/20, Elementbreite 46 mm, Bautiefen 62/100/136/173/210",
+        "art": "Herstellerdatenblatt",
+        "url": "https://www.etaz.rs/imgDocuments/424/Tehni%C4%8Dke%20karakteristike%20CHARLSTON.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "zehnder-charleston-pl",
+        "titel": "Zehnder Polska «Broszura techniczna Zehnder Charleston» (2015), PDF S. 3–6: Exponent n je Modell, zusätzliche Höhen",
+        "art": "Herstellerbroschüre",
+        "url": "https://ik.pl/pliki/ZEHNDER/Broszura-techniczna-zehnder-charleston.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "vn-konvektoren",
+        "titel": "Vogel & Noot «Konvektoren & Heizwände» Technik 07/2022, S. 21/77–79/90: KONTEC KK/KH W/m bei 75/65/20 nach Höhe × Tiefe, Exponent n",
+        "art": "Herstellerdatenblatt",
+        "url": "https://shop.vogelundnoot.com/media/wysiwyg/vogelundnoot/2022_07_VN_Konvektoren_TE_DE.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "joco-konvektor",
+        "titel": "JOCO «Technik Konvektor 2022/09», S. 5/9 ff.: W/lfm bei 75/65/20 und 55/45/20 nach Höhe × Tiefe, n 1.41–1.42",
+        "art": "Herstellerdatenblatt",
+        "url": "https://joco.de/wp-content/downloads/konvektoren/Technik%20Konvektor%202022_09.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "zehnder-terraline",
+        "titel": "Zehnder Terraline Prospekt ZGCH 605 V1115, S. 5/7: Exponenten Unterflurkonvektor natürlich 1.37–1.55, mit Gebläse (EN 16430) 1.02–1.22",
+        "art": "Herstellerprospekt (CH)",
+        "url": "https://cdn.swiss-arc.ch/m10/73/41200273/etc/58/43743558.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "kermi-basic-d",
+        "titel": "Kermi «Bad- und Wohnheizkörper – Preise und Technik I/2023», S. 286: Basic-D W bei 75/65/20, 70/55/20, 55/45/20 und Exponent n je Grösse",
+        "art": "Herstellerdatenblatt",
+        "url": "https://assets.heizung-billiger.de/documents/kermi-basic-d-gerade.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "zehnder-zeno",
+        "titel": "Zehnder Zeno Produktdatenblatt V20210614 DE_de, S. 3–4: W bei 75/65/20 (und 70/55/24, 55/45/24, 55/45/20)",
+        "art": "Herstellerdatenblatt",
+        "url": "https://cdn.shopify.com/s/files/1/0503/8663/2867/files/ze-zeno-prod.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "purmo-vertical",
+        "titel": "Purmo Vertical VR10/20C/21C/22C, Katalog RO 2009/2010, S. 86–87: W bei 75/65/20 und 70/55/20, n je Höhe, W/m bei 90/70/20",
+        "art": "Herstellerkatalog",
+        "url": "https://www.roinstalatii.ro/fisiere/2872_a_4273purmo_vertical.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "stelrad-vertex",
+        "titel": "Stelrad «Compact Vertex Technical PDS» 03/2023, S. 2–3: P2/K2 W bei Δt 50 (75/65/20), EN-442-Zertifizierung W/m, n 1.30–1.33",
+        "art": "Herstellerdatenblatt",
+        "url": "https://www.specifiedby.com/stelrad/compact-vertex/Stelrad_Compact-Vertex_Technical_PDS.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "vn-floortec",
+        "titel": "Vogel & Noot «FLOORTEC Technische Informationen» (2012), S. 22, 28–31: Leistungstabellen nach ÖNORM EN 1264 (Tacker 14×2, 45 mm Überdeckung) W/m² nach VA × Rλ,B × Rohrmitteltemperatur; Basiskennlinie 8.92·Δθ^1.1; Grenzwerte 29/33/35 °C",
+        "art": "Herstellerplanungsunterlage",
+        "url": "https://www.vogelundnoot.com/static_files/at/media/downloads/Floortec_technische_informationen.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "viessmann-fbh",
+        "titel": "Viessmann Vitoset Fussbodenheizung Planungsanleitung 4/2023, S. 37: Beispiel VA 100, Rλ,B 0.05, 70 W/m² ↔ ΔθH 15 K; Grenzkurve 29 °C Keramik 95/85/72/64 W/m² bei VA 150–300",
+        "art": "Herstellerplanungsunterlage",
+        "url": "https://www.loebbeshop.de/media/66682/file/static/pdf/viessmann/planung-fbh.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "uponor-siccus",
+        "titel": "Uponor TI Siccus 14 (Trockensystem), S. 5–8: Auslegungstabellen q_des nach θV,des und Verlegeabstand",
+        "art": "Herstellerplanungsunterlage",
+        "url": "https://brandportal.uponor.com/m/3166911f331518fe/original/TI-Siccus-14-DE-1119611-v1.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "danfoss-ufh",
+        "titel": "Danfoss «Planning Underfloor Heat» VGC C202 06/2009, S. 3–4: ca. 100 W/m² bei 9 K Oberflächenübertemperatur, ca. 175 W/m² Randzone (15 K)",
+        "art": "Herstellerplanungsunterlage",
+        "url": "https://assets.danfoss.com/documents/100650/AG000086464394en-010201.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "wem-klimaelement",
+        "titel": "WEM Technisches Datenblatt Klimaelement MV-D (03/2022), S. 2/4: Kennlinie W/m² nach VL/RL (EN-442-Prüfbericht HLK Stuttgart)",
+        "art": "Herstellerdatenblatt",
+        "url": "https://cdn.shopify.com/s/files/1/0628/8539/6725/files/DB-Klimaelement_D_03-22.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "wem-klimaregister",
+        "titel": "WEM Technisches Datenblatt Klimaregister (03/2020), S. 1/3: Nassputz-Wandheizung W/m² nach VL/RL",
+        "art": "Herstellerdatenblatt",
+        "url": "https://cdn.shopify.com/s/files/1/0628/8539/6725/files/DB-Klimaregister_020.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "variotherm-wall",
+        "titel": "Variotherm «MWHC Planning – Modular wall heating and cooling» VPLAN6, S. 23: Heat output table (35/28/20 → 84 W/m²)",
+        "art": "Herstellerplanungsunterlage",
+        "url": "https://eco-logisch.nl/images_content/thema/bestanden/Variotherm_Module_Gipsvezel_fermacell_wandverwarming_voor_op_regelwerk_metal_stud_planningsdocument_dimensionering.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "buderus-logatrend",
+        "titel": "Buderus «Planungsunterlage Heizkörper Logatrend» 6721814245 (2025/09), PDF-S. 13 Tab. 5: Logatrend C-Profil.2 W/m bei 75/65/20, n, 70/55, 55/45; Bautiefen S. 7",
+        "art": "Herstellerdatenblatt",
+        "url": "https://www.haustechnikmarkt24.de/media/pdf/heizkoerper/buderus-planungsunterlage-flachheizkoerper.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "kermi-profil-k",
+        "titel": "Kermi therm-x2 Profil-K: Technik PL 2017 PDF-S. 24/26 (W/m 75/65/20, n; 70/55, 55/45), FR 2018 PDF-S. 28; Hygiene Typ 10/20/30 DE 2023 PDF-S. 5/7",
+        "art": "Herstellerdatenblatt",
+        "url": "http://sankom.pl/download/dk/documentation/kermi/grzejniki/kiti_fhk_technik_2017_pl.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "purmo-compact",
+        "titel": "Purmo Group Technischer Katalog Panelradiatoren 10/2020 PDF-S. 12–15/31–33 (Compact, Hygiene; Zeile 1000 mm = W/m); Purmo DK Produktblad 2018 S. 5–10 (φn W/m, n); Radson Compact HP FR 2023 S. 5–8 (750 mm, 55/45)",
+        "art": "Herstellerdatenblatt",
+        "url": "https://gazovik.ua/upload/fck/file/Purmo_tech_catalogue_2020_.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "vn-kompakt",
+        "titel": "Vogel & Noot «Kompaktheizkörper – Technische Informationen» (AT, 2012) PDF-S. 5–6 (Zeile 1000 mm; n; 70/55, 55/45, 45/40); identisch COSMO/V&N DE 2022 PDF-S. 66",
+        "art": "Herstellerdatenblatt",
+        "url": "https://www.vogelundnoot.com/static_files/at/media/downloads/kompaktheizkoerper_technische_informationen.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "stelrad-novello",
+        "titel": "Stelrad «Technische Dokumentation» STR-TD-GE-2014-08 PDF-S. 92/96 (Novello/Compact W/m 75/65/20, n), S. 10 (Hygiene ECO); UK Green Compact 2024 S. 6 (K2/K3 identisch)",
+        "art": "Herstellerdatenblatt",
+        "url": "https://documents.unidomo.de/de/Katalog/Stellrad/Stellrad_STR-TD-GE-2014-08.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "brugman-compact4",
+        "titel": "Brugman «Technisches Handbuch 2025» (01/2025) PDF-S. 9/35/94–97: Compact 4 / Centric W/m 75/65/20, n, 70/55, 55/45",
+        "art": "Herstellerdatenblatt",
+        "url": "https://brugman.eu/files/downloads/Brugman-Technisches-Handuch-DE-20-10-2025.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "tw-abgeleitet",
+        "titel": "Thermowerk-Ableitung (Mittelwert mehrerer Datenblätter, Interpolation oder Umrechnung mit angegebenem Exponenten; Feld `abgeleitet: true`)",
+        "art": "Ableitung"
+      },
+      {
+        "id": "befund-hk",
+        "titel": "docs/revision/befund_heizkoerper.md §2A/§5: Nachrechnungen B1–B3, Umrechnung 90/70 → 75/65 = 0.795 (log, n 1.3)",
+        "art": "Revisionsbefund",
+        "fundort": "docs/revision/befund_heizkoerper.md"
+      }
+    ],
+    "referenzbedingung": {
+      "tVL": 75,
+      "tRL": 65,
+      "tInt": 20,
+      "dTlog": 49.83,
+      "dTarith": 50,
+      "norm": "EN 442-2"
+    },
+    "konvention": "Δθ_log (EN 442); f = (Δθ_log/49.83)^n. Alte 90/70/20-Angaben (DIN 4703): Faktor 0.795 bei n 1.3 (nicht 0.67; Befund HK-08). Unsicherheit Fallback-Tabellen ±15 %, Modell-DB ±5 %, Typenschild ±2 % (befund_heizkoerper.md §6.1)."
+  },
+  "bauarten": [
+    {
+      "key": "platte_10",
+      "label": "Plattenheizkörper Typ 10 (1 Platte)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        46,
+        47
+      ],
+      "n": 1.3,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben (Buderus/Kermi/Purmo/V&N/Stelrad) je Typ, siehe platten.nMittelJeTyp; Wissensbasis E Tab. 3.3 Platten 1.25–1.30."
+    },
+    {
+      "key": "platte_11",
+      "label": "Plattenheizkörper Typ 11 (1 Platte + 1 Konvektorblech)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        60,
+        63
+      ],
+      "n": 1.3,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.30 (Spannweite 1.22–1.34)."
+    },
+    {
+      "key": "platte_20",
+      "label": "Plattenheizkörper Typ 20 (2 Platten, ohne Konvektorblech)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        62,
+        70
+      ],
+      "n": 1.29,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.29 (Hygiene-Reihen)."
+    },
+    {
+      "key": "platte_21",
+      "label": "Plattenheizkörper Typ 21 (2 Platten + 1 Konvektorblech)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        66,
+        80
+      ],
+      "n": 1.32,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.32 (1.27–1.36)."
+    },
+    {
+      "key": "platte_22",
+      "label": "Plattenheizkörper Typ 22 (2 Platten + 2 Konvektorbleche)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        100,
+        105
+      ],
+      "n": 1.33,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.33 (1.28–1.36)."
+    },
+    {
+      "key": "platte_30",
+      "label": "Plattenheizkörper Typ 30 (3 Platten, ohne Konvektorblech)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        100,
+        110
+      ],
+      "n": 1.3,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.30."
+    },
+    {
+      "key": "platte_33",
+      "label": "Plattenheizkörper Typ 33 (3 Platten + 3 Konvektorbleche)",
+      "kategorie": "platte",
+      "tiefeTypMm": [
+        152,
+        160
+      ],
+      "n": 1.32,
+      "quelleExponent": [
+        "buderus-logatrend",
+        "kermi-profil-k",
+        "purmo-compact",
+        "vn-kompakt",
+        "stelrad-novello",
+        "brugman-compact4",
+        "wb-e"
+      ],
+      "exponentHinweis": "Mittel der Herstellerangaben 1.32 (1.27–1.37); Wissensbasis E Tab. 3.3: 1.30–1.33."
+    },
+    {
+      "key": "guss_glieder",
+      "label": "Gussradiator (Glieder, DIN 4703)",
+      "kategorie": "glieder",
+      "gliedbreiteMm": 60,
+      "n": 1.3,
+      "quelleExponent": [
+        "wb-e"
+      ],
+      "exponentHinweis": "Exponent für DIN-4703-Gliederradiatoren in keinem Datenblatt belegt (Recherche 2026-10-29); Wissensbasis E Tab. 3.3 Gussradiator 1.30. HG-TEC-Tabelle 75/65→55/45 impliziert n ≈ 1.30."
+    },
+    {
+      "key": "stahl_glieder",
+      "label": "Stahl-Gliederradiator (DIN 4703)",
+      "kategorie": "glieder",
+      "gliedbreiteMm": 50,
+      "n": 1.3,
+      "quelleExponent": [
+        "wb-e"
+      ],
+      "exponentHinweis": "wie Guss (Wissensbasis E Tab. 3.3 Stahlradiator 1.30)."
+    },
+    {
+      "key": "roehren_2",
+      "label": "Stahl-Röhrenradiator 2-säulig",
+      "kategorie": "roehren",
+      "saeulen": 2,
+      "gliedbreiteMm": 46,
+      "n": 1.27,
+      "quelleExponent": [
+        "zehnder-charleston-pl"
+      ],
+      "exponentHinweis": "Zehnder Charleston PL-Broschüre: 2-Säuler 1.21–1.30 je Höhe, Mitte 1.27."
+    },
+    {
+      "key": "roehren_3",
+      "label": "Stahl-Röhrenradiator 3-säulig",
+      "kategorie": "roehren",
+      "saeulen": 3,
+      "gliedbreiteMm": 46,
+      "n": 1.28,
+      "quelleExponent": [
+        "zehnder-charleston-pl"
+      ],
+      "exponentHinweis": "Charleston 3–6-Säuler 1.25–1.33 (Bandbreite); Default 1.28."
+    },
+    {
+      "key": "roehren_4",
+      "label": "Stahl-Röhrenradiator 4-säulig",
+      "kategorie": "roehren",
+      "saeulen": 4,
+      "gliedbreiteMm": 46,
+      "n": 1.28,
+      "quelleExponent": [
+        "zehnder-charleston-pl"
+      ]
+    },
+    {
+      "key": "roehren_5",
+      "label": "Stahl-Röhrenradiator 5-säulig",
+      "kategorie": "roehren",
+      "saeulen": 5,
+      "gliedbreiteMm": 46,
+      "n": 1.28,
+      "quelleExponent": [
+        "zehnder-charleston-pl"
+      ]
+    },
+    {
+      "key": "roehren_6",
+      "label": "Stahl-Röhrenradiator 6-säulig",
+      "kategorie": "roehren",
+      "saeulen": 6,
+      "gliedbreiteMm": 46,
+      "n": 1.28,
+      "quelleExponent": [
+        "zehnder-charleston-pl"
+      ]
+    },
+    {
+      "key": "konvektor_passiv",
+      "label": "Konvektor ohne Gebläse (Wand-/Unterflur-/Bankkonvektor)",
+      "kategorie": "konvektor",
+      "n": 1.4,
+      "quelleExponent": [
+        "wb-e",
+        "joco-konvektor",
+        "zehnder-terraline",
+        "vn-konvektoren"
+      ],
+      "exponentHinweis": "Wissensbasis E Tab. 3.3: 1.40; JOCO 1.41–1.42; Terraline UN 1.37–1.55; V&N Kontec 1.19–1.38 (Wandkonvektoren mit Abdeckung, tiefer). Befund HK-03: alter Default 1.10 war falsch."
+    },
+    {
+      "key": "konvektor_geblaese",
+      "label": "Gebläsekonvektor",
+      "kategorie": "konvektor",
+      "n": 1.1,
+      "quelleExponent": [
+        "wb-e",
+        "zehnder-terraline"
+      ],
+      "exponentHinweis": "Zehnder Terraline UFT (EN 16430) 1.02–1.22, typ. 1.03–1.09; Wissensbasis 1.10–1.20."
+    },
+    {
+      "key": "bad_handtuch",
+      "label": "Bad-/Handtuchheizkörper (Rohrregister)",
+      "kategorie": "bad",
+      "n": 1.22,
+      "quelleExponent": [
+        "kermi-basic-d",
+        "wb-e"
+      ],
+      "exponentHinweis": "Kermi Basic-D 1.195–1.233 je Grösse; Mittel 1.22."
+    },
+    {
+      "key": "design_vertikal",
+      "label": "Vertikal-/Design-Plattenheizkörper",
+      "kategorie": "vertikal",
+      "n": 1.32,
+      "quelleExponent": [
+        "purmo-vertical",
+        "stelrad-vertex"
+      ],
+      "exponentHinweis": "Purmo Vertical 1.30–1.37, Stelrad Vertex 1.30–1.33."
+    },
+    {
+      "key": "fbh",
+      "label": "Fussbodenheizung",
+      "kategorie": "flaeche",
+      "n": 1.1,
+      "quelleExponent": [
+        "wb-f",
+        "vn-floortec"
+      ],
+      "exponentHinweis": "EN 1264 Basiskennlinie q = 8.92·(θF,m − θi)^1.1 → n = 1.10 (Befund HK-10: alter Wert 1.00 falsch)."
+    },
+    {
+      "key": "wandheizung",
+      "label": "Wandheizung",
+      "kategorie": "flaeche",
+      "n": 1.1,
+      "quelleExponent": [
+        "wb-e",
+        "tw-abgeleitet"
+      ],
+      "exponentHinweis": "Kein Exponent belegt; Annahme wie Flächenheizung 1.10 (WEM-Kennlinie 35/30 → 55/45: 85 → 232 W/m² entspricht n ≈ 1.15)."
+    }
+  ],
+  "exponenten": {
+    "beschreibung": "EINE Tabelle n je Bauart (siehe bauarten[].n); hier zusätzlich als Map.",
+    "quelle": [
+      "wb-e",
+      "zehnder-charleston-pl",
+      "kermi-basic-d",
+      "joco-konvektor",
+      "zehnder-terraline",
+      "stelrad-vertex",
+      "purmo-vertical",
+      "vn-floortec"
+    ],
+    "werte": {
+      "platte_10": 1.3,
+      "platte_11": 1.3,
+      "platte_20": 1.29,
+      "platte_21": 1.32,
+      "platte_22": 1.33,
+      "platte_30": 1.3,
+      "platte_33": 1.32,
+      "guss_glieder": 1.3,
+      "stahl_glieder": 1.3,
+      "roehren_2": 1.27,
+      "roehren_3": 1.28,
+      "roehren_4": 1.28,
+      "roehren_5": 1.28,
+      "roehren_6": 1.28,
+      "konvektor_passiv": 1.4,
+      "konvektor_geblaese": 1.1,
+      "bad_handtuch": 1.22,
+      "design_vertikal": 1.32,
+      "fbh": 1.1,
+      "wandheizung": 1.1
+    },
+    "bereichGueltig": [
+      1.0,
+      1.45
+    ]
+  },
+  "umrechnung": {
+    "beschreibung": "Kontrollwerte f = Q(θ)/Q_N für übliche Betriebspunkte (θi 20 °C) nach n; Δθ_log und arithmetisch. Kurs-/Wissensbasis-Vergleich: 55/45 n 1.3 → 0.52 (Tab. 3.2), 90/70 → 1.27 (Kehrwert 0.79).",
+    "quelle": [
+      "en442",
+      "wb-e",
+      "befund-hk"
+    ],
+    "tabelle": [
+      {
+        "tVL": 90,
+        "tRL": 70,
+        "tInt": 20,
+        "dTlog": 59.44,
+        "dTarith": 60.0,
+        "f": {
+          "1.1": 1.214,
+          "1.2": 1.236,
+          "1.3": 1.258,
+          "1.33": 1.264,
+          "1.4": 1.28
+        }
+      },
+      {
+        "tVL": 75,
+        "tRL": 65,
+        "tInt": 20,
+        "dTlog": 49.83,
+        "dTarith": 50.0,
+        "f": {
+          "1.1": 1.0,
+          "1.2": 1.0,
+          "1.3": 1.0,
+          "1.33": 1.0,
+          "1.4": 1.0
+        }
+      },
+      {
+        "tVL": 70,
+        "tRL": 55,
+        "tInt": 20,
+        "dTlog": 42.06,
+        "dTarith": 42.5,
+        "f": {
+          "1.1": 0.83,
+          "1.2": 0.816,
+          "1.3": 0.802,
+          "1.33": 0.798,
+          "1.4": 0.789
+        }
+      },
+      {
+        "tVL": 65,
+        "tRL": 55,
+        "tInt": 20,
+        "dTlog": 39.79,
+        "dTarith": 40.0,
+        "f": {
+          "1.1": 0.781,
+          "1.2": 0.763,
+          "1.3": 0.746,
+          "1.33": 0.741,
+          "1.4": 0.73
+        }
+      },
+      {
+        "tVL": 60,
+        "tRL": 50,
+        "tInt": 20,
+        "dTlog": 34.76,
+        "dTarith": 35.0,
+        "f": {
+          "1.1": 0.673,
+          "1.2": 0.649,
+          "1.3": 0.626,
+          "1.33": 0.619,
+          "1.4": 0.604
+        }
+      },
+      {
+        "tVL": 55,
+        "tRL": 45,
+        "tInt": 20,
+        "dTlog": 29.72,
+        "dTarith": 30.0,
+        "f": {
+          "1.1": 0.566,
+          "1.2": 0.538,
+          "1.3": 0.511,
+          "1.33": 0.503,
+          "1.4": 0.485
+        }
+      },
+      {
+        "tVL": 50,
+        "tRL": 40,
+        "tInt": 20,
+        "dTlog": 24.66,
+        "dTarith": 25.0,
+        "f": {
+          "1.1": 0.461,
+          "1.2": 0.43,
+          "1.3": 0.401,
+          "1.33": 0.392,
+          "1.4": 0.374
+        }
+      },
+      {
+        "tVL": 45,
+        "tRL": 35,
+        "tInt": 20,
+        "dTlog": 19.58,
+        "dTarith": 20.0,
+        "f": {
+          "1.1": 0.358,
+          "1.2": 0.326,
+          "1.3": 0.297,
+          "1.33": 0.289,
+          "1.4": 0.27
+        }
+      },
+      {
+        "tVL": 40,
+        "tRL": 30,
+        "tInt": 20,
+        "dTlog": 14.43,
+        "dTarith": 15.0,
+        "f": {
+          "1.1": 0.256,
+          "1.2": 0.226,
+          "1.3": 0.2,
+          "1.33": 0.192,
+          "1.4": 0.176
+        }
+      },
+      {
+        "tVL": 35,
+        "tRL": 28,
+        "tInt": 20,
+        "dTlog": 11.14,
+        "dTarith": 11.5,
+        "f": {
+          "1.1": 0.192,
+          "1.2": 0.166,
+          "1.3": 0.143,
+          "1.33": 0.136,
+          "1.4": 0.123
+        }
+      }
+    ],
+    "faktor9070Zu7565": {
+      "n1_3": 0.795,
+      "hinweis": "Typenschild 90/70/20 → 75/65/20: Q_N = Q_9070 · 0.795 (n 1.3)"
+    }
+  },
+  "platten": {
+    "beschreibung": "W je Meter Baulänge bei 75/65/20 je Typ × Bauhöhe; Mittel aus Herstellerdatenblättern (Belege je Wert in `belege`). Interpolation über Höhe im Kern; Länge linear (±3 %, Minderung f4).",
+    "quelle": [
+      "en442",
+      "tw-abgeleitet",
+      "buderus-logatrend",
+      "kermi-profil-k",
+      "purmo-compact",
+      "vn-kompakt",
+      "stelrad-novello",
+      "brugman-compact4"
+    ],
+    "hoehenMm": [
+      300,
+      400,
+      500,
+      600,
+      750,
+      900
+    ],
+    "abgeleitet": true,
+    "wProM7565": {
+      "10": {
+        "300": 340,
+        "400": 434,
+        "500": 526,
+        "600": 616,
+        "750": 736,
+        "900": 881
+      },
+      "11": {
+        "300": 544,
+        "400": 700,
+        "500": 847,
+        "600": 983,
+        "750": 1208,
+        "900": 1376
+      },
+      "20": {
+        "300": 597,
+        "400": 750,
+        "500": 899,
+        "600": 1044,
+        "750": 1235,
+        "900": 1468
+      },
+      "21": {
+        "300": 769,
+        "400": 975,
+        "500": 1159,
+        "600": 1330,
+        "750": 1606,
+        "900": 1841
+      },
+      "22": {
+        "300": 984,
+        "400": 1241,
+        "500": 1475,
+        "600": 1697,
+        "750": 2021,
+        "900": 2336
+      },
+      "30": {
+        "300": 856,
+        "400": 1070,
+        "500": 1275,
+        "600": 1473,
+        "750": 1707,
+        "900": 2040
+      },
+      "33": {
+        "300": 1378,
+        "400": 1736,
+        "500": 2065,
+        "600": 2370,
+        "750": 2732,
+        "900": 3244
+      }
+    },
+    "belege": {
+      "10": {
+        "300": {
+          "buderus": 330,
+          "kermi": 335,
+          "purmo": 348,
+          "vogelnoot": 348,
+          "stelrad": 338
+        },
+        "400": {
+          "buderus": 423,
+          "kermi": 425,
+          "purmo": 449,
+          "vogelnoot": 444,
+          "stelrad": 430
+        },
+        "500": {
+          "buderus": 514,
+          "kermi": 514,
+          "purmo": 546,
+          "vogelnoot": 536,
+          "stelrad": 521
+        },
+        "600": {
+          "buderus": 604,
+          "kermi": 602,
+          "purmo": 639,
+          "vogelnoot": 625,
+          "stelrad": 610
+        },
+        "750": {
+          "kermi": 736
+        },
+        "900": {
+          "buderus": 875,
+          "kermi": 872,
+          "purmo": 903,
+          "vogelnoot": 878,
+          "stelrad": 877
+        }
+      },
+      "11": {
+        "300": {
+          "buderus": 549,
+          "kermi": 551,
+          "purmo": 546,
+          "vogelnoot": 565,
+          "stelrad": 509
+        },
+        "400": {
+          "buderus": 708,
+          "kermi": 697,
+          "purmo": 711,
+          "vogelnoot": 708,
+          "stelrad": 676,
+          "brugman": 697
+        },
+        "500": {
+          "buderus": 858,
+          "kermi": 840,
+          "purmo": 868,
+          "vogelnoot": 843,
+          "stelrad": 833,
+          "brugman": 840
+        },
+        "600": {
+          "buderus": 1002,
+          "kermi": 979,
+          "purmo": 1018,
+          "vogelnoot": 939,
+          "stelrad": 980,
+          "brugman": 979
+        },
+        "750": {
+          "kermi": 1185,
+          "purmo": 1230
+        },
+        "900": {
+          "buderus": 1394,
+          "kermi": 1390,
+          "purmo": 1427,
+          "vogelnoot": 1292,
+          "stelrad": 1360,
+          "brugman": 1390
+        }
+      },
+      "20": {
+        "300": {
+          "buderus": 590,
+          "kermi": 582,
+          "purmo": 630,
+          "stelrad": 585
+        },
+        "400": {
+          "buderus": 746,
+          "kermi": 736,
+          "purmo": 787,
+          "stelrad": 732
+        },
+        "500": {
+          "buderus": 897,
+          "kermi": 883,
+          "purmo": 938,
+          "stelrad": 879
+        },
+        "600": {
+          "buderus": 1043,
+          "kermi": 1027,
+          "purmo": 1085,
+          "stelrad": 1023
+        },
+        "750": {
+          "kermi": 1235
+        },
+        "900": {
+          "buderus": 1463,
+          "kermi": 1437,
+          "purmo": 1516,
+          "stelrad": 1458
+        }
+      },
+      "21": {
+        "300": {
+          "buderus": 745,
+          "purmo": 761,
+          "vogelnoot": 838,
+          "stelrad": 745,
+          "brugman": 755
+        },
+        "400": {
+          "buderus": 937,
+          "purmo": 963,
+          "vogelnoot": 1047,
+          "brugman": 953
+        },
+        "500": {
+          "buderus": 1117,
+          "purmo": 1156,
+          "vogelnoot": 1227,
+          "stelrad": 1153,
+          "brugman": 1141
+        },
+        "600": {
+          "buderus": 1288,
+          "purmo": 1340,
+          "vogelnoot": 1357,
+          "stelrad": 1345,
+          "brugman": 1322
+        },
+        "750": {
+          "purmo": 1606
+        },
+        "900": {
+          "buderus": 1754,
+          "purmo": 1861,
+          "vogelnoot": 1864,
+          "stelrad": 1883,
+          "brugman": 1841
+        }
+      },
+      "22": {
+        "300": {
+          "buderus": 966,
+          "kermi": 959,
+          "purmo": 961,
+          "vogelnoot": 1095,
+          "stelrad": 982,
+          "brugman": 942
+        },
+        "400": {
+          "buderus": 1216,
+          "kermi": 1207,
+          "purmo": 1221,
+          "vogelnoot": 1357,
+          "stelrad": 1245,
+          "brugman": 1202
+        },
+        "500": {
+          "buderus": 1452,
+          "kermi": 1441,
+          "purmo": 1470,
+          "vogelnoot": 1543,
+          "stelrad": 1494,
+          "brugman": 1449
+        },
+        "600": {
+          "buderus": 1679,
+          "kermi": 1666,
+          "purmo": 1709,
+          "vogelnoot": 1713,
+          "stelrad": 1732,
+          "brugman": 1683
+        },
+        "750": {
+          "kermi": 1987,
+          "purmo": 2055
+        },
+        "900": {
+          "buderus": 2313,
+          "kermi": 2295,
+          "purmo": 2388,
+          "vogelnoot": 2296,
+          "stelrad": 2395,
+          "brugman": 2326
+        }
+      },
+      "30": {
+        "300": {
+          "buderus": 858,
+          "kermi": 823,
+          "purmo": 874,
+          "stelrad": 867
+        },
+        "400": {
+          "buderus": 1072,
+          "kermi": 1034,
+          "purmo": 1098,
+          "stelrad": 1074
+        },
+        "500": {
+          "buderus": 1279,
+          "kermi": 1236,
+          "purmo": 1309,
+          "stelrad": 1275
+        },
+        "600": {
+          "buderus": 1482,
+          "kermi": 1429,
+          "purmo": 1510,
+          "stelrad": 1470
+        },
+        "750": {
+          "kermi": 1707
+        },
+        "900": {
+          "buderus": 2084,
+          "kermi": 1973,
+          "purmo": 2069,
+          "stelrad": 2034
+        }
+      },
+      "33": {
+        "300": {
+          "buderus": 1379,
+          "kermi": 1300,
+          "purmo": 1347,
+          "vogelnoot": 1561,
+          "stelrad": 1349,
+          "brugman": 1334
+        },
+        "400": {
+          "buderus": 1738,
+          "kermi": 1633,
+          "purmo": 1699,
+          "vogelnoot": 1936,
+          "stelrad": 1711,
+          "brugman": 1700
+        },
+        "500": {
+          "buderus": 2079,
+          "kermi": 1944,
+          "purmo": 2035,
+          "vogelnoot": 2228,
+          "stelrad": 2056,
+          "brugman": 2048
+        },
+        "600": {
+          "buderus": 2406,
+          "kermi": 2236,
+          "purmo": 2356,
+          "vogelnoot": 2453,
+          "stelrad": 2389,
+          "brugman": 2379
+        },
+        "750": {
+          "kermi": 2645,
+          "purmo": 2818
+        },
+        "900": {
+          "buderus": 3328,
+          "kermi": 3023,
+          "purmo": 3260,
+          "vogelnoot": 3221,
+          "stelrad": 3334,
+          "brugman": 3297
+        }
+      }
+    },
+    "nMittelJeTyp": {
+      "10": 1.3,
+      "11": 1.3,
+      "20": 1.29,
+      "21": 1.32,
+      "22": 1.33,
+      "30": 1.3,
+      "33": 1.32
+    },
+    "tiefenMmBelegt": {
+      "10": [
+        46,
+        47,
+        60,
+        61
+      ],
+      "11": [
+        60,
+        61,
+        61,
+        61,
+        61,
+        63
+      ],
+      "20": [
+        66,
+        77
+      ],
+      "21": [
+        66,
+        70,
+        73,
+        77,
+        80
+      ],
+      "22": [
+        100,
+        100,
+        100,
+        102,
+        105,
+        106
+      ],
+      "30": [
+        155,
+        158
+      ],
+      "33": [
+        152,
+        155,
+        155,
+        158,
+        165,
+        166
+      ]
+    },
+    "anzahlBelegeJeWert": {
+      "10": {
+        "300": 5,
+        "400": 5,
+        "500": 5,
+        "600": 5,
+        "750": 1,
+        "900": 5
+      },
+      "11": {
+        "300": 5,
+        "400": 6,
+        "500": 6,
+        "600": 6,
+        "750": 2,
+        "900": 6
+      },
+      "20": {
+        "300": 4,
+        "400": 4,
+        "500": 4,
+        "600": 4,
+        "750": 1,
+        "900": 4
+      },
+      "21": {
+        "300": 5,
+        "400": 4,
+        "500": 5,
+        "600": 5,
+        "750": 1,
+        "900": 5
+      },
+      "22": {
+        "300": 6,
+        "400": 6,
+        "500": 6,
+        "600": 6,
+        "750": 2,
+        "900": 6
+      },
+      "30": {
+        "300": 4,
+        "400": 4,
+        "500": 4,
+        "600": 4,
+        "750": 1,
+        "900": 4
+      },
+      "33": {
+        "300": 6,
+        "400": 6,
+        "500": 6,
+        "600": 6,
+        "750": 2,
+        "900": 6
+      }
+    },
+    "hinweisWenigeBelege": "Höhe 750: nur Kermi/Purmo (2 Belege) → ±15 % wie Tabelle; Typ 20/30 nur Hygiene-Reihen (Buderus/Kermi/Purmo/Stelrad).",
+    "hersteller": {
+      "buderus": {
+        "serie": "Logatrend C-Profil.2",
+        "quelle": [
+          "buderus-logatrend"
+        ],
+        "n": {
+          "10": 1.31,
+          "11": 1.31,
+          "20": 1.31,
+          "21": 1.33,
+          "22": 1.34,
+          "30": 1.32,
+          "33": 1.33
+        },
+        "hinweis": null
+      },
+      "kermi": {
+        "serie": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+        "quelle": [
+          "kermi-profil-k"
+        ],
+        "n": {
+          "10": 1.27,
+          "11": 1.26,
+          "20": 1.28,
+          "22": 1.29,
+          "30": 1.27,
+          "33": 1.28
+        },
+        "hinweis": "Kein Typ 21 (Typ 12, 64 mm, nicht übernommen). Typ 33: PL-2017-Werte (konservativ); FR-2018 nennt 1381/1744/2081/2394/2645/3214."
+      },
+      "purmo": {
+        "serie": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+        "quelle": [
+          "purmo-compact"
+        ],
+        "n": {
+          "10": 1.31,
+          "11": 1.31,
+          "20": 1.29,
+          "21": 1.31,
+          "22": 1.33,
+          "30": 1.31,
+          "33": 1.34
+        },
+        "hinweis": "Typ 21 = schmale Bauart 21s (70 mm). Deutsches Datenblatt 2025 ohne Leistungstabellen; Werte aus drei übereinstimmenden Purmo-Group-Quellen."
+      },
+      "vogelnoot": {
+        "serie": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+        "quelle": [
+          "vn-kompakt"
+        ],
+        "n": {
+          "10": 1.29,
+          "11": 1.33,
+          "21": 1.32,
+          "22": 1.34,
+          "33": 1.35
+        },
+        "hinweis": null
+      },
+      "stelrad": {
+        "serie": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+        "quelle": [
+          "stelrad-novello"
+        ],
+        "n": {
+          "10": 1.3,
+          "11": 1.3,
+          "20": 1.28,
+          "21": 1.34,
+          "22": 1.33,
+          "30": 1.31,
+          "33": 1.32
+        },
+        "hinweis": "Bauhöhe 700 statt 750 (nicht in die 750-Spalte übernommen)."
+      },
+      "brugman": {
+        "serie": "Compact 4 / Centric",
+        "quelle": [
+          "brugman-compact4"
+        ],
+        "n": {
+          "11": 1.27,
+          "21": 1.32,
+          "22": 1.32,
+          "33": 1.31
+        },
+        "hinweis": null
+      }
+    }
+  },
+  "glieder": {
+    "beschreibung": "DIN-4703-Gliederradiatoren: W je Glied bei 75/65/20 (plus 70/55/20 und 55/45/20 zur Kontrolle) nach Nabenabstand × Bautiefe. Gussradiator Gliedlänge 60 mm, Stahlradiator 50 mm. Buderus-Katalog 2026 (70/55, 55/45) stimmt mit HG-TEC auf ±1 W überein.",
+    "quelle": [
+      "hgtec-guss",
+      "hgtec-stahl",
+      "buderus-teil5"
+    ],
+    "guss": {
+      "gliedbreiteMm": 60,
+      "werte": [
+        {
+          "bauhoeheMm": 980,
+          "nabenabstandMm": 900,
+          "tiefeMm": 220,
+          "w7565": 205,
+          "w7055": 164,
+          "w5545": 104
+        },
+        {
+          "bauhoeheMm": 980,
+          "nabenabstandMm": 900,
+          "tiefeMm": 160,
+          "w7565": 163,
+          "w7055": 130,
+          "w5545": 83
+        },
+        {
+          "bauhoeheMm": 980,
+          "nabenabstandMm": 900,
+          "tiefeMm": 70,
+          "w7565": 88,
+          "w7055": 70,
+          "w5545": 45
+        },
+        {
+          "bauhoeheMm": 680,
+          "nabenabstandMm": 600,
+          "tiefeMm": 160,
+          "w7565": 111,
+          "w7055": 89,
+          "w5545": 56
+        },
+        {
+          "bauhoeheMm": 680,
+          "nabenabstandMm": 600,
+          "tiefeMm": 110,
+          "w7565": 81,
+          "w7055": 65,
+          "w5545": 42
+        },
+        {
+          "bauhoeheMm": 580,
+          "nabenabstandMm": 500,
+          "tiefeMm": 220,
+          "w7565": 122,
+          "w7055": 98,
+          "w5545": 62
+        },
+        {
+          "bauhoeheMm": 580,
+          "nabenabstandMm": 500,
+          "tiefeMm": 160,
+          "w7565": 96,
+          "w7055": 76,
+          "w5545": 49
+        },
+        {
+          "bauhoeheMm": 580,
+          "nabenabstandMm": 500,
+          "tiefeMm": 110,
+          "w7565": 72,
+          "w7055": 58,
+          "w5545": 37
+        },
+        {
+          "bauhoeheMm": 580,
+          "nabenabstandMm": 500,
+          "tiefeMm": 70,
+          "w7565": 52,
+          "w7055": 42,
+          "w5545": 27
+        },
+        {
+          "bauhoeheMm": 430,
+          "nabenabstandMm": 350,
+          "tiefeMm": 220,
+          "w7565": 97,
+          "w7055": 78,
+          "w5545": 49
+        },
+        {
+          "bauhoeheMm": 430,
+          "nabenabstandMm": 350,
+          "tiefeMm": 160,
+          "w7565": 75,
+          "w7055": 60,
+          "w5545": 39
+        },
+        {
+          "bauhoeheMm": 430,
+          "nabenabstandMm": 350,
+          "tiefeMm": 110,
+          "w7565": 55,
+          "w7055": 44,
+          "w5545": 28
+        },
+        {
+          "bauhoeheMm": 430,
+          "nabenabstandMm": 350,
+          "tiefeMm": 70,
+          "w7565": 43,
+          "w7055": 34,
+          "w5545": 22
+        },
+        {
+          "bauhoeheMm": 280,
+          "nabenabstandMm": 200,
+          "tiefeMm": 250,
+          "w7565": 75,
+          "w7055": 60,
+          "w5545": 38
+        }
+      ]
+    },
+    "stahl": {
+      "gliedbreiteMm": 50,
+      "werte": [
+        {
+          "bauhoeheMm": 1000,
+          "nabenabstandMm": 900,
+          "tiefeMm": 220,
+          "w7565": 150,
+          "w7055": 120,
+          "w5545": 76
+        },
+        {
+          "bauhoeheMm": 1000,
+          "nabenabstandMm": 900,
+          "tiefeMm": 160,
+          "w7565": 115,
+          "w7055": 92,
+          "w5545": 58
+        },
+        {
+          "bauhoeheMm": 1000,
+          "nabenabstandMm": 900,
+          "tiefeMm": 110,
+          "w7565": 86,
+          "w7055": 69,
+          "w5545": 44
+        },
+        {
+          "bauhoeheMm": 600,
+          "nabenabstandMm": 500,
+          "tiefeMm": 220,
+          "w7565": 97,
+          "w7055": 77,
+          "w5545": 49
+        },
+        {
+          "bauhoeheMm": 600,
+          "nabenabstandMm": 500,
+          "tiefeMm": 160,
+          "w7565": 73,
+          "w7055": 59,
+          "w5545": 38
+        },
+        {
+          "bauhoeheMm": 600,
+          "nabenabstandMm": 500,
+          "tiefeMm": 110,
+          "w7565": 54,
+          "w7055": 44,
+          "w5545": 28
+        },
+        {
+          "bauhoeheMm": 450,
+          "nabenabstandMm": 350,
+          "tiefeMm": 220,
+          "w7565": 76,
+          "w7055": 61,
+          "w5545": 39
+        },
+        {
+          "bauhoeheMm": 450,
+          "nabenabstandMm": 350,
+          "tiefeMm": 160,
+          "w7565": 59,
+          "w7055": 47,
+          "w5545": 30
+        },
+        {
+          "bauhoeheMm": 300,
+          "nabenabstandMm": 200,
+          "tiefeMm": 250,
+          "w7565": 62,
+          "w7055": 49,
+          "w5545": 31
+        }
+      ]
+    },
+    "referenz9070": {
+      "beschreibung": "Vogel & Noot Ersatztabelle DIN-Gliederradiatoren W/lfm bei 90/70/20 (nicht umgerechnet; Kontrolle: ×0.795 ≈ W/lfm 75/65 → /16.7 Glieder/lfm (60 mm) ≈ W/Glied)",
+      "quelle": [
+        "vn-modernisierung"
+      ],
+      "werte": [
+        {
+          "nabenabstandMm": 200,
+          "tiefeMm": 250,
+          "bauhoeheMm": 300,
+          "wProLfm9070": 1540
+        },
+        {
+          "nabenabstandMm": 350,
+          "tiefeMm": 160,
+          "bauhoeheMm": 450,
+          "wProLfm9070": 1480
+        },
+        {
+          "nabenabstandMm": 350,
+          "tiefeMm": 220,
+          "bauhoeheMm": 450,
+          "wProLfm9070": 1980
+        },
+        {
+          "nabenabstandMm": 500,
+          "tiefeMm": 110,
+          "bauhoeheMm": 600,
+          "wProLfm9070": 1460
+        },
+        {
+          "nabenabstandMm": 500,
+          "tiefeMm": 160,
+          "bauhoeheMm": 600,
+          "wProLfm9070": 1980
+        },
+        {
+          "nabenabstandMm": 500,
+          "tiefeMm": 220,
+          "bauhoeheMm": 600,
+          "wProLfm9070": 2560
+        },
+        {
+          "nabenabstandMm": 900,
+          "tiefeMm": 110,
+          "bauhoeheMm": 1000,
+          "wProLfm9070": 2440
+        },
+        {
+          "nabenabstandMm": 900,
+          "tiefeMm": 160,
+          "bauhoeheMm": 1000,
+          "wProLfm9070": 3140
+        },
+        {
+          "nabenabstandMm": 900,
+          "tiefeMm": 220,
+          "bauhoeheMm": 1000,
+          "wProLfm9070": 4080
+        }
+      ]
+    },
+    "kontrollbeispiel": "Befund B2: 10 Glieder Guss 600/160 (Bauhöhe 680) @70/55: 10 × 89 = 890 W (HG-TEC) — alter Tool-Wert 375 W (Faktor 2.4 zu tief)."
+  },
+  "roehren": {
+    "beschreibung": "Stahl-Röhrenradiatoren (Säuler): W je Element bei 75/65/20. Primär Zehnder Charleston (Elementbreite 46 mm, Bautiefen 62/100/136/173/210 mm); Kontrolle Wissensbasis E Tab. 3.5 (Tiefen 65/105/145/185/225) und Arbonia (nur 70/55, 55/45).",
+    "quelle": [
+      "zehnder-charleston-uk",
+      "zehnder-charleston-pl",
+      "wb-e",
+      "buderus-teil5"
+    ],
+    "charleston": {
+      "gliedbreiteMm": 46,
+      "gesamtlaengeFormel": "L = Elemente × 46 mm + 26 mm",
+      "tiefeMmJeSaeulen": {
+        "2": 62,
+        "3": 100,
+        "4": 136,
+        "5": 173,
+        "6": 210
+      },
+      "hoehenNominalMm": [
+        200,
+        300,
+        350,
+        400,
+        450,
+        500,
+        550,
+        600,
+        750,
+        900,
+        1000,
+        1200,
+        1500,
+        1800,
+        2000
+      ],
+      "wProElement7565": {
+        "200": {
+          "2": 14.5,
+          "3": 20.1,
+          "4": 28.4,
+          "5": 35.0,
+          "6": 41.5
+        },
+        "300": {
+          "2": 23.6,
+          "3": 32.0,
+          "4": 41.9,
+          "5": 51.7,
+          "6": 61.3
+        },
+        "350": {
+          "3": 37.0,
+          "4": 48.5,
+          "6": 71.0
+        },
+        "400": {
+          "2": 31.2,
+          "3": 41.9,
+          "4": 54.9,
+          "5": 67.9,
+          "6": 80.5
+        },
+        "450": {
+          "2": 34.9,
+          "3": 46.8,
+          "4": 61.3,
+          "5": 75.8,
+          "6": 89.8
+        },
+        "500": {
+          "2": 38.4,
+          "3": 51.6,
+          "4": 67.6,
+          "5": 83.5,
+          "6": 99.0
+        },
+        "550": {
+          "2": 41.9,
+          "3": 56.3,
+          "4": 73.7,
+          "5": 91.1,
+          "6": 108
+        },
+        "600": {
+          "2": 45.3,
+          "3": 60.9,
+          "4": 79.8,
+          "5": 98.6,
+          "6": 117
+        },
+        "750": {
+          "2": 55.0,
+          "3": 74.3,
+          "4": 97.4,
+          "5": 120,
+          "6": 143
+        },
+        "900": {
+          "2": 63.9,
+          "3": 87.0,
+          "4": 114,
+          "5": 141,
+          "6": 167
+        },
+        "1000": {
+          "2": 69.5,
+          "3": 95.1,
+          "4": 125,
+          "5": 154,
+          "6": 183
+        },
+        "1200": {
+          "2": 82.7,
+          "3": 115,
+          "4": 147,
+          "5": 179,
+          "6": 210
+        },
+        "1500": {
+          "2": 104,
+          "3": 140,
+          "4": 180,
+          "5": 219,
+          "6": 256
+        },
+        "1800": {
+          "2": 124,
+          "3": 166,
+          "4": 213,
+          "5": 259
+        },
+        "2000": {
+          "2": 138,
+          "3": 183,
+          "4": 234,
+          "5": 285,
+          "6": 334
+        }
+      },
+      "kontrolle7055_5545_H600": {
+        "2": [
+          36.9,
+          23.9
+        ],
+        "3": [
+          49.6,
+          32.0
+        ],
+        "4": [
+          64.9,
+          41.7
+        ],
+        "5": [
+          80.2,
+          51.5
+        ],
+        "6": [
+          94.8,
+          60.5
+        ]
+      },
+      "exponentJeModell": {
+        "2": [
+          1.21,
+          1.3
+        ],
+        "6": [
+          1.25,
+          1.33
+        ],
+        "3-5": [
+          1.25,
+          1.33
+        ]
+      }
+    },
+    "wissensbasisTab35": {
+      "tiefeMmJeSaeulen": {
+        "2": 65,
+        "3": 105,
+        "4": 145,
+        "5": 185,
+        "6": 225
+      },
+      "wProGlied7565und5545": {
+        "190": {
+          "2": [
+            14,
+            7
+          ],
+          "3": [
+            20,
+            10
+          ],
+          "4": [
+            26,
+            13
+          ],
+          "5": [
+            29,
+            15
+          ],
+          "6": [
+            32,
+            16
+          ]
+        },
+        "300": {
+          "2": [
+            22,
+            11
+          ],
+          "3": [
+            31,
+            16
+          ],
+          "4": [
+            40,
+            21
+          ],
+          "5": [
+            48,
+            25
+          ],
+          "6": [
+            57,
+            29
+          ]
+        },
+        "500": {
+          "2": [
+            37,
+            19
+          ],
+          "3": [
+            51,
+            26
+          ],
+          "4": [
+            65,
+            33
+          ],
+          "5": [
+            80,
+            41
+          ],
+          "6": [
+            94,
+            48
+          ]
+        },
+        "600": {
+          "2": [
+            44,
+            23
+          ],
+          "3": [
+            60,
+            31
+          ],
+          "4": [
+            77,
+            40
+          ],
+          "5": [
+            95,
+            49
+          ],
+          "6": [
+            113,
+            58
+          ]
+        },
+        "750": {
+          "2": [
+            55,
+            28
+          ],
+          "3": [
+            75,
+            39
+          ],
+          "4": [
+            95,
+            49
+          ],
+          "5": [
+            117,
+            60
+          ],
+          "6": [
+            137,
+            71
+          ]
+        },
+        "1000": {
+          "2": [
+            73,
+            38
+          ],
+          "3": [
+            98,
+            50
+          ],
+          "4": [
+            124,
+            64
+          ],
+          "5": [
+            151,
+            78
+          ],
+          "6": [
+            180,
+            93
+          ]
+        },
+        "2000": {
+          "2": [
+            140,
+            72
+          ],
+          "3": [
+            189,
+            97
+          ],
+          "4": [
+            237,
+            122
+          ],
+          "5": [
+            282,
+            144
+          ],
+          "6": [
+            330,
+            169
+          ]
+        }
+      },
+      "quelle": [
+        "wb-e"
+      ],
+      "kontrolle": "3-Säuler H600 = 60 W/Glied (Tab. 3.5) vs. Charleston 60.9 W (+1.5 %)"
+    },
+    "arbonia7055": {
+      "tiefeMmJeSaeulen": {
+        "2": 65,
+        "3": 105,
+        "4": 145,
+        "5": 185,
+        "6": 225
+      },
+      "wProGlied7055und5545": {
+        "300": {
+          "2": [
+            19,
+            13
+          ],
+          "3": [
+            27,
+            17
+          ],
+          "4": [
+            34,
+            21
+          ],
+          "5": [
+            42,
+            26
+          ],
+          "6": [
+            49,
+            30
+          ]
+        },
+        "500": {
+          "2": [
+            31,
+            20
+          ],
+          "3": [
+            42,
+            26
+          ],
+          "4": [
+            55,
+            35
+          ],
+          "5": [
+            67,
+            42
+          ],
+          "6": [
+            78,
+            48
+          ]
+        },
+        "600": {
+          "2": [
+            37,
+            23
+          ],
+          "3": [
+            50,
+            31
+          ],
+          "4": [
+            65,
+            40
+          ],
+          "5": [
+            79,
+            49
+          ],
+          "6": [
+            92,
+            56
+          ]
+        },
+        "750": {
+          "2": [
+            46,
+            29
+          ],
+          "3": [
+            62,
+            39
+          ],
+          "4": [
+            80,
+            50
+          ],
+          "5": [
+            97,
+            60
+          ],
+          "6": [
+            113,
+            69
+          ]
+        },
+        "900": {
+          "2": [
+            53,
+            34
+          ],
+          "3": [
+            73,
+            46
+          ],
+          "4": [
+            93,
+            58
+          ],
+          "5": [
+            114,
+            70
+          ],
+          "6": [
+            132,
+            81
+          ]
+        },
+        "1000": {
+          "2": [
+            59,
+            37
+          ],
+          "3": [
+            81,
+            51
+          ],
+          "4": [
+            103,
+            64
+          ],
+          "5": [
+            125,
+            78
+          ],
+          "6": [
+            146,
+            90
+          ]
+        },
+        "1500": {
+          "2": [
+            87,
+            55
+          ],
+          "3": [
+            117,
+            73
+          ],
+          "4": [
+            148,
+            93
+          ],
+          "5": [
+            178,
+            111
+          ],
+          "6": [
+            208,
+            128
+          ]
+        },
+        "1800": {
+          "2": [
+            104,
+            66
+          ],
+          "3": [
+            138,
+            86
+          ],
+          "4": [
+            174,
+            109
+          ],
+          "5": [
+            209,
+            130
+          ],
+          "6": [
+            244,
+            151
+          ]
+        },
+        "2000": {
+          "2": [
+            115,
+            73
+          ],
+          "3": [
+            152,
+            95
+          ],
+          "4": [
+            192,
+            120
+          ]
+        }
+      },
+      "quelle": [
+        "buderus-teil5"
+      ],
+      "hinweis": "kein 75/65-Wert im Katalog; Elementbreite nicht belegt"
+    }
+  },
+  "konvektoren": {
+    "beschreibung": "Konvektoren ohne Gebläse: W je Meter bei 75/65/20 nach Bauhöhe × Bautiefe. Wand-/Bankkonvektoren mit Abdeckung (V&N Kontec, n 1.19–1.38) liefern je Höhe weniger als nackte Lamellenpakete (JOCO Unterflur, n 1.41–1.42). Fallback-Tabelle für «Bauart Konvektor» = JOCO (Lamellenpaket) bzw. Kontec (verkleideter Wandkonvektor) je nach Einbauart.",
+    "quelle": [
+      "vn-konvektoren",
+      "joco-konvektor",
+      "wb-e",
+      "zehnder-terraline"
+    ],
+    "wandkonvektorVerkleidet": {
+      "hersteller": "Vogel & Noot KONTEC",
+      "werte": [
+        {
+          "typ": "KK11",
+          "tiefeMm": 68,
+          "hoeheMm": 214,
+          "wProM7565": 464,
+          "wProM7055": 374,
+          "wProM5545": 236,
+          "n": 1.32
+        },
+        {
+          "typ": "KK11",
+          "tiefeMm": 68,
+          "hoeheMm": 286,
+          "wProM7565": 577,
+          "wProM7055": 464,
+          "wProM5545": 291,
+          "n": 1.34
+        },
+        {
+          "typ": "KK20",
+          "tiefeMm": 93,
+          "hoeheMm": 142,
+          "wProM7565": 304,
+          "wProM7055": 249,
+          "wProM5545": 161,
+          "n": 1.24
+        },
+        {
+          "typ": "KK20",
+          "tiefeMm": 93,
+          "hoeheMm": 214,
+          "wProM7565": 440,
+          "wProM7055": 359,
+          "wProM5545": 232,
+          "n": 1.25
+        },
+        {
+          "typ": "KK20",
+          "tiefeMm": 93,
+          "hoeheMm": 286,
+          "wProM7565": 561,
+          "wProM7055": 458,
+          "wProM5545": 296,
+          "n": 1.25
+        },
+        {
+          "typ": "KK22",
+          "tiefeMm": 93,
+          "hoeheMm": 70,
+          "wProM7565": 424,
+          "wProM7055": 345,
+          "wProM5545": 222,
+          "n": 1.27
+        },
+        {
+          "typ": "KK22",
+          "tiefeMm": 93,
+          "hoeheMm": 142,
+          "wProM7565": 641,
+          "wProM7055": 519,
+          "wProM5545": 330,
+          "n": 1.3
+        },
+        {
+          "typ": "KK22",
+          "tiefeMm": 93,
+          "hoeheMm": 214,
+          "wProM7565": 838,
+          "wProM7055": 674,
+          "wProM5545": 423,
+          "n": 1.34
+        },
+        {
+          "typ": "KK22",
+          "tiefeMm": 93,
+          "hoeheMm": 286,
+          "wProM7565": 1032,
+          "wProM7055": 825,
+          "wProM5545": 510,
+          "n": 1.38
+        },
+        {
+          "typ": "KK23",
+          "tiefeMm": 150,
+          "hoeheMm": 70,
+          "wProM7565": 524,
+          "wProM7055": 427,
+          "wProM5545": 275,
+          "n": 1.26
+        },
+        {
+          "typ": "KK23",
+          "tiefeMm": 150,
+          "hoeheMm": 142,
+          "wProM7565": 797,
+          "wProM7055": 645,
+          "wProM5545": 410,
+          "n": 1.3
+        },
+        {
+          "typ": "KK23",
+          "tiefeMm": 150,
+          "hoeheMm": 214,
+          "wProM7565": 1035,
+          "wProM7055": 832,
+          "wProM5545": 522,
+          "n": 1.34
+        },
+        {
+          "typ": "KK23",
+          "tiefeMm": 150,
+          "hoeheMm": 286,
+          "wProM7565": 1261,
+          "wProM7055": 1008,
+          "wProM5545": 623,
+          "n": 1.38
+        },
+        {
+          "typ": "KK34",
+          "tiefeMm": 175,
+          "hoeheMm": 70,
+          "wProM7565": 661,
+          "wProM7055": 545,
+          "wProM5545": 360,
+          "n": 1.19
+        },
+        {
+          "typ": "KK34",
+          "tiefeMm": 175,
+          "hoeheMm": 142,
+          "wProM7565": 1050,
+          "wProM7055": 856,
+          "wProM5545": 552,
+          "n": 1.26
+        },
+        {
+          "typ": "KK34",
+          "tiefeMm": 175,
+          "hoeheMm": 214,
+          "wProM7565": 1394,
+          "wProM7055": 1123,
+          "wProM5545": 707,
+          "n": 1.33
+        },
+        {
+          "typ": "KK34",
+          "tiefeMm": 175,
+          "hoeheMm": 286,
+          "wProM7565": 1723,
+          "wProM7055": 1377,
+          "wProM5545": 851,
+          "n": 1.38
+        },
+        {
+          "typ": "KH22",
+          "tiefeMm": 93,
+          "hoeheMm": 574,
+          "wProM7565": 1592,
+          "wProM7055": null,
+          "wProM5545": null,
+          "n": 1.37
+        }
+      ]
+    },
+    "lamellenpaket": {
+      "hersteller": "JOCO Unterflur-/Fassadenkonvektor",
+      "n": 1.41,
+      "wProM7565und5545": {
+        "40": {
+          "60": [
+            262,
+            127
+          ],
+          "120": [
+            520,
+            252
+          ],
+          "180": [
+            775,
+            377
+          ],
+          "240": [
+            1030,
+            500
+          ]
+        },
+        "60": {
+          "60": [
+            310,
+            151
+          ],
+          "90": [
+            463,
+            225
+          ],
+          "120": [
+            615,
+            298
+          ],
+          "150": [
+            766,
+            372
+          ],
+          "180": [
+            917,
+            445
+          ],
+          "210": [
+            1068,
+            519
+          ],
+          "240": [
+            1218,
+            592
+          ]
+        },
+        "90": {
+          "120": [
+            728,
+            353
+          ],
+          "240": [
+            1443,
+            700
+          ]
+        },
+        "120": {
+          "60": [
+            414,
+            201
+          ],
+          "90": [
+            618,
+            300
+          ],
+          "120": [
+            821,
+            398
+          ],
+          "150": [
+            1023,
+            497
+          ],
+          "180": [
+            1225,
+            595
+          ],
+          "210": [
+            1427,
+            692
+          ],
+          "240": [
+            1628,
+            790
+          ]
+        },
+        "150": {
+          "120": [
+            902,
+            438
+          ],
+          "240": [
+            1789,
+            868
+          ]
+        }
+      }
+    },
+    "wissensbasisTab37": {
+      "werte": [
+        {
+          "hoeheMm": 70,
+          "tiefeMm": 72,
+          "wProM7565": 349,
+          "n": 1.24
+        },
+        {
+          "hoeheMm": 70,
+          "tiefeMm": 133,
+          "wProM7565": 458,
+          "n": 1.24
+        },
+        {
+          "hoeheMm": 140,
+          "tiefeMm": 133,
+          "wProM7565": 760,
+          "n": 1.24
+        },
+        {
+          "hoeheMm": 280,
+          "tiefeMm": 255,
+          "wProM7565": 1800,
+          "n": 1.24
+        }
+      ],
+      "quelle": [
+        "wb-e"
+      ]
+    },
+    "unterflurHinweis": "Zehnder Terraline / Kampmann Katherm nur als Leistungsspannen belegt (keine W/m-Tabelle); Quergitter ca. −15 %.",
+    "geblaeseExponent": {
+      "min": 1.02,
+      "max": 1.22,
+      "typ": 1.1,
+      "quelle": [
+        "zehnder-terraline"
+      ]
+    }
+  },
+  "bad": {
+    "beschreibung": "Bad-/Handtuchheizkörper (Rohrregister, einlagig): W bei 75/65/20 nach Höhe × Breite; Exponent 1.20–1.23. Fallback: Interpolation in der Kermi-Basic-D-Tabelle (Breiten 450/524/599/749/899); Zehnder Zeno als Kontrolle (±5 %).",
+    "quelle": [
+      "kermi-basic-d",
+      "zehnder-zeno",
+      "wb-e"
+    ],
+    "kermiBasicD": [
+      {
+        "hoeheMm": 804,
+        "breiteMm": 450,
+        "n": 1.2325,
+        "w7565": 348,
+        "w7055": 282,
+        "w5545": 184
+      },
+      {
+        "hoeheMm": 804,
+        "breiteMm": 524,
+        "n": 1.2275,
+        "w7565": 399,
+        "w7055": 324,
+        "w5545": 212
+      },
+      {
+        "hoeheMm": 804,
+        "breiteMm": 599,
+        "n": 1.2225,
+        "w7565": 451,
+        "w7055": 367,
+        "w5545": 240
+      },
+      {
+        "hoeheMm": 804,
+        "breiteMm": 749,
+        "n": 1.2124,
+        "w7565": 551,
+        "w7055": 449,
+        "w5545": 294
+      },
+      {
+        "hoeheMm": 804,
+        "breiteMm": 899,
+        "n": 1.2023,
+        "w7565": 650,
+        "w7055": 530,
+        "w5545": 349
+      },
+      {
+        "hoeheMm": 1172,
+        "breiteMm": 450,
+        "n": 1.2321,
+        "w7565": 511,
+        "w7055": 415,
+        "w5545": 270
+      },
+      {
+        "hoeheMm": 1172,
+        "breiteMm": 524,
+        "n": 1.2271,
+        "w7565": 586,
+        "w7055": 476,
+        "w5545": 311
+      },
+      {
+        "hoeheMm": 1172,
+        "breiteMm": 599,
+        "n": 1.2221,
+        "w7565": 662,
+        "w7055": 538,
+        "w5545": 352
+      },
+      {
+        "hoeheMm": 1172,
+        "breiteMm": 749,
+        "n": 1.212,
+        "w7565": 810,
+        "w7055": 659,
+        "w5545": 433
+      },
+      {
+        "hoeheMm": 1172,
+        "breiteMm": 899,
+        "n": 1.202,
+        "w7565": 955,
+        "w7055": 779,
+        "w5545": 513
+      },
+      {
+        "hoeheMm": 1448,
+        "breiteMm": 450,
+        "n": 1.2318,
+        "w7565": 631,
+        "w7055": 512,
+        "w5545": 334
+      },
+      {
+        "hoeheMm": 1448,
+        "breiteMm": 524,
+        "n": 1.2268,
+        "w7565": 724,
+        "w7055": 588,
+        "w5545": 384
+      },
+      {
+        "hoeheMm": 1448,
+        "breiteMm": 599,
+        "n": 1.2218,
+        "w7565": 817,
+        "w7055": 664,
+        "w5545": 434
+      },
+      {
+        "hoeheMm": 1448,
+        "breiteMm": 749,
+        "n": 1.2118,
+        "w7565": 1000,
+        "w7055": 814,
+        "w5545": 535
+      },
+      {
+        "hoeheMm": 1448,
+        "breiteMm": 899,
+        "n": 1.2017,
+        "w7565": 1179,
+        "w7055": 962,
+        "w5545": 634
+      },
+      {
+        "hoeheMm": 1770,
+        "breiteMm": 450,
+        "n": 1.2256,
+        "w7565": 767,
+        "w7055": 623,
+        "w5545": 407
+      },
+      {
+        "hoeheMm": 1770,
+        "breiteMm": 524,
+        "n": 1.2206,
+        "w7565": 880,
+        "w7055": 715,
+        "w5545": 468
+      },
+      {
+        "hoeheMm": 1770,
+        "breiteMm": 599,
+        "n": 1.2155,
+        "w7565": 993,
+        "w7055": 808,
+        "w5545": 530
+      },
+      {
+        "hoeheMm": 1770,
+        "breiteMm": 749,
+        "n": 1.2054,
+        "w7565": 1216,
+        "w7055": 991,
+        "w5545": 652
+      },
+      {
+        "hoeheMm": 1770,
+        "breiteMm": 899,
+        "n": 1.1953,
+        "w7565": 1433,
+        "w7055": 1170,
+        "w5545": 773
+      }
+    ],
+    "zehnderZeno": [
+      {
+        "hoeheMm": 788,
+        "breiteMm": 450,
+        "w7565": 341,
+        "w5545": 180
+      },
+      {
+        "hoeheMm": 788,
+        "breiteMm": 500,
+        "w7565": 377,
+        "w5545": 199
+      },
+      {
+        "hoeheMm": 788,
+        "breiteMm": 600,
+        "w7565": 447,
+        "w5545": 235
+      },
+      {
+        "hoeheMm": 1184,
+        "breiteMm": 450,
+        "w7565": 509,
+        "w5545": 267
+      },
+      {
+        "hoeheMm": 1184,
+        "breiteMm": 500,
+        "w7565": 562,
+        "w5545": 295
+      },
+      {
+        "hoeheMm": 1184,
+        "breiteMm": 600,
+        "w7565": 667,
+        "w5545": 350
+      },
+      {
+        "hoeheMm": 1184,
+        "breiteMm": 750,
+        "w7565": 822,
+        "w5545": 432
+      },
+      {
+        "hoeheMm": 1508,
+        "breiteMm": 450,
+        "w7565": 646,
+        "w5545": 338
+      },
+      {
+        "hoeheMm": 1508,
+        "breiteMm": 600,
+        "w7565": 846,
+        "w5545": 444
+      },
+      {
+        "hoeheMm": 1688,
+        "breiteMm": 450,
+        "w7565": 731,
+        "w5545": 382
+      },
+      {
+        "hoeheMm": 1688,
+        "breiteMm": 500,
+        "w7565": 807,
+        "w5545": 424
+      },
+      {
+        "hoeheMm": 1688,
+        "breiteMm": 600,
+        "w7565": 957,
+        "w5545": 503
+      },
+      {
+        "hoeheMm": 1688,
+        "breiteMm": 750,
+        "w7565": 1179,
+        "w5545": 623
+      },
+      {
+        "hoeheMm": 1688,
+        "breiteMm": 1000,
+        "w7565": 1543,
+        "w5545": 823
+      }
+    ],
+    "hinweis": "Doppellagig (Zehnder ZND) ca. +40 % (1171×600: 928 W). Bad 24 °C: Δθ_log sinkt, Kern rechnet mit θ_int je Raum."
+  },
+  "vertikal": {
+    "beschreibung": "Vertikal-/Design-Plattenheizkörper: W bei 75/65/20 nach Typ × Höhe × Breite. Fallback: W/m Baubreite ≈ Stelrad-Zertifizierungsdaten (P2 ≈ Typ 20: 2865–3390 W/m; K2 ≈ Typ 22: 3690–4230 W/m für H 1800–2200).",
+    "quelle": [
+      "purmo-vertical",
+      "stelrad-vertex"
+    ],
+    "purmoVertical": {
+      "werte": {
+        "VR10": {
+          "450": {
+            "1800": 765,
+            "1950": 819,
+            "2100": 876
+          },
+          "600": {
+            "1800": 1020,
+            "1950": 1092,
+            "2100": 1168
+          },
+          "750": {
+            "1800": 1275,
+            "1950": 1365,
+            "2100": 1460
+          }
+        },
+        "VR20C": {
+          "300": {
+            "1800": 819,
+            "1950": 877,
+            "2100": 935
+          },
+          "450": {
+            "1800": 1229,
+            "1950": 1315,
+            "2100": 1403
+          },
+          "600": {
+            "1800": 1638,
+            "1950": 1753,
+            "2100": 1870
+          },
+          "750": {
+            "1800": 2048,
+            "1950": 2192,
+            "2100": 2338
+          }
+        },
+        "VR21C": {
+          "300": {
+            "1800": 963,
+            "1950": 1020,
+            "2100": 1081
+          },
+          "450": {
+            "1800": 1445,
+            "1950": 1530,
+            "2100": 1621
+          },
+          "600": {
+            "1800": 1926,
+            "1950": 2040,
+            "2100": 2162
+          },
+          "750": {
+            "1800": 2408,
+            "1950": 2550,
+            "2100": 2702
+          }
+        },
+        "VR22C": {
+          "300": {
+            "1800": 1132,
+            "1950": 1192,
+            "2100": 1252,
+            "2300": 1332
+          },
+          "450": {
+            "1800": 1698,
+            "1950": 1788,
+            "2100": 1877,
+            "2300": 1998
+          },
+          "600": {
+            "1800": 2264,
+            "1950": 2384,
+            "2100": 2503,
+            "2300": 2663
+          },
+          "750": {
+            "1950": 2980,
+            "2100": 3129,
+            "2300": 3329
+          }
+        }
+      },
+      "nJeHoehe": {
+        "VR10": [
+          1.2976,
+          1.3246,
+          1.3381,
+          1.3516
+        ],
+        "VR20C": [
+          1.3094,
+          1.3135,
+          1.3176
+        ],
+        "VR21C": [
+          1.3384,
+          1.3422,
+          1.3371
+        ],
+        "VR22C": [
+          1.3566,
+          1.3619,
+          1.3672,
+          1.3671
+        ]
+      },
+      "hinweis": "Katalog RO 2009/2010; Händlerangabe 2025 (VR22C 1800×600: 2345 W) weicht +3.6 % ab."
+    },
+    "stelradVertex": {
+      "werte": {
+        "P2": {
+          "1800": {
+            "400": 1146,
+            "600": 1719,
+            "700": 2006
+          },
+          "2000": {
+            "400": 1248,
+            "600": 1872,
+            "700": 2184
+          },
+          "2200": {
+            "400": 1356,
+            "600": 2034,
+            "700": 2373
+          }
+        },
+        "K2": {
+          "1800": {
+            "400": 1584,
+            "500": 1980,
+            "600": 2376,
+            "700": 2772
+          },
+          "2000": {
+            "400": 1716,
+            "500": 2145,
+            "600": 2574,
+            "700": 3003
+          },
+          "2200": {
+            "300": 1386,
+            "400": 1848,
+            "500": 2310,
+            "600": 2772
+          }
+        }
+      },
+      "wProMBreite": {
+        "P2": {
+          "1800": 2865,
+          "2000": 3120,
+          "2200": 3390
+        },
+        "K2": {
+          "1800": 3690,
+          "2000": 3960,
+          "2200": 4230
+        }
+      },
+      "n": {
+        "P2": 1.3,
+        "K2": 1.33
+      },
+      "hinweis": "P2 = 2 Platten ohne Konvektorblech (≈ Typ 20), K2 ≈ Typ 22 (Zuordnung nicht im Blatt ausgeschrieben)."
+    }
+  },
+  "fbh": {
+    "beschreibung": "Fussbodenheizung Nassestrich (Tacker 14×2, 45 mm Überdeckung): q [W/m²] nach Bodenbelag Rλ,B × Verlegeabstand × Heizmittelübertemperatur ΔθH (arithmetisch; Rohrmitteltemperatur − 20 °C). Kein Tabellenwert bei exakt 35/28/20 (ΔθH 11.5 K): Kern skaliert mit n 1.10 von ΔθH 15 K (40/30/20). Aufenthaltszone max ≈ 100 W/m² (29 °C), Randzone ≈ 175 W/m² (35 °C), Bad 33 °C.",
+    "quelle": [
+      "vn-floortec",
+      "viessmann-fbh",
+      "uponor-siccus",
+      "danfoss-ufh",
+      "wb-f"
+    ],
+    "verlegeabstandMm": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300
+    ],
+    "rlbStufen": [
+      "0.00",
+      "0.05",
+      "0.10",
+      "0.15"
+    ],
+    "dThStufenK": [
+      15,
+      20,
+      25,
+      30
+    ],
+    "qWm2": {
+      "0.00": {
+        "15": [
+          113,
+          97,
+          84,
+          73,
+          63,
+          55
+        ],
+        "20": [
+          150,
+          129,
+          112,
+          97,
+          84,
+          73
+        ],
+        "25": [
+          188,
+          162,
+          140,
+          121,
+          105,
+          92
+        ],
+        "30": [
+          226,
+          194,
+          168,
+          146,
+          126,
+          110
+        ]
+      },
+      "0.05": {
+        "15": [
+          81,
+          71,
+          63,
+          56,
+          50,
+          44
+        ],
+        "20": [
+          107,
+          95,
+          84,
+          75,
+          66,
+          59
+        ],
+        "25": [
+          134,
+          119,
+          105,
+          93,
+          83,
+          74
+        ],
+        "30": [
+          161,
+          142,
+          126,
+          112,
+          99,
+          88
+        ]
+      },
+      "0.10": {
+        "15": [
+          63,
+          56,
+          51,
+          46,
+          42,
+          38
+        ],
+        "20": [
+          83,
+          75,
+          68,
+          61,
+          55,
+          50
+        ],
+        "25": [
+          104,
+          94,
+          85,
+          77,
+          69,
+          63
+        ],
+        "30": [
+          125,
+          113,
+          102,
+          92,
+          83,
+          75
+        ]
+      },
+      "0.15": {
+        "15": [
+          51,
+          47,
+          43,
+          39,
+          36,
+          33
+        ],
+        "20": [
+          68,
+          62,
+          57,
+          52,
+          48,
+          44
+        ],
+        "25": [
+          85,
+          78,
+          71,
+          65,
+          60,
+          55
+        ],
+        "30": [
+          102,
+          93,
+          86,
+          78,
+          72,
+          66
+        ]
+      }
+    },
+    "rlbTypisch": {
+      "keramik": 0.0,
+      "pvc_linoleum": 0.02,
+      "parkett": 0.05,
+      "laminat": 0.05,
+      "teppich": 0.1,
+      "teppichDick": 0.15,
+      "planungWohnen": 0.1,
+      "planungBad": 0.0,
+      "quelle": [
+        "wb-f",
+        "vn-floortec"
+      ]
+    },
+    "grenzwerte": {
+      "thetaFmaxAufenthaltC": 29,
+      "thetaFmaxBadC": 33,
+      "thetaFmaxRandzoneC": 35,
+      "qMaxAufenthaltWm2": 100,
+      "qMaxRandzoneWm2": 175,
+      "basiskennlinie": "q = 8.92 · (θF,m − θi)^1.1",
+      "rlbMax": 0.15
+    },
+    "trockensystem": {
+      "beschreibung": "Uponor Siccus 14 (Trockenestrich 25 mm): q_des bei θV,des 45 °C ≈ 40–55 W/m² (VA 150), 50 °C ≈ 50–65, 56 °C ≈ 50–82.5 (Rλ,B 0.15, θi 20)",
+      "quelle": [
+        "uponor-siccus"
+      ],
+      "qDesJeVlC": {
+        "45": [
+          40,
+          55
+        ],
+        "50": [
+          50,
+          65
+        ],
+        "56": [
+          50,
+          82.5
+        ]
+      }
+    },
+    "richtwerteBestand": {
+      "beschreibung": "Wissensbasis F Tab. 3.10: FBH-Nachrüstung Bestand 40–60 W/m² (VL 40–45 °C), Trockensystem 40–55, Klimaboden 30–50 (VL 35–40)",
+      "quelle": [
+        "wb-f"
+      ],
+      "nassSanierung": [
+        40,
+        60
+      ],
+      "trocken": [
+        40,
+        55
+      ],
+      "klimaboden": [
+        30,
+        50
+      ]
+    },
+    "kontrollbeispiel": "Viessmann: VA 100, Rλ,B 0.05 → 70 W/m² bei ΔθH 15 K; Floortec gleicher Punkt: 71 W/m²."
+  },
+  "wandheizung": {
+    "beschreibung": "Wandheizung W/m² nach VL/RL (Raum 20 °C). Trockenbau (WEM Klimaelement) 85 W/m² bei 35/30; Nassputz (WEM Klimaregister) 100 W/m² bei 35/30; Variotherm Modulwand 84 W/m² bei 35/28.",
+    "quelle": [
+      "wem-klimaelement",
+      "wem-klimaregister",
+      "variotherm-wall"
+    ],
+    "wemKlimaelement": {
+      "3530": 85,
+      "4035": 128,
+      "4535": 150,
+      "4540": 170,
+      "5040": 190,
+      "5045": 212,
+      "5545": 232,
+      "5550": 255
+    },
+    "wemKlimaregister": {
+      "3530": 100,
+      "4035": 150,
+      "4535": 175,
+      "4540": 200,
+      "5040": 225,
+      "5045": 250,
+      "5545": 275,
+      "5550": 300
+    },
+    "variotherm3528": 84,
+    "fallbackQ3528Wm2": 80,
+    "fallbackHinweis": "Default 80 W/m² bei 35/28/20 (Mittel Trockenbau/Modul; Nassputz +20 %)."
+  },
+  "minderungen": {
+    "beschreibung": "Minderungsfaktoren f1–f5 (B2 Kap. 8 S.242): f_i = 1 − m_i/100; f_m = f1·f2·f3·f4·f5; Q = Q_N · f_m.",
+    "quelle": [
+      "wb-e"
+    ],
+    "f1Nische": {
+      "beschreibung": "Nischeneinbau, Abstand Δh < 100 mm",
+      "mProzentMin": 1,
+      "mProzentMax": 33,
+      "mProzentTyp": 7,
+      "hinweis": "typisch 4–10 %; Beispiel Δh 40 mm → 6 %"
+    },
+    "f2Verkleidung": {
+      "beschreibung": "Verkleidung je Bauart",
+      "mProzent": {
+        "glieder": [
+          4,
+          8
+        ],
+        "platteEinreihigOhneKonvektorblech": [
+          5,
+          10
+        ],
+        "platteEinreihigMitKonvektorblech": [
+          4,
+          8
+        ],
+        "platteMehrreihig": [
+          3,
+          5
+        ]
+      },
+      "mProzentTyp": 6
+    },
+    "f3Oberflaeche": {
+      "beschreibung": "Metallicfarbe, Bronze, blanke Metalloberfläche",
+      "mProzentMax": 30,
+      "mProzentTyp": 10
+    },
+    "f4Baulaenge": {
+      "beschreibung": "Baulänge > 500 mm (nicht bei wechselseitigem Anschluss)",
+      "stufen": [
+        {
+          "bisMm": 500,
+          "mProzent": 0
+        },
+        {
+          "bisMm": 1000,
+          "mProzent": 1.0
+        },
+        {
+          "bisMm": 1500,
+          "mProzent": 1.5
+        },
+        {
+          "bisMm": 2000,
+          "mProzent": 2.5
+        },
+        {
+          "bisMm": 2500,
+          "mProzent": 3.5
+        }
+      ]
+    },
+    "f5Anschluss": {
+      "beschreibung": "Spreizung × Anschlussart: wechselseitig (VL oben / RL unten) vs. reitend (VL unten / RL unten)",
+      "stufen": [
+        {
+          "spreizungK": 10,
+          "wechselseitig": 0,
+          "reitend": 4
+        },
+        {
+          "spreizungK": 20,
+          "wechselseitig": 0,
+          "reitend": 12
+        },
+        {
+          "spreizungK": 30,
+          "wechselseitig": 3,
+          "reitend": 18
+        },
+        {
+          "spreizungK": 50,
+          "wechselseitig": 5,
+          "reitend": 25
+        }
+      ]
+    },
+    "erdreichberuehrt": {
+      "beschreibung": "Heizflächenvergrösserung in erdreichberührten Räumen (B2 S.243): +25 % bei erdreichberührtem Boden, +50 % bei Boden und Aussenwand",
+      "faktorBoden": 1.25,
+      "faktorBodenUndWand": 1.5
+    }
+  },
+  "ampel": {
+    "beschreibung": "Deckungsgrad Σ Q(θ_VL) / Φ_HL: grün ≥ 1.0, gelb 0.85–1.0, rot < 0.85 (Thermowerk-Schwellen; Wissensbasis E §5 nennt 0.7–1.0 gelb). Vorlauf-Tauglichkeit WP: ≤ 55 °C gut, 55–65 kritisch, > 65 ungeeignet ohne Massnahmen (befund_heizkoerper.md §6.2; FWS M3 Senkentemperatur 55 °C @ A−8).",
+    "quelle": [
+      "wb-e",
+      "befund-hk"
+    ],
+    "deckung": {
+      "gruenAb": 1.0,
+      "gelbAb": 0.85
+    },
+    "vorlaufC": {
+      "gutBis": 55,
+      "kritischBis": 65
+    },
+    "starkUeberdimensioniertAb": 2.0
+  },
+  "modelle": [
+    {
+      "id": "buderus-logatrend-c-profil.2-t10-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_10",
+      "hoeheMm": 300,
+      "wProM7565": 330,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t10-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_10",
+      "hoeheMm": 400,
+      "wProM7565": 423,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t10-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_10",
+      "hoeheMm": 500,
+      "wProM7565": 514,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t10-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_10",
+      "hoeheMm": 600,
+      "wProM7565": 604,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t10-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_10",
+      "hoeheMm": 900,
+      "wProM7565": 875,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t11-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_11",
+      "hoeheMm": 300,
+      "wProM7565": 549,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t11-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 708,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t11-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 858,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t11-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 1002,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t11-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1394,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t20-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_20",
+      "hoeheMm": 300,
+      "wProM7565": 590,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t20-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_20",
+      "hoeheMm": 400,
+      "wProM7565": 746,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t20-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_20",
+      "hoeheMm": 500,
+      "wProM7565": 897,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t20-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_20",
+      "hoeheMm": 600,
+      "wProM7565": 1043,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t20-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_20",
+      "hoeheMm": 900,
+      "wProM7565": 1463,
+      "n": 1.31,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t21-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_21",
+      "hoeheMm": 300,
+      "wProM7565": 745,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t21-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_21",
+      "hoeheMm": 400,
+      "wProM7565": 937,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t21-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_21",
+      "hoeheMm": 500,
+      "wProM7565": 1117,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t21-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_21",
+      "hoeheMm": 600,
+      "wProM7565": 1288,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t21-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_21",
+      "hoeheMm": 900,
+      "wProM7565": 1754,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t22-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 966,
+      "n": 1.34,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t22-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1216,
+      "n": 1.34,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t22-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1452,
+      "n": 1.34,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t22-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1679,
+      "n": 1.34,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t22-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2313,
+      "n": 1.34,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t30-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_30",
+      "hoeheMm": 300,
+      "wProM7565": 858,
+      "n": 1.32,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t30-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_30",
+      "hoeheMm": 400,
+      "wProM7565": 1072,
+      "n": 1.32,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t30-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_30",
+      "hoeheMm": 500,
+      "wProM7565": 1279,
+      "n": 1.32,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t30-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_30",
+      "hoeheMm": 600,
+      "wProM7565": 1482,
+      "n": 1.32,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t30-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_30",
+      "hoeheMm": 900,
+      "wProM7565": 2084,
+      "n": 1.32,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t33-h300",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1379,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t33-h400",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1738,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t33-h500",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 2079,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t33-h600",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2406,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "buderus-logatrend-c-profil.2-t33-h900",
+      "hersteller": "Buderus",
+      "modellreihe": "Logatrend C-Profil.2",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3328,
+      "n": 1.33,
+      "quelle": [
+        "buderus-logatrend"
+      ],
+      "quelleSeite": "Planungsunterlage 6721814245 (2025/09), PDF-S. 13 Tab. 5 (W/m direkt), Bautiefen S. 7",
+      "stand": "2025-09",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 300,
+      "wProM7565": 335,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 400,
+      "wProM7565": 425,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 500,
+      "wProM7565": 514,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 600,
+      "wProM7565": 602,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 750,
+      "wProM7565": 736,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t10-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 900,
+      "wProM7565": 872,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 300,
+      "wProM7565": 551,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 697,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 840,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 979,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 750,
+      "wProM7565": 1185,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t11-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1390,
+      "n": 1.26,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 300,
+      "wProM7565": 582,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 400,
+      "wProM7565": 736,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 500,
+      "wProM7565": 883,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 600,
+      "wProM7565": 1027,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 750,
+      "wProM7565": 1235,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t20-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 900,
+      "wProM7565": 1437,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h200",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 200,
+      "wProM7565": 678,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 959,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1207,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1441,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1666,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 750,
+      "wProM7565": 1987,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t22-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2295,
+      "n": 1.29,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 300,
+      "wProM7565": 823,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 400,
+      "wProM7565": 1034,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 500,
+      "wProM7565": 1236,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 600,
+      "wProM7565": 1429,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 750,
+      "wProM7565": 1707,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t30-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 900,
+      "wProM7565": 1973,
+      "n": 1.27,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h200",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 200,
+      "wProM7565": 998,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h300",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1300,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h400",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1633,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h500",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 1944,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h600",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2236,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h750",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 750,
+      "wProM7565": 2645,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "kermi-therm-x2-profil-k-(hygiene:-typ-10/20/30)-t33-h900",
+      "hersteller": "Kermi",
+      "modellreihe": "therm-x2 Profil-K (Hygiene: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3023,
+      "n": 1.28,
+      "quelle": [
+        "kermi-profil-k"
+      ],
+      "quelleSeite": "Technik PL 2017 PDF-S. 24 (Typ 11/22/33), FR 2018 PDF-S. 28; Hygiene DE 2023 PDF-S. 5 (Typ 10/20/30); W/m direkt",
+      "stand": "2017/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t10-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_10",
+      "hoeheMm": 300,
+      "wProM7565": 348,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t10-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_10",
+      "hoeheMm": 400,
+      "wProM7565": 449,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t10-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_10",
+      "hoeheMm": 500,
+      "wProM7565": 546,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t10-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_10",
+      "hoeheMm": 600,
+      "wProM7565": 639,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t10-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_10",
+      "hoeheMm": 900,
+      "wProM7565": 903,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 300,
+      "wProM7565": 546,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 711,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 868,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 1018,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h750",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 750,
+      "wProM7565": 1230,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t11-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1427,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t20-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_20",
+      "hoeheMm": 300,
+      "wProM7565": 630,
+      "n": 1.29,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t20-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_20",
+      "hoeheMm": 400,
+      "wProM7565": 787,
+      "n": 1.29,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t20-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_20",
+      "hoeheMm": 500,
+      "wProM7565": 938,
+      "n": 1.29,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t20-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_20",
+      "hoeheMm": 600,
+      "wProM7565": 1085,
+      "n": 1.29,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t20-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_20",
+      "hoeheMm": 900,
+      "wProM7565": 1516,
+      "n": 1.29,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 300,
+      "wProM7565": 761,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 400,
+      "wProM7565": 963,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 500,
+      "wProM7565": 1156,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 600,
+      "wProM7565": 1340,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h750",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 750,
+      "wProM7565": 1606,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t21-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_21",
+      "hoeheMm": 900,
+      "wProM7565": 1861,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 961,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1221,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1470,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1709,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h750",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 750,
+      "wProM7565": 2055,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t22-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2388,
+      "n": 1.33,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t30-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_30",
+      "hoeheMm": 300,
+      "wProM7565": 874,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t30-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_30",
+      "hoeheMm": 400,
+      "wProM7565": 1098,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t30-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_30",
+      "hoeheMm": 500,
+      "wProM7565": 1309,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t30-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_30",
+      "hoeheMm": 600,
+      "wProM7565": 1510,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t30-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_30",
+      "hoeheMm": 900,
+      "wProM7565": 2069,
+      "n": 1.31,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h300",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1347,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h400",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1699,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h500",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 2035,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h600",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2356,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h750",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 750,
+      "wProM7565": 2818,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "purmo-compact-/-ventil-compact-(hygiene:-typ-10/20/30);-750-mm-=-radson-compact-hp-t33-h900",
+      "hersteller": "Purmo",
+      "modellreihe": "Compact / Ventil Compact (Hygiene: Typ 10/20/30); 750 mm = Radson Compact HP",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3260,
+      "n": 1.34,
+      "quelle": [
+        "purmo-compact"
+      ],
+      "quelleSeite": "Purmo-Group-Katalog 10/2020 PDF-S. 12–15/31–33 (Zeile 1000 mm), DK-Produktblad 2018 S. 5–10 (φn W/m), Radson Compact HP 2023 S. 5–8",
+      "stand": "2020/2023",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t10-h300",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_10",
+      "hoeheMm": 300,
+      "wProM7565": 348,
+      "n": 1.29,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t10-h400",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_10",
+      "hoeheMm": 400,
+      "wProM7565": 444,
+      "n": 1.29,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t10-h500",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_10",
+      "hoeheMm": 500,
+      "wProM7565": 536,
+      "n": 1.29,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t10-h600",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_10",
+      "hoeheMm": 600,
+      "wProM7565": 625,
+      "n": 1.29,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t10-h900",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_10",
+      "hoeheMm": 900,
+      "wProM7565": 878,
+      "n": 1.29,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t11-h300",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_11",
+      "hoeheMm": 300,
+      "wProM7565": 565,
+      "n": 1.33,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t11-h400",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 708,
+      "n": 1.33,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t11-h500",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 843,
+      "n": 1.33,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t11-h600",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 939,
+      "n": 1.33,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t11-h900",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1292,
+      "n": 1.33,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t21-h300",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_21",
+      "hoeheMm": 300,
+      "wProM7565": 838,
+      "n": 1.32,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t21-h400",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_21",
+      "hoeheMm": 400,
+      "wProM7565": 1047,
+      "n": 1.32,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t21-h500",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_21",
+      "hoeheMm": 500,
+      "wProM7565": 1227,
+      "n": 1.32,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t21-h600",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_21",
+      "hoeheMm": 600,
+      "wProM7565": 1357,
+      "n": 1.32,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t21-h900",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_21",
+      "hoeheMm": 900,
+      "wProM7565": 1864,
+      "n": 1.32,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t22-h300",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 1095,
+      "n": 1.34,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t22-h400",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1357,
+      "n": 1.34,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t22-h500",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1543,
+      "n": 1.34,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t22-h600",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1713,
+      "n": 1.34,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t22-h900",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2296,
+      "n": 1.34,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t33-h300",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1561,
+      "n": 1.35,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t33-h400",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1936,
+      "n": 1.35,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t33-h500",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 2228,
+      "n": 1.35,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t33-h600",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2453,
+      "n": 1.35,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "vogelnoot-kompaktheizkörper-(vonova)-typ-10-/-11-k-/-21-k-s-/-22-k-/-33-k-t33-h900",
+      "hersteller": "Vogel & Noot",
+      "modellreihe": "Kompaktheizkörper (Vonova) Typ 10 / 11 K / 21 K-S / 22 K / 33 K",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3221,
+      "n": 1.35,
+      "quelle": [
+        "vn-kompakt"
+      ],
+      "quelleSeite": "AT Technische Informationen 2012 PDF-S. 5 (Zeile 1000 mm), bestätigt COSMO/V&N DE 2022 PDF-S. 66",
+      "stand": "2012/2022",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t10-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 300,
+      "wProM7565": 338,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t10-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 400,
+      "wProM7565": 430,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t10-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 500,
+      "wProM7565": 521,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t10-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 600,
+      "wProM7565": 610,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t10-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_10",
+      "hoeheMm": 900,
+      "wProM7565": 877,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t11-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 300,
+      "wProM7565": 509,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t11-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 676,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t11-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 833,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t11-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 980,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t11-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1360,
+      "n": 1.3,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t20-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 300,
+      "wProM7565": 585,
+      "n": 1.28,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t20-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 400,
+      "wProM7565": 732,
+      "n": 1.28,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t20-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 500,
+      "wProM7565": 879,
+      "n": 1.28,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t20-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 600,
+      "wProM7565": 1023,
+      "n": 1.28,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t20-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_20",
+      "hoeheMm": 900,
+      "wProM7565": 1458,
+      "n": 1.28,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t21-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_21",
+      "hoeheMm": 300,
+      "wProM7565": 745,
+      "n": 1.34,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t21-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_21",
+      "hoeheMm": 500,
+      "wProM7565": 1153,
+      "n": 1.34,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t21-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_21",
+      "hoeheMm": 600,
+      "wProM7565": 1345,
+      "n": 1.34,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t21-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_21",
+      "hoeheMm": 900,
+      "wProM7565": 1883,
+      "n": 1.34,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t22-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 982,
+      "n": 1.33,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t22-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1245,
+      "n": 1.33,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t22-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1494,
+      "n": 1.33,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t22-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1732,
+      "n": 1.33,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t22-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2395,
+      "n": 1.33,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t30-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 300,
+      "wProM7565": 867,
+      "n": 1.31,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t30-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 400,
+      "wProM7565": 1074,
+      "n": 1.31,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t30-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 500,
+      "wProM7565": 1275,
+      "n": 1.31,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t30-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 600,
+      "wProM7565": 1470,
+      "n": 1.31,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t30-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_30",
+      "hoeheMm": 900,
+      "wProM7565": 2034,
+      "n": 1.31,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t33-h300",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1349,
+      "n": 1.32,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t33-h400",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1711,
+      "n": 1.32,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t33-h500",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 2056,
+      "n": 1.32,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t33-h600",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2389,
+      "n": 1.32,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "stelrad-novello-/-compact-(hygiene-eco:-typ-10/20/30)-t33-h900",
+      "hersteller": "Stelrad",
+      "modellreihe": "Novello / Compact (Hygiene ECO: Typ 10/20/30)",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3334,
+      "n": 1.32,
+      "quelle": [
+        "stelrad-novello"
+      ],
+      "quelleSeite": "Technische Dokumentation STR-TD-GE-2014-08 PDF-S. 92/96 (W/m direkt), Hygiene ECO S. 10; UK Green Compact 2024 S. 6 identisch",
+      "stand": "2014/2024",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t11-h400",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_11",
+      "hoeheMm": 400,
+      "wProM7565": 697,
+      "n": 1.27,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t11-h500",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_11",
+      "hoeheMm": 500,
+      "wProM7565": 840,
+      "n": 1.27,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t11-h600",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_11",
+      "hoeheMm": 600,
+      "wProM7565": 979,
+      "n": 1.27,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t11-h900",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_11",
+      "hoeheMm": 900,
+      "wProM7565": 1390,
+      "n": 1.27,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t21-h300",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_21",
+      "hoeheMm": 300,
+      "wProM7565": 755,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t21-h400",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_21",
+      "hoeheMm": 400,
+      "wProM7565": 953,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t21-h500",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_21",
+      "hoeheMm": 500,
+      "wProM7565": 1141,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t21-h600",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_21",
+      "hoeheMm": 600,
+      "wProM7565": 1322,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t21-h900",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_21",
+      "hoeheMm": 900,
+      "wProM7565": 1841,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h200",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 200,
+      "wProM7565": 619,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h300",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 300,
+      "wProM7565": 942,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h400",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 400,
+      "wProM7565": 1202,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h500",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 500,
+      "wProM7565": 1449,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h600",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 600,
+      "wProM7565": 1683,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t22-h900",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_22",
+      "hoeheMm": 900,
+      "wProM7565": 2326,
+      "n": 1.32,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h200",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 200,
+      "wProM7565": 871,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h300",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 300,
+      "wProM7565": 1334,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h400",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 400,
+      "wProM7565": 1700,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h500",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 500,
+      "wProM7565": 2048,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h600",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 600,
+      "wProM7565": 2379,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "brugman-compact-4-/-centric-t33-h900",
+      "hersteller": "Brugman",
+      "modellreihe": "Compact 4 / Centric",
+      "bauart": "platte_33",
+      "hoeheMm": 900,
+      "wProM7565": 3297,
+      "n": 1.31,
+      "quelle": [
+        "brugman-compact4"
+      ],
+      "quelleSeite": "Technisches Handbuch 01/2025 PDF-S. 9 (Compact 4), S. 35 (Centric), S. 94–97 (W/m direkt)",
+      "stand": "2025-01",
+      "abgeleitet": false,
+      "abgeleitetHinweis": null
+    },
+    {
+      "id": "zehnder-charleston-2s",
+      "hersteller": "Zehnder",
+      "modellreihe": "Charleston 2-Säuler",
+      "bauart": "roehren_2",
+      "gliedbreiteMm": 46,
+      "tiefeMm": 62,
+      "wProElement7565JeHoehe": {
+        "200": 14.5,
+        "300": 23.6,
+        "400": 31.2,
+        "450": 34.9,
+        "500": 38.4,
+        "550": 41.9,
+        "600": 45.3,
+        "750": 55.0,
+        "900": 63.9,
+        "1000": 69.5,
+        "1200": 82.7,
+        "1500": 104,
+        "1800": 124,
+        "2000": 138
+      },
+      "quelle": [
+        "zehnder-charleston-uk"
+      ],
+      "quelleSeite": "PDF S. 2–3",
+      "stand": "2020-05-18",
+      "abgeleitet": false
+    },
+    {
+      "id": "zehnder-charleston-3s",
+      "hersteller": "Zehnder",
+      "modellreihe": "Charleston 3-Säuler",
+      "bauart": "roehren_3",
+      "gliedbreiteMm": 46,
+      "tiefeMm": 100,
+      "wProElement7565JeHoehe": {
+        "200": 20.1,
+        "300": 32.0,
+        "350": 37.0,
+        "400": 41.9,
+        "450": 46.8,
+        "500": 51.6,
+        "550": 56.3,
+        "600": 60.9,
+        "750": 74.3,
+        "900": 87.0,
+        "1000": 95.1,
+        "1200": 115,
+        "1500": 140,
+        "1800": 166,
+        "2000": 183
+      },
+      "quelle": [
+        "zehnder-charleston-uk"
+      ],
+      "quelleSeite": "PDF S. 2–3",
+      "stand": "2020-05-18",
+      "abgeleitet": false
+    },
+    {
+      "id": "zehnder-charleston-4s",
+      "hersteller": "Zehnder",
+      "modellreihe": "Charleston 4-Säuler",
+      "bauart": "roehren_4",
+      "gliedbreiteMm": 46,
+      "tiefeMm": 136,
+      "wProElement7565JeHoehe": {
+        "200": 28.4,
+        "300": 41.9,
+        "350": 48.5,
+        "400": 54.9,
+        "450": 61.3,
+        "500": 67.6,
+        "550": 73.7,
+        "600": 79.8,
+        "750": 97.4,
+        "900": 114,
+        "1000": 125,
+        "1200": 147,
+        "1500": 180,
+        "1800": 213,
+        "2000": 234
+      },
+      "quelle": [
+        "zehnder-charleston-uk"
+      ],
+      "quelleSeite": "PDF S. 2–3",
+      "stand": "2020-05-18",
+      "abgeleitet": false
+    },
+    {
+      "id": "zehnder-charleston-5s",
+      "hersteller": "Zehnder",
+      "modellreihe": "Charleston 5-Säuler",
+      "bauart": "roehren_5",
+      "gliedbreiteMm": 46,
+      "tiefeMm": 173,
+      "wProElement7565JeHoehe": {
+        "200": 35.0,
+        "300": 51.7,
+        "400": 67.9,
+        "450": 75.8,
+        "500": 83.5,
+        "550": 91.1,
+        "600": 98.6,
+        "750": 120,
+        "900": 141,
+        "1000": 154,
+        "1200": 179,
+        "1500": 219,
+        "1800": 259,
+        "2000": 285
+      },
+      "quelle": [
+        "zehnder-charleston-uk"
+      ],
+      "quelleSeite": "PDF S. 2–3",
+      "stand": "2020-05-18",
+      "abgeleitet": false
+    },
+    {
+      "id": "zehnder-charleston-6s",
+      "hersteller": "Zehnder",
+      "modellreihe": "Charleston 6-Säuler",
+      "bauart": "roehren_6",
+      "gliedbreiteMm": 46,
+      "tiefeMm": 210,
+      "wProElement7565JeHoehe": {
+        "200": 41.5,
+        "300": 61.3,
+        "350": 71.0,
+        "400": 80.5,
+        "450": 89.8,
+        "500": 99.0,
+        "550": 108,
+        "600": 117,
+        "750": 143,
+        "900": 167,
+        "1000": 183,
+        "1200": 210,
+        "1500": 256,
+        "2000": 334
+      },
+      "quelle": [
+        "zehnder-charleston-uk"
+      ],
+      "quelleSeite": "PDF S. 2–3",
+      "stand": "2020-05-18",
+      "abgeleitet": false
+    },
+    {
+      "id": "kermi-basic-d",
+      "hersteller": "Kermi",
+      "modellreihe": "Basic-D (gerade)",
+      "bauart": "bad_handtuch",
+      "tiefeMm": 35,
+      "wJeHoeheBreite7565": {
+        "804x450": 348,
+        "804x524": 399,
+        "804x599": 451,
+        "804x749": 551,
+        "804x899": 650,
+        "1172x450": 511,
+        "1172x524": 586,
+        "1172x599": 662,
+        "1172x749": 810,
+        "1172x899": 955,
+        "1448x450": 631,
+        "1448x524": 724,
+        "1448x599": 817,
+        "1448x749": 1000,
+        "1448x899": 1179,
+        "1770x450": 767,
+        "1770x524": 880,
+        "1770x599": 993,
+        "1770x749": 1216,
+        "1770x899": 1433
+      },
+      "nJeGroesse": {
+        "804x450": 1.2325,
+        "804x524": 1.2275,
+        "804x599": 1.2225,
+        "804x749": 1.2124,
+        "804x899": 1.2023,
+        "1172x450": 1.2321,
+        "1172x524": 1.2271,
+        "1172x599": 1.2221,
+        "1172x749": 1.212,
+        "1172x899": 1.202,
+        "1448x450": 1.2318,
+        "1448x524": 1.2268,
+        "1448x599": 1.2218,
+        "1448x749": 1.2118,
+        "1448x899": 1.2017,
+        "1770x450": 1.2256,
+        "1770x524": 1.2206,
+        "1770x599": 1.2155,
+        "1770x749": 1.2054,
+        "1770x899": 1.1953
+      },
+      "quelle": [
+        "kermi-basic-d"
+      ],
+      "quelleSeite": "S. 286",
+      "stand": "2023",
+      "abgeleitet": false
+    },
+    {
+      "id": "zehnder-zeno",
+      "hersteller": "Zehnder",
+      "modellreihe": "Zeno (einlagig)",
+      "bauart": "bad_handtuch",
+      "wJeHoeheBreite7565": {
+        "788x450": 341,
+        "788x500": 377,
+        "788x600": 447,
+        "1184x450": 509,
+        "1184x500": 562,
+        "1184x600": 667,
+        "1184x750": 822,
+        "1508x450": 646,
+        "1508x600": 846,
+        "1688x450": 731,
+        "1688x500": 807,
+        "1688x600": 957,
+        "1688x750": 1179,
+        "1688x1000": 1543
+      },
+      "quelle": [
+        "zehnder-zeno"
+      ],
+      "quelleSeite": "PDF S. 3–4",
+      "stand": "2021-06-14",
+      "abgeleitet": false
+    },
+    {
+      "id": "purmo-vertical-vr10",
+      "hersteller": "Purmo",
+      "modellreihe": "Vertical VR10",
+      "bauart": "design_vertikal",
+      "wJeBreiteHoehe7565": {
+        "450": {
+          "1800": 765,
+          "1950": 819,
+          "2100": 876
+        },
+        "600": {
+          "1800": 1020,
+          "1950": 1092,
+          "2100": 1168
+        },
+        "750": {
+          "1800": 1275,
+          "1950": 1365,
+          "2100": 1460
+        }
+      },
+      "nJeHoehe": [
+        1.2976,
+        1.3246,
+        1.3381,
+        1.3516
+      ],
+      "quelle": [
+        "purmo-vertical"
+      ],
+      "quelleSeite": "S. 86–87",
+      "stand": "2010",
+      "abgeleitet": false
+    },
+    {
+      "id": "purmo-vertical-vr20c",
+      "hersteller": "Purmo",
+      "modellreihe": "Vertical VR20C",
+      "bauart": "design_vertikal",
+      "wJeBreiteHoehe7565": {
+        "300": {
+          "1800": 819,
+          "1950": 877,
+          "2100": 935
+        },
+        "450": {
+          "1800": 1229,
+          "1950": 1315,
+          "2100": 1403
+        },
+        "600": {
+          "1800": 1638,
+          "1950": 1753,
+          "2100": 1870
+        },
+        "750": {
+          "1800": 2048,
+          "1950": 2192,
+          "2100": 2338
+        }
+      },
+      "nJeHoehe": [
+        1.3094,
+        1.3135,
+        1.3176
+      ],
+      "quelle": [
+        "purmo-vertical"
+      ],
+      "quelleSeite": "S. 86–87",
+      "stand": "2010",
+      "abgeleitet": false
+    },
+    {
+      "id": "purmo-vertical-vr21c",
+      "hersteller": "Purmo",
+      "modellreihe": "Vertical VR21C",
+      "bauart": "design_vertikal",
+      "wJeBreiteHoehe7565": {
+        "300": {
+          "1800": 963,
+          "1950": 1020,
+          "2100": 1081
+        },
+        "450": {
+          "1800": 1445,
+          "1950": 1530,
+          "2100": 1621
+        },
+        "600": {
+          "1800": 1926,
+          "1950": 2040,
+          "2100": 2162
+        },
+        "750": {
+          "1800": 2408,
+          "1950": 2550,
+          "2100": 2702
+        }
+      },
+      "nJeHoehe": [
+        1.3384,
+        1.3422,
+        1.3371
+      ],
+      "quelle": [
+        "purmo-vertical"
+      ],
+      "quelleSeite": "S. 86–87",
+      "stand": "2010",
+      "abgeleitet": false
+    },
+    {
+      "id": "purmo-vertical-vr22c",
+      "hersteller": "Purmo",
+      "modellreihe": "Vertical VR22C",
+      "bauart": "design_vertikal",
+      "wJeBreiteHoehe7565": {
+        "300": {
+          "1800": 1132,
+          "1950": 1192,
+          "2100": 1252,
+          "2300": 1332
+        },
+        "450": {
+          "1800": 1698,
+          "1950": 1788,
+          "2100": 1877,
+          "2300": 1998
+        },
+        "600": {
+          "1800": 2264,
+          "1950": 2384,
+          "2100": 2503,
+          "2300": 2663
+        },
+        "750": {
+          "1950": 2980,
+          "2100": 3129,
+          "2300": 3329
+        }
+      },
+      "nJeHoehe": [
+        1.3566,
+        1.3619,
+        1.3672,
+        1.3671
+      ],
+      "quelle": [
+        "purmo-vertical"
+      ],
+      "quelleSeite": "S. 86–87",
+      "stand": "2010",
+      "abgeleitet": false
+    },
+    {
+      "id": "stelrad-vertex-p2",
+      "hersteller": "Stelrad",
+      "modellreihe": "Compact Vertex P2",
+      "bauart": "design_vertikal",
+      "wJeHoeheBreite7565": {
+        "1800": {
+          "400": 1146,
+          "600": 1719,
+          "700": 2006
+        },
+        "2000": {
+          "400": 1248,
+          "600": 1872,
+          "700": 2184
+        },
+        "2200": {
+          "400": 1356,
+          "600": 2034,
+          "700": 2373
+        }
+      },
+      "wProMBreite7565": {
+        "1800": 2865,
+        "2000": 3120,
+        "2200": 3390
+      },
+      "n": 1.3,
+      "quelle": [
+        "stelrad-vertex"
+      ],
+      "quelleSeite": "S. 2–3",
+      "stand": "2023-03",
+      "abgeleitet": false
+    },
+    {
+      "id": "stelrad-vertex-k2",
+      "hersteller": "Stelrad",
+      "modellreihe": "Compact Vertex K2",
+      "bauart": "design_vertikal",
+      "wJeHoeheBreite7565": {
+        "1800": {
+          "400": 1584,
+          "500": 1980,
+          "600": 2376,
+          "700": 2772
+        },
+        "2000": {
+          "400": 1716,
+          "500": 2145,
+          "600": 2574,
+          "700": 3003
+        },
+        "2200": {
+          "300": 1386,
+          "400": 1848,
+          "500": 2310,
+          "600": 2772
+        }
+      },
+      "wProMBreite7565": {
+        "1800": 3690,
+        "2000": 3960,
+        "2200": 4230
+      },
+      "n": 1.33,
+      "quelle": [
+        "stelrad-vertex"
+      ],
+      "quelleSeite": "S. 2–3",
+      "stand": "2023-03",
+      "abgeleitet": false
+    }
+  ]
+}
