@@ -88,7 +88,7 @@ describe('Gerätefilter', () => {
 });
 
 describe('Prozent-Skala WP-Grösse (Wunsch Daniel 29.10.)', () => {
-  it('Bereiche: grün 0 … +33 % (Kurs), gelb −9 … 0 und +33 … +37 % (Fachentscheid Daniel), sonst rot; Grenzen zum milderen Bereich', () => {
+  it('Bereiche: grün 0 … +33 % (Kurs), gelb −9 … 0 und +33 … +37 %, sonst rot; Grenzen zum milderen Bereich', () => {
     const s = skalaWpGroesse(fws, null);
     expect(s.wert).toBeNull();
     expect(s.ampel).toBe('grau');

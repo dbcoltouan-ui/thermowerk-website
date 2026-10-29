@@ -46,8 +46,8 @@ export interface KlimaDaten {
     hinweisTraegheit: string;
     jahresmittel: string;
   };
-  /** Thermowerk-Regel (Session 6, Fachentscheid Daniel): θe nie wärmer als thetaEMaxC. */
-  auslegungsregel: { beschreibung: string; quelle: string[]; thetaEMaxC: number };
+  /** Standardwert θe ohne Standort/Station (Session 6), überschreibbar. */
+  standardThetaE: { beschreibung: string; quelle: string[]; thetaEC: number };
   jahresmittel: {
     beschreibung: string;
     quelle: string[];

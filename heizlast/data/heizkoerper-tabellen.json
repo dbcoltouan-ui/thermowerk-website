@@ -218,11 +218,6 @@
         "id": "tw-annahme",
         "titel": "Thermowerk-Annahme (Standardwert der Rechenkette Wärmeabgabe, im Tool als «Standardwert» markiert und überschreibbar; Session 5)",
         "art": "Annahme"
-      },
-      {
-        "id": "tw-entscheid",
-        "titel": "Fachentscheid Thermowerk (Daniel, 29.10.2026) — firmeneigene Auslegungsregel, im Bericht als solche ausgewiesen",
-        "art": "Fachentscheid"
       }
     ],
     "referenzbedingung": {
@@ -3243,8 +3238,7 @@
       "wb-e",
       "wb-f",
       "befund-hk",
-      "tw-annahme",
-      "tw-entscheid"
+      "tw-annahme"
     ],
     "spreizungDefaultK": {
       "radiator": 10,
@@ -3278,7 +3272,7 @@
       "radiatoren": 55,
       "gemischt": 55
     },
-    "standardVLHinweis": "Auslegungs-VL, solange keine Heizflächen bewertet sind: nach Wärmeabgabesystem (Fussbodenheizung 35 °C, Radiatoren/gemischt 55 °C); überschreibbar. Fachentscheid Daniel 29.10.: Vorlauf je System (FBH/Radiatoren) anpassbar."
+    "standardVLHinweis": "Auslegungs-VL, solange keine Heizflächen bewertet sind: nach Wärmeabgabesystem (Fussbodenheizung 35 °C, Radiatoren/gemischt 55 °C); Standardwert, überschreibbar."
   },
   "modelle": [
     {

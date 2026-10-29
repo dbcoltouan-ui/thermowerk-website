@@ -25,7 +25,6 @@ exports[`berechne — FWS-Modus (Moosseedorf) > Snapshot 1`] = `
     "OE-0017",
   ],
   "hinweise": [
-    "gebaeude:info:klima.thermowerkRegel",
     "verbrauch:info:verbrauch.zeitraum.kurz",
     "heizlast:warnung:plausi.spez.rot",
     "speicher:warnung:puffer.qWp.fehlt",
@@ -65,16 +64,15 @@ exports[`berechne — FWS-Modus (Moosseedorf) > Snapshot 1`] = `
 
 exports[`berechne — raumweise (CH-EFH von Hand) > Snapshot 1`] = `
 {
-  "annahmen": 28,
+  "annahmen": 27,
   "auslegungsVL": {
     "herkunft": "berechnet",
-    "wert": 60.9,
+    "wert": 60,
   },
   "ebf": 38.5,
   "geraete": [],
   "hinweise": [
     "gebaeude:info:klima.hoeheFehlt",
-    "gebaeude:info:klima.thermowerkRegel",
     "waermeabgabe:info:waermeabgabe.raum.ohneHeizflaeche",
     "waermeabgabe:info:waermeabgabe.raum.ohneHeizflaeche",
     "waermepumpe:warnung:geraet.keineTreffer",
@@ -85,24 +83,24 @@ exports[`berechne — raumweise (CH-EFH von Hand) > Snapshot 1`] = `
     "art": "raumweise",
     "quelle": "raumweise",
     "status": "raumweise",
-    "wert": 2776.6,
+    "wert": 2678.7,
   },
   "puffer": 0,
-  "qh": 3457.6,
+  "qh": 3365.9,
   "qoff": 0,
-  "qw": 681,
+  "qw": 687.2,
   "raeume": [
     [
       "wohnen",
-      2176.3,
+      2098.6,
     ],
     [
       "bad",
-      588.1,
+      570.3,
     ],
     [
       "flur",
-      67.2,
+      64.8,
     ],
   ],
   "status": {
@@ -125,7 +123,7 @@ exports[`berechne — raumweise (CH-EFH von Hand) > Snapshot 1`] = `
     [
       "wohnen",
       1706.8,
-      60.9,
+      60,
       "rot",
     ],
     [

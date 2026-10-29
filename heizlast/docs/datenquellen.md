@@ -29,7 +29,7 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 | EFH-Speicher meist 400 l à 60 °C; MFH 2–3 Ladezyklen | — | FWS Folie 57 | P |
 | Puffer-Kriterien (Abtau 10–20, Takt 20, Sperrzeit 50–100 l/kW …) | — | Wissensbasis J §3.4–3.6 (Herstellerkonventionen DE) | S |
 | Bivalenz: Leistungsanteil 50/33/25 % → Energie 80–85/50–60/30–40 % | — | FWS M3 Folie 95 | P |
-| Gerätewahl (Session 6): Inverter-Faustregel Q_h ≥ 0.75 · Q_WP (Übergrösse ≤ +33 %); gelb +33 … +37 % und −9 … 0 %, rot darüber/darunter; Filter Q_WP ≥ Q_h · 0.9 | Aufgabe 4: 9.0/12 = 0.75 (Grenzfall) | FWS M3 Folie 3 Frage 4 (Antwort nicht abgedruckt, 0.75 gemäss FWS-RECHENWEGE §16.2); Bänder Fachentscheid Daniel 29.10.; Filter Thermowerk-Annahme | S/E/A |
+| Gerätewahl (Session 6): Inverter-Faustregel Q_h ≥ 0.75 · Q_WP (Übergrösse ≤ +33 %); gelb +33 … +37 % und −9 … 0 %, rot darüber/darunter; Filter Q_WP ≥ Q_h · 0.9 | Aufgabe 4: 9.0/12 = 0.75 (Grenzfall) | FWS M3 Folie 3 Frage 4 (Antwort nicht abgedruckt, 0.75 gemäss FWS-RECHENWEGE §16.2); Bänder und Filter Thermowerk-Annahme | S/A |
 | Bivalenz zwischen 50 % und 100 % Leistungsanteil linear gegen «monovalent = 100 %» interpoliert | — | Thermowerk-Annahme (Tabelle Folie 95 endet bei 50 %) | A |
 | Norm-Reserve SIA 384/2 10–20 %; Feldmessung 30 % Überdimensionierung | — | FWS Aufgabe 3 Diskussion; Folie 8 | P |
 | Jahresraster: Mittel über 3–5 relevante Jahre; Jahreswert = Σ Menge·365/Σ Tage | — | FWS M3 Folie 29; Aufgabe 2 (Ø 5 Jahre); FWS-RECHENWEGE §3a | P |
@@ -157,10 +157,10 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 - Heizwert-Dichte Heizöl 0.84 kg/l (BFE nennt nur MJ/kg).
 - WP-Datenbank: Herstellerwerte durch KI-Session erfasst, nicht fachlich geprüft; 9 Geräte mit Plausibilitätsflag.
 
-### Session 6 — Fachentscheide Thermowerk (Daniel, 29.10.2026)
+### Session 6 — Standardwerte
 
 | Wert | Datei/Feld | Quelle |
 |---|---|---|
-| Auslegungs-Aussentemperatur nie wärmer als −8 °C | `klimastationen.json` `auslegungsregel.thetaEMaxC` | Fachentscheid (`tw-entscheid`) |
-| WP-Übergrösse gelb bis +37 %, darüber rot; zu klein bis −9 % gelb | `fws.json` `geraetewahl.rotAbUebergroesseProzent`, `knappGelbBis` | Fachentscheid (`tw-entscheid`) |
-| Auslegungs-VL ohne Heizflächen: FBH 35 °C, Radiatoren/gemischt 55 °C | `heizkoerper-tabellen.json` `auslegung.standardVLJeSystemC` | Fachentscheid (`tw-entscheid`), überschreibbar |
+| θe ohne Standort/Station: −8 °C (überschreibbar; mit Station gilt deren Wert) | `klimastationen.json` `standardThetaE.thetaEC` | Thermowerk-Annahme (`tw-abgeleitet`) |
+| WP-Übergrösse gelb bis +37 %, darüber rot; zu klein bis −9 % gelb | `fws.json` `geraetewahl.rotAbUebergroesseProzent`, `knappGelbBis` | Thermowerk-Annahme (`tw-annahme`) |
+| Auslegungs-VL ohne Heizflächen: FBH 35 °C, Radiatoren/gemischt 55 °C | `heizkoerper-tabellen.json` `auslegung.standardVLJeSystemC` | Thermowerk-Annahme (`tw-annahme`), überschreibbar |

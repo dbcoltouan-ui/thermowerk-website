@@ -40,7 +40,7 @@ export function ampelAufSkala(bereiche: ReadonlyArray<SkalaBereich>, wert: numbe
 /**
  * WP-Grösse gegenüber dem Bedarf: Übergrösse = (Q_WP / Q_h − 1) · 100 [%].
  * Grenzen aus fws.json `geraetewahl` (r = Q_h/Q_WP): grün 0 … +33 % (Kurs: Q_h ≥ 0.75 · Q_WP),
- * gelb −9 … 0 % (knapp, Elektroeinsatz deckt die Spitze) und +33 … +37 % (Fachentscheid Daniel), sonst rot.
+ * gelb −9 … 0 % (knapp, Elektroeinsatz deckt die Spitze) und +33 … +37 % (Thermowerk-Annahme), sonst rot.
  */
 export function skalaWpGroesse(fws: FwsDaten, uebergroesseProzent: number | null): Skala {
   const g = fws.geraetewahl;

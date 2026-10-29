@@ -200,3 +200,8 @@ Prompt: `state/schema.ts` (State v2 nur Rohangaben, Typen + Validierung), `kern/
 - Wirkung: CH-EFH-Fixture (Eingabe −7 °C) rechnet mit −8 °C: saldiert 2 776.6 W (Handrechnung bei −8 °C im Test dokumentiert); Kern-Test raumweise bleibt bei −7 °C (Kernfunktion unverändert).
 - Prüfung: `npm test` 468/468, lint/build ok, Playwright (siehe Chat-Bericht).
 
+### Nachtrag 22:05 — Korrektur θe (Daniel)
+- Prompt (Kurzform): −8 °C ist nur der Standardwert, solange keine belastbaren Klimadaten vorliegen; mit Station gilt deren Wert (auch −7 °C); immer überschreibbar; keine «Firmenregel»-Kennzeichnung.
+- Umsetzung: `klimastationen.json` `auslegungsregel` → `standardThetaE` (−8 °C, Quelle `tw-abgeleitet`); `thetaEAuslegung` liefert Station/Angabe, sonst Standardwert (Annahme, Hinweis `klima.standardwert`); fehlender Standort ist keine Pflichtlücke mehr. Quelle `tw-entscheid` und «Fachentscheid»-Texte aus Daten/Doku entfernt; WP-Bänder und Standard-VL als Thermowerk-Annahme (`tw-annahme`) geführt. CH-EFH wieder 2 678.7 W (Handrechnung −7 °C).
+- Prüfung: `npm test` 467/467, lint/build ok, Playwright (siehe Chat-Bericht).
+

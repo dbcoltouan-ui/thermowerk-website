@@ -78,11 +78,6 @@
         "id": "fws-rechenwege",
         "titel": "referenz/FWS-RECHENWEGE.md §3a (Perioden-Modell, Sub-Perioden-Korrektur vergangener Sanierungen) und §5 (Plausi-Toleranz ±15 %)",
         "art": "Thermowerk-Referenzdokument (Konzept, Befund FACH-03 bestätigt)"
-      },
-      {
-        "id": "tw-entscheid",
-        "titel": "Fachentscheid Thermowerk (Daniel, 29.10.2026) — firmeneigene Auslegungsregel, im Bericht als solche ausgewiesen",
-        "art": "Fachentscheid"
       }
     ]
   },
@@ -1302,20 +1297,19 @@
     ]
   },
   "geraetewahl": {
-    "beschreibung": "Dimensionierungs-Ampel und Gerätefilter Wärmepumpe (Kern Session 6, eine Logik für Dashboard, Gerätedetail und Bericht). Verhältnis r = Q_h / Q_WP mit Q_WP = Heizleistung A−7/W35 laut Gerätedatenbank. Kurs-Faustregel Inverter-WP: Q_h,max ≥ 0.75 · Q_WP (WP höchstens ~33 % grösser als Q_h). Q_WP < Q_h: WP deckt die Spitze nicht allein (Elektroeinsatz/bivalent, Energieanteil nach Tabelle «bivalenz»). Übergrösse = Q_WP/Q_h − 1: grün 0 … +33 % (Kurs), gelb +33 … +37 % (Fachentscheid Daniel 29.10.), darüber rot; zu klein: gelb bis −9 % (r ≤ 1.10, Elektroeinsatz deckt die Spitze — von Daniel bestätigt), darunter rot.",
+    "beschreibung": "Dimensionierungs-Ampel und Gerätefilter Wärmepumpe (Kern Session 6, eine Logik für Dashboard, Gerätedetail und Bericht). Verhältnis r = Q_h / Q_WP mit Q_WP = Heizleistung A−7/W35 laut Gerätedatenbank. Kurs-Faustregel Inverter-WP: Q_h,max ≥ 0.75 · Q_WP (WP höchstens ~33 % grösser als Q_h). Q_WP < Q_h: WP deckt die Spitze nicht allein (Elektroeinsatz/bivalent, Energieanteil nach Tabelle «bivalenz»). Übergrösse = Q_WP/Q_h − 1: grün 0 … +33 % (Kurs), gelb +33 … +37 %, darüber rot; zu klein: gelb bis −9 % (r ≤ 1.10, Elektroeinsatz deckt die Spitze), darunter rot.",
     "quelle": [
       "fws-m3",
-      "tw-annahme",
-      "tw-entscheid"
+      "tw-annahme"
     ],
-    "fundstelle": "Folie 3 «Warm-Up» Frage 4 (Antwortoptionen 0.9 / 0.75 / 0.5 · Q_WP; Lösung im Skript nicht abgedruckt, 0.75 gemäss referenz/FWS-RECHENWEGE §8/§16.2); Aufgabe 4 Lösung (Q_h 9.0 kW bei Q_WP 12 kW = 0.75 «überdimensioniert», Grenzfall); Folien 93–95; gelb bis +37 % und −9 % Fachentscheid Daniel 29.10.",
+    "fundstelle": "Folie 3 «Warm-Up» Frage 4 (Antwortoptionen 0.9 / 0.75 / 0.5 · Q_WP; Lösung im Skript nicht abgedruckt, 0.75 gemäss referenz/FWS-RECHENWEGE §8/§16.2); Aufgabe 4 Lösung (Q_h 9.0 kW bei Q_WP 12 kW = 0.75 «überdimensioniert», Grenzfall); Folien 93–95; gelb bis +37 % und −9 % Thermowerk-Annahme",
     "inverterMinVerhaeltnis": 0.75,
     "rotAbUebergroesseProzent": 37,
     "knappGelbBis": 1.1,
     "filterToleranzUntenProzent": 10,
     "hinweise": [
       "Q_WP aus der Datenbank gilt bei A−7/W35; bei höherem Vorlauf ist die Leistung kleiner — Herstellerkennlinie und Einsatzgrenzen gegen Heizkurve prüfen (Folien 93/94).",
-      "Grenzen +37 % und −9 % sind Thermowerk-Fachentscheide (Daniel 29.10.), Filtertoleranz 10 % nach unten Thermowerk-Annahme."
+      "Gelb-Grenzen +37 % und −9 % sowie die Filtertoleranz 10 % nach unten sind Thermowerk-Annahmen, nicht Kursinhalt."
     ]
   },
   "plausibilitaet": {
