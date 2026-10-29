@@ -140,11 +140,12 @@ describe('sia384-2.json — Methode, n_min (NA.7), b_u (ND.3), ΔU_WB, Rsi/Rse, 
     expect(u.werte['4']![0]).toBe(0.88);
     expect(s.erdreich.fThetaAnn).toBe(1.45);
   });
-  it('Innentemperaturen: Wohnen 20, Bad 24, Flur 15, unbeheizte Räume ≤ 10 °C; Keys eindeutig und von nMin-Zuordnung referenzierbar', () => {
+  it('Innentemperaturen: Wohnen 20, Bad 22, Flur 20, Eingangsbereich 15, unbeheizte Räume ≤ 10 °C; Keys eindeutig und von nMin-Zuordnung referenzierbar', () => {
     const t = Object.fromEntries(s.innentemperaturen.raumtypen.map((r) => [r.key, r]));
     expect(t.wohnen!.thetaIntC).toBe(20);
-    expect(t.bad!.thetaIntC).toBe(24);
-    expect(t.flur!.thetaIntC).toBe(15);
+    expect(t.bad!.thetaIntC).toBe(22);
+    expect(t.flur!.thetaIntC).toBe(20);
+    expect(t.eingangsbereich!.thetaIntC).toBe(15);
     for (const r of s.innentemperaturen.raumtypen) {
       if (!r.beheizt) expect(r.thetaIntC, r.key).toBeLessThanOrEqual(10);
       else expect(r.thetaIntC, r.key).toBeGreaterThanOrEqual(15);

@@ -83,3 +83,7 @@ Prompt: Alle Fachdaten als JSON unter `heizlast/data/` mit `_meta` und Quelle je
 2. Bad-Innentemperatur: Default 24 °C (DIN/Komfort) oder SIA-konform wie Haupträume (20–22 °C)?
 3. Flur innerhalb einer Wohnung: 15 °C (DIN) oder 20 °C (CH-Praxis, keine Türen)?
 4. WW-Standard-Default für EFH: «mittlerer Standard» 45 l/P·d oder Kurs-Rechenwert 40 l/P·d (Aufgabe 4)?
+
+## 2026-10-29 17:51 — Prompt 7 (Daniel): Antworten Fragerunde 3
+1. Heizkörper fast immer ohne Marke → Bauart/Masse/Tiefe/Glieder sind der Hauptpfad, Modell-DB optional (so gebaut). 2. Bad 22 °C (SIA: wie Haupträume). 3. Flur 20 °C; abgetrennter Eingangsbereich 15 °C (neuer Raumtyp). 4. Warmwasser-Standard 45 l/P·d, überschreibbar. Neu Regel: alle vorbelegten Werte sichtbar als Zahl mit Markierung «Standardwert».
+→ `data/sia384-2.json` 1.0.1 (Bad 22, Flur 20, Raumtyp eingangsbereich 15), `data/fws.json` 1.0.1 (efh_mittel default), Tests angepasst (141 grün), KONTEXT §2/§3 ergänzt; Commit + Push, Deploy geprüft.

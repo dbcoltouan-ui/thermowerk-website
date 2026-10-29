@@ -1,29 +1,111 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "stand": "2026-10-29",
     "beschreibung": "Tabellen für die raumweise Norm-Heizlast nach SIA 384/2:2020 (Anwendung von SN EN 12831-1:2017 in der Schweiz): Mindestluftwechsel n_min je Raumtyp × Lüftungskonzept, Reduktionsfaktoren b_u unbeheizter Räume, Wärmebrückenzuschlag ΔU_WB (pauschal), äquivalenter U-Wert gegen Erdreich (B'-Tabelle), Rsi/Rse, Innentemperaturen je Raumtyp, Methodenregeln (kein n50-Term, kein Wiederaufheizzuschlag, saldierte Gebäude-Heizlast). Wo der SIA-Normtext nicht öffentlich ist, sind die belegten Ersatztabellen der gleichzeitig revidierten nationalen Anhänge (SIA 384.201-C1:2014, SN EN 12831-1/C1:2020) und DIN-Tabellen (Wissensbasis) verwendet und als solche gekennzeichnet. Keine Rechenlogik.",
     "quellen": [
-      { "id": "sia384-2-vorschau", "titel": "SIA 384/2:2020 «Heizungsanlagen in Gebäuden – Leistungsbedarf», Vorschau (Inhalt, Vorwort, Änderungen; 2. Auflage 2024-03 mit C1): nur Mindestluftwechsel, kein Wiederaufheizzuschlag, U_eq nach vereinfachtem Verfahren EN 12831-1 (0–5 m), Anhang A Raumtemperaturen angrenzender Räume, Anhang B U_eq", "art": "Norm (Vorschau)", "url": "https://shop.sia.ch/b483cf7c-0b7b-46ff-adef-d2c72f9eb54f/D/DownloadAnhang", "abgerufen": "2026-10-29" },
-      { "id": "sn-en-12831-1-na-c1-2020", "titel": "SN EN 12831-1:2017/C1:2020 = SIA 384.201-C1:2020, Korrigenda zum Nationalen Anhang (gültig ab 2020-06-01, verweist auf SIA 384/2:2020): Tabelle NA.7 Mindest-Luftwechselrate (national gültige Anhaltswerte), Tabelle NA.5 f_i-z", "art": "Norm (öffentliche Korrigenda)", "url": "https://shop.sia.ch/feb0ad42-b952-4b0e-8682-499f400ef086/D/DownloadAnhang", "abgerufen": "2026-10-29" },
-      { "id": "sia384201-c1-2014", "titel": "SIA 384.201-C1:2014 (SN EN 12831:2003 nationaler Anhang): ND.1 Norm-Aussentemperatur (SIA 2028, Höhen-/τ-Korrektur), ND.2 Innentemperaturen (SIA 2024; Bad/Dusche wie Haupträume), Tabelle ND.3 Reduktionsfaktor b_u", "art": "Norm (öffentliche Korrigenda)", "url": "https://shop.sia.ch/dfabd0f6-cdc4-42f5-b67e-0b0bebd5f9d5/D/DownloadAnhang", "abgerufen": "2026-10-29" },
-      { "id": "sia384201-c2-2016", "titel": "SIA 384.201-C2:2016: ND.5.2 n_min 0.3 h⁻¹ (natürlich belüftet), Tabelle ND.7 n50-Anhaltswerte (nur Vorgängerwerte)", "art": "Norm (öffentliche Korrigenda)", "url": "https://shop.sia.ch/293efd3f-4765-48e6-a11f-c10ed789c72c/D/DownloadAnhang", "abgerufen": "2026-10-29" },
-      { "id": "sia2024-c1-2024", "titel": "SIA 2024:2021 / C1:2024 Anhang A Tabelle 11 «Raumtemperatur-Auslegungswert Heizfall (Auslegung Norm-Heizlast)» — öffentlich nur Zeile 12.08 Garderobe/Dusche 21 °C", "art": "Merkblatt (teilweise öffentlich)", "url": "https://shop.sia.ch/28cf7414-4297-416f-81d9-1931ab48a247/D/DownloadAnhang", "abgerufen": "2026-10-29" },
-      { "id": "zh-energiepraxis-2021", "titel": "Kanton ZH EnergiePraxis-Seminar 2021, R. Gadola (HSLU): Neuerungen SIA 384/2:2020 (U_eq 0–5 m, hohe Räume Tabelle 9, Lüftung nur Mindestluftwechsel)", "art": "Kantonales Seminar", "url": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/themen/umwelt-tiere/energie/energiepraxis/03a_ref.pdf", "abgerufen": "2026-10-29" },
-      { "id": "linear-sia384-2", "titel": "LINEAR Knowledge Base «Heat load calculation acc. to SN SIA 384/2:2020»: unbeheizte Räume (Korrekturfaktor/Temperatur/Wärmebilanz), globale Wärmebrückenmethode, Grundwasser", "art": "Software-Dokumentation (Sekundärquelle)", "url": "https://www.linear.eu/en/services/knowledge-base-revit/v26/analyzing-buildings/heat-load/heat-load-calculation-according-to-sn-sia-384/22020/", "abgerufen": "2026-10-29" },
-      { "id": "btk-san", "titel": "BFE Bauteilekatalog Sanierungen 2002: Rsi 0.13 / Rse 0.04 (SIA 180), Erdreich Rse 0, hinterlüftet Rse = Rsi, Luftschichten Tab. 3", "art": "Behördenpublikation", "url": "https://www.fr.ch/sites/default/files/contens/sde/_www/files/pdf67/U-Wert-Berechnung_und_Bauteilekatalog_Sanierungen_d.pdf", "abgerufen": "2026-10-29" },
-      { "id": "lu-c", "titel": "Kanton Luzern Vollzugshilfe C «Winterlicher Wärmeschutz» 2017: Rsi/Rse SIA 180, Fussbodenheizung Rsi 0, Erdreich < 2 m wie Aussenklima / > 2 m wie unbeheizt (SIA 380/1 Figur 2)", "art": "Vollzugshilfe", "url": "https://uwe.lu.ch/-/media/UWE/Dokumente/Themen/Energie/Vollzugshilfen/C_Winterlicher_Waermeschutz.pdf?la=de-CH", "abgerufen": "2026-10-29" },
-      { "id": "wb-b", "titel": "Wissensbasis B_Gebaeudehuelle_UWerte.md (Tabellenbuch SHK B4 S.329/342/343): Rsi/Rse richtungsabhängig (ISO 6946), U_equiv Bodenplatte nach B' (ISO 13370-Tabelle), ΔU_WB 0.10/0.05, b_u-Situationen", "art": "Wissensbasis (DE)", "fundort": "docs/wissensbasis/B_Gebaeudehuelle_UWerte.md" },
-      { "id": "wb-a", "titel": "Wissensbasis A_Gebaeudedaten.md (DIN/TS 12831-1:2020 Tab. θint je Raumtyp: Wohnen 20, Bad 24, Flur 15, unbeheizt 10)", "art": "Wissensbasis (DE)", "fundort": "docs/wissensbasis/A_Gebaeudedaten.md" },
-      { "id": "beuth-errata", "titel": "Beuth «Errata Praxis Heizlastberechnung» (DIN/TS 12831-1:2020 Beispiel): B' = A_g/(0.5·P) = 4.36 m, U_Boden 0.58 → U_equiv 0.37; f_θann 1.45; f_GW 1.0", "art": "Fachverlag (Beispiel)", "url": "https://www.beuth.de/resource/blob/787818/6fe74cc28f02554f8bbd917634a1ce6c/errata-praxis-heizlastberechnung-data.pdf", "abgerufen": "2026-10-29" },
-      { "id": "befund-fachlogik", "titel": "docs/revision/befund_fachlogik.md §3 (Methodik-Entscheid SIA 384/2), FACH-22–30", "art": "Revisionsbefund", "fundort": "docs/revision/befund_fachlogik.md" },
-      { "id": "tw-annahme", "titel": "Thermowerk-Annahme (im Bericht als Annahme auszuweisen)", "art": "Annahme" }
+      {
+        "id": "sia384-2-vorschau",
+        "titel": "SIA 384/2:2020 «Heizungsanlagen in Gebäuden – Leistungsbedarf», Vorschau (Inhalt, Vorwort, Änderungen; 2. Auflage 2024-03 mit C1): nur Mindestluftwechsel, kein Wiederaufheizzuschlag, U_eq nach vereinfachtem Verfahren EN 12831-1 (0–5 m), Anhang A Raumtemperaturen angrenzender Räume, Anhang B U_eq",
+        "art": "Norm (Vorschau)",
+        "url": "https://shop.sia.ch/b483cf7c-0b7b-46ff-adef-d2c72f9eb54f/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sn-en-12831-1-na-c1-2020",
+        "titel": "SN EN 12831-1:2017/C1:2020 = SIA 384.201-C1:2020, Korrigenda zum Nationalen Anhang (gültig ab 2020-06-01, verweist auf SIA 384/2:2020): Tabelle NA.7 Mindest-Luftwechselrate (national gültige Anhaltswerte), Tabelle NA.5 f_i-z",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/feb0ad42-b952-4b0e-8682-499f400ef086/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia384201-c1-2014",
+        "titel": "SIA 384.201-C1:2014 (SN EN 12831:2003 nationaler Anhang): ND.1 Norm-Aussentemperatur (SIA 2028, Höhen-/τ-Korrektur), ND.2 Innentemperaturen (SIA 2024; Bad/Dusche wie Haupträume), Tabelle ND.3 Reduktionsfaktor b_u",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/dfabd0f6-cdc4-42f5-b67e-0b0bebd5f9d5/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia384201-c2-2016",
+        "titel": "SIA 384.201-C2:2016: ND.5.2 n_min 0.3 h⁻¹ (natürlich belüftet), Tabelle ND.7 n50-Anhaltswerte (nur Vorgängerwerte)",
+        "art": "Norm (öffentliche Korrigenda)",
+        "url": "https://shop.sia.ch/293efd3f-4765-48e6-a11f-c10ed789c72c/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "sia2024-c1-2024",
+        "titel": "SIA 2024:2021 / C1:2024 Anhang A Tabelle 11 «Raumtemperatur-Auslegungswert Heizfall (Auslegung Norm-Heizlast)» — öffentlich nur Zeile 12.08 Garderobe/Dusche 21 °C",
+        "art": "Merkblatt (teilweise öffentlich)",
+        "url": "https://shop.sia.ch/28cf7414-4297-416f-81d9-1931ab48a247/D/DownloadAnhang",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "zh-energiepraxis-2021",
+        "titel": "Kanton ZH EnergiePraxis-Seminar 2021, R. Gadola (HSLU): Neuerungen SIA 384/2:2020 (U_eq 0–5 m, hohe Räume Tabelle 9, Lüftung nur Mindestluftwechsel)",
+        "art": "Kantonales Seminar",
+        "url": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/themen/umwelt-tiere/energie/energiepraxis/03a_ref.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "linear-sia384-2",
+        "titel": "LINEAR Knowledge Base «Heat load calculation acc. to SN SIA 384/2:2020»: unbeheizte Räume (Korrekturfaktor/Temperatur/Wärmebilanz), globale Wärmebrückenmethode, Grundwasser",
+        "art": "Software-Dokumentation (Sekundärquelle)",
+        "url": "https://www.linear.eu/en/services/knowledge-base-revit/v26/analyzing-buildings/heat-load/heat-load-calculation-according-to-sn-sia-384/22020/",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "btk-san",
+        "titel": "BFE Bauteilekatalog Sanierungen 2002: Rsi 0.13 / Rse 0.04 (SIA 180), Erdreich Rse 0, hinterlüftet Rse = Rsi, Luftschichten Tab. 3",
+        "art": "Behördenpublikation",
+        "url": "https://www.fr.ch/sites/default/files/contens/sde/_www/files/pdf67/U-Wert-Berechnung_und_Bauteilekatalog_Sanierungen_d.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "lu-c",
+        "titel": "Kanton Luzern Vollzugshilfe C «Winterlicher Wärmeschutz» 2017: Rsi/Rse SIA 180, Fussbodenheizung Rsi 0, Erdreich < 2 m wie Aussenklima / > 2 m wie unbeheizt (SIA 380/1 Figur 2)",
+        "art": "Vollzugshilfe",
+        "url": "https://uwe.lu.ch/-/media/UWE/Dokumente/Themen/Energie/Vollzugshilfen/C_Winterlicher_Waermeschutz.pdf?la=de-CH",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "wb-b",
+        "titel": "Wissensbasis B_Gebaeudehuelle_UWerte.md (Tabellenbuch SHK B4 S.329/342/343): Rsi/Rse richtungsabhängig (ISO 6946), U_equiv Bodenplatte nach B' (ISO 13370-Tabelle), ΔU_WB 0.10/0.05, b_u-Situationen",
+        "art": "Wissensbasis (DE)",
+        "fundort": "docs/wissensbasis/B_Gebaeudehuelle_UWerte.md"
+      },
+      {
+        "id": "wb-a",
+        "titel": "Wissensbasis A_Gebaeudedaten.md (DIN/TS 12831-1:2020 Tab. θint je Raumtyp: Wohnen 20, Bad 24, Flur 15, unbeheizt 10)",
+        "art": "Wissensbasis (DE)",
+        "fundort": "docs/wissensbasis/A_Gebaeudedaten.md"
+      },
+      {
+        "id": "beuth-errata",
+        "titel": "Beuth «Errata Praxis Heizlastberechnung» (DIN/TS 12831-1:2020 Beispiel): B' = A_g/(0.5·P) = 4.36 m, U_Boden 0.58 → U_equiv 0.37; f_θann 1.45; f_GW 1.0",
+        "art": "Fachverlag (Beispiel)",
+        "url": "https://www.beuth.de/resource/blob/787818/6fe74cc28f02554f8bbd917634a1ce6c/errata-praxis-heizlastberechnung-data.pdf",
+        "abgerufen": "2026-10-29"
+      },
+      {
+        "id": "befund-fachlogik",
+        "titel": "docs/revision/befund_fachlogik.md §3 (Methodik-Entscheid SIA 384/2), FACH-22–30",
+        "art": "Revisionsbefund",
+        "fundort": "docs/revision/befund_fachlogik.md"
+      },
+      {
+        "id": "tw-annahme",
+        "titel": "Thermowerk-Annahme (im Bericht als Annahme auszuweisen)",
+        "art": "Annahme"
+      }
     ]
   },
-
   "methode": {
     "beschreibung": "Raumweise Norm-Heizlast nach SIA 384/2:2020 (SN EN 12831-1:2017, Schweizer Anwendung): Φ_HL,Raum = Φ_T + Φ_V; Φ_T = Σ (U + ΔU_WB)·A·f_x·(θint − θe) mit f_x = 1 (aussen) / b_u (unbeheizt) / U_equiv-Ansatz (Erdreich); Φ_V = V·n_min·0.34·(θint − θe) [W bei 0.34 Wh/(m³K)]; kein n50-/Infiltrationsterm, kein Wiederaufheizzuschlag; Gebäude-Heizlast saldiert (nur Hülle nach aussen/unbeheizt/Erdreich), Σ Räume separat für Heizflächen.",
-    "quelle": ["sia384-2-vorschau", "zh-energiepraxis-2021", "befund-fachlogik"],
+    "quelle": [
+      "sia384-2-vorschau",
+      "zh-energiepraxis-2021",
+      "befund-fachlogik"
+    ],
     "luftWaermekapazitaetWhM3K": 0.34,
     "keinInfiltrationsterm": true,
     "keinWiederaufheizzuschlag": true,
@@ -33,138 +115,517 @@
     "thetaEQuelle": "klimastationen.json (SIA 2028 Tabelle 6 «kalt», Höhenkorrektur)",
     "bezeichnungBericht": "SIA 384/2:2020 (Anwendung von SN EN 12831-1:2017); θe aus SIA 2028"
   },
-
   "nMin": {
     "beschreibung": "Mindest-Luftwechselrate n_min [h⁻¹] je Lüftungskonzept der Gebäudeeinheit × Raumtyp (national gültige Anhaltswerte, Tabelle NA.7). «neubau» gilt auch für bestehende Gebäude, die die Luftdichtheits-Grenzwerte für Neubauten erfüllen; «altbau» sonst (+0.2).",
-    "quelle": ["sn-en-12831-1-na-c1-2020", "sia384-2-vorschau"],
+    "quelle": [
+      "sn-en-12831-1-na-c1-2020",
+      "sia384-2-vorschau"
+    ],
     "lueftungskonzepte": [
-      { "key": "natuerlich", "label": "Natürliche Lüftung (ohne oder mit kurzfristig betriebenen Abluftanlagen in Küche/Bad/WC)", "default": true },
-      { "key": "wrg", "label": "Einfache Lüftungsanlage mit Wärmerückgewinnung (Komfortlüftung)" },
-      { "key": "lufterwaermung", "label": "Lüftungsanlage mit Lufterwärmung / Zulufttemperatur max. 3 K unter Raumtemperatur" },
-      { "key": "abluftDauer", "label": "Abluftanlage im Dauerbetrieb" }
+      {
+        "key": "natuerlich",
+        "label": "Natürliche Lüftung (ohne oder mit kurzfristig betriebenen Abluftanlagen in Küche/Bad/WC)",
+        "default": true
+      },
+      {
+        "key": "wrg",
+        "label": "Einfache Lüftungsanlage mit Wärmerückgewinnung (Komfortlüftung)"
+      },
+      {
+        "key": "lufterwaermung",
+        "label": "Lüftungsanlage mit Lufterwärmung / Zulufttemperatur max. 3 K unter Raumtemperatur"
+      },
+      {
+        "key": "abluftDauer",
+        "label": "Abluftanlage im Dauerbetrieb"
+      }
     ],
     "raumtypen": [
-      { "key": "ohneAussenbezug", "label": "Raum ohne Aussenbezug und ohne Zuluft (innenliegend)" },
-      { "key": "badDusche", "label": "Bad, Dusche mit Aussenbezug" },
-      { "key": "weitere", "label": "Weitere Räume mit Aussenbezug (Wohnen, Schlafen, Küche, WC, Büro …)" },
-      { "key": "mitZuluft", "label": "Raum mit Zuluft (Lüftungsanlage)" },
-      { "key": "ohneZuluftDurchstroemt", "label": "Raum mit Aussenbezug, ohne Zuluft (Durchströmbereich / Verbundlüftung)" }
+      {
+        "key": "ohneAussenbezug",
+        "label": "Raum ohne Aussenbezug und ohne Zuluft (innenliegend)"
+      },
+      {
+        "key": "badDusche",
+        "label": "Bad, Dusche mit Aussenbezug"
+      },
+      {
+        "key": "weitere",
+        "label": "Weitere Räume mit Aussenbezug (Wohnen, Schlafen, Küche, WC, Büro …)"
+      },
+      {
+        "key": "mitZuluft",
+        "label": "Raum mit Zuluft (Lüftungsanlage)"
+      },
+      {
+        "key": "ohneZuluftDurchstroemt",
+        "label": "Raum mit Aussenbezug, ohne Zuluft (Durchströmbereich / Verbundlüftung)"
+      }
     ],
     "tabelle": {
-      "natuerlich":     { "ohneAussenbezug": { "neubau": 0, "altbau": 0 }, "badDusche": { "neubau": 0.50, "altbau": 0.70 }, "weitere": { "neubau": 0.30, "altbau": 0.50 } },
-      "wrg":            { "ohneAussenbezug": { "neubau": 0, "altbau": 0 }, "mitZuluft": { "neubau": 0.20, "altbau": 0.40 }, "ohneZuluftDurchstroemt": { "neubau": 0.10, "altbau": 0.30 } },
-      "lufterwaermung": { "ohneAussenbezug": { "neubau": 0, "altbau": 0 }, "weitere": { "neubau": 0.10, "altbau": 0.30 }, "badDusche": { "neubau": 0.10, "altbau": 0.30 } },
-      "abluftDauer":    { "ohneAussenbezug": { "neubau": 0, "altbau": 0 }, "weitere": { "neubau": 0.50, "altbau": 0.70 }, "badDusche": { "neubau": 0.50, "altbau": 0.70 } }
+      "natuerlich": {
+        "ohneAussenbezug": {
+          "neubau": 0,
+          "altbau": 0
+        },
+        "badDusche": {
+          "neubau": 0.5,
+          "altbau": 0.7
+        },
+        "weitere": {
+          "neubau": 0.3,
+          "altbau": 0.5
+        }
+      },
+      "wrg": {
+        "ohneAussenbezug": {
+          "neubau": 0,
+          "altbau": 0
+        },
+        "mitZuluft": {
+          "neubau": 0.2,
+          "altbau": 0.4
+        },
+        "ohneZuluftDurchstroemt": {
+          "neubau": 0.1,
+          "altbau": 0.3
+        }
+      },
+      "lufterwaermung": {
+        "ohneAussenbezug": {
+          "neubau": 0,
+          "altbau": 0
+        },
+        "weitere": {
+          "neubau": 0.1,
+          "altbau": 0.3
+        },
+        "badDusche": {
+          "neubau": 0.1,
+          "altbau": 0.3
+        }
+      },
+      "abluftDauer": {
+        "ohneAussenbezug": {
+          "neubau": 0,
+          "altbau": 0
+        },
+        "weitere": {
+          "neubau": 0.5,
+          "altbau": 0.7
+        },
+        "badDusche": {
+          "neubau": 0.5,
+          "altbau": 0.7
+        }
+      }
     },
     "zuordnungRaumtypZuNmin": {
       "beschreibung": "Mapping der UI-Raumtypen (siehe innentemperaturen) auf die n_min-Raumtypen bei natürlicher Lüftung; bei Lüftungsanlagen entscheidet die Zuluft-Angabe je Raum.",
-      "quelle": ["tw-annahme"],
-      "wohnen": "weitere", "schlafen": "weitere", "kueche": "weitere", "bad": "badDusche", "dusche": "badDusche", "wc": "weitere", "buero": "weitere", "flur": "ohneAussenbezug", "treppenhaus": "weitere", "abstellraum": "ohneAussenbezug", "kellerBeheizt": "weitere", "hobby": "weitere"
+      "quelle": [
+        "tw-annahme"
+      ],
+      "wohnen": "weitere",
+      "schlafen": "weitere",
+      "kueche": "weitere",
+      "bad": "badDusche",
+      "dusche": "badDusche",
+      "wc": "weitere",
+      "buero": "weitere",
+      "flur": "ohneAussenbezug",
+      "treppenhaus": "weitere",
+      "abstellraum": "ohneAussenbezug",
+      "kellerBeheizt": "weitere",
+      "hobby": "weitere",
+      "eingangsbereich": "weitere"
     },
     "altbauKriterium": "Gebäude ohne nachgewiesene Luftdichtheit (keine Luftdichtheitsschicht, Baujahr vor ca. 1995 ohne Sanierung) → «altbau»; Thermowerk-Default: altbau wenn Baujahr < 1995 und Fenster nicht ersetzt, sonst Frage im UI.",
-    "fIZ": { "beschreibung": "Verhältnis Volumenstrom Raum/Zone f_i-z (Tabelle NA.5): natürlich belüftet 1 Raum 1.0; ≥ 2 Räume max 0.8 / min 0.5; mechanisch belüftet max 1.0", "natuerlichEinRaum": 1.0, "natuerlichMehrereMax": 0.8, "natuerlichMehrereMin": 0.5, "mechanischMax": 1.0 },
+    "fIZ": {
+      "beschreibung": "Verhältnis Volumenstrom Raum/Zone f_i-z (Tabelle NA.5): natürlich belüftet 1 Raum 1.0; ≥ 2 Räume max 0.8 / min 0.5; mechanisch belüftet max 1.0",
+      "natuerlichEinRaum": 1.0,
+      "natuerlichMehrereMax": 0.8,
+      "natuerlichMehrereMin": 0.5,
+      "mechanischMax": 1.0
+    },
     "hinweisZusatz": "Bei grossen Öffnungen (Tore), Raumhöhen > 4.0 m oder hoher Luftwechselrate ist das detaillierte Verfahren der SN EN 12831-1 zu prüfen.",
-    "vorgaenger": { "beschreibung": "SIA 384.201 ND.5.2 (C2:2016): natürlich belüftete Räume n_min 0.3 h⁻¹; n50-Anhaltswerte ND.7 (EFH Neubau 1.5, Altbau gut 4 / mässig 7 / keine Abdichtung 10) — nur Information, nicht verwendet", "quelle": ["sia384201-c2-2016"], "nMinNatuerlich": 0.3, "n50Efh": { "neubau": 1.5, "altbauGut": 4, "altbauMaessig": 7, "altbauKeine": 10 } }
+    "vorgaenger": {
+      "beschreibung": "SIA 384.201 ND.5.2 (C2:2016): natürlich belüftete Räume n_min 0.3 h⁻¹; n50-Anhaltswerte ND.7 (EFH Neubau 1.5, Altbau gut 4 / mässig 7 / keine Abdichtung 10) — nur Information, nicht verwendet",
+      "quelle": [
+        "sia384201-c2-2016"
+      ],
+      "nMinNatuerlich": 0.3,
+      "n50Efh": {
+        "neubau": 1.5,
+        "altbauGut": 4,
+        "altbauMaessig": 7,
+        "altbauKeine": 10
+      }
+    }
   },
-
   "bU": {
     "beschreibung": "Temperatur-Reduktionsfaktor b_u für Bauteile gegen unbeheizte Räume: Φ_T = U·A·b_u·(θint − θe). Primärtabelle SIA 384.201-C1:2014 Tabelle ND.3 (nach Lage, Anzahl Flächen gegen beheizt, Infiltrationsluftwechsel des unbeheizten Raums n_u,e). SIA 384/2:2020 Anhang A (nicht öffentlich) nutzt das EN-12831-1-Verfahren; Thermowerk verwendet ND.3 bis Anhang A vorliegt. Fläche mit Flächenheizung zählt doppelt; Räume mit n_u,e > 5 h⁻¹ gelten als äussere Umgebung (b_u = 1).",
-    "quelle": ["sia384201-c1-2014", "sia384-2-vorschau", "linear-sia384-2"],
+    "quelle": [
+      "sia384201-c1-2014",
+      "sia384-2-vorschau",
+      "linear-sia384-2"
+    ],
     "tabelleND3": {
-      "seitlich": { "label": "Seitlich angrenzender unbeheizter Raum (z. B. Garage, Abstellraum, Treppenhaus)", "eineFlaeche": { "dicht": 0.6, "undicht": 0.8 }, "zweiFlaechen": { "dicht": 0.5, "undicht": 0.7 }, "mehrFlaechen": { "dicht": 0.4, "undicht": 0.6 } },
-      "keller": { "label": "Kellerraum (im oder über dem Erdreich)", "eineFlaeche": { "dicht": 0.5, "undicht": 0.7 }, "zweiFlaechen": { "dicht": 0.4, "undicht": 0.6 }, "mehrFlaechen": { "dicht": 0.3, "undicht": 0.5 } },
-      "estrich": { "label": "Dach – nicht gedämmter Estrich (Dachraum)", "eineFlaeche": { "dicht": 0.7, "undicht": 0.9 } },
+      "seitlich": {
+        "label": "Seitlich angrenzender unbeheizter Raum (z. B. Garage, Abstellraum, Treppenhaus)",
+        "eineFlaeche": {
+          "dicht": 0.6,
+          "undicht": 0.8
+        },
+        "zweiFlaechen": {
+          "dicht": 0.5,
+          "undicht": 0.7
+        },
+        "mehrFlaechen": {
+          "dicht": 0.4,
+          "undicht": 0.6
+        }
+      },
+      "keller": {
+        "label": "Kellerraum (im oder über dem Erdreich)",
+        "eineFlaeche": {
+          "dicht": 0.5,
+          "undicht": 0.7
+        },
+        "zweiFlaechen": {
+          "dicht": 0.4,
+          "undicht": 0.6
+        },
+        "mehrFlaechen": {
+          "dicht": 0.3,
+          "undicht": 0.5
+        }
+      },
+      "estrich": {
+        "label": "Dach – nicht gedämmter Estrich (Dachraum)",
+        "eineFlaeche": {
+          "dicht": 0.7,
+          "undicht": 0.9
+        }
+      },
       "dichtKriterium": "dicht: n_u,e ≤ 0.5 h⁻¹ (spezielle Massnahmen nötig); undicht: 0.5 < n_u,e ≤ 5 h⁻¹ (Default im Bestand)"
     },
     "defaults": {
       "beschreibung": "UI-Vorbelegung je Anschluss-Situation (Bestand: «undicht», Keller mit mehr als zwei Flächen gegen beheizt = typischer EFH-Keller unter dem ganzen Haus).",
-      "quelle": ["sia384201-c1-2014", "tw-annahme"],
-      "kellerUnbeheizt": 0.5, "kellerUnbeheiztHinweis": "ND.3 Keller, mehr als zwei Flächen gegen beheizt, undicht",
-      "dachraumUnbeheizt": 0.9, "dachraumUnbeheiztHinweis": "ND.3 Dach, nicht gedämmter Estrich, undicht",
-      "garageUnbeheizt": 0.8, "garageUnbeheiztHinweis": "ND.3 seitlich, eine Fläche gegen beheizt, undicht",
-      "treppenhausUnbeheizt": 0.7, "treppenhausUnbeheiztHinweis": "ND.3 seitlich, zwei Flächen, undicht",
-      "nachbarBeheiztGleich": 0.0, "nachbarBeheiztGleichHinweis": "gleiche Solltemperatur → kein Verlust; andere Temperatur: Φ = U·A·(θint − θnachbar)",
+      "quelle": [
+        "sia384201-c1-2014",
+        "tw-annahme"
+      ],
+      "kellerUnbeheizt": 0.5,
+      "kellerUnbeheiztHinweis": "ND.3 Keller, mehr als zwei Flächen gegen beheizt, undicht",
+      "dachraumUnbeheizt": 0.9,
+      "dachraumUnbeheiztHinweis": "ND.3 Dach, nicht gedämmter Estrich, undicht",
+      "garageUnbeheizt": 0.8,
+      "garageUnbeheiztHinweis": "ND.3 seitlich, eine Fläche gegen beheizt, undicht",
+      "treppenhausUnbeheizt": 0.7,
+      "treppenhausUnbeheiztHinweis": "ND.3 seitlich, zwei Flächen, undicht",
+      "nachbarBeheiztGleich": 0.0,
+      "nachbarBeheiztGleichHinweis": "gleiche Solltemperatur → kein Verlust; andere Temperatur: Φ = U·A·(θint − θnachbar)",
       "aussenluft": 1.0
     },
-    "vergleichDIN": { "beschreibung": "DIN-Tabelle (Wissensbasis B Tab. 3.10): Nachbarraum ohne Fenster 0.4, mit Fenster 0.5–0.6, innenliegendes Treppenhaus 0.8, Dachraum 0.4–0.5, Keller 0.25–0.38 — nur Vergleich", "quelle": ["wb-b"] }
+    "vergleichDIN": {
+      "beschreibung": "DIN-Tabelle (Wissensbasis B Tab. 3.10): Nachbarraum ohne Fenster 0.4, mit Fenster 0.5–0.6, innenliegendes Treppenhaus 0.8, Dachraum 0.4–0.5, Keller 0.25–0.38 — nur Vergleich",
+      "quelle": [
+        "wb-b"
+      ]
+    }
   },
-
   "deltaUWb": {
     "beschreibung": "Pauschaler Wärmebrückenzuschlag ΔU_WB [W/(m²K)] auf alle Hüllflächen (globale Methode; SIA 384/2 Detailmethode mit ψ/χ nicht abgebildet). Zahlenwert der SIA nicht öffentlich belegt → DIN-Pauschalen (Wissensbasis B Tab. 3.9) als Annahme; im Bericht ausweisen.",
-    "quelle": ["wb-b", "linear-sia384-2", "tw-annahme"],
+    "quelle": [
+      "wb-b",
+      "linear-sia384-2",
+      "tw-annahme"
+    ],
     "werte": [
-      { "key": "bestand", "label": "Bestand / Sanierung ohne Wärmebrückennachweis", "deltaU": 0.10, "default": true },
-      { "key": "neubau", "label": "Neubau mit Standarddetails (Beiblatt 2 / SIA-Standardlösungen)", "deltaU": 0.05 },
-      { "key": "nachweis", "label": "Detaillierter Nachweis (ψ/χ bekannt) — Wert eingeben", "deltaU": 0.02 }
+      {
+        "key": "bestand",
+        "label": "Bestand / Sanierung ohne Wärmebrückennachweis",
+        "deltaU": 0.1,
+        "default": true
+      },
+      {
+        "key": "neubau",
+        "label": "Neubau mit Standarddetails (Beiblatt 2 / SIA-Standardlösungen)",
+        "deltaU": 0.05
+      },
+      {
+        "key": "nachweis",
+        "label": "Detaillierter Nachweis (ψ/χ bekannt) — Wert eingeben",
+        "deltaU": 0.02
+      }
     ]
   },
-
   "rsiRse": {
     "beschreibung": "Wärmeübergangswiderstände [m²K/W] (SIA 180 / ISO 6946). Standard Rsi 0.13 / Rse 0.04; richtungsabhängig nach ISO 6946 (0.10 aufwärts, 0.13 horizontal, 0.17 abwärts); Erdreich Rse 0; hinterlüftete Bauteile und Bauteile gegen unbeheizt: Rse = Rsi; Fussbodenheizung Rsi 0.",
-    "quelle": ["btk-san", "lu-c", "wb-b"],
-    "rsi": { "aufwaerts": 0.10, "horizontal": 0.13, "abwaerts": 0.17 },
+    "quelle": [
+      "btk-san",
+      "lu-c",
+      "wb-b"
+    ],
+    "rsi": {
+      "aufwaerts": 0.1,
+      "horizontal": 0.13,
+      "abwaerts": 0.17
+    },
     "rseAussen": 0.04,
     "rseErdreich": 0.0,
     "rseHinterlueftet": "= Rsi",
     "rseUnbeheizt": "= Rsi",
     "rsiFussbodenheizung": 0.0,
-    "luftschichtRuhend": { "beschreibung": "R [m²K/W] ruhender Luftschichten nach Dicke (mm): 5 / 10 / 25 / 50 / 100", "quelle": ["btk-san", "wb-b"], "aufwaerts": { "5": 0.11, "10": 0.15, "25": 0.16, "50": 0.16, "100": 0.16 }, "horizontal": { "5": 0.11, "10": 0.15, "25": 0.18, "50": 0.18, "100": 0.18 }, "abwaerts": { "5": 0.11, "10": 0.15, "25": 0.19, "50": 0.21, "100": 0.22 } }
+    "luftschichtRuhend": {
+      "beschreibung": "R [m²K/W] ruhender Luftschichten nach Dicke (mm): 5 / 10 / 25 / 50 / 100",
+      "quelle": [
+        "btk-san",
+        "wb-b"
+      ],
+      "aufwaerts": {
+        "5": 0.11,
+        "10": 0.15,
+        "25": 0.16,
+        "50": 0.16,
+        "100": 0.16
+      },
+      "horizontal": {
+        "5": 0.11,
+        "10": 0.15,
+        "25": 0.18,
+        "50": 0.18,
+        "100": 0.18
+      },
+      "abwaerts": {
+        "5": 0.11,
+        "10": 0.15,
+        "25": 0.19,
+        "50": 0.21,
+        "100": 0.22
+      }
+    }
   },
-
   "erdreich": {
     "beschreibung": "Bauteile gegen Erdreich: U_equiv nach vereinfachtem Verfahren (SIA 384/2 Anhang B / EN 12831-1 / ISO 13370) mit charakteristischem Bodenmass B' = A_g / (0.5·P). SIA-Anhang-B-Tabelle nicht öffentlich → Tabelle Bodenplatte z = 0 (Wissensbasis B Tab. 3.8, ISO-13370-Stützwerte nach B' × Dämmwiderstand) plus Faktoren f_θann (Jahresgang) und f_GW (Grundwasser) nach EN 12831-1-Beispiel. Alternativ: 'einfach' = U_Boden · b (SIA 380/1-Regel: < 2 m Tiefe wie Aussenklima, > 2 m wie unbeheizt).",
-    "quelle": ["sia384-2-vorschau", "wb-b", "beuth-errata", "lu-c", "zh-energiepraxis-2021", "tw-annahme"],
+    "quelle": [
+      "sia384-2-vorschau",
+      "wb-b",
+      "beuth-errata",
+      "lu-c",
+      "zh-energiepraxis-2021",
+      "tw-annahme"
+    ],
     "formelBStrich": "B' = A_g / (0.5 · P)  [m]; A_g = Bodenfläche, P = exponierter Umfang",
     "uEquivBodenplatteZ0": {
       "beschreibung": "U_equiv,bf [W/(m²K)] für Bodenplatte auf Erdreich (z = 0) nach B' und Wärmedurchlasswiderstand der Dämmung R_f (0 / 0.5 / 1.0 / 2.0 m²K/W ≈ keine / ~2 cm / ~4 cm / ~8 cm). Interpolation im Kern. Hinweis: Wissensbasis-Tabelle listet Spalten «keine / 0.5 cm / 1 cm / 2 cm», gemeint sind R-Stufen 0 / 0.5 / 1.0 / 2.0 (Monotonie); so übernommen.",
-      "rfStufen": [0, 0.5, 1.0, 2.0],
-      "bStrichM": [2, 4, 6, 8, 10],
+      "rfStufen": [
+        0,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "bStrichM": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
       "werte": {
-        "2":  [1.30, 0.77, 0.55, 0.33],
-        "4":  [0.88, 0.59, 0.45, 0.30],
-        "6":  [0.68, 0.48, 0.38, 0.27],
-        "8":  [0.55, 0.41, 0.33, 0.25],
-        "10": [0.47, 0.36, 0.30, 0.23]
+        "2": [
+          1.3,
+          0.77,
+          0.55,
+          0.33
+        ],
+        "4": [
+          0.88,
+          0.59,
+          0.45,
+          0.3
+        ],
+        "6": [
+          0.68,
+          0.48,
+          0.38,
+          0.27
+        ],
+        "8": [
+          0.55,
+          0.41,
+          0.33,
+          0.25
+        ],
+        "10": [
+          0.47,
+          0.36,
+          0.3,
+          0.23
+        ]
       },
       "kontrollbeispiel": "DIN/TS-Beispiel: U_Boden 0.58 (R_f ≈ 1.3), B' 4.36 → U_equiv 0.37 (Beuth-Errata); SBZ-Beispiel U 1.0, B' 4 → 0.45 auf Erdreich."
     },
     "fThetaAnn": 1.45,
-    "fGw": { "default": 1.0, "grundwasserNah": 1.15, "kriterium": "Grundwasserspiegel < 1 m unter Bodenplatte" },
-    "lambdaErdreichWmK": { "default": 2.0, "tonLehm": 1.5, "sandKies": 2.0, "quelle": ["btk-san"] },
-    "einfacheRegel": { "beschreibung": "SIA 380/1 Figur 2: Bauteile < 2 m im Erdreich wie gegen Aussenklima (b = 1), > 2 m wie gegen unbeheizt (b_u Keller)", "quelle": ["lu-c"], "tiefeGrenzeM": 2.0 },
-    "faustwerteAlt": { "beschreibung": "Alte Empfehlung SIA 384/2:1982: Erdreich 0 °C, unbeheizt 5 °C — veraltet, nur Plausibilisierung", "thetaErdreichC": 0, "thetaUnbeheiztC": 5 }
+    "fGw": {
+      "default": 1.0,
+      "grundwasserNah": 1.15,
+      "kriterium": "Grundwasserspiegel < 1 m unter Bodenplatte"
+    },
+    "lambdaErdreichWmK": {
+      "default": 2.0,
+      "tonLehm": 1.5,
+      "sandKies": 2.0,
+      "quelle": [
+        "btk-san"
+      ]
+    },
+    "einfacheRegel": {
+      "beschreibung": "SIA 380/1 Figur 2: Bauteile < 2 m im Erdreich wie gegen Aussenklima (b = 1), > 2 m wie gegen unbeheizt (b_u Keller)",
+      "quelle": [
+        "lu-c"
+      ],
+      "tiefeGrenzeM": 2.0
+    },
+    "faustwerteAlt": {
+      "beschreibung": "Alte Empfehlung SIA 384/2:1982: Erdreich 0 °C, unbeheizt 5 °C — veraltet, nur Plausibilisierung",
+      "thetaErdreichC": 0,
+      "thetaUnbeheiztC": 5
+    }
   },
-
   "innentemperaturen": {
-    "beschreibung": "Norm-Innentemperatur θint je Raumtyp [°C]. SIA 384.201 ND.2 / SIA 384/2 2.5: Auslegungswerte nach SIA 2024 (Tabelle 11), Bad/Dusche wie Haupträume der Nutzungseinheit; SIA-2024-Tabelle nur teilweise öffentlich (Garderobe/Dusche 21 °C) → Werte nach DIN/TS 12831-1 (Wissensbasis A) als Annahme, Bad 24 °C nach CH-Praxis (FWS-Beispiel Folie 17: Bad 24, Wohnen 24/22, Schlafen 18, Werkstatt 18).",
-    "quelle": ["sia384201-c1-2014", "sia2024-c1-2024", "wb-a", "tw-annahme"],
+    "beschreibung": "Norm-Innentemperatur θint je Raumtyp [°C]. SIA 384.201 ND.2 / SIA 384/2 2.5: Auslegungswerte nach SIA 2024 (Tabelle 11), Bad/Dusche wie Haupträume der Nutzungseinheit; SIA-2024-Tabelle nur teilweise öffentlich (Garderobe/Dusche 21 °C) → Werte nach DIN/TS 12831-1 (Wissensbasis A) als Annahme, Bad 22 °C (SIA: wie Haupträume; Entscheid Daniel), Flur 20 °C innerhalb der Wohnung, abgetrennter Eingangsbereich 15 °C (FWS-Beispiel Folie 17: Bad 24, Wohnen 24/22, Schlafen 18, Werkstatt 18).",
+    "quelle": [
+      "sia384201-c1-2014",
+      "sia2024-c1-2024",
+      "wb-a",
+      "tw-annahme"
+    ],
     "raumtypen": [
-      { "key": "wohnen", "label": "Wohnen / Essen", "thetaIntC": 20, "beheizt": true },
-      { "key": "schlafen", "label": "Schlafen", "thetaIntC": 20, "beheizt": true, "hinweis": "Praxis oft 18 °C (FWS Folie 17); Norm-Auslegung 20 °C" },
-      { "key": "kueche", "label": "Küche", "thetaIntC": 20, "beheizt": true },
-      { "key": "bad", "label": "Bad", "thetaIntC": 24, "beheizt": true, "hinweis": "SIA: wie Haupträume (20–22 °C) zulässig; Thermowerk-Default 24 °C (Komfort, DIN)" },
-      { "key": "dusche", "label": "Dusche / Garderobe", "thetaIntC": 21, "beheizt": true, "hinweis": "SIA 2024 Tab. 11 Zeile 12.08: 21 °C" },
-      { "key": "wc", "label": "WC", "thetaIntC": 20, "beheizt": true },
-      { "key": "buero", "label": "Büro / Arbeitszimmer", "thetaIntC": 20, "beheizt": true },
-      { "key": "flur", "label": "Flur / Korridor", "thetaIntC": 15, "beheizt": true, "hinweis": "DIN 15 °C; innerhalb einer Wohnung oft 20 °C (Thermowerk: 20 wenn keine Tür zu beheizten Räumen fehlt)" },
-      { "key": "treppenhaus", "label": "Treppenhaus (beheizt)", "thetaIntC": 15, "beheizt": true },
-      { "key": "hobby", "label": "Hobby / Fitness / Werkstatt", "thetaIntC": 18, "beheizt": true },
-      { "key": "kellerBeheizt", "label": "Kellerraum beheizt", "thetaIntC": 15, "beheizt": true },
-      { "key": "abstellraum", "label": "Abstellraum (beheizt, innenliegend)", "thetaIntC": 15, "beheizt": true },
-      { "key": "kellerUnbeheizt", "label": "Keller unbeheizt", "thetaIntC": 10, "beheizt": false },
-      { "key": "dachraumUnbeheizt", "label": "Dachraum / Estrich unbeheizt", "thetaIntC": 5, "beheizt": false },
-      { "key": "garageUnbeheizt", "label": "Garage unbeheizt", "thetaIntC": 5, "beheizt": false },
-      { "key": "nebenraumUnbeheizt", "label": "Nebenraum unbeheizt", "thetaIntC": 10, "beheizt": false }
+      {
+        "key": "wohnen",
+        "label": "Wohnen / Essen",
+        "thetaIntC": 20,
+        "beheizt": true
+      },
+      {
+        "key": "schlafen",
+        "label": "Schlafen",
+        "thetaIntC": 20,
+        "beheizt": true,
+        "hinweis": "Praxis oft 18 °C (FWS Folie 17); Norm-Auslegung 20 °C"
+      },
+      {
+        "key": "kueche",
+        "label": "Küche",
+        "thetaIntC": 20,
+        "beheizt": true
+      },
+      {
+        "key": "bad",
+        "label": "Bad",
+        "thetaIntC": 22,
+        "beheizt": true,
+        "hinweis": "SIA 384.201 ND.2.2: Bad/Dusche wie Haupträume (20–22 °C) → 22 °C (Entscheid Daniel 2026-10-29); DIN-Wert 24 °C nur als Option"
+      },
+      {
+        "key": "dusche",
+        "label": "Dusche / Garderobe",
+        "thetaIntC": 21,
+        "beheizt": true,
+        "hinweis": "SIA 2024 Tab. 11 Zeile 12.08: 21 °C"
+      },
+      {
+        "key": "wc",
+        "label": "WC",
+        "thetaIntC": 20,
+        "beheizt": true
+      },
+      {
+        "key": "buero",
+        "label": "Büro / Arbeitszimmer",
+        "thetaIntC": 20,
+        "beheizt": true
+      },
+      {
+        "key": "flur",
+        "label": "Flur / Korridor",
+        "thetaIntC": 20,
+        "beheizt": true,
+        "hinweis": "Flur innerhalb der Wohnung ohne Tür zu den Zimmern: 20 °C (Entscheid Daniel 2026-10-29); abgetrennter Eingangsbereich → Raumtyp eingangsbereich 15 °C"
+      },
+      {
+        "key": "eingangsbereich",
+        "label": "Eingangsbereich / Windfang (durch Tür abgetrennt)",
+        "thetaIntC": 15,
+        "beheizt": true,
+        "hinweis": "DIN 15 °C; nur wenn vom Wohnbereich durch eine Tür getrennt (Entscheid Daniel 2026-10-29)"
+      },
+      {
+        "key": "treppenhaus",
+        "label": "Treppenhaus (beheizt)",
+        "thetaIntC": 15,
+        "beheizt": true
+      },
+      {
+        "key": "hobby",
+        "label": "Hobby / Fitness / Werkstatt",
+        "thetaIntC": 18,
+        "beheizt": true
+      },
+      {
+        "key": "kellerBeheizt",
+        "label": "Kellerraum beheizt",
+        "thetaIntC": 15,
+        "beheizt": true
+      },
+      {
+        "key": "abstellraum",
+        "label": "Abstellraum (beheizt, innenliegend)",
+        "thetaIntC": 15,
+        "beheizt": true
+      },
+      {
+        "key": "kellerUnbeheizt",
+        "label": "Keller unbeheizt",
+        "thetaIntC": 10,
+        "beheizt": false
+      },
+      {
+        "key": "dachraumUnbeheizt",
+        "label": "Dachraum / Estrich unbeheizt",
+        "thetaIntC": 5,
+        "beheizt": false
+      },
+      {
+        "key": "garageUnbeheizt",
+        "label": "Garage unbeheizt",
+        "thetaIntC": 5,
+        "beheizt": false
+      },
+      {
+        "key": "nebenraumUnbeheizt",
+        "label": "Nebenraum unbeheizt",
+        "thetaIntC": 10,
+        "beheizt": false
+      }
     ],
     "korrekturGrenzwert": "SIA 380/1: ±5 % je K Abweichung von 20 °C (betrifft Grenzwerte, nicht Heizlast)",
     "hinweisUnbeheizt": "Temperaturen unbeheizter Räume dienen nur der Nachbarraum-Berechnung (alternativ b_u-Faktor)."
   },
-
   "plausibilitaet": {
     "beschreibung": "Prüfbänder für die raumweise Rechnung (Thermowerk-Annahmen, Kurs- und Befund-Werte).",
-    "quelle": ["befund-fachlogik", "tw-annahme"],
-    "spezHeizlastWm2": { "beschreibung": "siehe fws.json bauperioden.wM2 (Folie 37, Schneider 2014) — gleiche Bänder für beide Modi" },
-    "normReserveGegenVerbrauchProzent": [10, 25],
+    "quelle": [
+      "befund-fachlogik",
+      "tw-annahme"
+    ],
+    "spezHeizlastWm2": {
+      "beschreibung": "siehe fws.json bauperioden.wM2 (Folie 37, Schneider 2014) — gleiche Bänder für beide Modi"
+    },
+    "normReserveGegenVerbrauchProzent": [
+      10,
+      25
+    ],
     "innentransmissionAnteilMax": 0.3,
     "hinweisSaldierung": "Σ Räume (inkl. Innentransmission zu kälteren Räumen) liegt typisch 10–25 % über der saldierten Gebäude-Heizlast (Befund FACH-30); Gebäude-Wert ist massgebend für den Wärmeerzeuger, Σ Räume für Heizflächen."
   }

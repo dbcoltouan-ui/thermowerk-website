@@ -135,6 +135,8 @@ describe('fws.json — Warmwasser (SIA 385/2, Folien 42–52)', () => {
   it('Nutzwarmwasserbedarf je Person nach SIA 385/2:2015', () => {
     const w = Object.fromEntries(fws.warmwasser.bedarfProPersonLiterTag.werte.map((x) => [x.key, x.literProPersonTag]));
     expect(w).toEqual({ efh_einfach: 40, efh_mittel: 45, efh_gehoben: 55, mfh_allgemein: 35, mfh_gehoben: 45, buero: 3 });
+    const defaults = fws.warmwasser.bedarfProPersonLiterTag.werte.filter((x) => (x as { default?: boolean }).default);
+    expect(defaults.map((x) => x.key)).toEqual(['efh_mittel']); // Standardwert 45 l (Daniel 29.10.)
   });
   it('Personenbelegung: Stützpunkte entsprechen der Formel n = 3.3 − 2/(1+(A/100)³)', () => {
     const a0 = fws.warmwasser.personenbelegung.a0M2;

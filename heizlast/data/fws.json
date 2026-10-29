@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "stand": "2026-10-29",
     "beschreibung": "Fachdaten FWS-Modus (Verbrauchsmethode nach FWS/AWB Kurs Modul 3, Version 1-2025) inkl. Warmwasser, Zuschläge, Speicher, Puffer, Bivalenz. Keine Rechenlogik; jede Tabelle nennt ihre Quelle über `quelle` (IDs aus `_meta.quellen`). Werte in SI-nahen Einheiten (kWh, kW, h, l, K); Konvention siehe `heizwerte`.",
     "quellen": [
@@ -807,40 +807,47 @@
           "key": "efh_einfach",
           "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
           "standard": "einfacher Standard",
-          "literProPersonTag": 40
+          "literProPersonTag": 40,
+          "default": false
         },
         {
           "key": "efh_mittel",
           "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
           "standard": "mittlerer Standard",
-          "literProPersonTag": 45
+          "literProPersonTag": 45,
+          "default": true
         },
         {
           "key": "efh_gehoben",
           "gebaeudeart": "Einfamilienhaus, Eigentumswohnung",
           "standard": "gehobener Standard",
-          "literProPersonTag": 55
+          "literProPersonTag": 55,
+          "default": false
         },
         {
           "key": "mfh_allgemein",
           "gebaeudeart": "Mehrfamilienhaus",
           "standard": "allgemeiner Wohnungsbau",
-          "literProPersonTag": 35
+          "literProPersonTag": 35,
+          "default": false
         },
         {
           "key": "mfh_gehoben",
           "gebaeudeart": "Mehrfamilienhaus",
           "standard": "gehobener Wohnungsbau",
-          "literProPersonTag": 45
+          "literProPersonTag": 45,
+          "default": false
         },
         {
           "key": "buero",
           "gebaeudeart": "Bürogebäude",
           "standard": "ohne Personalrestaurant",
-          "literProPersonTag": 3
+          "literProPersonTag": 3,
+          "default": false
         }
       ],
-      "kursHinweis": "Aufgabe 4 rechnet EFH mit 4 Personen à 40 l/d; Aufgabe 3 MFH gehoben mit 45 l/P."
+      "kursHinweis": "Aufgabe 4 rechnet EFH mit 4 Personen à 40 l/d; Aufgabe 3 MFH gehoben mit 45 l/P.",
+      "defaultHinweis": "Standardwert 45 l/P·d (EFH mittlerer Standard; Entscheid Daniel 2026-10-29), im UI sichtbar als «Standardwert» und überschreibbar."
     },
     "personenbelegung": {
       "beschreibung": "Personenbelegung n_P,i einer Wohneinheit aus der Nutzfläche A_NF (SIA 385/2:2015, Folie 43). Darf nicht-ganzzahlig sein.",

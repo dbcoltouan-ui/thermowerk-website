@@ -1,6 +1,6 @@
 # KONTEXT — Neubau «Thermowerk Heizlast» (für jede Folge-Session zuerst lesen)
 
-Stand: 2026-10-29 (Regel 10 + Design 16:34) · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
+Stand: 2026-10-29 (Regel 10 + Design 16:34; Fachentscheide 17:51) · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
 
 ## 1. Zweck (verbindlich)
 Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbaren Modi:
@@ -28,6 +28,8 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 | Backend | Cloudflare Pages Functions + D1 bleiben. Auth neu: HMAC-signiertes Cookie (`HEIZLAST_COOKIE_SECRET`), Ablauf, timing-safe Passwortvergleich, Rate-Limit; Projekte: Grössenlimit, ID-Format, optimistisches Locking (409 bei `updated_at`-Konflikt), 404 bei unbekannter ID. SQL aus `heizlast-projects.js` übernehmen. D1-Schema ins Repo. | BUILD-06–09, 12. |
 | Daten | Nur in `data/*.json`, nie als Kopie im Code. Einheitliches `_meta { version, stand, quellen[] }`; jede Tabelle mit Quelle (Norm/Seite/Tabelle oder Datenblatt-URL + Datum). KI-Recherche ist keine Primärquelle. Schema-Tests je Datei. | DATA-01, 10. |
 | Design | Farbpalette und die **eckige** Formensprache (Radien 0–4 px, wie im alten `style.css`) übernehmen; Layout, Navigation, Dichte, Komponenten frei neu. Tokens liegen seit Session 1 in `src/ui/styles/tokens.css`; **Radien wie auf Schritt 0 der neuen App sind von Daniel bestätigt (29.10., 16:34) und bleiben so.** | Daniel 29.10. |
+| Standardwerte sichtbar | **Jeder automatisch vorbelegte Wert steht als Zahl im Feld und ist deutlich als «Standardwert» markiert** (Daniel 29.10., 17:51); unbekannte Grössen zeigen den Fallback ebenfalls als Zahl mit Markierung, der Nutzer überschreibt, wo er es besser weiss, sonst bleibt der Fallback. Gilt für alle Schritte (UI-Sessions 7/8). | Daniel 29.10. |
+| Fachentscheide 29.10. | Heizkörper: Erfassung primär nach Bauart/Masse/Tiefe/Glieder (Marke meist unbekannt), Modell-DB optional. Innentemperaturen: Bad 22 °C (SIA: wie Haupträume), Flur in der Wohnung 20 °C, abgetrennter Eingangsbereich 15 °C. Warmwasser-Standard 45 l/P·d, überschreibbar. | Daniel 29.10. (Fragerunde 3) |
 | Sprache/Stil | UI und Doku Deutsch, Schweizer Schreibweise (ss, 23'000). Bezeichner: Domänensprache Deutsch, camelCase, Einheit im Namen wo nicht SI (`qhlKW` vermeiden → intern alles in W und °C, Formatierung nur in UI). Keine ß, keine «ae/oe/ue»-Umschreibungen in sichtbaren Texten. | CODE-22–27. |
 | Zusatzmodule | Förderung, Bewilligung, Offerte: bestehende reine Module übernehmen, an neuen State anbinden, in separater Navigationsgruppe. Hydraulik-Schemas: zurückgestellt (nicht im Umfang). | CODE-10, `code-qualitaet.md §5`. |
 
@@ -36,7 +38,7 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 2. **Protokoll** `REVISION\PROTOKOLL.md`: je Session Datum, Prompt (Kurzform), Entscheide, Änderungen, Prüfresultat. Arbeits-Backups + Protokoll werden nach Abnahme gelöscht.
 3. **Strikt sequentiell**: eine Session, ein Ziel, Abschluss + Prüfung (Definition of Done unten) vor der nächsten. Keine Parallelarbeit an denselben Dateien.
 4. **Freiheit beim Umbau**, aber: felsenfeste Bausteine übernehmen; im Zweifel gewinnt das saubere neue System.
-5. **Fragen** nur gebündelt und entscheidungsrelevant (max. 4 Runden gesamt; Stand 29.10.: 2 verbraucht).
+5. **Fragen** nur gebündelt und entscheidungsrelevant (max. 4 Runden gesamt; Stand 29.10. 17:51: 3 verbraucht).
 8. **Kein Hotfix am alten Tool** (Daniel 29.10.): Session 0 entfällt, Live-Stand bleibt unverändert bis Go-Live.
 9. **Ablauf:** je Session ein neuer Chat im Claude-Projekt «thermowerk», Modell laut PLAN wählen, Prompt aus PLAN.md §4 einfügen. Dieses KONTEXT.md liegt in der Projekt-Wissensbasis und wird in jedem Chat zuerst gelesen.
 6. Doku an Daniel **als PDF oder Text im Chat**; für Claude als Markdown im Repo.
