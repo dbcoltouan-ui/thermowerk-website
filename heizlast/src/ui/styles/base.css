@@ -20,6 +20,7 @@ body {
   color: var(--c-text);
   background: var(--c-bg);
   -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
 }
 h1,
 h2,
@@ -105,40 +106,10 @@ small {
   padding: var(--s-5);
 }
 .karte__titel {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--c-text-mute);
-  margin-bottom: var(--s-3);
-}
-
-/* ---- Felder ---- */
-.feld {
-  display: grid;
-  gap: var(--s-1);
-}
-.feld__label {
   font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-semibold);
   color: var(--ink-700);
-}
-.feld__input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--c-border-strong);
-  border-radius: var(--r-sm);
-  background: var(--ink-0);
-  font-size: var(--fs-md);
-}
-.feld__input:focus {
-  border-color: var(--brand-500);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--brand-100);
-}
-.feld__hilfe {
-  font-size: var(--fs-xs);
-  color: var(--c-text-mute);
+  margin-bottom: var(--s-3);
 }
 
 /* ---- Hilfsklassen ---- */
@@ -155,4 +126,13 @@ small {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

@@ -3,32 +3,34 @@ import type { SchrittDef } from '../schritte';
 
 interface Props {
   schritt: SchrittDef;
-  istErster: boolean;
-  istLetzter: boolean;
-  onZurueck: () => void;
-  onWeiter: () => void;
+  vorher: SchrittDef | undefined;
+  nachher: SchrittDef | undefined;
+  onWahl: (s: SchrittDef) => void;
   children: ComponentChildren;
 }
 
-/** Rahmen einer Schrittseite: Titel, Inhalt, Zurück/Weiter. */
-export function SchrittSeite({ schritt, istErster, istLetzter, onZurueck, onWeiter, children }: Props) {
+/** Rahmen einer Schrittseite: Titel mit Zweck, Inhalt, Zurück/Weiter mit Ziel. */
+export function SchrittSeite({ schritt, vorher, nachher, onWahl, children }: Props) {
   return (
-    <section class="inhalt" aria-labelledby="schritt-titel">
+    <section class="inhalt" aria-labelledby="schritt-titel" data-testid={`seite-${schritt.id}`}>
       <div class="inhalt__kopf">
-        <h1 id="schritt-titel">
-          <span class="mute">{schritt.nr} · </span>
-          {schritt.titel}
-        </h1>
+        <span class="inhalt__nr" aria-hidden="true">
+          {schritt.nr}
+        </span>
+        <div>
+          <h1 id="schritt-titel">{schritt.titel}</h1>
+          <p>{schritt.zweck}</p>
+        </div>
       </div>
       {children}
-      <div class="inhalt__nav">
-        <button type="button" class="btn" onClick={onZurueck} disabled={istErster}>
-          ← Zurück
+      <nav class="inhalt__nav" aria-label="Schritt wechseln">
+        <button type="button" class="btn" onClick={() => vorher && onWahl(vorher)} disabled={!vorher} data-testid="zurueck">
+          Zurück{vorher ? `: ${vorher.kurz}` : ''}
         </button>
-        <button type="button" class="btn btn--primary" onClick={onWeiter} disabled={istLetzter} data-testid="weiter">
-          Weiter →
+        <button type="button" class="btn btn--primary" onClick={() => nachher && onWahl(nachher)} disabled={!nachher} data-testid="weiter">
+          Weiter{nachher ? `: ${nachher.kurz}` : ''}
         </button>
-      </div>
+      </nav>
     </section>
   );
 }

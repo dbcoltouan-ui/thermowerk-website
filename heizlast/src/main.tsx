@@ -4,6 +4,7 @@ import { verwaltung } from './state/app';
 import './ui/styles/tokens.css';
 import './ui/styles/base.css';
 import './ui/styles/shell.css';
+import './ui/styles/komponenten.css';
 
 // Entwurf laden und Autosave starten; ausstehende Sicherung beim Verlassen/Verbergen sofort schreiben.
 verwaltung.starten();

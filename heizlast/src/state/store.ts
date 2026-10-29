@@ -47,6 +47,17 @@ function setzeIn(obj: unknown, teile: string[], wert: unknown, bisher: string[])
   return kopie;
 }
 
+/** Liest den Wert unter `pfad` (Listen über id; gleiche Pfade wie `setzeImState`). Fehlende Knoten → undefined. */
+export function leseAusState(s: State, pfad: string): unknown {
+  let obj: unknown = s;
+  for (const k of pfad.split('.')) {
+    if (Array.isArray(obj)) obj = obj.find((e) => istObjekt(e) && e.id === k);
+    else if (istObjekt(obj)) obj = obj[k];
+    else return undefined;
+  }
+  return obj;
+}
+
 /** Reiner Setter: neuer State mit `wert` unter `pfad` (Listen über id; `undefined` löscht). Wirft bei unbekanntem Pfad. */
 export function setzeImState(s: State, pfad: string, wert: unknown): State {
   return setzeIn(s, pfad.split('.'), wert, []) as State;
@@ -78,6 +89,8 @@ export interface Store {
   heizflaecheHinzufuegen: (raumId: string, bauart: Bauart) => string;
   heizflaecheBauart: (raumId: string, hfId: string, bauart: Bauart) => void;
   standardBauteiltypenAnlegen: () => void;
+  /** Hängt ein Element mit neuer id an die Liste unter `listenPfad` an (z. B. `sanierungen`, `raeume.r1.bauteile`); gibt die id zurück. */
+  hinzufuegen: (listenPfad: string, element: Record<string, unknown>, praefix: string) => string;
 }
 
 let zaehler = 0;
@@ -168,6 +181,14 @@ export function erstelleStore(o: StoreOptionen): Store {
         if (!r) return s;
         return { ...s, waermeabgabe: { ...s.waermeabgabe, raeume: { ...s.waermeabgabe.raeume, [raumId]: { ...r, heizflaechen: r.heizflaechen.map((hf) => (hf.id === hfId ? heizflaecheBauartWechseln(hf, bauart, o.daten.hk) : hf)) } } } };
       }),
+    hinzufuegen: (listenPfad, element, praefix) => {
+      const id = neueId(praefix);
+      aktion((s) => {
+        const alt = leseAusState(s, listenPfad);
+        return setzeImState(s, listenPfad, [...(Array.isArray(alt) ? alt : []), { ...element, id }]);
+      });
+      return id;
+    },
     /** Legt die Standard-Bauteiltypen aus Keller/Dachform an (nur wenn noch keine erfasst sind). */
     standardBauteiltypenAnlegen: () =>
       batch(() =>

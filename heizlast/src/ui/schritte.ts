@@ -1,41 +1,39 @@
 /**
- * Schrittdefinitionen der Shell (Ziel-Navigationskonzept, befund_ux-datenfluss.md §5).
- * Session 1: nur Struktur und Status-Platzhalter. Relevanz je Modus und echte
- * Status kommen mit `relevant()` / `Ergebnis.status` in Session 6/7.
+ * Schrittdefinitionen (Ziel-Navigationskonzept, befund_ux-datenfluss.md §5.1). Welche Schritte sichtbar sind,
+ * entscheidet der Kern (`Ergebnis.relevanteSchritte`, kern/relevanz.ts `schrittRelevant`) — hier nur Texte.
  */
-import type { Methode } from '../state/typen';
-import type { SchrittStatus } from '../kern/relevanz';
+import type { SchrittId, SchrittStatus } from '../kern/relevanz';
 
-export type { SchrittStatus };
+export type { SchrittId, SchrittStatus };
 
 export interface SchrittDef {
-  id: string;
+  id: SchrittId;
   nr: number;
   titel: string;
   /** Kurztitel für die Schrittleiste. */
   kurz: string;
-  /** Platzhalter: für welche Modi der Schritt relevant ist. */
-  modi: ReadonlyArray<Methode>;
+  /** Ein Satz: wozu der Schritt dient. */
+  zweck: string;
 }
 
 export const SCHRITTE: ReadonlyArray<SchrittDef> = [
-  { id: 'projekt', nr: 0, titel: 'Projekt & Methode', kurz: 'Projekt', modi: ['fws', 'raumweise'] },
-  { id: 'gebaeude', nr: 1, titel: 'Gebäude', kurz: 'Gebäude', modi: ['fws', 'raumweise'] },
-  { id: 'sanierungen', nr: 2, titel: 'Sanierungen', kurz: 'Sanierungen', modi: ['fws', 'raumweise'] },
-  { id: 'verbrauch', nr: 3, titel: 'Verbrauch', kurz: 'Verbrauch', modi: ['fws'] },
-  { id: 'huelle', nr: 3, titel: 'Hülle & Räume', kurz: 'Hülle & Räume', modi: ['raumweise'] },
-  { id: 'heizlast', nr: 4, titel: 'Heizlast', kurz: 'Heizlast', modi: ['fws', 'raumweise'] },
-  { id: 'warmwasser', nr: 5, titel: 'Warmwasser', kurz: 'Warmwasser', modi: ['fws', 'raumweise'] },
-  { id: 'waermeabgabe', nr: 6, titel: 'Wärmeabgabe', kurz: 'Wärmeabgabe', modi: ['fws', 'raumweise'] },
-  { id: 'zuschlaege', nr: 7, titel: 'Zuschläge & Leistung', kurz: 'Zuschläge', modi: ['fws', 'raumweise'] },
-  { id: 'speicher', nr: 8, titel: 'Speicher & Hydraulik', kurz: 'Speicher', modi: ['fws', 'raumweise'] },
-  { id: 'waermepumpe', nr: 9, titel: 'Wärmepumpe', kurz: 'Wärmepumpe', modi: ['fws', 'raumweise'] },
-  { id: 'bericht', nr: 10, titel: 'Bericht', kurz: 'Bericht', modi: ['fws', 'raumweise'] },
+  { id: 'projekt', nr: 0, titel: 'Projekt & Methode', kurz: 'Projekt', zweck: 'Projekt benennen und festlegen, wie die Heizlast bestimmt wird.' },
+  { id: 'gebaeude', nr: 1, titel: 'Gebäude', kurz: 'Gebäude', zweck: 'Standort, Baujahr und Fläche — daraus folgen Aussentemperatur und Vergleichswerte.' },
+  { id: 'sanierungen', nr: 2, titel: 'Sanierungen', kurz: 'Sanierungen', zweck: 'Ausgeführte und geplante Massnahmen mit Jahr; sie wirken je nach Methode auf den Verbrauch oder auf die Bauteile.' },
+  { id: 'verbrauch', nr: 3, titel: 'Verbrauch', kurz: 'Verbrauch', zweck: 'Bisheriger Energieverbrauch oder Betriebsdaten — Grundlage der Heizlast nach FWS-Kurs.' },
+  { id: 'huelle', nr: 3, titel: 'Hülle & Räume', kurz: 'Hülle & Räume', zweck: 'Bauteiltypen des Gebäudes und Räume mit ihren Flächen — Grundlage der raumweisen Heizlast.' },
+  { id: 'heizlast', nr: 4, titel: 'Heizlast', kurz: 'Heizlast', zweck: 'Massgebende Heizlast mit Herkunft, Spanne und Rechenweg.' },
+  { id: 'warmwasser', nr: 5, titel: 'Warmwasser', kurz: 'Warmwasser', zweck: 'Warmwasser über die neue Wärmepumpe.' },
+  { id: 'waermeabgabe', nr: 6, titel: 'Wärmeabgabe', kurz: 'Wärmeabgabe', zweck: 'Heizkörper und Flächenheizungen je Raum — nötige Vorlauftemperatur.' },
+  { id: 'zuschlaege', nr: 7, titel: 'Zuschläge & Leistung', kurz: 'Zuschläge', zweck: 'Sperrzeit und weitere Zuschläge zur Auslegungsleistung.' },
+  { id: 'speicher', nr: 8, titel: 'Speicher & Hydraulik', kurz: 'Speicher', zweck: 'Warmwasserspeicher, Puffer und Ausdehnungsgefäss.' },
+  { id: 'waermepumpe', nr: 9, titel: 'Wärmepumpe', kurz: 'Wärmepumpe', zweck: 'Gerät passend zu Leistung und Vorlauftemperatur.' },
+  { id: 'bericht', nr: 10, titel: 'Bericht', kurz: 'Bericht', zweck: 'Vorschau, Vollständigkeit und Export.' },
 ];
 
-/** Schritte, die für die gewählte Methode sichtbar sind (ohne Methode: beide Varianten von Schritt 3 ausgeblendet). */
-export function sichtbareSchritte(methode: Methode | null): SchrittDef[] {
-  return SCHRITTE.filter((s) => (methode ? s.modi.includes(methode) : s.modi.length === 2));
+/** Sichtbare Schritte in der Reihenfolge der Schrittfolge (Relevanz aus dem Ergebnis). */
+export function sichtbareSchritte(relevant: ReadonlyArray<SchrittId>): SchrittDef[] {
+  return SCHRITTE.filter((s) => relevant.includes(s.id));
 }
 
 export const STATUS_TEXT: Record<SchrittStatus, string> = {

@@ -1,55 +1,37 @@
-import { methode, projektname, setzeMethode, setzeProjektname } from '../../state/ui';
+import { ruhendeAngaben } from '../../kern/relevanz';
 import { METHODEN } from '../../state/typen';
+import { setzeMethode } from '../../state/ui';
+import { store } from '../bindung';
+import { Abschnitt, OptionKarten, Raster, TextFeld } from '../komponenten/Felder';
 
-/** Schritt 0 — Projekt & Methode (Session 1: Projektname + Moduswahl; Rest folgt in Session 7). */
+/** Schritt 0 — Projekt & Methode. */
 export function ProjektMethode() {
+  const s = store.state.value;
+  const ruhend = ruhendeAngaben(s);
   return (
     <>
-      <div class="karte">
-        <div class="karte__titel">Projekt</div>
-        <label class="feld">
-          <span class="feld__label">Projektname</span>
-          <input
-            class="feld__input"
-            type="text"
-            value={projektname.value}
-            onInput={(e) => setzeProjektname((e.currentTarget as HTMLInputElement).value)}
-            placeholder="z. B. EFH Muster, Musterstrasse 1, 3000 Bern"
-            data-testid="projektname-eingabe"
-            autocomplete="off"
-          />
-          <span class="feld__hilfe">Erscheint in der Kopfzeile und auf dem Bericht — eine Quelle.</span>
-        </label>
-      </div>
+      <Abschnitt titel="Projekt">
+        <Raster>
+          <TextFeld pfad="projekt.name" label="Projektname" platzhalter="z. B. EFH Muster, Bern" testid="projektname-eingabe" breit info="Erscheint in der Kopfzeile, in der Projektliste und auf dem Bericht." />
+          <TextFeld pfad="projekt.kunde" label="Kunde" testid="projekt-kunde" />
+          <TextFeld pfad="projekt.adresse" label="Objektadresse" testid="projekt-adresse" />
+          <TextFeld pfad="projekt.bearbeiter" label="Bearbeitet von" testid="projekt-bearbeiter" />
+        </Raster>
+      </Abschnitt>
 
-      <div class="karte">
-        <div class="karte__titel">Methode</div>
-        <div class="moduswahl" role="radiogroup" aria-label="Methode">
-          {METHODEN.map((m) => (
-            <button
-              type="button"
-              role="radio"
-              class="modus"
-              aria-checked={methode.value === m.id}
-              onClick={() => setzeMethode(m.id)}
-              key={m.id}
-              data-testid={`methode-${m.id}`}
-            >
-              <span class="modus__radio" aria-hidden="true" />
-              <span>
-                <span class="modus__titel">{m.titel}</span>
-                <p class="modus__text">{m.text}</p>
-              </span>
-            </button>
-          ))}
-        </div>
-        {methode.value && (
-          <p class="hinweis" style={{ marginTop: 'var(--s-4)' }}>
-            Die Methode kann jederzeit gewechselt werden. Eingaben bleiben erhalten; Angaben, die im anderen Modus
-            nicht gebraucht werden, ruhen und werden nicht gedruckt.
-          </p>
+      <Abschnitt titel="Wie wird die Heizlast bestimmt?" text="Die Wahl bestimmt Schritt 3. Sie lässt sich jederzeit ändern; Eingaben gehen dabei nicht verloren.">
+        <OptionKarten pfad="methode" label="Methode" optionen={METHODEN.map((m) => ({ wert: m.id, label: m.titel, text: m.text }))} testid="methode" beiWahl={setzeMethode} />
+        {s.methode && ruhend.length > 0 && (
+          <div class="meldung meldung--info" data-testid="ruhende-angaben">
+            <strong>Diese Angaben ruhen im gewählten Modus</strong> — sie bleiben gespeichert, werden aber weder gerechnet noch gedruckt:
+            <ul>
+              {ruhend.map((r) => (
+                <li key={r.pfad}>{r.text}</li>
+              ))}
+            </ul>
+          </div>
         )}
-      </div>
+      </Abschnitt>
     </>
   );
 }

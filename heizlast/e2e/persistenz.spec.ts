@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 /** Session 6: Entwurf überlebt Neuladen (Autosave ≥ 1 s), Speichern, «Neu» mit Rückfrage bei ungespeicherten Änderungen. */
 test('Entwurf, Speichern und «Neu» mit Rückfrage', async ({ page }, info) => {
-  // Mobil blendet Status und Projekt-Knöpfe der Topbar aus (Projektmenü mobil: Session 7) — dort nur der Entwurf.
+  // Mobil blendet den Speicherstatus der Topbar aus — dort nur der Entwurf.
   const desktop = info.project.name === 'desktop';
   await page.goto('./');
   if (desktop) await expect(page.getByTestId('speicherstatus')).toHaveText('Neues Projekt');

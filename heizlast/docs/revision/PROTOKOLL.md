@@ -205,3 +205,24 @@ Prompt: `state/schema.ts` (State v2 nur Rohangaben, Typen + Validierung), `kern/
 - Umsetzung: `klimastationen.json` `auslegungsregel` → `standardThetaE` (−8 °C, Quelle `tw-abgeleitet`); `thetaEAuslegung` liefert Station/Angabe, sonst Standardwert (Annahme, Hinweis `klima.standardwert`); fehlender Standort ist keine Pflichtlücke mehr. Quelle `tw-entscheid` und «Fachentscheid»-Texte aus Daten/Doku entfernt; WP-Bänder und Standard-VL als Thermowerk-Annahme (`tw-annahme`) geführt. CH-EFH wieder 2 678.7 W (Handrechnung −7 °C).
 - Prüfung: `npm test` 467/467, lint/build ok, Playwright (siehe Chat-Bericht).
 
+
+## 2026-10-29 22:30 — Session 7: UI Teil 1 (Opus-Prompt aus PLAN §4, ausgeführt mit Opus 5.5)
+Prompt: Shell (Topbar, Schrittleiste mit Status nur für relevante Schritte, Weiter/Zurück, Dashboard-Seitenleiste bzw. mobile Leiste), Komponenten (Feld mit ⓘ-Popover, Inline-Fehler, Validierung; Wert mit Herkunfts-Chip; Stufen-Picker eingeklappt; Ampel mit Legende; Tabelle), Schritte 0–4; Playwright Desktop/Mobil mit FWS- und raumweise-Fall, Screenshots, bedingte Felder, Stepper sticky, keine stale Anzeige.
+
+### Entscheide
+- Navigation über die Schritt-id (nicht Index), sichtbare Schritte = `Ergebnis.relevanteSchritte`; Moduswechsel springt von Schritt 3A auf 3B und umgekehrt.
+- Felder binden an State-Pfade (`ui/bindung.ts`); `relevant()` entscheidet über das Rendern. Store ergänzt um `leseAusState` und `hinzufuegen(listenPfad, element, praefix)` (Listen-ids vom Store).
+- Standardwerte sichtbar (Daniel 29.10.): ZahlFeld zeigt den Wert, den der Kern ohne eigene Angabe nimmt (θe, η, t_voll, Raumhöhe, θint, U aus der Hülle, Sanierungs-Einsparung, WW-Verlust-Richtwerte), gestrichelt mit Herkunfts-Chip; eigene Zahl überschreibt und ist mit rotem Strich markiert, «Standard verwenden» bzw. «Wert aus Hülle verwenden» setzt zurück. Auswahlfelder zeigen «Standard: …».
+- Herkunft als ein visuelles System (Muster je Herkunft) für Felder, Chips, Annahmen-Liste und Schrittstatus; Chip-Klick zeigt Begründung, Spanne und Quelle.
+- Raum-Bauteile: Lage-Fragen (Aussenwand mit Fenster, darunter, darüber) legen Bauteile als Referenz auf die Hüllentypen an; Boden-/Deckenfläche aus der Raumfläche des Ergebnisses.
+- Schrift IBM Plex Sans (statt Inter), Farben/Radien unverändert (Daniel 29.10.).
+- WW-Angaben als gemeinsame Komponente (`seiten/WwAngaben.tsx`) für beide Äste (Abzug jetzt, künftig Session 8), ohne Kopplung.
+
+### Änderungen
+- Neu: `src/ui/bindung.ts`; `src/ui/komponenten/Felder.tsx`, `Herkunft.tsx`, `Popover.tsx`, `StufenPicker.tsx`, `Ampel.tsx`, `Meldungen.tsx`; `src/ui/seiten/Gebaeude.tsx`, `Sanierungen.tsx`, `Verbrauch.tsx`, `WwAngaben.tsx`, `HuelleRaeume.tsx`, `Heizlast.tsx`; `src/ui/styles/komponenten.css`; `e2e/schritte.spec.ts`; `tests/ui-bindung.test.ts`.
+- Geändert: `src/ui/App.tsx`, `schritte.ts`, `komponenten/Dashboard.tsx`, `Schrittleiste.tsx`, `Topbar.tsx` (Projektliste), `SchrittSeite.tsx`, `seiten/ProjektMethode.tsx`, `Platzhalter.tsx`; `src/state/ui.ts` (Schritt-id), `store.ts`; `src/ui/styles/shell.css`, `base.css`, `tokens.css`; `index.html` (Schrift); `src/main.tsx`; `tests/shell.test.ts` (Relevanz aus dem Kern); `e2e/persistenz.spec.ts` (Kommentar); README.
+
+### Prüfung
+- `npm test` 469/469, `npm run lint` ohne Fehler, `npm run build` ok.
+- Playwright 14/14 (Desktop 1280 + Mobil 390): Moosseedorf über die UI → Q_hl 9.3 kW (Handrechnung 9 304.7 W), Seite = Dashboard, Annahmen-Sprung; CH-EFH über die UI (Typen vorschlagen, Lage-Fragen, eigene U-Werte wie Handrechnung) → Wohnen 2'099 W, Bad 570 W (2 098.6 / 570.3 W), EBF 34.1 m²; Picker-Änderung ändert U im Raum und Φ_HL sofort; WW-Abzug nur bei «ja», Personen-/Liter-Felder je Methode; Moduswechsel nennt ruhende Angaben; Schrittleiste mobil nach Scroll sichtbar. Screenshots `docs/revision/shots-neu/s7-*`.
+- Deploy: Commit + Push; Staging per Fetch geprüft (siehe Chat-Bericht).

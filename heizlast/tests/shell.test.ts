@@ -2,26 +2,35 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { SCHRITTE, sichtbareSchritte } from '../src/ui/schritte';
+import { SCHRITT_IDS, schrittRelevant } from '../src/kern/relevanz';
+import { neuerState } from '../src/state/schema';
+import type { Methode } from '../src/state/schema';
+
+/** Sichtbare Schritte wie in der App: Relevanz aus dem Kern. */
+const sicht = (m: Methode | null) => {
+  const s = { ...neuerState({ id: 't', jetzt: '2026-10-29T00:00:00.000Z' }), methode: m };
+  return sichtbareSchritte(SCHRITT_IDS.filter((id) => schrittRelevant(id, s)));
+};
 import { eingabe, istAnnahme } from '../src/kern/wert';
 
 describe('Schrittdefinitionen', () => {
   it('zeigt ohne Methode nur modusunabhängige Schritte', () => {
-    const ids = sichtbareSchritte(null).map((s) => s.id);
+    const ids = sicht(null).map((s) => s.id);
     expect(ids).not.toContain('verbrauch');
     expect(ids).not.toContain('huelle');
     expect(ids[0]).toBe('projekt');
   });
 
   it('zeigt je Modus genau eine Variante von Schritt 3', () => {
-    expect(sichtbareSchritte('fws').map((s) => s.id)).toContain('verbrauch');
-    expect(sichtbareSchritte('fws').map((s) => s.id)).not.toContain('huelle');
-    expect(sichtbareSchritte('raumweise').map((s) => s.id)).toContain('huelle');
-    expect(sichtbareSchritte('raumweise').map((s) => s.id)).not.toContain('verbrauch');
+    expect(sicht('fws').map((s) => s.id)).toContain('verbrauch');
+    expect(sicht('fws').map((s) => s.id)).not.toContain('huelle');
+    expect(sicht('raumweise').map((s) => s.id)).toContain('huelle');
+    expect(sicht('raumweise').map((s) => s.id)).not.toContain('verbrauch');
   });
 
   it('nummeriert sichtbare Schritte lückenlos 0…10', () => {
     for (const m of ['fws', 'raumweise'] as const) {
-      expect(sichtbareSchritte(m).map((s) => s.nr)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(sicht(m).map((s) => s.nr)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     }
     expect(new Set(SCHRITTE.map((s) => s.id)).size).toBe(SCHRITTE.length);
   });

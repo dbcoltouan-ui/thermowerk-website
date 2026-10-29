@@ -42,7 +42,7 @@
   --info-100: #eef1f6;
 
   /* ---- Typografie ---- */
-  --ff: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ff: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --ff-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --fs-xs: 11px;
   --fs-sm: 13px;
@@ -92,5 +92,9 @@
   --topbar-h: 56px;
   --stepper-h: 44px;
   --dashboard-w: 320px;
-  --inhalt-max: 760px;
+  --inhalt-max: 780px;
+
+  /* ---- Herkunftsmuster (Wert-Markierung, eine Sprache für Felder, Chips, Annahmen, Status) ---- */
+  --muster-geschaetzt: repeating-linear-gradient(135deg, var(--warn-500) 0 2px, transparent 2px 5px);
+  --muster-tabelle: repeating-linear-gradient(0deg, var(--brand-300) 0 1.5px, transparent 1.5px 4px);
 }

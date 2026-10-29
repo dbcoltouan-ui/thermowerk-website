@@ -1,13 +1,14 @@
 /**
- * UI-Zustand der Shell. Fachliche Angaben liegen im Store (State v2, Session 6); hier nur die
- * reine Navigation und schmale Zugriffe für die Shell-Komponenten. Keine abgeleiteten Werte.
+ * UI-Zustand der Shell (Navigation). Fachliche Angaben liegen im Store (State v2); hier nur, welcher Schritt
+ * offen ist, und schmale Zugriffe für die Shell. Keine abgeleiteten Werte.
  */
 import { computed, signal } from '@preact/signals';
+import type { SchrittId } from '../kern/relevanz';
 import { store, verwaltung } from './app';
 import type { Methode } from './schema';
 
-/** Index des aktiven Schritts (0 = Projekt & Methode) — Navigation, nicht Teil des Projekts. */
-export const aktiverSchritt = signal(0);
+/** Offener Schritt — Navigation, nicht Teil des Projekts. Über die id, damit ein Moduswechsel nicht verrutscht. */
+export const aktiverSchritt = signal<SchrittId>('projekt');
 
 /** Projektname — eine Quelle: `state.projekt.name` (Topbar = Schritt 0 = Projektliste = Bericht). */
 export const projektname = computed(() => store.state.value.projekt.name);
@@ -18,15 +19,13 @@ export const speicherfehler = verwaltung.fehler;
 
 export const projektnameAnzeige = computed(() => projektname.value.trim() || 'Neues Projekt');
 
-export function setzeProjektname(name: string): void {
-  store.setze('projekt.name', name);
-}
-
 export function setzeMethode(neu: Methode): void {
   store.setzeMethode(neu);
 }
 
-export function geheZuSchritt(index: number, anzahl: number): void {
-  if (index < 0 || index >= anzahl) return;
-  aktiverSchritt.value = index;
+/** Springt zu einem Schritt (nur sichtbare Schritte) und an den Seitenanfang. */
+export function geheZu(id: SchrittId): void {
+  if (!store.ergebnis.value.relevanteSchritte.includes(id)) return;
+  aktiverSchritt.value = id;
+  if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
 }
