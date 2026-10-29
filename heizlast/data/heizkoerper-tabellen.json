@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "stand": "2026-10-29",
     "beschreibung": "Heizflächen-Tabellen für das Wärmeabgabe-Modul: Normwärmeleistung EN 442 bei 75/65/20 °C (Δθ_log 49.83 K) je Bauart aus Massen (Platten W/m je Typ × Höhe als Mittel mehrerer Hersteller; Glieder W/Glied je Nabenabstand × Tiefe; Röhren W/Element je Säulen × Höhe; Konvektoren W/m je Höhe × Tiefe; Bad-HK, Vertikal-HK, FBH W/m², Wandheizung), eine Exponenten-Tabelle, Minderungsfaktoren, Umrechnungs-Kontrollwerte und bereinigte Modell-DB (nur Datenblatt-belegte Zahlen, `abgeleitet` gekennzeichnet). Keine Rechenlogik: der Kern interpoliert/rechnet selbst (Session 5).",
     "quellen": [
@@ -218,6 +218,11 @@
         "id": "tw-annahme",
         "titel": "Thermowerk-Annahme (Standardwert der Rechenkette Wärmeabgabe, im Tool als «Standardwert» markiert und überschreibbar; Session 5)",
         "art": "Annahme"
+      },
+      {
+        "id": "tw-entscheid",
+        "titel": "Fachentscheid Thermowerk (Daniel, 29.10.2026) — firmeneigene Auslegungsregel, im Bericht als solche ausgewiesen",
+        "art": "Fachentscheid"
       }
     ],
     "referenzbedingung": {
@@ -3238,7 +3243,8 @@
       "wb-e",
       "wb-f",
       "befund-hk",
-      "tw-annahme"
+      "tw-annahme",
+      "tw-entscheid"
     ],
     "spreizungDefaultK": {
       "radiator": 10,
@@ -3266,7 +3272,13 @@
       "rlbBad": 0.0
     },
     "konvektorEinbauDefault": "verkleidet",
-    "hinweis": "Spreizung 10 K ist konservativ: WP-Betrieb mit 5–7 K Spreizung senkt die nötige Vorlauftemperatur um 1–3 K (log. Übertemperatur). Gussradiator-Tiefe 160 mm = häufigste Bautiefe im CH-Bestand (Thermowerk-Annahme, Datenblatt-Tabelle enthält 70/110/160/220). Verteilung der Gebäude-Heizlast nach Raumfläche (FWS-Modus ohne raumweise Heizlast) ±25 %: Aussenräume und Bäder brauchen mehr als der Mittelwert, Innenräume weniger."
+    "hinweis": "Spreizung 10 K ist konservativ: WP-Betrieb mit 5–7 K Spreizung senkt die nötige Vorlauftemperatur um 1–3 K (log. Übertemperatur). Gussradiator-Tiefe 160 mm = häufigste Bautiefe im CH-Bestand (Thermowerk-Annahme, Datenblatt-Tabelle enthält 70/110/160/220). Verteilung der Gebäude-Heizlast nach Raumfläche (FWS-Modus ohne raumweise Heizlast) ±25 %: Aussenräume und Bäder brauchen mehr als der Mittelwert, Innenräume weniger.",
+    "standardVLJeSystemC": {
+      "fbh": 35,
+      "radiatoren": 55,
+      "gemischt": 55
+    },
+    "standardVLHinweis": "Auslegungs-VL, solange keine Heizflächen bewertet sind: nach Wärmeabgabesystem (Fussbodenheizung 35 °C, Radiatoren/gemischt 55 °C); überschreibbar. Fachentscheid Daniel 29.10.: Vorlauf je System (FBH/Radiatoren) anpassbar."
   },
   "modelle": [
     {

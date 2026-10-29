@@ -187,7 +187,7 @@ describe('«Neu» und «Laden» mit Rückfrage (UX-21, BUILD-10)', () => {
     expect(await v.laden('p-ch-efh')).toBe(true);
     expect(store.state.value.projekt.name).toBe('CH-EFH Bern 1965 (Handrechnung)');
     expect(v.status.value).toBe('gespeichert');
-    expect(store.ergebnis.value.heizlast.massgebend.wert!.wert).toBeCloseTo(2678.7, 0);
+    expect(store.ergebnis.value.heizlast.massgebend.wert!.wert).toBeCloseTo(2776.6, 0); // −8 °C (Thermowerk-Regel)
     v.stoppen();
   });
 

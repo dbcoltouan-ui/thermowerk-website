@@ -14,10 +14,11 @@ const fws = fwsDaten();
 const wp = waermepumpenDaten();
 
 describe('Dimensionierung r = Q_h / Q_WP', () => {
-  it('Kurs-Faustregel: r ≥ 0.75 und WP deckt Q_h → grün; WP 34 % zu gross → nicht grün', () => {
+  it('Kurs-Faustregel: r ≥ 0.75 und WP deckt Q_h → grün; WP 35 % zu gross → gelb, 40 % → rot', () => {
     expect(dimensionierung(7500, 10000, fws).ampel).toBe('gruen');
     expect(dimensionierung(10000, 10000, fws).ampel).toBe('gruen');
     expect(dimensionierung(7400, 10000, fws).ampel).toBe('gelb');
+    expect(dimensionierung(7150, 10000, fws).ampel).toBe('rot');
     expect(dimensionierung(5900, 10000, fws).ampel).toBe('rot');
   });
   it('Aufgabe 4 (Q_h 9.0 kW, Q_WP 12 kW): r = 0.75 — Grenzfall der Faustregel, Text nennt die Übergrösse', () => {
@@ -87,7 +88,7 @@ describe('Gerätefilter', () => {
 });
 
 describe('Prozent-Skala WP-Grösse (Wunsch Daniel 29.10.)', () => {
-  it('Bereiche aus der Kursregel: grün 0 … +33 %, gelb −9 … 0 und +33 … +67 %, sonst rot; Grenzen zum milderen Bereich', () => {
+  it('Bereiche: grün 0 … +33 % (Kurs), gelb −9 … 0 und +33 … +37 % (Fachentscheid Daniel), sonst rot; Grenzen zum milderen Bereich', () => {
     const s = skalaWpGroesse(fws, null);
     expect(s.wert).toBeNull();
     expect(s.ampel).toBe('grau');
@@ -98,8 +99,10 @@ describe('Prozent-Skala WP-Grösse (Wunsch Daniel 29.10.)', () => {
     expect(ampelAufSkala(s.bereiche, 100 / 3)).toBe('gruen');
     expect(ampelAufSkala(s.bereiche, (1 / 1.1 - 1) * 100)).toBe('gelb');
     expect(ampelAufSkala(s.bereiche, -15)).toBe('rot');
-    expect(ampelAufSkala(s.bereiche, 50)).toBe('gelb');
-    expect(ampelAufSkala(s.bereiche, 80)).toBe('rot');
+    expect(ampelAufSkala(s.bereiche, 35)).toBe('gelb');
+    expect(ampelAufSkala(s.bereiche, 37)).toBe('gelb');
+    expect(ampelAufSkala(s.bereiche, 38)).toBe('rot');
+    expect(ampelAufSkala(s.bereiche, 50)).toBe('rot');
   });
   it('Beispiel Leistungsstufen: Bedarf 11 kW → 12-kW-Gerät +9 % grün, 10-kW-Gerät −9 % gelb (knapp)', () => {
     const gross = dimensionierung(11000, 12000, fws);

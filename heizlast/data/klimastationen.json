@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "stand": "2026-10-29",
     "beschreibung": "Klimastationen SIA 2028:2010 (40 Stationen) mit Auslegungstemperatur θe «kalt» für die Norm-Heizlast (SIA 2028 Tabelle 6, Mittel der kältesten 4-Tagesmittel 1984–2003), 1-h-Minimum, Heizgradtage HGT 20/12 (SIA 2028-C1 Tabelle 6, Mittel 1984–2003), ATD 12 °C, Stationshöhe (MeteoSchweiz-Metadaten; SIA-2028-Tabelle 1a nicht öffentlich), Kanton. Zuordnung Standort → Station über PLZ-Präfix (2-/3-stellig) und Kanton (Thermowerk-Regel, kantonale Regeln wo bekannt), Höhenkorrektur-Regel. Jahresmittel nur aus Vorgängerdaten SIA 381/2 (alt). Keine Rechenlogik.",
     "quellen": [
@@ -92,6 +92,11 @@
         "id": "tw-abgeleitet",
         "titel": "Thermowerk-Ableitung/Annahme (PLZ-Zuordnung, Höhengradient aus Stationspaaren); im Bericht als Annahme auszuweisen",
         "art": "Ableitung"
+      },
+      {
+        "id": "tw-entscheid",
+        "titel": "Fachentscheid Thermowerk (Daniel, 29.10.2026) — firmeneigene Auslegungsregel, im Bericht als solche ausgewiesen",
+        "art": "Fachentscheid"
       }
     ],
     "ausgabe": "SIA 2028:2010 (+ C1:2015, C2:2023); keine neuere Ausgabe (SIA-Liste 30.07.2026)",
@@ -1431,5 +1436,12 @@
     "bKPro100m": -0.5,
     "unsicherheitK": 1.0,
     "rmseK": 0.8
+  },
+  "auslegungsregel": {
+    "beschreibung": "Thermowerk-Regel für die Auslegungs-Aussentemperatur: θe wird nie wärmer als −8 °C angesetzt. Liefert die SIA-2028-Station (mit Höhenkorrektur) oder eine manuelle Angabe einen wärmeren Wert, gilt −8 °C. Kältere Werte bleiben unverändert. Gilt für die raumweise Heizlast und den Auslegungspunkt der Wärmepumpe.",
+    "quelle": [
+      "tw-entscheid"
+    ],
+    "thetaEMaxC": -8
   }
 }

@@ -4,8 +4,12 @@
  * Sollwerte extern (keine Zirkelschlüsse, Befund FACH-60):
  *  - FWS: Referenzhaus Moosseedorf (referenz/BEISPIELRECHNUNG.md) mit Handrechnung additiver WW-Verluste wie in
  *    tests/kern/fws.test.ts: Q_hl 9 304.7 W, Q_w 581.0 W, Q_off 845.9 W, Q_h 10 731.6 W (Befund A1 Ho: 9 276 / 10 708).
- *  - raumweise: eigenes CH-EFH von Hand (tests/kern/raumweise.test.ts): Wohnen 2 098.6 W, Bad 570.3 W,
- *    Flur 64.8 W, saldiert 2 678.7 W, EBF 38.5 m².
+ *  - raumweise: eigenes CH-EFH von Hand (tests/kern/raumweise.test.ts, dort bei θe −7 °C). Die Fixture gibt −7 °C ein;
+ *    die Thermowerk-Regel (θe nie wärmer als −8 °C, Fachentscheid Daniel 29.10.) rechnet mit −8 °C. Handrechnung bei −8 °C
+ *    (alle Hüll- und Lüftungsterme ∝ θint − θe, Innenbauteile gegen 20 °C konstant):
+ *      Wohnen 67.1 · 28 + 62.5 · 0.5 · 0.34 · 28 = 1 878.8 + 297.5 = 2 176.3 W
+ *      Bad Hülle 14.2 · 30 + 15 · 0.7 · 0.34 · 30 = 426.0 + 107.1 = 533.1 W; innen 1.896 · 29 = 55.0 W → 588.1 W
+ *      Flur 0.6 · 4 · 28 = 67.2 W; saldiert 2 176.3 + 533.1 + 67.2 = 2 776.6 W; EBF 38.5 m².
  *  - Wärmeabgabe: Typ 22 600 × 1000 @ 55/45/20 = 842–873 W je Heizkörper (Purmo/Kermi/KB-E, Befund B1).
  * Zusätzlich ein Snapshot je Modus (Struktur, Status, Hinweis-Codes) gegen unbeabsichtigte Änderungen.
  */
@@ -88,16 +92,23 @@ describe('berechne — raumweise (CH-EFH von Hand)', () => {
   const e = berechne(s, daten);
   const rw = e.heizlast.raumweise!;
 
-  it('Räume und Gebäude wie Handrechnung (±0.5 %), massgebend = saldiert', () => {
+  it('Thermowerk-Regel: Eingabe −7 °C → Auslegung −8 °C (sichtbar als Annahme mit Hinweis)', () => {
+    expect(e.klima!.thetaE).toMatchObject({ wert: -7, herkunft: 'override' });
+    expect(e.thetaE).toMatchObject({ wert: -8, herkunft: 'tabelle', stufe: 'thermowerkRegel' });
+    expect(rw.thetaE).toBe(e.thetaE);
+    expect(e.hinweise.some((h) => h.code === 'klima.thermowerkRegel')).toBe(true);
+    expect(e.annahmen.some((a) => a.wert === e.thetaE && a.schritt === 'gebaeude')).toBe(true);
+  });
+
+  it('Räume und Gebäude wie Handrechnung bei −8 °C (±0.5 %), massgebend = saldiert', () => {
     const [w, b, f] = rw.raeume;
-    erwarteNahe(w!.phiHL.wert, 2098.6, 0.5, 'Wohnen');
-    erwarteNahe(b!.phiHL.wert, 570.3, 0.5, 'Bad');
-    erwarteNahe(f!.phiHL.wert, 64.8, 0.5, 'Flur');
-    erwarteNahe(e.heizlast.massgebend.wert!.wert, 2678.7, 0.5, 'saldiert');
+    erwarteNahe(w!.phiHL.wert, 2176.3, 0.5, 'Wohnen');
+    erwarteNahe(b!.phiHL.wert, 588.1, 0.5, 'Bad');
+    erwarteNahe(f!.phiHL.wert, 67.2, 0.5, 'Flur');
+    erwarteNahe(e.heizlast.massgebend.wert!.wert, 2776.6, 0.5, 'saldiert');
     expect(e.heizlast.massgebend).toMatchObject({ quelle: 'raumweise', status: 'raumweise' });
     expect(e.heizlast.massgebend.label).toContain('SIA 384/2:2020');
     expect(e.ebf!.wert).toBeCloseTo(38.5, 6);
-    expect(e.klima!.thetaE).toMatchObject({ wert: -7, herkunft: 'override' });
   });
 
   it('Wärmeabgabe: 2 × Typ 22 600×1000 bei 55/45 = 2 × (842–873) W; Deckung < 1 → θ_VL,req > 55 °C wird DIE Auslegungs-VL', () => {
@@ -214,6 +225,25 @@ describe('berechne — Fälle und Leitplanken', () => {
     expect(nachher.fe!.u.wert).toBeLessThan(vorher.fe!.u.wert);
     expect(nachher.fe!.sanierungWirkt).toBe(true);
     expect(nachher.aw!.u.wert).toBe(vorher.aw!.u.wert);
+  });
+
+  it('Thermowerk-Regel greift nur, wenn θe wärmer als −8 °C ist; −12 °C bleibt', () => {
+    const s = setzeImState(fixture('state-v2-raumweise-efh.json'), 'gebaeude.standort.thetaEOverrideC', -12);
+    const e = berechne(s, daten);
+    expect(e.thetaE).toMatchObject({ wert: -12, herkunft: 'override' });
+    expect(e.hinweise.some((h) => h.code === 'klima.thermowerkRegel')).toBe(false);
+  });
+
+  it('ohne Heizflächen: Standard-VL nach Wärmeabgabesystem (FBH 35 °C, Radiatoren 55 °C), Override gewinnt', () => {
+    const basis = fixture('state-v2-fws-moosseedorf.json');
+    expect(berechne(basis, daten).auslegungsVL.wert).toBe(55);
+    const fbh = berechne(setzeImState(basis, 'waermeabgabe.system', 'fbh'), daten);
+    expect(fbh.auslegungsVL).toMatchObject({ wert: 35, herkunft: 'fallback', stufe: 'standardwert' });
+    expect(fbh.auslegungsVL.begruendung).toContain('Fussbodenheizung');
+    expect(fbh.speicher.mag!.anlagenvolumen.begruendung).toContain('fbh');
+    expect(berechne(setzeImState(basis, 'waermeabgabe.system', 'radiatoren'), daten).auslegungsVL.wert).toBe(55);
+    const ov = berechne(setzeImState(setzeImState(basis, 'waermeabgabe.system', 'fbh'), 'waermeabgabe.auslegungsVLOverrideC', 40), daten);
+    expect(ov.auslegungsVL).toMatchObject({ wert: 40, herkunft: 'override' });
   });
 
   it('Heizflächen eines gelöschten Raums werden ignoriert und gemeldet', () => {

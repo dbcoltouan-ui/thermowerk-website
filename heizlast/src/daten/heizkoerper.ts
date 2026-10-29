@@ -113,6 +113,9 @@ export interface HkDaten {
     fbhDefault: { verlegeabstandMm: number; rlb: number; rlbBad: number };
     konvektorEinbauDefault: string;
     hinweis: string;
+    /** Auslegungs-VL ohne bewertete Heizflächen je Wärmeabgabesystem (Session 6, Fachentscheid Daniel). */
+    standardVLJeSystemC: { fbh: number; radiatoren: number; gemischt: number };
+    standardVLHinweis: string;
   };
   modelle: HkModell[];
 }

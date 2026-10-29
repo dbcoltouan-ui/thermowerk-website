@@ -37,7 +37,7 @@ import { kategorieVon, waermeabgabe } from './waermeabgabe';
 import type { LeistungszuschlagErgebnis, WarmwasserEingabe, WarmwasserErgebnis } from './warmwasser';
 import { leistungszuschlagWarmwasser, warmwasserBedarf } from './warmwasser';
 import type { Hinweis, Wert } from './wert';
-import { berechnet, fallback, fmt, istAnnahme } from './wert';
+import { berechnet, fallback, fmt, istAnnahme, tabelle } from './wert';
 import type { SperrzeitErgebnis } from './zuschlaege';
 import { auslegungsleistung, sperrzeitZuschlag, zusatzleistung } from './zuschlaege';
 
@@ -83,6 +83,8 @@ export interface Gegenprobe {
 export interface Ergebnis {
   methode: State['methode'];
   klima: KlimaErgebnis | null;
+  /** Massgebende Auslegungs-Aussentemperatur (SIA 2028 mit Höhenkorrektur bzw. Eingabe, Thermowerk-Regel ≤ −8 °C). */
+  thetaE: Wert | null;
   /** Energiebezugsfläche (manuell oder aus Räumen) — eine Quelle für beide Modi. */
   ebf: Wert | null;
   heizlast: {
@@ -243,7 +245,20 @@ function fwsRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, ebf
   return { fws: e ? heizlastFws(e, daten.fws) : null, wwBisher, fehlend };
 }
 
-function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, hinweise: Hinweis[]): { huelle: HuelleErgebnis | null; raumweise: RaumweiseErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[] } {
+/**
+ * Auslegungs-Aussentemperatur mit Thermowerk-Regel (Fachentscheid Daniel 29.10.): nie wärmer als
+ * klimastationen.json `auslegungsregel.thetaEMaxC` (−8 °C). Kältere Stations-/Eingabewerte bleiben.
+ */
+export function thetaEAuslegung(klima: KlimaErgebnis | null, daten: Datensatz): { thetaE: Wert | null; hinweise: Hinweis[] } {
+  const t = klima?.thetaE ?? null;
+  if (!t) return { thetaE: null, hinweise: [] };
+  const max = daten.klima.auslegungsregel.thetaEMaxC;
+  if (t.wert <= max) return { thetaE: t, hinweise: [] };
+  const thetaE = tabelle(max, '°C', `Auslegung ${fmt(max, 0)} °C statt ${fmt(t.wert, 0)} °C (${t.begruendung}) — Thermowerk-Regel: θe nie wärmer als ${fmt(max, 0)} °C`, 'Fachentscheid Thermowerk (Daniel 29.10.2026), klimastationen.json auslegungsregel', { stufe: 'thermowerkRegel' });
+  return { thetaE, hinweise: [{ stufe: 'info', code: 'klima.thermowerkRegel', text: `Auslegungs-Aussentemperatur ${fmt(t.wert, 0)} °C ist wärmer als die Thermowerk-Regel — gerechnet wird mit ${fmt(max, 0)} °C.`, pfad: 'gebaeude.standort' }] };
+}
+
+function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, thetaE: Wert | null, hinweise: Hinweis[]): { huelle: HuelleErgebnis | null; raumweise: RaumweiseErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[] } {
   const fehlend: Omit<Fehlend, 'schritt'>[] = [];
   const g = s.gebaeude;
   if (g.baujahr === undefined) return { huelle: null, raumweise: null, fehlend };
@@ -251,11 +266,11 @@ function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | nul
   const bauteiltypen: Bauteiltyp[] = s.huelle.bauteiltypen.map((t) => def<Bauteiltyp>({ ...t, sanierung: sanierungFuerTyp(t, s.sanierungen, zustand, daten, hinweise) }));
   const huelle = huelleAufloesen({ baujahr: g.baujahr, bauteiltypen, zustand }, daten.huelle);
   if (!s.raeume.length) fehlend.push({ pfad: 'raeume', text: 'Keine Räume erfasst' });
-  if (!klima?.thetaE) return { huelle, raumweise: null, fehlend };
+  if (!thetaE) return { huelle, raumweise: null, fehlend };
   const h = s.huelle;
   const e = def<RaumweiseEingabe>({
-    thetaE: klima.thetaE,
-    thetaMittelJahr: klima.thetaMittelJahr ?? undefined,
+    thetaE,
+    thetaMittelJahr: klima?.thetaMittelJahr ?? undefined,
     huelle,
     baujahr: g.baujahr,
     gebaeudetyp: g.typ ?? undefined,
@@ -325,6 +340,10 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     hinweis('gebaeude', klima.hinweise);
     annahme('gebaeude', klima.annahmen);
   }
+  const te = thetaEAuslegung(klima, daten);
+  const thetaE = te.thetaE;
+  hinweis('gebaeude', te.hinweise);
+  annahme('gebaeude', [thetaE]);
   const ebfR = ebfBestimmen({ modus: g.ebfModus, manuellM2: g.ebfModus === 'manuell' ? g.ebfManuellM2 : undefined }, summeRaumflaechen(s), daten.fws);
   const ebf = ebfR.ebf;
   hinweis('gebaeude', ebfR.hinweise.map((x) => ({ ...x, pfad: 'gebaeude.ebfManuellM2' })));
@@ -362,12 +381,12 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     }
     // Gegenprobe raumweise nur mit echten Raum-Bauteilen
     if (fws?.qhl && s.raeume.some((x) => x.bauteile.length > 0)) {
-      const rw = raumweiseRechnen(s, daten, klima, []);
+      const rw = raumweiseRechnen(s, daten, klima, thetaE, []);
       if (rw.raumweise?.vollstaendig) gegenprobe = { methode: 'raumweise', wert: rw.raumweise.gebaeude, vergleich: vergleichNormVerbrauch(rw.raumweise.gebaeude, fws.qhl, daten.fws) };
     }
   } else if (s.methode === 'raumweise') {
     const hh: Hinweis[] = [];
-    const r = raumweiseRechnen(s, daten, klima, hh);
+    const r = raumweiseRechnen(s, daten, klima, thetaE, hh);
     hinweis('sanierungen', hh);
     huelle = r.huelle;
     raumweise = r.raumweise;
@@ -382,7 +401,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
       annahme('huelle', raumweise.annahmen.filter((a) => a !== raumweise?.thetaE && a !== raumweise?.ebf));
       if (raumweise.raeume.length) massgebend = { wert: raumweise.gebaeude, quelle: 'raumweise', art: 'raumweise', status: raumweise.vollstaendig ? 'raumweise' : 'fehlt', label: raumweise.methode };
       else massgebend = { wert: null, quelle: 'raumweise', art: 'raumweise', status: 'fehlt', label: raumweise.methode };
-    } else if (huelle && !klima?.thetaE) fehlt('huelle', 'gebaeude.standort', 'Für θe fehlt der Standort');
+    } else if (huelle && !thetaE) fehlt('huelle', 'gebaeude.standort', 'Für θe fehlt der Standort');
     // Gegenprobe FWS nur mit echten Verbrauchsrechnungen
     if (raumweise?.vollstaendig && raumweise.raeume.length && s.verbrauch.quelle === 'rechnungen' && s.verbrauch.eintraege.length) {
       const fr = fwsRechnen(s, daten, klima, ebf, heute, s.verbrauch.wwBisher === true);
@@ -473,9 +492,12 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     hinweis('waermeabgabe', wab.hinweise); // enthält bereits die Raum- und Heizflächen-Hinweise
     annahme('waermeabgabe', wab.annahmen);
   }
+  const sys = wa.system;
+  const SYSTEM_TEXT = { fbh: 'Fussbodenheizung', radiatoren: 'Radiatoren', gemischt: 'Radiatoren und Fussbodenheizung' } as const;
+  const vlStandard = sys ? daten.hk.auslegung.standardVLJeSystemC[sys] : daten.hk.auslegung.zielVLDefaultC;
   const auslegungsVL: Wert =
     wab?.gebaeude.auslegungsVL ??
-    fallback(daten.hk.auslegung.zielVLDefaultC, '°C', `Keine Heizflächen bewertet — Auslegungs-VL ${fmt(daten.hk.auslegung.zielVLDefaultC, 0)} °C als Standardwert (Grenze «gut» der WP-Tauglichkeit), bis Heizflächen erfasst sind`, { stufe: 'standardwert', quelle: 'heizkoerper-tabellen.json auslegung.zielVLDefaultC (Thermowerk-Annahme)' });
+    fallback(vlStandard, '°C', sys ? `Keine Heizflächen bewertet — Auslegungs-VL ${fmt(vlStandard, 0)} °C für ${SYSTEM_TEXT[sys]} (Standardwert, überschreibbar)` : `Keine Heizflächen bewertet, System nicht gewählt — Auslegungs-VL ${fmt(vlStandard, 0)} °C als Standardwert (Grenze «gut» der WP-Tauglichkeit)`, { stufe: 'standardwert', quelle: 'heizkoerper-tabellen.json auslegung.standardVLJeSystemC (Fachentscheid Daniel 29.10.)' });
   annahme('waermeabgabe', [auslegungsVL]);
 
   // Schritt 9: Gerät
@@ -505,9 +527,9 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     const a = heizflaechenArt(kats);
     pufferHeizflaechen = a.puffer;
     magArt = a.mag;
-  } else if (sp.heizflaechen) {
-    pufferHeizflaechen = sp.heizflaechen;
-    magArt = sp.heizflaechen === 'fbh' ? 'fbh' : sp.heizflaechen === 'heizkoerper' ? 'radiatoren' : 'gemischt';
+  } else if (sys) {
+    pufferHeizflaechen = sys === 'radiatoren' ? 'heizkoerper' : sys;
+    magArt = sys;
   } else {
     pufferHeizflaechen = 'heizkoerper';
     annahme('speicher', [fallback<string>('heizkoerper', '', 'Heizflächenart für Puffer-Kriterium: Heizkörper (Standardwert, keine Heizflächen erfasst)', { stufe: 'standardwert' })]);
@@ -575,6 +597,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
   return {
     methode: s.methode,
     klima,
+    thetaE,
     ebf,
     heizlast: { massgebend, fws, raumweise, huelle, gegenprobe, spezifisch: spezHeizlast },
     plausi: { spezifisch },

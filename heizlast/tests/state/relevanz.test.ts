@@ -67,7 +67,7 @@ const FAELLE: ReadonlyArray<[string, State, string, boolean]> = [
   ['Sperrzeit nein: Puffer-Überbrückung nicht', setze(fws, { 'zuschlaege.sperrzeitAktiv': false }), 'speicher.puffer.sperrzeitUeberbrueckung', false],
   ['Puffer abgewählt: Override nicht relevant', setze(fws, { 'speicher.puffer.aktiv': false }), 'speicher.puffer.volumenOverrideLiter', false],
   // HK vorhanden
-  ['ohne Heizflächen: Puffer-Heizflächenart relevant', fws, 'speicher.puffer.heizflaechen', true],
+  ['ohne Heizflächen: Wärmeabgabesystem relevant', fws, 'waermeabgabe.system', true],
   ['ohne Heizflächen: Ziel-VL/alte Heizkurve nicht relevant', fws, 'waermeabgabe.heizkurveAlt', false],
 ];
 
@@ -76,10 +76,10 @@ describe('relevant(pfad, state) — Relevanz-Tabelle', () => {
     expect(relevant(pfad, s)).toBe(erwartet);
   });
 
-  it('mit Heizflächen: Heizflächenart abgeleitet (nicht relevant), Ziel-VL relevant; Masse je Bauart', () => {
+  it('mit Heizflächen: Wärmeabgabesystem abgeleitet (nicht relevant), Ziel-VL relevant; Masse je Bauart', () => {
     const s = fixture('state-v2-raumweise-efh.json');
     const hk = { hk: heizkoerperDaten() };
-    expect(relevant('speicher.puffer.heizflaechen', s)).toBe(false);
+    expect(relevant('waermeabgabe.system', s)).toBe(false);
     expect(relevant('waermeabgabe.zielVLC', s)).toBe(true);
     expect(relevant('waermeabgabe.raeume.wohnen.heizflaechen.hf1.hoeheMm', s, hk)).toBe(true);
     expect(relevant('waermeabgabe.raeume.wohnen.heizflaechen.hf1.glieder', s, hk)).toBe(false);

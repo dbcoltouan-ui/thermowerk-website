@@ -193,3 +193,10 @@ Prompt: `state/schema.ts` (State v2 nur Rohangaben, Typen + Validierung), `kern/
 - Prompt (Kurzform): Ampel nicht nur als Farbe, sondern als %-Skala mit grünen/gelben/roten Bereichen; Rückfrage zur Richtung der Faustregel und zu Leistungsstufen.
 - Entscheid: Kern liefert `Skala` (Bereiche, Achse, Wert, Marken) — `kern/skala.ts`; `Ergebnis.skalen { vorlauf, wpGroesse }`; jede `Dimensionierung` trägt `uebergroesse` [%] und `skala`. WP-Grösse als Übergrösse (Q_WP/Q_h − 1): grün 0 … +33 % (Kurs Q_h ≥ 0.75 · Q_WP), gelb −9 … 0 % und +33 … +67 %, sonst rot; Grenzen zählen zum milderen Bereich (Aufgabe 4 genau +33 % = grün am Rand). Neues optionales Feld `geraet.qWpAuslegungW` (Datenblattleistung bei θe und Auslegungs-VL, FWS Folie 93) ersetzt für Ampel/Bivalenz den Datenbankwert A−7/W35. UI-Komponente `Skala.tsx`, im Dashboard (Vorlauf immer, WP-Grösse bei gewähltem Gerät).
 - Prüfung: `npm test` 465/465, lint/build ok, Playwright 8/8 (neu `e2e/skala.spec.ts`: vorbelegter Entwurf Moosseedorf + Gerät → Q_h 10.73 kW, Skala grün +4 %), Screenshots `shots-neu/s6-skala-*.png`.
+
+### Nachtrag 21:55 — Fachentscheide Daniel (Chat)
+- Prompt (Kurzform): zu kleine WP bis −9 % bleibt gelb (Heizstab); θe immer mindestens −8 °C; Vorlauf je System (FBH/Radiatoren) anpassbar; gelb +33 … +37 %, darüber rot.
+- Umsetzung: `klimastationen.json` 1.2.0 `auslegungsregel` + `berechne.thetaEAuslegung` (`Ergebnis.thetaE`, Annahme + Hinweis `klima.thermowerkRegel`; kältere Werte bleiben); `fws.json` `geraetewahl.rotAbUebergroesseProzent` 37 (ersetzt das r-Band 0.60); `heizkoerper-tabellen.json` 1.2.0 `auslegung.standardVLJeSystemC`; State `waermeabgabe.system` (ersetzt `speicher.puffer.heizflaechen` — eine Quelle für Standard-VL, Puffer- und MAG-Kriterium); Quelle `tw-entscheid` in den drei Dateien; KONTEXT §2 «Fachentscheide 29.10. (S6)».
+- Wirkung: CH-EFH-Fixture (Eingabe −7 °C) rechnet mit −8 °C: saldiert 2 776.6 W (Handrechnung bei −8 °C im Test dokumentiert); Kern-Test raumweise bleibt bei −7 °C (Kernfunktion unverändert).
+- Prüfung: `npm test` 468/468, lint/build ok, Playwright (siehe Chat-Bericht).
+

@@ -94,6 +94,7 @@ export const RELEVANZ_REGELN: ReadonlyArray<RelevanzRegel> = [
   // Schritt 6 Wärmeabgabe
   { muster: 'waermeabgabe.raeume.*', wenn: 'Raum existiert', pruefe: (s, [id]) => raumVorhanden(s, id) },
   { muster: 'waermeabgabe.raeume.*.phiHLManuellW', wenn: 'FWS (keine raumweise Heizlast)', pruefe: fws },
+  { muster: 'waermeabgabe.system', wenn: 'keine Heizflächen erfasst (sonst aus den Heizflächen abgeleitet)', pruefe: (s) => !heizflaechenVorhanden(s) },
   { muster: 'waermeabgabe.zielVLC', wenn: 'Heizflächen erfasst', pruefe: heizflaechenVorhanden },
   { muster: 'waermeabgabe.heizkurveAlt', wenn: 'Heizflächen erfasst', pruefe: heizflaechenVorhanden },
   // Schritt 7 Zuschläge
@@ -105,7 +106,6 @@ export const RELEVANZ_REGELN: ReadonlyArray<RelevanzRegel> = [
   { muster: 'speicher.puffer.sperrzeitUeberbrueckung', wenn: 'Puffer nicht abgewählt und Sperrzeit vorhanden', pruefe: (s) => s.speicher.puffer.aktiv !== false && s.zuschlaege.sperrzeitAktiv === true },
   // Schritt 9 Wärmepumpe
   { muster: 'geraet.qWpAuslegungW', wenn: 'Gerät gewählt', pruefe: (s) => s.geraet.auswahlId !== null },
-  { muster: 'speicher.puffer.heizflaechen', wenn: 'keine Heizflächen erfasst (sonst abgeleitet)', pruefe: (s) => s.speicher.puffer.aktiv !== false && !heizflaechenVorhanden(s) },
 ];
 
 function passt(muster: string[], pfad: string[]): string[] | null {

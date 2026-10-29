@@ -18,7 +18,7 @@ type Fws = {
   };
   speicherWarmwasser: { fSto: { wert: number; default?: boolean }[]; tKaltwasserC: number; spitzendeckung: { anteilVwuMax: number } };
   bivalenz: { tabelle: { leistungsanteilWP: number; energieanteilWP: Band }[] };
-  geraetewahl: { inverterMinVerhaeltnis: number; ueberdimensioniertRotUnter: number; knappGelbBis: number; filterToleranzUntenProzent: number; quelle: string[]; fundstelle: string };
+  geraetewahl: { inverterMinVerhaeltnis: number; rotAbUebergroesseProzent: number; knappGelbBis: number; filterToleranzUntenProzent: number; quelle: string[]; fundstelle: string };
 };
 
 const fws = ladeJson<Fws>('fws.json');
@@ -186,11 +186,12 @@ describe('fws.json — Gerätewahl (Folie 3, Session 6)', () => {
   it('Kurs-Faustregel Q_h ≥ 0.75 · Q_WP; Thermowerk-Bänder geordnet und als Annahme gekennzeichnet', () => {
     const g = fws.geraetewahl;
     expect(g.inverterMinVerhaeltnis).toBe(0.75);
-    expect(g.ueberdimensioniertRotUnter).toBeLessThan(g.inverterMinVerhaeltnis);
+    expect(g.rotAbUebergroesseProzent).toBe(37); // Fachentscheid Daniel 29.10.
+    expect(g.rotAbUebergroesseProzent).toBeGreaterThan((1 / g.inverterMinVerhaeltnis - 1) * 100);
     expect(g.knappGelbBis).toBeGreaterThan(1);
     expect(g.filterToleranzUntenProzent).toBeGreaterThan(0);
     expect(g.filterToleranzUntenProzent).toBeLessThan(25);
-    expect(g.quelle).toEqual(expect.arrayContaining(['fws-m3', 'tw-annahme']));
+    expect(g.quelle).toEqual(expect.arrayContaining(['fws-m3', 'tw-annahme', 'tw-entscheid']));
     expect(g.fundstelle).toContain('Folie 3');
   });
 });

@@ -157,6 +157,8 @@ export interface WaermeabgabeRaumState {
 
 export interface WaermeabgabeState {
   heizkreise: HeizkreisEingabe[];
+  /** Wärmeabgabesystem, solange keine Heizflächen erfasst sind: bestimmt Standard-Vorlauf (FBH 35 / Radiatoren 55 °C), Puffer- und MAG-Kriterium. */
+  system?: 'fbh' | 'radiatoren' | 'gemischt';
   /** Heizflächen je Raum (Schlüssel = Raum-id aus `raeume`). */
   raeume: Record<string, WaermeabgabeRaumState>;
   zielVLC?: number;
@@ -179,8 +181,6 @@ export interface SpeicherState {
     aktiv: boolean | null;
     einzelraumregelung: boolean | null;
     sperrzeitUeberbrueckung: boolean;
-    /** Nur ohne erfasste Heizflächen; sonst aus den Heizflächen abgeleitet. */
-    heizflaechen?: 'fbh' | 'heizkoerper' | 'gemischt';
     volumenOverrideLiter?: number;
   };
   mag: { anlagenvolumenLiter?: number; p0Bar?: number; pSvBar?: number };
@@ -584,7 +584,7 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
   const waermeabgabe: WaermeabgabeState = {
     heizkreise: liste(wa.heizkreise, 'waermeabgabe.heizkreise', p, (x, q) => (mitId(x, q, p) ? (felder(x, { id: 'text', bezeichnung: 'text', tVLC: 'zahl', spreizungK: 'zahl', gemischt: 'bool' }, q, p) as unknown as HeizkreisEingabe) : null)),
     raeume: waRaeume,
-    ...felder(wa, { zielVLC: 'zahl', heizkurveAlt: objekt({ tVLC: 'zahl', tRLC: 'zahl' }), auslegungsVLOverrideC: 'zahl' }, 'waermeabgabe', p),
+    ...felder(wa, { system: ['fbh', 'radiatoren', 'gemischt'], zielVLC: 'zahl', heizkurveAlt: objekt({ tVLC: 'zahl', tRLC: 'zahl' }), auslegungsVLOverrideC: 'zahl' }, 'waermeabgabe', p),
   } as WaermeabgabeState;
 
   const z = istObjekt(r.zuschlaege) ? r.zuschlaege : {};
@@ -601,7 +601,7 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
   const speicher: SpeicherState = {
     ww: felder(s.ww, { volumenOverrideLiter: 'zahl' }, 'speicher.ww', p),
     puffer: {
-      ...felder(pu, { heizflaechen: ['fbh', 'heizkoerper', 'gemischt'], volumenOverrideLiter: 'zahl' }, 'speicher.puffer', p),
+      ...felder(pu, { volumenOverrideLiter: 'zahl' }, 'speicher.puffer', p),
       aktiv: nullbarBool(pu.aktiv, 'speicher.puffer.aktiv', p),
       einzelraumregelung: nullbarBool(pu.einzelraumregelung, 'speicher.puffer.einzelraumregelung', p),
       sperrzeitUeberbrueckung: pu.sperrzeitUeberbrueckung === true,

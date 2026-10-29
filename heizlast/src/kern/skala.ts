@@ -40,13 +40,13 @@ export function ampelAufSkala(bereiche: ReadonlyArray<SkalaBereich>, wert: numbe
 /**
  * WP-Grösse gegenüber dem Bedarf: Übergrösse = (Q_WP / Q_h − 1) · 100 [%].
  * Grenzen aus fws.json `geraetewahl` (r = Q_h/Q_WP): grün 0 … +33 % (Kurs: Q_h ≥ 0.75 · Q_WP),
- * gelb −9 … 0 % (knapp, Elektroeinsatz deckt die Spitze) und +33 … +67 %, sonst rot.
+ * gelb −9 … 0 % (knapp, Elektroeinsatz deckt die Spitze) und +33 … +37 % (Fachentscheid Daniel), sonst rot.
  */
 export function skalaWpGroesse(fws: FwsDaten, uebergroesseProzent: number | null): Skala {
   const g = fws.geraetewahl;
   const knapp = (1 / g.knappGelbBis - 1) * 100;
   const gruenBis = (1 / g.inverterMinVerhaeltnis - 1) * 100;
-  const gelbBis = (1 / g.ueberdimensioniertRotUnter - 1) * 100;
+  const gelbBis = g.rotAbUebergroesseProzent;
   const bereiche: SkalaBereich[] = [
     { von: -100, bis: knapp, ampel: 'rot', label: 'zu klein — bivalenter Betrieb' },
     { von: knapp, bis: 0, ampel: 'gelb', label: 'knapp — Spitze über Elektroeinsatz' },
@@ -58,7 +58,7 @@ export function skalaWpGroesse(fws: FwsDaten, uebergroesseProzent: number | null
     titel: 'WP-Grösse gegenüber Bedarf',
     einheit: '%',
     min: -30,
-    max: 100,
+    max: 60,
     wert: uebergroesseProzent,
     ampel: ampelAufSkala(bereiche, uebergroesseProzent),
     bereiche,

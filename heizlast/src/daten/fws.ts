@@ -165,7 +165,7 @@ export interface FwsDaten {
   };
   bivalenz: { tabelle: { leistungsanteilWP: number; energieanteilWP: number[] }[]; fundstelle: string };
   /** Dimensionierungs-Ampel + Gerätefilter Wärmepumpe (Session 6). */
-  geraetewahl: { inverterMinVerhaeltnis: number; ueberdimensioniertRotUnter: number; knappGelbBis: number; filterToleranzUntenProzent: number; fundstelle: string; hinweise: string[] };
+  geraetewahl: { inverterMinVerhaeltnis: number; rotAbUebergroesseProzent: number; knappGelbBis: number; filterToleranzUntenProzent: number; fundstelle: string; hinweise: string[] };
   plausibilitaet: {
     normReserveProzent: number[];
     qhlNormMinusVerbrauchErwartungProzent: number[];

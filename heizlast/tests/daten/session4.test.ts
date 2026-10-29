@@ -61,7 +61,7 @@ describe('huelle-epochen.json 1.1.0 — jede Bauweise ist auflösbar (Epochen-De
 
 describe('klimastationen.json 1.1.0 — Jahresmittel-Regression', () => {
   it('θm,e ≈ 11.5 − 0.5 K/100 m reproduziert die 53 SIA-381/2-Stationen < 2000 m mit RMSE ≤ 1 K', () => {
-    expect(k._meta.version).toBe('1.1.0');
+    expect(Number(k._meta.version.split('.')[1])).toBeGreaterThanOrEqual(1); // ≥ 1.1.0 (Session 6: 1.2.0 auslegungsregel)
     const j = k.jahresmittel;
     const pts = k.vergleichSia381_2.stationen.filter((x) => x.hoeheM < 2000);
     expect(pts.length).toBeGreaterThanOrEqual(50);
