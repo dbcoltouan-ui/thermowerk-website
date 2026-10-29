@@ -1,7 +1,8 @@
 import { useSignal } from '@preact/signals';
-import { methode } from '../../state/ui';
+import { ergebnis, methode } from '../../state/ui';
 import { METHODEN } from '../../state/typen';
 import type { SchrittStatus } from '../schritte';
+import { kW, zahl } from '../format';
 
 interface Props {
   anzahlSchritte: number;
@@ -9,20 +10,25 @@ interface Props {
 }
 
 /**
- * Dashboard (Session 1: Platzhalter-KPIs). Ab Session 6 liest es ausschliesslich
- * `Ergebnis` — nie den State, nie eigene Rechnung (KONTEXT §2 «Eine Quelle der Wahrheit»).
+ * Dashboard: liest ausschliesslich `Ergebnis` — nie eigene Rechnung (KONTEXT §2 «Eine Quelle der Wahrheit»).
+ * Session 6 bindet die KPIs an; Gestaltung, Herkunfts-Chips und Annahmen-Liste folgen in Session 7.
  */
 function DashboardInhalt({ anzahlSchritte, status }: Props) {
   const fertig = Object.values(status).filter((s) => s !== 'offen').length;
   const prozent = Math.round((fertig / anzahlSchritte) * 100);
   const m = METHODEN.find((x) => x.id === methode.value);
+  const e = ergebnis.value;
+  const qh = e.zuschlaege.qh?.wert ?? null;
+  const qhl = e.heizlast.massgebend.wert?.wert ?? null;
+  const spez = e.heizlast.spezifisch?.wert ?? null;
+  const vl = e.auslegungsVL;
 
   return (
     <div class="dashboard__inner">
       <div class="kpi">
         <span class="kpi__label">Heizleistung Q<sub>h</sub></span>
-        <span class="kpi__wert leer" data-testid="kpi-qh">
-          —
+        <span class={`kpi__wert${qh === null ? ' leer' : ''}`} data-testid="kpi-qh">
+          {kW(qh)}
         </span>
         <span class="kpi__sub">
           {m ? <span class="badge badge--brand">{m.id === 'fws' ? 'FWS-Kurs' : 'SIA 384/2'}</span> : 'Methode wählen'}
@@ -31,23 +37,27 @@ function DashboardInhalt({ anzahlSchritte, status }: Props) {
       <div>
         <div class="dashboard__zeile">
           <span class="mute">Heizlast Q<sub>hl</sub></span>
-          <span class="leer">—</span>
+          <span class={qhl === null ? 'leer' : ''} data-testid="kpi-qhl">{kW(qhl)}</span>
         </div>
         <div class="dashboard__zeile">
           <span class="mute">spezifisch</span>
-          <span class="leer">— W/m²</span>
+          <span class={spez === null ? 'leer' : ''}>{zahl(spez, 'W/m²', 1)}</span>
         </div>
         <div class="dashboard__zeile">
           <span class="mute">Auslegungs-VL</span>
-          <span class="leer">— °C</span>
+          <span class={vl.herkunft === 'fallback' ? 'leer' : ''} data-testid="kpi-vl" title={vl.begruendung}>
+            {zahl(vl.wert, '°C', 0)}
+          </span>
         </div>
         <div class="dashboard__zeile">
-          <span class="mute">Speicher</span>
-          <span class="leer">—</span>
+          <span class="mute">Speicher WW / Puffer</span>
+          <span>
+            {zahl(e.speicher.ww?.volumenEffektiv.wert, 'l')} / {zahl(e.speicher.pufferEffektiv.wert, 'l')}
+          </span>
         </div>
         <div class="dashboard__zeile">
           <span class="mute">Annahmen</span>
-          <span class="leer">0</span>
+          <span data-testid="kpi-annahmen">{e.annahmen.length}</span>
         </div>
       </div>
       <div class="kpi">
@@ -86,7 +96,7 @@ export function DashboardLeiste(props: Props) {
       >
         <span class="kpi">
           <span class="kpi__label">Heizleistung Q<sub>h</sub></span>
-          <span class="kpi__wert leer">—</span>
+          <span class={`kpi__wert${ergebnis.value.zuschlaege.qh ? '' : ' leer'}`}>{kW(ergebnis.value.zuschlaege.qh?.wert)}</span>
         </span>
         <span class="chevron" aria-hidden="true" />
       </button>

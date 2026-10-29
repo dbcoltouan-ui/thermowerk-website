@@ -4,8 +4,9 @@
  * Status kommen mit `relevant()` / `Ergebnis.status` in Session 6/7.
  */
 import type { Methode } from '../state/typen';
+import type { SchrittStatus } from '../kern/relevanz';
 
-export type SchrittStatus = 'offen' | 'vollstaendig' | 'annahmen' | 'warnung';
+export type { SchrittStatus };
 
 export interface SchrittDef {
   id: string;

@@ -1,0 +1,56 @@
+{
+  "meta": { "schemaVersion": 2, "id": "p-ch-efh", "erstellt": "2026-10-29T09:00:00.000Z", "geaendert": "2026-10-29T09:45:00.000Z" },
+  "projekt": { "name": "CH-EFH Bern 1965 (Handrechnung)", "bezugsdatum": "2026-10-29" },
+  "methode": "raumweise",
+  "gebaeude": {
+    "typ": "efh",
+    "standort": { "plz": "3000", "ort": "Bern", "kanton": "BE", "thetaEOverrideC": -7 },
+    "baujahr": 1965,
+    "keller": "unbeheizt",
+    "dachform": "steil",
+    "dachraumBeheizt": true,
+    "ebfModus": "raeume",
+    "energiestandard": "keiner"
+  },
+  "sanierungen": [],
+  "verbrauch": { "quelle": null, "eintraege": [], "eta": {}, "konvention": "fwsKurs", "bedarfsart": "raumwaerme_wohnen", "klimabereinigung": false, "wwBisher": null, "abzug": { "methode": "personen", "zirkulation": "keine" }, "wpBetriebsstunden": {}, "messung": {} },
+  "huelle": {
+    "bauteiltypen": [],
+    "lueftung": { "konzept": "natuerlich", "dichtheit": "altbau" },
+    "waermebruecken": { "key": "bestand" },
+    "erdreich": {},
+    "geschosshoeheM": 2.5,
+    "rest": { "modus": "keiner" }
+  },
+  "raeume": [
+    { "id": "wohnen", "name": "Wohnen", "typ": "wohnen", "flaecheM2": 25, "bauteile": [
+      { "id": "aw", "art": "aussenwand", "flaecheM2": 19, "uOverride": 1.1, "anschluss": { "art": "aussen" } },
+      { "id": "f", "art": "fenster", "flaecheM2": 6, "uOverride": 2.7, "anschluss": { "art": "aussen" } },
+      { "id": "b", "art": "bodenKeller", "flaecheM2": 25, "uOverride": 2.1, "anschluss": { "art": "unbeheizt", "situation": "keller" } }
+    ] },
+    { "id": "bad", "name": "Bad", "typ": "bad", "laengeM": 2, "breiteM": 3, "bauteile": [
+      { "id": "aw", "art": "aussenwand", "flaecheM2": 6.5, "uOverride": 1.1, "anschluss": { "art": "aussen" } },
+      { "id": "f", "art": "fenster", "flaecheM2": 1, "uOverride": 2.7, "anschluss": { "art": "aussen" } },
+      { "id": "d", "art": "dachSteil", "flaecheM2": 6, "uOverride": 0.5, "anschluss": { "art": "aussen" } },
+      { "id": "iw", "art": "innenwand", "flaecheM2": 5, "uOverride": 1.9, "anschluss": { "art": "beheizt", "thetaNachbarC": 20 } },
+      { "id": "id", "art": "innendecke", "flaecheM2": 6, "uOverride": 3.0, "anschluss": { "art": "beheizt", "thetaNachbarC": 20 } }
+    ] },
+    { "id": "flur", "name": "Flur", "typ": "flur", "flaecheM2": 4, "bauteile": [
+      { "id": "d", "art": "dachSteil", "flaecheM2": 4, "uOverride": 0.5, "anschluss": { "art": "aussen" } }
+    ] }
+  ],
+  "warmwasser": { "wwKuenftig": true, "methode": "personen", "personen": 4, "zirkulation": "keine" },
+  "waermeabgabe": {
+    "heizkreise": [{ "id": "k1", "bezeichnung": "Radiatoren", "tVLC": 55, "spreizungK": 10 }],
+    "raeume": {
+      "wohnen": { "heizflaechen": [
+        { "id": "hf1", "bauart": "platte_22", "kreisId": "k1", "hoeheMm": 600, "laengeMm": 1000 },
+        { "id": "hf2", "bauart": "platte_22", "kreisId": "k1", "hoeheMm": 600, "laengeMm": 1000 }
+      ] }
+    }
+  },
+  "zuschlaege": { "sperrzeitAktiv": false, "zusatz": [] },
+  "speicher": { "ww": {}, "puffer": { "aktiv": null, "einzelraumregelung": false, "sperrzeitUeberbrueckung": false }, "mag": {} },
+  "geraet": { "quelle": "luftWasser", "auswahlId": null, "filterOverrides": {} },
+  "zusatz": { "foerderung": {}, "bewilligung": {}, "offerte": {} }
+}

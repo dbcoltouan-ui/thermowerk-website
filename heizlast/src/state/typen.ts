@@ -1,10 +1,9 @@
 /**
- * Gemeinsame Typen des State (Session 1: nur das Nötigste).
- * Session 6 ersetzt/erweitert dies durch das vollständige Schema v2.
+ * Anzeigetexte zur Methodenwahl. Das State-Schema v2 liegt in `schema.ts` (Session 6).
  */
+import type { Methode } from './schema';
 
-/** Rechenmodus (KONTEXT §2 «Modus»). */
-export type Methode = 'fws' | 'raumweise';
+export type { Methode };
 
 export const METHODEN: ReadonlyArray<{ id: Methode; titel: string; text: string }> = [
   {

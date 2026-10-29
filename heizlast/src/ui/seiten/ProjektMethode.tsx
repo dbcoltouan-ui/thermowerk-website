@@ -1,4 +1,4 @@
-import { methode, projektname, setzeMethode } from '../../state/ui';
+import { methode, projektname, setzeMethode, setzeProjektname } from '../../state/ui';
 import { METHODEN } from '../../state/typen';
 
 /** Schritt 0 — Projekt & Methode (Session 1: Projektname + Moduswahl; Rest folgt in Session 7). */
@@ -13,7 +13,7 @@ export function ProjektMethode() {
             class="feld__input"
             type="text"
             value={projektname.value}
-            onInput={(e) => (projektname.value = (e.currentTarget as HTMLInputElement).value)}
+            onInput={(e) => setzeProjektname((e.currentTarget as HTMLInputElement).value)}
             placeholder="z. B. EFH Muster, Musterstrasse 1, 3000 Bern"
             data-testid="projektname-eingabe"
             autocomplete="off"

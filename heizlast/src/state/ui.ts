@@ -1,29 +1,29 @@
 /**
- * UI-Zustand der Shell (Session 1).
- *
- * Platzhalter: Das fachliche State-Schema v2 (nur Rohangaben, schemaVersion,
- * hydrateState mit Migrationen) wird in Session 6 gebaut. Hier liegen nur die
- * wenigen Angaben, die die Shell heute braucht. Keine abgeleiteten Werte.
+ * UI-Zustand der Shell. Fachliche Angaben liegen im Store (State v2, Session 6); hier nur die
+ * reine Navigation und schmale Zugriffe für die Shell-Komponenten. Keine abgeleiteten Werte.
  */
-import { signal, computed } from '@preact/signals';
-import type { Methode } from './typen';
+import { computed, signal } from '@preact/signals';
+import { store, verwaltung } from './app';
+import type { Methode } from './schema';
 
-/** Index des aktiven Schritts (0 = Projekt & Methode). */
+/** Index des aktiven Schritts (0 = Projekt & Methode) — Navigation, nicht Teil des Projekts. */
 export const aktiverSchritt = signal(0);
 
-/** Projektname — eine Quelle (Topbar = Schritt 0 = Bericht). */
-export const projektname = signal('');
-
-/** Gewählte Methode; null solange nichts gewählt (Schritt 0 unvollständig). */
-export const methode = signal<Methode | null>(null);
-
-/** Speicherstatus für die Topbar (Persistenz folgt in Session 6/10). */
-export const speicherstatus = signal<'entwurf' | 'gespeichert' | 'fehler'>('entwurf');
+/** Projektname — eine Quelle: `state.projekt.name` (Topbar = Schritt 0 = Projektliste = Bericht). */
+export const projektname = computed(() => store.state.value.projekt.name);
+export const methode = computed<Methode | null>(() => store.state.value.methode);
+export const ergebnis = store.ergebnis;
+export const speicherstatus = verwaltung.status;
+export const speicherfehler = verwaltung.fehler;
 
 export const projektnameAnzeige = computed(() => projektname.value.trim() || 'Neues Projekt');
 
+export function setzeProjektname(name: string): void {
+  store.setze('projekt.name', name);
+}
+
 export function setzeMethode(neu: Methode): void {
-  methode.value = neu;
+  store.setzeMethode(neu);
 }
 
 export function geheZuSchritt(index: number, anzahl: number): void {

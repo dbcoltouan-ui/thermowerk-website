@@ -78,7 +78,7 @@ describe('sia384-2.json 1.1.0 und fws.json 1.2.0', () => {
     expect(s._meta.version).toBe('1.1.0');
     expect(s.erdreich.formelIso13370).toMatchObject({ wandDickeDefaultM: 0.3, rsiAbwaerts: 0.17, bStrichDefaultM: 5 });
     expect(s.erdreich.faktoren.fG1).toBe(1.45);
-    expect(f._meta.version).toBe('1.2.0');
+    expect(Number(f._meta.version.split('.')[1])).toBeGreaterThanOrEqual(2); // ≥ 1.2.0 (Session 6: 1.3.0 geraetewahl)
     expect(f.ebf.faktorNwfZuEbf).toEqual({ typ: 1.1, spanne: [1.1, 1.15] });
   });
 });

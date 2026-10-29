@@ -250,7 +250,7 @@ export function uEquivBodenplatte(uBoden: number, bStrichM: number, o: { lambdaE
   return { uEquiv, rf, dt };
 }
 
-function flaecheAus(r: { flaecheM2?: number | undefined; laengeM?: number | undefined; breiteM?: number | undefined }): number | null {
+export function flaecheAus(r: { flaecheM2?: number | undefined; laengeM?: number | undefined; breiteM?: number | undefined }): number | null {
   if (r.flaecheM2 !== undefined && Number.isFinite(r.flaecheM2) && r.flaecheM2 > 0) return r.flaecheM2;
   if (r.laengeM !== undefined && r.breiteM !== undefined && r.laengeM > 0 && r.breiteM > 0) return r.laengeM * r.breiteM;
   return null;
@@ -502,6 +502,31 @@ function restAufloesen(rest: RestEingabe, e: RaumweiseEingabe, ctx: Kontext, sum
 /* Hauptfunktion                                                                                   */
 /* ---------------------------------------------------------------------------------------------- */
 
+/**
+ * Energiebezugsfläche (Session 4, als Funktion exportiert in Session 6 — gemeinsam für beide Modi):
+ * manuell (Eingabe) oder Σ Nettoflächen der beheizten Räume × Faktor NWF→EBF (FWS Folie 33, Band 1.10–1.15).
+ * `ebf` ist null, wenn weder Eingabe noch Raumflächen vorliegen.
+ */
+export function ebfBestimmen(e: { modus: 'raeume' | 'manuell'; manuellM2?: number | undefined; faktorNwfZuEbf?: number | undefined }, summeFlaecheRaeume: number, fws: FwsDaten): { ebf: Wert | null; hinweise: Hinweis[] } {
+  const hinweise: Hinweis[] = [];
+  const faktorEbf = e.faktorNwfZuEbf ?? fws.ebf.faktorNwfZuEbf.typ;
+  const sp = fws.ebf.faktorNwfZuEbf.spanne;
+  if (e.modus === 'manuell' && e.manuellM2 !== undefined && Number.isFinite(e.manuellM2) && e.manuellM2 > 0) {
+    if (summeFlaecheRaeume * faktorEbf > e.manuellM2 * 1.05) hinweise.push({ stufe: 'warnung', code: 'ebf.kleinerAlsRaeume', text: `EBF ${fmt(e.manuellM2, 0)} m² ist kleiner als Σ Raumflächen × ${fmt(faktorEbf, 2)} = ${fmt(summeFlaecheRaeume * faktorEbf, 0)} m².`, pfad: 'ebf.manuellM2' });
+    return { ebf: eingabe(e.manuellM2, 'm²', `EBF ${fmt(e.manuellM2, 0)} m² (Eingabe)`), hinweise };
+  }
+  if (e.modus === 'manuell') hinweise.push({ stufe: 'warnung', code: 'ebf.manuellFehlt', text: summeFlaecheRaeume > 0 ? 'EBF manuell gewählt, aber kein Wert — aus den Räumen geschätzt.' : 'EBF manuell gewählt, aber kein Wert.', pfad: 'ebf.manuellM2' });
+  if (!(summeFlaecheRaeume > 0)) return { ebf: null, hinweise };
+  const w = summeFlaecheRaeume * faktorEbf;
+  const ebf = schaetzung(w, 'm²', `EBF ≈ Σ Nettoflächen der beheizten Räume ${fmt(summeFlaecheRaeume, 1)} m² × ${fmt(faktorEbf, 2)} (Wandanteil, FWS Folie 33) = ${fmt(w, 0)} m²`, {
+    stufe: e.faktorNwfZuEbf !== undefined ? 'raeume_faktor' : 'raeume_standardfaktor',
+    band: [summeFlaecheRaeume * (sp[0] ?? 1.1), summeFlaecheRaeume * (sp[1] ?? 1.15)],
+    unsicherheit: 5,
+    quelle: fws.ebf.fundstelle,
+  });
+  return { ebf, hinweise };
+}
+
 export function heizlastRaumweise(e: RaumweiseEingabe, daten: { sia: Sia3842Daten; fws: FwsDaten }): RaumweiseErgebnis {
   const sia = daten.sia;
   const hinweise: Hinweis[] = [];
@@ -571,24 +596,11 @@ export function heizlastRaumweise(e: RaumweiseEingabe, daten: { sia: Sia3842Date
   const saldiertRaeume = berechnet(saldW, 'W', `Gebäude-Heizlast saldiert (nur Hülle nach aussen/unbeheizt/Erdreich + Lüftung) = ${fmt(saldW, 0)} W; Innentransmission zwischen beheizten Räumen nicht gezählt`, beheizt.map((r) => r.phiHuelle), { quelle: Q_METHODE, unsicherheit: unsicherheitSumme(beheizt.map((r) => r.phiHuelle)) ?? 0 });
 
   // EBF
-  const faktorEbf = e.ebf?.faktorNwfZuEbf ?? daten.fws.ebf.faktorNwfZuEbf.typ;
   const summeFlaeche = raeume.filter((r) => r.inEbf).reduce((s, r) => s + r.flaeche.wert, 0);
   const ebfModus = e.ebf?.modus ?? (e.ebf?.manuellM2 !== undefined ? 'manuell' : 'raeume');
-  let ebf: Wert;
-  const sp = daten.fws.ebf.faktorNwfZuEbf.spanne;
-  if (ebfModus === 'manuell' && e.ebf?.manuellM2 !== undefined && Number.isFinite(e.ebf.manuellM2) && e.ebf.manuellM2 > 0) {
-    ebf = eingabe(e.ebf.manuellM2, 'm²', `EBF ${fmt(e.ebf.manuellM2, 0)} m² (Eingabe)`);
-    if (summeFlaeche * faktorEbf > e.ebf.manuellM2 * 1.05) hinweise.push({ stufe: 'warnung', code: 'ebf.kleinerAlsRaeume', text: `EBF ${fmt(e.ebf.manuellM2, 0)} m² ist kleiner als Σ Raumflächen × ${fmt(faktorEbf, 2)} = ${fmt(summeFlaeche * faktorEbf, 0)} m².`, pfad: 'ebf.manuellM2' });
-  } else {
-    const w = summeFlaeche * faktorEbf;
-    ebf = schaetzung(w, 'm²', `EBF ≈ Σ Nettoflächen der beheizten Räume ${fmt(summeFlaeche, 1)} m² × ${fmt(faktorEbf, 2)} (Wandanteil, FWS Folie 33) = ${fmt(w, 0)} m²`, {
-      stufe: e.ebf?.faktorNwfZuEbf !== undefined ? 'raeume_faktor' : 'raeume_standardfaktor',
-      band: [summeFlaeche * (sp[0] ?? 1.1), summeFlaeche * (sp[1] ?? 1.15)],
-      unsicherheit: 5,
-      quelle: daten.fws.ebf.fundstelle,
-    });
-    if (ebfModus === 'manuell') hinweise.push({ stufe: 'warnung', code: 'ebf.manuellFehlt', text: 'EBF manuell gewählt, aber kein Wert — aus den Räumen geschätzt.', pfad: 'ebf.manuellM2' });
-  }
+  const ebfR = ebfBestimmen({ modus: ebfModus, manuellM2: e.ebf?.manuellM2, faktorNwfZuEbf: e.ebf?.faktorNwfZuEbf }, summeFlaeche, daten.fws);
+  const ebf = ebfR.ebf ?? eingabe(0, 'm²', 'EBF fehlt');
+  hinweise.push(...ebfR.hinweise);
 
   // Rest
   const rest = e.rest ? restAufloesen(e.rest, e, ctx, summeFlaeche, ebfModus === 'manuell' && e.ebf?.manuellM2 ? e.ebf.manuellM2 : null, daten.fws) : null;

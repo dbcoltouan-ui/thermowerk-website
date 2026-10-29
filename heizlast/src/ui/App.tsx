@@ -5,7 +5,7 @@ import { Dashboard, DashboardLeiste } from './komponenten/Dashboard';
 import { SchrittSeite } from './komponenten/SchrittSeite';
 import { ProjektMethode } from './seiten/ProjektMethode';
 import { Platzhalter } from './seiten/Platzhalter';
-import { aktiverSchritt, methode, geheZuSchritt } from '../state/ui';
+import { aktiverSchritt, ergebnis, methode, geheZuSchritt } from '../state/ui';
 import { sichtbareSchritte } from './schritte';
 import type { SchrittStatus } from './schritte';
 
@@ -15,8 +15,8 @@ export function App() {
   const schritt = schritte.value[index];
   if (!schritt) return null;
 
-  // Status-Platzhalter: Session 6 liefert `Ergebnis.status` je Schritt.
-  const status: Record<string, SchrittStatus> = { projekt: methode.value ? 'vollstaendig' : 'offen' };
+  // Status je Schritt aus dem einen Ergebnis (berechne), nie aus eigener UI-Logik.
+  const status = ergebnis.value.status as Record<string, SchrittStatus>;
 
   return (
     <div class="shell">

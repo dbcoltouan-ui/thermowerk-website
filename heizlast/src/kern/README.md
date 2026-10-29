@@ -17,7 +17,7 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `huelle.ts` | 4 | Bauteiltypen auf Gebäudeebene: Stufen-Picker, EINE Schichtkette (Epochen-Default Bestand → bekannte Stufen → ISO 6946 → Clamp), Sanierung ab Jahr, Override, Fenster/Türen/Innenbauteile |
 | `raumweise.ts` | 4 | Räume und Bauteile (Referenz auf Hüllentyp + Fläche + Anschluss), Φ_T mit ΔU_WB/b_u/U_equiv, Φ_V = V·n_min·0.34, Σ Räume und saldierte Gebäude-Heizlast, EBF aus Räumen, nicht erfasster Rest |
 | `waermeabgabe.ts` | 5 | Heizkörper-Modul: Q_N je Heizfläche (Typenschild/Modell/Bauart+Massen/alte Heizkurve), n aus einer Tabelle, Minderungen, Raum-Deckung, θ_VL,req (Bisektion), Gebäude-Auslegungs-VL + Ampel, Massnahmen |
-| `berechne.ts`, `relevanz.ts` | 6 | Orchestrierung, Relevanz |
+| `berechne.ts`, `relevanz.ts`, `geraet.ts` | 6 | Orchestrierung (einziger Rechenpfad), Relevanz bedingter Felder, WP-Gerätefilter/Dimensionierung/Bivalenz |
 | `zusatz/` | 11 | Förderung, Bewilligung, Offerte |
 
 ## Konventionen
@@ -136,3 +136,29 @@ Heizfläche `{ id, bauart, kreisId?, bezeichnung?, hoeheMm?, laengeMm?, tiefeMm?
 - FWS-Modus: Φ_HL,Raum = Q_hl / EBF × 1.10 × A_Raum (bzw. Anteil der erfassten Raumflächen), Schätzung ±25 %.
 
 Hilfsfunktionen: `dTlog`, `leistungsfaktor`, `bisektionVorlauf`, `vorlaufNaeherungArithmetisch` (nur Vergleich), `normleistung`, `minderungsfaktor`, `ampelVorlauf`, `interpoliere1/2`, `kategorieVon`, `bauartDaten`.
+
+## Kern-API Session 6
+
+### `berechne.ts` — der einzige Rechenpfad
+
+```ts
+berechne(state: State, daten: Datensatz /* alleDaten() aus src/daten/index.ts */): Ergebnis
+```
+
+Ablauf: Klima → EBF (`ebfBestimmen`, manuell oder Σ Raumflächen × 1.10, eine Quelle für beide Modi) → Heizlast (FWS bzw. raumweise; die andere Methode nur als **Gegenprobe**, wenn ihre Daten echt vorhanden sind: Rechnungen bzw. Räume mit Bauteilen) → Plausi → WW künftig → WW-Speicher → Zuschläge → Wärmeabgabe → Gerät → Puffer → MAG/SV → Annahmen, Hinweise, Vollständigkeit, Status.
+
+`Ergebnis`: `heizlast { massgebend { wert, quelle 'fws'|'raumweise', art, status 'gemessen'|'raumweise'|'schaetzung'|'fehlt', label }, fws, raumweise, huelle, gegenprobe, spezifisch }`, `ebf`, `klima`, `plausi.spezifisch`, `warmwasser { bisher (nur Abzug), kuenftig, zuschlag }`, `zuschlaege { qhl, qw, qoff, qas, sperrzeit, qh }`, `waermeabgabe`, **`auslegungsVL`** (die eine VL: aus Heizflächen, Override, sonst Standardwert 55 °C als Annahme), `geraet`, `speicher { ww, puffer, pufferEffektiv, mag, sicherheitsventil }`, `annahmen[] { wert, schritt }`, `hinweise[] (Hinweis + schritt)`, `vollstaendigkeit[] { schritt, pfad, text }`, `relevanteSchritte`, `status` je Schritt (`offen` > `warnung` > `annahmen` > `vollstaendig`).
+
+Regeln: Sanierungen sind EINE Liste — FWS wertet Massnahme/Einsparung/Datum aus (§3a), raumweise setzt die Bauteiltypen der passenden Art (`fws.json sanierungen.massnahmen[].bauteile`, «dach» = Steil-/Flachdach/Estrichdecke) bzw. `bauteiltypIds` auf «saniert ab Jahr» (späteste wirksame gewinnt); mit geplanten Massnahmen rechnet raumweise im Zustand «geplant» (wie FWS `qhlKorr`). WW bisher (Abzug) und WW künftig sind getrennte Äste ohne stille Kopplung (UX-11/13). Puffer abgewählt → effektiv 0 l; Overrides wirken in Dashboard, MAG und Bericht (FLOW-07). Heizflächenart für Puffer/MAG wird aus den erfassten Heizflächen abgeleitet.
+
+### `relevanz.ts`
+
+`relevant(pfad, state, daten?)` — hierarchische Regeltabelle `RELEVANZ_REGELN` (Muster mit `*` für Listen-ids, Klartext `wenn`); mit `daten.hk` auch Heizflächen-Masse je Bauart (`relevanteMasse`). `schrittRelevant(id, state)`, `schrittVonPfad(pfad, state)`, `ruhendeAngaben(state)` (Hinweis beim Moduswechsel), `SCHRITT_IDS`, `SchrittStatus`, `heizflaechenVorhanden`.
+
+### `geraet.ts`
+
+`geraetWaehlen({ qh, auslegungsVL, wwLadetemperaturC?, filter { quelle, toleranzUntenProzent?, aufstellung?, schallNachtMaxDb?, vorlaufC? }, auswahlId? }, { fws, wp })` → `{ filterVorlauf, qWpMin, qWpMax, liste[] (sortiert nach |Q_WP − Q_h|, Ampel je Gerät), gewaehlt { qWp, vorlaufMax, mindestPuffer, dimensionierung, bivalenz }, annahmen, hinweise }`. `dimensionierung(qhW, qWpW, fws)`: r = Q_h/Q_WP, grün 0.75 ≤ r ≤ 1 (Kurs-Faustregel), gelb 0.60–0.75 bzw. 1.00–1.10, sonst rot (Bänder Thermowerk-Annahme, fws.json `geraetewahl`). `bivalenz(qhW, qWpW, fws)`: Folie-95-Tabelle, zwischen 50 % und 100 % gegen monovalent interpoliert (Schätzung), unter 25 % nicht abschätzbar.
+
+### `raumweise.ts` (Ergänzung)
+
+`ebfBestimmen({ modus, manuellM2?, faktorNwfZuEbf? }, summeFlaecheRaeume, fws)` und `flaecheAus(raum)` sind exportiert (gemeinsam mit `berechne`).
