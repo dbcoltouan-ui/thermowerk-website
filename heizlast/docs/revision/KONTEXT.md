@@ -1,6 +1,6 @@
 # KONTEXT — Neubau «Thermowerk Heizlast» (für jede Folge-Session zuerst lesen)
 
-Stand: 2026-10-29 (Regel 10 + Design 16:34; Fachentscheide 17:51) · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
+Stand: 2026-10-29 (Regel 10 + Design 16:34; Fachentscheide 17:51; Herkunft `berechnet` S3) · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
 
 ## 1. Zweck (verbindlich)
 Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbaren Modi:
@@ -17,7 +17,7 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 | Stack | **Vite + Preact + @preact/signals + TypeScript**, Tests **Vitest** (Kern) + **Playwright** (E2E), **eslint** im Build. | Deklaratives Rendering statt innerHTML/Regex (CODE-05/06); echter Bundler statt Regex-Bundler (BUILD-02); Typen gegen Schlüssel-Chaos (CODE-22–24). |
 | Schichten | `src/kern/` (reine Funktionen, keine DOM/FS), `src/daten/` (Loader + Schemas), `src/state/` (Schema v2, Store, Migrationen, Persistenz), `src/ui/` (Schritte, Dashboard, Komponenten), `src/bericht/` (HTML/PDF). Kern importiert nie aus ui. | CODE-01. |
 | Eine Quelle der Wahrheit | `berechne(state, daten) → Ergebnis` ist der **einzige** Rechenpfad. UI, Dashboard, Bericht, Cloud-KPI, Gerätefilter, Offerte lesen nur `Ergebnis`. UI rechnet nichts. Abgeleitete Werte werden nie in den State geschrieben. | CODE-02/08, FLOW-01/07/09. |
-| Herkunftsmodell | Jeder berechnete oder ergänzte Wert ist ein `Wert = { wert, einheit, herkunft: 'eingabe'\|'messung'\|'tabelle'\|'schaetzung'\|'fallback'\|'override', stufe?: string, unsicherheit?: number (±%), begruendung: string, quelle?: string }`. `Ergebnis.annahmen[]` sammelt alle Nicht-Eingaben. Bericht hat Kapitel «Annahmen & Unsicherheiten». | UX-50–52, Vorgabe «Fallback sichtbar». |
+| Herkunftsmodell | Jeder berechnete oder ergänzte Wert ist ein `Wert = { wert, einheit, herkunft: 'eingabe'\|'messung'\|'tabelle'\|'schaetzung'\|'fallback'\|'override'\|'berechnet', stufe?: string, unsicherheit?: number (±%), band?: [min, max], begruendung: string, quelle?: string }`. `berechnet` (seit S3) = Wert aus einer Formel über andere Werte, selbst keine Annahme; seine Begründung ist der Rechenweg mit eingesetzten Zahlen. `Ergebnis.annahmen[]` sammelt alle Nicht-Eingaben (Tabellen, Schätzungen, Fallbacks, Overrides). Bericht hat Kapitel «Annahmen & Unsicherheiten». | UX-50–52, Vorgabe «Fallback sichtbar». |
 | Relevanz | `relevant(feldPfad, state): boolean` zentral; UI rendert irrelevante Felder **nicht** (kein `hidden`, kein Dimmen); Bericht druckt nur relevante Werte. | UX-10–14. |
 | Modus | `state.methode: 'fws' \| 'raumweise'` explizit, Schritt 0. Wechsel behält Daten, zeigt Hinweis, welche ruhen. `Ergebnis.heizlast.massgebend` = genau eine Quelle mit Herkunft. | UX-02. |
 | State | Nur Rohangaben, `schemaVersion`, `hydrateState(raw)` mit versionierten Migrationen (eine Kette, getestet mit eingefrorenen Fixtures). Alte Projekte des alten Tools müssen **nicht** importierbar sein (Daniel). | FLOW-03/04, BUILD-11. |

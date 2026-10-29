@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.0.1",
+    "version": "1.1.0",
     "stand": "2026-10-29",
     "beschreibung": "Fachdaten FWS-Modus (Verbrauchsmethode nach FWS/AWB Kurs Modul 3, Version 1-2025) inkl. Warmwasser, Zuschläge, Speicher, Puffer, Bivalenz. Keine Rechenlogik; jede Tabelle nennt ihre Quelle über `quelle` (IDs aus `_meta.quellen`). Werte in SI-nahen Einheiten (kWh, kW, h, l, K); Konvention siehe `heizwerte`.",
     "quellen": [
@@ -73,6 +73,11 @@
         "id": "tw-annahme",
         "titel": "Thermowerk-Annahme (keine Norm; im Bericht als Annahme auszuweisen)",
         "art": "Annahme"
+      },
+      {
+        "id": "fws-rechenwege",
+        "titel": "referenz/FWS-RECHENWEGE.md §3a (Perioden-Modell, Sub-Perioden-Korrektur vergangener Sanierungen) und §5 (Plausi-Toleranz ±15 %)",
+        "art": "Thermowerk-Referenzdokument (Konzept, Befund FACH-03 bestätigt)"
       }
     ]
   },
@@ -358,6 +363,33 @@
         }
       ]
     }
+  },
+  "verbrauch": {
+    "beschreibung": "Regeln für das Jahresraster der Verbrauchseinträge (Kern Session 3): Jahreswert je Energieträger = Σ Menge · 365 / Σ Tage (Mittel über alle Einträge), Summe nur über verschiedene Energieträger (bivalent). Überlappende Zeiträume desselben Trägers sind ein Fehler. Streuung der annualisierten Einzelwerte als Ampel.",
+    "quelle": [
+      "fws-m3",
+      "fws-rechenwege",
+      "tw-annahme"
+    ],
+    "fundstelle": "Folie 29 (durchschnittlicher Verbrauch, min. ca. 3–5 relevante Jahre); Aufgabe 2 (Ø der letzten 5 Jahre)",
+    "datumsregel": "Eintrag mit `jahr` zählt als 365 Tage (Kalenderjahr); Eintrag mit `von`/`bis` zählt die Kalendertage inklusive beider Grenzen. Lieferungen werden als Zeitraum «Tank voll bis Tank voll» erfasst.",
+    "mindestJahreEmpfohlen": 3,
+    "maxJahreEmpfohlen": 5,
+    "streuung": {
+      "beschreibung": "Grösste relative Abweichung eines annualisierten Einzelwerts vom Mittel (nur Einträge ab `mindestTageJeEintrag`). Schwellen sind eine Thermowerk-Annahme; der Kurs nennt keine Zahl.",
+      "mindestTageJeEintrag": 300,
+      "gelbAbProzent": 10,
+      "rotAbProzent": 20
+    }
+  },
+  "klimabereinigung": {
+    "beschreibung": "Optionale Heizgradtag-Korrektur je Verbrauchseintrag: Heizanteil × HGT_norm / HGT_ist. NICHT Bestandteil der FWS-Methode (Kurs mittelt nur über 3–5 Jahre); Default aus, im Bericht als «Klimabereinigung (nicht FWS-Kurs)» auszuweisen (Befund FACH-07). HGT_norm aus klimastationen.json (hgt2012Kd), HGT_ist aus HEV-/MeteoSchweiz-Tabellen je Jahr und Station (Eingabe).",
+    "quelle": [
+      "tw-annahme"
+    ],
+    "defaultAktiv": false,
+    "faktorPlausibelMin": 0.7,
+    "faktorPlausibelMax": 1.4
   },
   "sperrzeit": {
     "beschreibung": "Leistungszuschlag infolge Sperrzeiten des Elektrizitätswerks: Qoff = Qhl · (24/(24 − t_off) − 1), t_off = kumulierte Sperrzeit pro Tag in h. Tabelle = Faktor (Qhl+Qoff)/Qhl aus der Kursgrafik.",
@@ -1212,7 +1244,23 @@
           ]
         }
       ]
-    }
+    },
+    "marktrundungLiter": [
+      50,
+      100,
+      150,
+      200,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000,
+      1500,
+      2000
+    ],
+    "marktrundungHinweis": "Thermowerk-Annahme: Aufrundung auf nächstes marktübliches Nennvolumen; über 2000 l in 500-l-Schritten.",
+    "regel": "V_Puffer = max(Hersteller-Minimum, Kriterium nach Quelle). Luft/Wasser: Abtau-/Taktreserve `abtau.empfehlungLiterProKw` (Mitte 40 l/kW, Band 30–50) × Q_WP; Sole/Wasser: `hkMitErr` 20 l/kW × Q_WP nur bei Heizkörpern mit Einzelraumregelung, sonst 0 (Weiche); Wasser/Wasser: 0. Sperrzeit-Überbrückung nur auf ausdrücklichen Wunsch (Folie 91: meist unrealistisch), Bezug Qhl."
   },
   "bivalenz": {
     "beschreibung": "Abschätzung des bivalenten Energieanteils der Wärmepumpe (Luft/Wasser) in Abhängigkeit des Leistungsanteils der WP an der Heizleistung (Folie 95). Für Bivalenz-Darstellung statt synthetischer Kennlinie (Befund FACH-42).",
@@ -1263,7 +1311,13 @@
       10,
       25
     ],
-    "erwartungHinweis": "Erwartung «Norm 10–25 % über Verbrauch» (Thermowerk-Annahme aus Kurs 10–20 % + Toleranz)."
+    "erwartungHinweis": "Erwartung «Norm 10–25 % über Verbrauch» (Thermowerk-Annahme aus Kurs 10–20 % + Toleranz).",
+    "bandToleranzProzent": 15,
+    "bandToleranzHinweis": "Spez. Heizleistung des UNSANIERTEN Zustands gegen das Bauperioden-Band (Folie 37): im Band grün; bis 15 % ausserhalb gelb; darüber rot (FWS-RECHENWEGE §5, Thermowerk-Annahme). Unter dem Band: Verbrauchsmethode vermutlich ungenau (Minergie, Leichtbau, Teilbelegung); über dem Band: η, Heizwert, Verbrauch, WW-Anteil prüfen.",
+    "vergleichNormVerbrauch": {
+      "beschreibung": "Abweichung = (Qhl,Norm − Qhl,Verbrauch) / Qhl,Verbrauch. Grün innerhalb `qhlNormMinusVerbrauchErwartungProzent`; gelb von 0 bis zur unteren bzw. von der oberen Grenze bis `gelbBisProzent`; rot wenn Norm unter Verbrauch (Verbrauch/Eingaben prüfen) oder über `gelbBisProzent` (Hülle/U-Werte prüfen). Thermowerk-Annahme.",
+      "gelbBisProzent": 40
+    }
   },
   "methodeB": {
     "beschreibung": "Heizleistung aus WP-Betriebsstunden (Aufgabe 4): h/a = Zählerstand / Betriebsjahre; Qn = h/a · Q_WP,Nenn (oder Wärmezähler kWh); Qhl = Qn / t_voll. Nicht Q_WP selbst (Befund FACH-04). Kälteleistung Qk = Q_WP · (COP − 1)/COP; spezifische Entzugsleistung Erdsonde = Qk / L_Sonde.",

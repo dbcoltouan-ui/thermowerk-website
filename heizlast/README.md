@@ -10,7 +10,8 @@ Verbindliche Grundlage: `docs/revision/KONTEXT.md` (Zweck, Architektur-Entscheid
 |---|---|---|
 | 1 | **erledigt** (2026-10-29) | Repo-Ordner, Stack, Pages-Build, Referenzmaterial, Shell + Schritt 0, Design-Tokens |
 | 2 | **erledigt** (2026-10-29) | Datenbasis `data/*.json` (6 Dateien, Quellen je Tabelle), Daten-Tests (141), `docs/datenquellen.md`, Recherche-Berichte `docs/recherche/` |
-| 3–12 | offen | siehe `docs/revision/PLAN.md` §3 |
+| 3 | **erledigt** (2026-10-29) | Kern FWS-Modus: `src/kern/fws.ts`, `warmwasser.ts`, `zuschlaege.ts`, `speicher.ts`, `plausi.ts` mit Herkunftsmodell; `src/daten/fws.ts` (Loader + Schema), `data/hydraulik.json`; 74 Kern-Tests gegen Kurslösungen (API: `src/kern/README.md`) |
+| 4–12 | offen | siehe `docs/revision/PLAN.md` §3 |
 
 Staging-URL: `https://thermowerk.ch/heizlast-neu/` (bzw. `*.pages.dev/heizlast-neu/`). Das Live-Tool unter `/heizlast/` bleibt bis Session 12 unverändert.
 
@@ -37,7 +38,7 @@ Regeln, die der Build erzwingt (`eslint.config.js`, `tests/shell.test.ts`):
 - kein «ß» im Quelltext (Schweizer Schreibweise),
 - `src/kern` und `src/daten` importieren nie aus `src/ui`, `src/bericht` oder `preact`, und nutzen keine DOM-Globals.
 
-Herkunftsmodell: `src/kern/wert.ts` — jeder berechnete oder ergänzte Wert ist ein `Wert { wert, einheit, herkunft, stufe?, unsicherheit?, begruendung, quelle? }`.
+Herkunftsmodell: `src/kern/wert.ts` — jeder berechnete oder ergänzte Wert ist ein `Wert { wert, einheit, herkunft, stufe?, unsicherheit?, band?, begruendung, quelle? }`; Herkunft `berechnet` (Formel über andere Werte) ist selbst keine Annahme, die Eingangswerte landen in `annahmen[]`. Kern-API: `src/kern/README.md`.
 
 Design: Farbpalette und eckige Formensprache des alten Tools (`src/ui/styles/tokens.css`, abgeleitet aus `referenz/alt-style/style.css`); Layout und Komponenten neu. UI-Sprache Deutsch (Schweiz).
 
@@ -65,13 +66,15 @@ Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Ast
 
 ## Datenquellen
 
-`data/` enthält sechs JSON-Dateien (Übersicht in `data/README.md`): `fws.json`, `waermepumpen.json`, `klimastationen.json`, `huelle-epochen.json`, `sia384-2.json`, `heizkoerper-tabellen.json`. Primärquellen: SIA 2028-C1:2015, SIA 384.201-C1:2014 / SN EN 12831-1-C1:2020, SIA 380/1-Vollzugshilfen, BFE Bauteilekatalog 2002, GEAK/BFE-UFELD, EnFK Merkblatt Fenster 2021, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter (Buderus, Kermi, Purmo, V&N, Stelrad, Brugman, HG-TEC, Zehnder, JOCO, Uponor, WEM …). Stichproben mit Zahl/Quelle/Datum: `docs/datenquellen.md`; vollständige Recherche-Berichte: `docs/recherche/`. Tests: `tests/daten/*.test.ts` (Schema je Datei, Plausibilität, externe Referenzwerte wie Kurslösungen und Befund-Beispiele B1–B3).
+`data/` enthält sieben JSON-Dateien (Übersicht in `data/README.md`): `fws.json`, `hydraulik.json` (MAG/Sicherheitsventil, Session 3), `waermepumpen.json`, `klimastationen.json`, `huelle-epochen.json`, `sia384-2.json`, `heizkoerper-tabellen.json`. Der Kern bekommt sie über `src/daten/` (`fwsDaten()`, `hydraulikDaten()`; Schema per TypeScript-Interface, vom Build geprüft). Primärquellen: SIA 2028-C1:2015, SIA 384.201-C1:2014 / SN EN 12831-1-C1:2020, SIA 380/1-Vollzugshilfen, BFE Bauteilekatalog 2002, GEAK/BFE-UFELD, EnFK Merkblatt Fenster 2021, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter (Buderus, Kermi, Purmo, V&N, Stelrad, Brugman, HG-TEC, Zehnder, JOCO, Uponor, WEM …). Stichproben mit Zahl/Quelle/Datum: `docs/datenquellen.md`; vollständige Recherche-Berichte: `docs/recherche/`. Tests: `tests/daten/*.test.ts` (Schema je Datei, Plausibilität, externe Referenzwerte wie Kurslösungen und Befund-Beispiele B1–B3).
 
 Als Annahme gekennzeichnet (nicht öffentlich belegbar): Höhengradient θe 0.6 K/100 m, SIA 384/2 Anhang A/B (ersetzt durch ND.3 / ISO-13370-Tabelle), ΔU_WB 0.10/0.05, SIA-2024-Innentemperaturen, Exponent Gliederradiatoren, FBH bei exakt 35/28, Epochenzuordnung Böden/Türen.
 
 ## Offene Punkte
 
-- Sessions 3–12 gemäss Plan.
-- Offene fachliche Fragen an Daniel (Session 2): Marken im CH-Bestand für die Modell-DB (Arbonia/Runtal/Schäfer/Roca fehlen), Bad-Default 24 °C vs. SIA (wie Haupträume), Flur innerhalb Wohnung 15 oder 20 °C.
+- Sessions 4–12 gemäss Plan.
+- Fragerunde 3 beantwortet (29.10.): Bad 22 °C, Flur 20 °C, Eingangsbereich 15 °C, WW-Standard 45 l/P·d, HK primär nach Bauart/Masse.
+- Session 3, dokumentierte Abweichung: WW-Verluste additiv (Folie 49/SIA 385/2); die Kurslösungen 2–4 verketten multiplikativ — Q_h innerhalb ±1 %, Q_w bis 3 %.
+- Klimabereinigung (HGT) braucht HGT-Istwerte je Jahr und Station als Eingabe (HEV/MeteoSchweiz); keine Jahreswerte in `data/`.
 - Screenshot-Referenz des alten Tools: `docs/revision/shots/`; des Neubaus: `docs/revision/shots-neu/`.
 - Zurückgestellt (nicht im Umfang): Hydraulik-Schemas (`referenz/alt-data/hydraulik-schemas-katalog.json` nur zum Nachschlagen).

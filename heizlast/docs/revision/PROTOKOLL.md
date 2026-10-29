@@ -87,3 +87,30 @@ Prompt: Alle Fachdaten als JSON unter `heizlast/data/` mit `_meta` und Quelle je
 ## 2026-10-29 17:51 — Prompt 7 (Daniel): Antworten Fragerunde 3
 1. Heizkörper fast immer ohne Marke → Bauart/Masse/Tiefe/Glieder sind der Hauptpfad, Modell-DB optional (so gebaut). 2. Bad 22 °C (SIA: wie Haupträume). 3. Flur 20 °C; abgetrennter Eingangsbereich 15 °C (neuer Raumtyp). 4. Warmwasser-Standard 45 l/P·d, überschreibbar. Neu Regel: alle vorbelegten Werte sichtbar als Zahl mit Markierung «Standardwert».
 → `data/sia384-2.json` 1.0.1 (Bad 22, Flur 20, Raumtyp eingangsbereich 15), `data/fws.json` 1.0.1 (efh_mittel default), Tests angepasst (141 grün), KONTEXT §2/§3 ergänzt; Commit + Push, Deploy geprüft.
+
+## 2026-10-29 17:59 — Session 3: Kern FWS-Modus (Fable-Prompt aus PLAN §4, ausgeführt mit Fable 5.1)
+Prompt: `src/kern/` als reine TypeScript-Module mit Herkunftsmodell: `fws.ts` (Jahresraster, Konvention, WW-Abzug, Sanierungen §3a, Methoden B/C, Bauperioden-Fallback, t_voll), `warmwasser.ts`, `zuschlaege.ts`, `speicher.ts`, `plausi.ts`; Tests extern belegt (Kurslösungen A1/1B/2/3/4, Folie 49/52, Moosseedorf, Mehrperioden, Öl-Lieferungen, Überlappung, Sanierungen mit Zeitgewichtung, Konventionswechsel).
+
+### Entscheide
+- Herkunftsmodell ergänzt: Herkunft `berechnet` (Wert aus Formel; selbst keine Annahme, Eingangswerte landen in `annahmen[]`; Begründung = Formel mit eingesetzten Zahlen), optionales `band` (min/max), Konstruktoren und Unsicherheits-Fortpflanzung in `wert.ts`; `Hinweis { stufe, code, text, pfad? }` als Validierungs-/Plausi-Meldung. KONTEXT §2 nachgeführt.
+- Daten-Injektion: `src/daten/fws.ts` mit TypeScript-Interfaces als Schema; `fwsDaten()`/`hydraulikDaten()` geben das JSON ohne Cast zurück → tsc prüft die Dateien beim Build gegen das Schema. Kern liest nie Dateien.
+- Warmwasser-Verluste **additiv** (Folie 49, SIA 385/2) — die Kurslösungen 2–4 verketten multiplikativ (1.1·1.15·1.15). Folge: Q_hl und Q_h aller Kursaufgaben innerhalb ±1 %, Q_w weicht bis 3 % ab (A2 saniert −1.1 %, A3 −1.5 %, A4 −3 %); im Test dokumentiert, Q_w-Formel selbst mit Kurs-Q_WW exakt (5.64 kW).
+- Jahresraster: Eintrag mit `jahr` = 365 Tage, `von`/`bis` inklusiv (Kalendertage); Lieferungen als «Tank voll bis Tank voll». Überlappung gleicher Träger → Fehler ohne Resultat. Streuungs-Ampel 10/20 % nur über Einträge ≥ 300 Tage (Thermowerk-Annahme, in fws.json). Hinweis bei < 3 Jahren (Folie 29).
+- Sanierungen exakt nach FWS-RECHENWEGE §3a: Sub-Perioden je Zeitraum, kumulativer Faktor, W_pre = W·L/Σ(L_j·F_j), W_ist = W_pre·F_heute (L und L_j in Kalendertagen, sonst Faktor 365/366 bei Schaltjahren); geplante Massnahmen multiplikativ auf `qhlKorr`; ausgeführt ohne Datum → Warnung, als vor dem Zeitraum angenommen. Drei Heizlasten: `qhlUnsaniert` (Plausi-Band), `qhlIst`, `qhlKorr` (= massgebend).
+- Konvention `hi`: η-Presets werden mit Ho/Hi umgerechnet (Q_n identisch), eigener η gilt als Hi-bezogen. Hi Erdgas 10.08 (BFE) statt 10.04 der alten BEISPIELRECHNUNG (unbelegt) → Moosseedorf hi 8.945 statt 8.871 kW (dokumentiert).
+- WW-Abzug: nur mit `wwAbzug` (= «WW bisher über Heizung»), Zuordnung zum grössten Träger oder explizit; Abzug > Nutzenergie → Heizanteil 0 mit Warnung.
+- Methode B: Q_n = h/a·Q_WP bzw. Strom·COP, Q_hl = Q_n/t_voll (8.4 kW, Aufgabe 4); Q_k und Entzugsleistung (57 W/m → gelb nach fws.json-Ampel; Kurs: zu gross) als Nebenrechnung; Zeitraum des Zählers synthetisch aus `heute` − Betriebsjahre für die Sanierungs-Gewichtung.
+- Klimabereinigung HGT_norm/HGT_ist je Eintrag, Default aus, nur Heizanteil, Begründung «nicht FWS-Kurs». HGT-Istwerte sind Eingabe (keine Jahresdaten im Repo).
+- Puffer: max(Hersteller-Minimum, Kriterium): Luft/Wasser 40 l/kW Q_WP (Band 30–50), Sole HK+ERR 20 l/kW, Sole FBH/Wasser 0, Sperrzeit-Überbrückung nur auf Wunsch (Bezug Q_hl, Info «meist unrealistisch»). Marktrundung in fws.json. MAG/Sicherheitsventil nach Wissensbasis K (Tabellenbuch B4 S.399–401, DIN EN 12828) in neuer `data/hydraulik.json`; Kontrollbeispiel 27.8 → 35 l reproduziert.
+- Plausi: spez. Heizleistung des unsanierten Zustands gegen Folie-37-Band, ±15 % gelb; Minergie-P 8–12 W/m²; Vergleich Norm/Verbrauch grün bei +10…25 %, gelb 0…10 und 25…40, rot darunter/darüber (Thermowerk-Annahmen in fws.json).
+- Einheiten intern: W, kWh/a, kWh/d, °C, K, l, h; `fmt` für Schweizer Zahlformat in Begründungen.
+
+### Änderungen
+- Neu: `src/kern/typen.ts`, `fws.ts`, `warmwasser.ts`, `zuschlaege.ts`, `speicher.ts`, `plausi.ts`; `src/daten/fws.ts`; `data/hydraulik.json`; `tests/kern/*.test.ts` (6 Dateien, 74 Tests) + `tests/daten/hydraulik.test.ts`.
+- Geändert: `src/kern/wert.ts` (berechnet, band, Konstruktoren, Hinweis, fmt); `data/fws.json` 1.1.0 (`verbrauch`, `klimabereinigung`, `puffer.regel`/`marktrundungLiter`, `plausibilitaet.bandToleranzProzent`/`vergleichNormVerbrauch`, Quelle fws-rechenwege); README, `src/kern/README.md` (Kern-API), `data/README.md`, `docs/datenquellen.md`.
+- Kein UI-Code, keine Orchestrierung (Session 6).
+
+### Prüfung
+- `npm test` 247/247 grün (davon 74 Kern-Tests: Kurs A1 12.495/1.136/13.63 ≙ 12.5/1.14/13.64; 1B 33 295/16.65/3.33/19.98 exakt; A2 12.571/1.796/0.506/14.87 ≙ 12.55/1.79/0.51/14.85, saniert 8.847/1.264/0.514/10.63 ≙ 8.8/1.26/0.52/10.58; A3 11.5 exakt, 17.06 ≙ 17.14; A4 8.4 exakt, 8.98 ≙ 9.0, Q_k 9.14, 57 W/m, 1813 h; Folie 49/52 40.26/2.68/1.889 ≙ 40.3/2.69/1.89; Moosseedorf beide Konventionen; 3 Jahre → Mittel 2 500 m³; 3 Lieferungen/24 Monate → 3 000 l/a; Überlappung → Fehler; Sanierung 1 und 2 Massnahmen gegen Handrechnung ±0.01 kW; Konventionswechsel; Monotonie Sanierung/Sperrzeit/WW/Speicherverlust/MAG-n; Herkunft an jedem Wert).
+- `npm run lint` ohne Fehler (inkl. Eszett-Regel), `npm run build` ok (UI unverändert 29.8 kB).
+- Deploy: Commit + Push; Staging per Fetch geprüft (siehe Chat-Bericht).

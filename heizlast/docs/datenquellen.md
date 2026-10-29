@@ -30,6 +30,22 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 | Puffer-Kriterien (Abtau 10–20, Takt 20, Sperrzeit 50–100 l/kW …) | — | Wissensbasis J §3.4–3.6 (Herstellerkonventionen DE) | S |
 | Bivalenz: Leistungsanteil 50/33/25 % → Energie 80–85/50–60/30–40 % | — | FWS M3 Folie 95 | P |
 | Norm-Reserve SIA 384/2 10–20 %; Feldmessung 30 % Überdimensionierung | — | FWS Aufgabe 3 Diskussion; Folie 8 | P |
+| Jahresraster: Mittel über 3–5 relevante Jahre; Jahreswert = Σ Menge·365/Σ Tage | — | FWS M3 Folie 29; Aufgabe 2 (Ø 5 Jahre); FWS-RECHENWEGE §3a | P |
+| Streuungs-Ampel 10 / 20 %, Mindestlänge 300 d je Eintrag (Session 3) | — | Thermowerk-Annahme (Kurs nennt keine Schwelle) | A |
+| Klimabereinigung HGT_norm/HGT_ist, Plausibilitätsfenster 0.7–1.4 (Default aus, nicht FWS) | — | Thermowerk-Annahme; HGT-Norm aus klimastationen.json | A |
+| Puffer-Regel max(Hersteller-Minimum, Kriterium): L/W 30–50 l/kW Q_WP (Mitte 40), Sole HK+ERR 20 l/kW, Marktrundung 50–2000 l | — | Wissensbasis J §5; FWS Folie 91; Thermowerk-Annahme | S/A |
+| Plausi-Toleranz ±15 % um das Band; Norm/Verbrauch grün 10–25 %, gelb bis 40 % | — | FWS-RECHENWEGE §5; Thermowerk-Annahme | A |
+
+### 1a. `hydraulik.json` — MAG / Sicherheitsventil (Session 3, nicht FWS)
+
+| Zahl | Wert | Quelle | Status |
+|---|---|---|---|
+| Ausdehnungsfaktor n bei 10 °C Befüllung, 40–95 °C | 45 °C 0.96 %, 55 °C 1.42 %, 75 °C 2.57 % | Tabellenbuch SHK B4 S.400 via Wissensbasis K §3.2 | S |
+| Anlageninhalt l/kW: Konvektoren 7, Platten 9, Radiatoren 15, FBH 20; gemischt 12–18 | gemischt 15 | B4 S.400 via Wissensbasis K §3.3 | S |
+| Wasservorlage max(3 l, 0.5 %·V_A); V_N = (V_e+V_V)(p_e+1)/(p_e−p_0); p_e = p_SV − 0.5 bar | — | B4 S.400/401, DIN EN 12828 via Wissensbasis K | S |
+| Kontrollbeispiel EFH 8 kW + Puffer 200 + WW 300 → V_A 620, V_N 27.8 → 35 l | — | Wissensbasis K §5 | S |
+| MAG-Nennvolumen-Reihe 8…500 l | — | Herstellerreihe (B4 S.401); Thermowerk-Annahme | S/A |
+| Sicherheitsventil DN15/20/25/32/40 bis 50/100/200/350/600 kW, 3.0 bar | — | B4 S.399, DIN EN 12828 via Wissensbasis K §3.6 | S |
 
 ## 2. `waermepumpen.json` — Gerätedatenbank (normalisiert)
 

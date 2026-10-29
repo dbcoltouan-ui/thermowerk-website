@@ -1,0 +1,111 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "stand": "2026-10-29",
+    "beschreibung": "Sicherheitstechnische Auslegung Heizkreis (Schritt 8 «Speicher & Hydraulik»): Membran-Ausdehnungsgefäss (MAG) nach DIN EN 12828 und Sicherheitsventil. Keine Rechenlogik; der Kern (src/kern/speicher.ts) rechnet V_e = n·V_A/100, V_V = max(3 l, 0.5 %·V_A), V_N = (V_e + V_V)·(p_e + 1)/(p_e − p_0). Nicht Bestandteil des FWS-Kurses.",
+    "quellen": [
+      {
+        "id": "wb-k",
+        "titel": "Wissensbasis K_Sicherheit_MAG.md — Tabellenbuch SHK B4 S.399–401 (Ausdehnungsfaktor n bei Befülltemperatur 10 °C, Anlageninhalt je Heizflächenart, MAG-Formeln, Sicherheitsventil-Grössen), B2 Kap. 8 S.272–275 (Rechenverfahren)",
+        "art": "Wissensbasis (zitiert Tabellenbuch SHK, DIN EN 12828)",
+        "fundort": "docs/wissensbasis/K_Sicherheit_MAG.md §3.2, §3.3, §3.6, §5"
+      },
+      {
+        "id": "din-en-12828",
+        "titel": "DIN EN 12828 Heizungsanlagen in Gebäuden — Planung von Warmwasser-Heizungsanlagen (Sicherheitstechnische Ausrüstung; Enddruck p_e = p_SV − 0.5 bar)",
+        "art": "Norm (zitiert in Wissensbasis K)"
+      },
+      {
+        "id": "tw-annahme",
+        "titel": "Thermowerk-Annahme (keine Norm; im Bericht als Annahme auszuweisen)",
+        "art": "Annahme"
+      }
+    ]
+  },
+  "mag": {
+    "beschreibung": "Membran-Ausdehnungsgefäss nach DIN EN 12828 / Tabellenbuch B4 S.400.",
+    "quelle": ["wb-k", "din-en-12828"],
+    "formeln": {
+      "ve": "V_e = n · V_A / 100  [l]",
+      "vv": "V_V = max(3 l, 0.005 · V_A)  (Wasservorlage; bei V_N ≤ 15 l: 0.02 · V_A)",
+      "vn": "V_N,min = (V_e + V_V) · (p_e + 1) / (p_e − p_0)  [l]",
+      "pe": "p_e = p_SV − 0.5 bar"
+    },
+    "ausdehnungsfaktor": {
+      "beschreibung": "Ausdehnungsfaktor n in % des Anlageninhalts bei Befülltemperatur 10 °C und maximaler Vorlauftemperatur (B4 S.400). Lineare Interpolation zwischen den Stützpunkten; unter 40 °C mit der Steigung 40→45 extrapoliert (Thermowerk-Annahme, z. B. FBH 35 °C ≈ 0.6 %).",
+      "quelle": ["wb-k"],
+      "befuelltemperaturC": 10,
+      "stuetzpunkte": [
+        { "tVlMaxC": 40, "nProzent": 0.75 },
+        { "tVlMaxC": 45, "nProzent": 0.96 },
+        { "tVlMaxC": 50, "nProzent": 1.18 },
+        { "tVlMaxC": 55, "nProzent": 1.42 },
+        { "tVlMaxC": 60, "nProzent": 1.68 },
+        { "tVlMaxC": 65, "nProzent": 1.96 },
+        { "tVlMaxC": 70, "nProzent": 2.25 },
+        { "tVlMaxC": 75, "nProzent": 2.57 },
+        { "tVlMaxC": 80, "nProzent": 2.89 },
+        { "tVlMaxC": 85, "nProzent": 3.23 },
+        { "tVlMaxC": 90, "nProzent": 3.57 },
+        { "tVlMaxC": 95, "nProzent": 3.96 }
+      ]
+    },
+    "anlageninhaltLiterProKw": {
+      "beschreibung": "Richtwert Anlagen-Wasserinhalt V_A je kW Heizleistung nach Heizflächenart (ohne Puffer/WW-Speicher, diese werden addiert). B4 S.400; `gemischt` = Konvention Wissensbasis K §3.3 (Mischsystem Heizkörper-Bestand 12–18 l/kW, Mitte).",
+      "quelle": ["wb-k"],
+      "werte": {
+        "konvektoren": 7,
+        "plattenheizkoerper": 9,
+        "radiatoren": 15,
+        "fbh": 20,
+        "gemischt": 15
+      }
+    },
+    "wasservorlage": {
+      "quelle": ["wb-k"],
+      "anteil": 0.005,
+      "minimumLiter": 3,
+      "anteilKleinesMag": 0.02,
+      "kleinesMagBisLiter": 15
+    },
+    "druckDefaults": {
+      "beschreibung": "Vordruck p_0 = statische Höhe/10 + 0.3 bar (typisch 1.0–1.5 bar); Sicherheitsventil 3.0 bar EFH; Enddruck p_e = p_SV − 0.5 bar (Wissensbasis K §5).",
+      "quelle": ["wb-k", "din-en-12828"],
+      "p0Bar": 1.0,
+      "pSvBar": 3.0,
+      "peAbstandZuSvBar": 0.5,
+      "p0ZuschlagBar": 0.3
+    },
+    "nennvolumenReiheLiter": {
+      "beschreibung": "Marktübliche MAG-Nennvolumen (Herstellerreihe, B4 S.401); Aufrundung auf die nächste Stufe, darüber 50-l-Schritte.",
+      "quelle": ["wb-k", "tw-annahme"],
+      "werte": [8, 12, 18, 25, 35, 50, 80, 100, 140, 200, 250, 300, 400, 500]
+    },
+    "kontrollbeispiel": {
+      "beschreibung": "Wissensbasis K §5 Standard-Default: EFH Qhl 8 kW, Mischsystem 15 l/kW + Puffer 200 l + WW 300 l → V_A 620 l; VL 55 °C → n 1.42 % → V_e 8.8 l; V_V 3.1 l; p_0 1.0, p_e 2.5 → V_N,min 27.8 l → 35 l.",
+      "quelle": ["wb-k"],
+      "qhlW": 8000,
+      "pufferLiter": 200,
+      "wwSpeicherLiter": 300,
+      "tVlMaxC": 55,
+      "vaLiter": 620,
+      "veLiter": 8.8,
+      "vvLiter": 3.1,
+      "vnMinLiter": 27.8,
+      "vnMarktLiter": 35
+    }
+  },
+  "sicherheitsventil": {
+    "beschreibung": "Sicherheitsventil-Grösse nach Abblaseleistung (= Wärmeerzeuger-Nennleistung inkl. E-Heizstab), Ansprechdruck 3.0 bar bis 300 kW (B4 S.399, DIN EN 12828).",
+    "quelle": ["wb-k", "din-en-12828"],
+    "ansprechdruckBar": 3.0,
+    "stufen": [
+      { "bisKw": 50, "dn": "DN15", "anschluss": "R ½\"", "ausblaseleitung": "R ¾\"" },
+      { "bisKw": 100, "dn": "DN20", "anschluss": "R ¾\"", "ausblaseleitung": "R 1\"" },
+      { "bisKw": 200, "dn": "DN25", "anschluss": "R 1\"", "ausblaseleitung": "R 1¼\"" },
+      { "bisKw": 350, "dn": "DN32", "anschluss": "R 1¼\"", "ausblaseleitung": "R 1½\"" },
+      { "bisKw": 600, "dn": "DN40", "anschluss": "R 1½\"", "ausblaseleitung": "R 2\"" }
+    ],
+    "hinweis": "Abblaseleistung muss WP-Nennleistung plus Elektro-Heizstab abdecken (z. B. 10 kW + 9 kW = 19 kW → DN15)."
+  }
+}
