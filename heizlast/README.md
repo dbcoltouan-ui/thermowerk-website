@@ -63,6 +63,7 @@ Im Ordner `heizlast/` (Node ≥ 22):
 | `npm run build` | tsc + Vite-Build nach `../public/heizlast-neu/` |
 | `npm run e2e:install` | Chromium für Playwright (einmalig) |
 | `npm run e2e` | Playwright-Smoke (baut, startet Preview, Desktop + Mobil; Screenshots nach `docs/revision/shots-neu/`) |
+| `npm run e2e:staging` | dieselben Durchläufe gegen die deployte Staging-URL (`STAGING_URL` überschreibbar) |
 
 Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Astro. Cloudflare Pages liefert `dist/` aus, der Vite-Output liegt darin unter `heizlast-neu/`.
 

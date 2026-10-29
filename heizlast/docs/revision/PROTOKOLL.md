@@ -225,4 +225,4 @@ Prompt: Shell (Topbar, Schrittleiste mit Status nur für relevante Schritte, Wei
 ### Prüfung
 - `npm test` 469/469, `npm run lint` ohne Fehler, `npm run build` ok.
 - Playwright 14/14 (Desktop 1280 + Mobil 390): Moosseedorf über die UI → Q_hl 9.3 kW (Handrechnung 9 304.7 W), Seite = Dashboard, Annahmen-Sprung; CH-EFH über die UI (Typen vorschlagen, Lage-Fragen, eigene U-Werte wie Handrechnung) → Wohnen 2'099 W, Bad 570 W (2 098.6 / 570.3 W), EBF 34.1 m²; Picker-Änderung ändert U im Raum und Φ_HL sofort; WW-Abzug nur bei «ja», Personen-/Liter-Felder je Methode; Moduswechsel nennt ruhende Angaben; Schrittleiste mobil nach Scroll sichtbar. Screenshots `docs/revision/shots-neu/s7-*`.
-- Deploy: Commit + Push; Staging per Fetch geprüft (siehe Chat-Bericht).
+- Deploy: Commit 94d843e gepusht; Staging `/heizlast-neu/` liefert Build-Stempel 94d843e (Fetch), Playwright-Smoke gegen Staging 10/10 (neu `npm run e2e:staging`, `playwright.staging.config.ts`); Live `/heizlast/` 200.

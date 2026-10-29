@@ -21,7 +21,9 @@ const zuklappen = async (page: Page, info: TestInfo) => {
 };
 const foto = async (page: Page, info: TestInfo, name: string) => {
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: `${SHOTS}/s7-${name}-${info.project.name}.png`, fullPage: true });
+  // Lokal in docs/revision/shots-neu, gegen Staging nur in den Testausgabe-Ordner.
+  const lokal = String(info.project.use.baseURL ?? '').includes('127.0.0.1');
+  await page.screenshot({ path: lokal ? `${SHOTS}/s7-${name}-${info.project.name}.png` : info.outputPath(`s7-${name}.png`), fullPage: true });
 };
 
 test('FWS-Fall Moosseedorf: Projekt → Gebäude → Verbrauch → Heizlast', async ({ page }, info) => {
