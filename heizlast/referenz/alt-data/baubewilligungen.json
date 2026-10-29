@@ -1,0 +1,284 @@
+{
+  "version": "2026-04",
+  "stand": "April 2026 — Recherche-Stand. Verbindliche Auskunft erteilt das zuständige Gemeinde-Bauamt bzw. die kantonale Fachstelle.",
+  "quelle": "Kantonale Energiegesetze (MuKEn 2014/2025), Bau- und Planungsverordnungen, Lärmschutzverordnung (LSV) Bund.",
+  "kantone": {
+    "ZH": {
+      "kanton_name": "Zürich",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Heizungsersatz ist meist baubewilligungspflichtig (vereinfachtes Verfahren). EnerG ZH §10c verlangt erneuerbares System bei Ersatz fossiler/Elektroheizung, sofern wirtschaftlich zumutbar (Mehrkosten <5 % über Lebensdauer) — Standardlösungen: Wärmepumpe, Holz, Wärmenetz, thermische Solaranlage + fossile Spitzenlast.",
+        "details": "Seit 1.9.2022: § 10c EnerG ZH. Befreiung möglich, wenn keine wirtschaftlich zumutbare Standardlösung existiert (Härtefall-Antrag). Aussenaufstellung Luft/Wasser-WP: Lärmschutznachweis nach LSV zwingend, Mindestabstand zur Nachbargrenze prüfen.",
+        "frist": "Antrag VOR Baubeginn. Bearbeitungsdauer typ. 30-60 Tage."
+      },
+      "erdsonden": {
+        "bewilligungspflichtig": true,
+        "details": "Bohrung bewilligungspflichtig durch AWEL (Amt für Abfall, Wasser, Energie und Luft). Eignungskarte unter maps.zh.ch beachten — in Grundwasserschutzzonen S1/S2 verboten."
+      },
+      "lwwp_aussen": {
+        "details": "Aussengeräte sind in der Regel baubewilligungspflichtig. LSV-Schallnachweis (Planungswert nachts -10 dB(A) zur Empfindlichkeitsstufe). Mindestabstand 3 m zur Nachbargrenze empfohlen."
+      },
+      "portal": "https://www.zh.ch/de/baudirektion/awel.html",
+      "portal_label": "AWEL Kanton Zürich",
+      "energieportal": "https://energieportal.zh.ch/",
+      "kontakt": "AWEL Energie, Stampfenbachstrasse 12, 8090 Zürich"
+    },
+    "BE": {
+      "kanton_name": "Bern",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Heizungsersatz ist baubewilligungspflichtig, oft im vereinfachten Verfahren. KEnG BE Art. 53 verlangt seit 2023 bei Ersatz Wärmeerzeuger einen Anteil von ≥ 10 % erneuerbarer Energie oder einen GEAK-Klassen-Nachweis (D oder besser).",
+        "details": "Bei Neubauten: vollständig erneuerbare Heizung (Ausnahmen Härtefall). MuKEn-konform. Luft/Wasser-WP aussen: Lärmschutz LSV.",
+        "frist": "Antrag VOR Baubeginn. Bearbeitung typ. 4-8 Wochen."
+      },
+      "erdsonden": {
+        "bewilligungspflichtig": true,
+        "details": "Bohrung bewilligungspflichtig durch AWA (Amt für Wasser und Abfall). Geotop-Karte beachten."
+      },
+      "lwwp_aussen": {
+        "details": "Aussengeräte baubewilligungspflichtig. LSV-Nachweis zwingend, Berechnungsmethodik nach Cercle Bruit."
+      },
+      "portal": "https://www.bve.be.ch/de/start/themen/energie.html",
+      "portal_label": "Energiefachstelle Kanton Bern",
+      "energieportal": "https://www.energiefranken.ch/",
+      "kontakt": "Amt für Umwelt und Energie, Reiterstrasse 11, 3013 Bern"
+    },
+    "LU": {
+      "kanton_name": "Luzern",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Heizungsersatz im Bestand ist baubewilligungspflichtig (vereinfachtes Verfahren). KEnV LU verlangt bei Ersatz fossiler Heizungen Prüfung erneuerbarer Lösungen — bei Neubauten erneuerbar zwingend.",
+        "details": "Bei Sanierungen: GEAK-Pflicht ab gewissen Schwellen. Luft/Wasser-WP aussen: Schallnachweis LSV.",
+        "frist": "Antrag VOR Baubeginn. Bearbeitung typ. 30-60 Tage."
+      },
+      "erdsonden": {
+        "bewilligungspflichtig": true,
+        "details": "Bohrung bewilligungspflichtig durch UWE (Umwelt und Energie). Eignungskarte: geo.lu.ch."
+      },
+      "lwwp_aussen": {
+        "details": "Aussenaufstellung baubewilligungspflichtig. LSV-Nachweis."
+      },
+      "portal": "https://uwe.lu.ch/themen/energie",
+      "portal_label": "UWE Kanton Luzern",
+      "energieportal": "https://uwe.lu.ch/themen/energie/foerderprogramm",
+      "kontakt": "Umwelt und Energie, Libellenrain 15, 6002 Luzern"
+    },
+    "GR": {
+      "kanton_name": "Graubünden",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Heizungsersatz baubewilligungspflichtig. KEnG GR (revidiert 2024) verlangt bei Ersatz fossiler Heizung Prüfung einer erneuerbaren Lösung; bei Heizungs-Neubau gilt MuKEn-Standard. In Tourismusgemeinden Sondervorschriften möglich.",
+        "details": "Höhenlage: Auslegungstemperatur korrekt setzen (ggf. -16 °C oder kälter). Stückholz mit Pufferspeicher ≥ 55 L/kW.",
+        "frist": "Antrag VOR Baubeginn. In Bergregionen Bearbeitungsdauer ggf. länger."
+      },
+      "erdsonden": {
+        "bewilligungspflichtig": true,
+        "details": "Bohrung bewilligungspflichtig durch ANU (Amt für Natur und Umwelt). Geologische Verhältnisse alpin — Eignung in vielen Gebieten eingeschränkt."
+      },
+      "lwwp_aussen": {
+        "details": "Aussengeräte baubewilligungspflichtig. LSV-Nachweis. Frostfreiheit Kondensat in höher gelegenen Gemeinden zu berücksichtigen."
+      },
+      "portal": "https://www.gr.ch/DE/institutionen/verwaltung/dvs/aev",
+      "portal_label": "AEV Graubünden",
+      "energieportal": "https://www.gr.ch/DE/institutionen/verwaltung/dvs/aev/dienstleistungen/foerderprogramm",
+      "kontakt": "Amt für Energie und Verkehr, Ringstrasse 10, 7001 Chur"
+    },
+    "AG": {
+      "kanton_name": "Aargau",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Bewilligungspflichtig (vereinfacht). EnergieG AG verlangt Wirtschaftlichkeitsprüfung erneuerbarer Lösung bei Ersatz.",
+        "details": "MuKEn-konform. LWWP aussen: LSV.",
+        "frist": "VOR Baubeginn."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Abteilung für Umwelt." },
+      "lwwp_aussen": { "details": "LSV-Nachweis." },
+      "portal": "https://www.ag.ch/de/verwaltung/dfr/abteilungen/energie",
+      "portal_label": "Abteilung Energie Kanton Aargau",
+      "energieportal": "https://www.ag.ch/de/verwaltung/dfr/abteilungen/energie/foerderprogramm-energie",
+      "kontakt": "Abteilung Energie, Buchenhof, 5001 Aarau"
+    },
+    "SG": {
+      "kanton_name": "St. Gallen",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Bewilligungspflichtig. EnG SG verlangt erneuerbare Lösung bei Ersatz fossiler Heizung sofern zumutbar.",
+        "details": "MuKEn-konform. LWWP-Aussenaufstellung: Lärmschutz.",
+        "frist": "VOR Baubeginn."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Amt für Umwelt." },
+      "lwwp_aussen": { "details": "LSV-Nachweis." },
+      "portal": "https://www.sg.ch/umwelt-natur/energie.html",
+      "portal_label": "Amt für Umwelt und Energie SG",
+      "energieportal": "https://www.sg.ch/umwelt-natur/energie/energiefoerderung.html",
+      "kontakt": "Amt für Umwelt und Energie, Lämmlisbrunnenstrasse 54, 9001 St. Gallen"
+    },
+    "TG": {
+      "kanton_name": "Thurgau",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Baubewilligungspflichtig (vereinfacht). EnergieG TG verlangt erneuerbare Lösung bei Heizungsersatz.",
+        "details": "MuKEn-konform.",
+        "frist": "VOR Baubeginn."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Amt für Umwelt TG." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://energie.tg.ch/",
+      "portal_label": "Energiefachstelle Kanton Thurgau",
+      "energieportal": "https://energie.tg.ch/foerderbeitraege",
+      "kontakt": "Energiefachstelle, Promenadenstrasse 8, 8510 Frauenfeld"
+    },
+    "ZG": {
+      "kanton_name": "Zug",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Bewilligungspflichtig. EnergieG ZG verlangt bei Ersatz erneuerbare Lösung.",
+        "details": "MuKEn-konform.",
+        "frist": "VOR Baubeginn."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Amt für Umweltschutz." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://zg.ch/de/wirtschaft-arbeit/energie",
+      "portal_label": "Amt für Energie Kanton Zug",
+      "energieportal": "https://zg.ch/de/wirtschaft-arbeit/energie/foerderprogramm",
+      "kontakt": "Amt für Energie, Aabachstrasse 5, 6300 Zug"
+    },
+    "BS": {
+      "kanton_name": "Basel-Stadt",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Strenge Klimaschutz-Verordnung BS. Heizungsersatz baubewilligungspflichtig. Fossile Heizungen werden nur in Härtefällen bewilligt — erneuerbare Lösung Standard.",
+        "details": "Stadtkanton — Aussenaufstellung LWWP wegen Schall häufig kritisch. Erdsonden eingeschränkt verfügbar.",
+        "frist": "VOR Baubeginn. Bearbeitung 4-8 Wochen."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Sehr restriktiv — viele Gebiete in Schutzzonen." },
+      "lwwp_aussen": { "details": "Schallnachweis LSV oft kritischer Punkt im Stadtgebiet." },
+      "portal": "https://www.aue.bs.ch/",
+      "portal_label": "AUE Basel-Stadt",
+      "energieportal": "https://www.aue.bs.ch/foerderbeitraege.html",
+      "kontakt": "Amt für Umwelt und Energie, Hochbergerstrasse 158, 4019 Basel"
+    },
+    "BL": {
+      "kanton_name": "Basel-Landschaft",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Bewilligungspflichtig. Energiegesetz BL verlangt erneuerbare Lösung bei Ersatz fossiler Heizung.",
+        "details": "MuKEn-konform.",
+        "frist": "VOR Baubeginn."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Lufthygieneamt beider Basel." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://www.baselland.ch/politik-und-behoerden/direktionen/bau-und-umweltschutzdirektion",
+      "portal_label": "BUD Baselland",
+      "energieportal": "https://www.baselland.ch/politik-und-behoerden/direktionen/bau-und-umweltschutzdirektion/lufthygieneamt-beider-basel/energie",
+      "kontakt": "Lufthygieneamt beider Basel, Rheinstrasse 29, 4410 Liestal"
+    },
+    "SH": {
+      "kanton_name": "Schaffhausen",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-Vorgaben.", "frist": "VOR Baubeginn." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Durch Energiefachstelle SH." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://sh.ch/CMS/Webseite/Kanton-Schaffhausen/Beh-rde/Verwaltung",
+      "portal_label": "Energiefachstelle SH",
+      "energieportal": "https://sh.ch/CMS/Webseite/Kanton-Schaffhausen/Beh-rde/Verwaltung/Volkswirtschaftsdepartement/Hochbauamt/Energiefachstelle",
+      "kontakt": "Energiefachstelle, Mühlentalstrasse 105, 8200 Schaffhausen"
+    },
+    "SO": {
+      "kanton_name": "Solothurn",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. Erneuerbare Lösung bei Ersatz fossiler Heizung gefordert.", "frist": "VOR Baubeginn." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umwelt." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://so.ch/verwaltung/bau-und-justizdepartement/amt-fuer-umwelt/",
+      "portal_label": "Amt für Umwelt SO",
+      "energieportal": "https://so.ch/verwaltung/bau-und-justizdepartement/amt-fuer-umwelt/energie/foerderprogramm",
+      "kontakt": "Amt für Umwelt, Werkhofstrasse 5, 4509 Solothurn"
+    },
+    "FR": {
+      "kanton_name": "Fribourg",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. Erneuerbare Lösung bei Ersatz fossiler Heizung gefordert.", "frist": "VOR Baubeginn." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Service de l'environnement." },
+      "lwwp_aussen": { "details": "LSV." },
+      "portal": "https://www.fr.ch/de/energie",
+      "portal_label": "Energiefachstelle Freiburg",
+      "energieportal": "https://www.fr.ch/de/energie/foerderprogramm",
+      "kontakt": "Amt für Energie, Boulevard de Pérolles 25, 1701 Fribourg"
+    },
+    "VD": {
+      "kanton_name": "Vaud",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Soumis à autorisation. Loi vaudoise sur l'énergie (LVLEne) exige solution renouvelable lors du remplacement de chauffages fossiles, sauf exception économique.",
+        "details": "Conforme MoPEC. PAC air/eau extérieure: étude acoustique OPB.",
+        "frist": "AVANT le début des travaux."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Forage par DGE — Direction générale de l'environnement." },
+      "lwwp_aussen": { "details": "Étude de bruit OPB obligatoire." },
+      "portal": "https://www.vd.ch/themes/environnement/energie/",
+      "portal_label": "DGE-DIREN Canton de Vaud",
+      "energieportal": "https://www.vd.ch/themes/environnement/energie/subventions/",
+      "kontakt": "DGE-DIREN, Av. de Valmont 30B, 1014 Lausanne"
+    },
+    "GE": {
+      "kanton_name": "Genève",
+      "heizungsersatz": {
+        "bewilligungspflichtig": true,
+        "kurz": "Strict — Loi sur l'énergie GE 2.0. Remplacement fossile par fossile presque toujours refusé. PAC, réseau de chauffage à distance, biomasse standard.",
+        "details": "Audit énergétique souvent requis. Pour PAC air/eau: contraintes acoustiques OPB renforcées en zone urbaine.",
+        "frist": "AVANT le début des travaux. Délai 4-8 semaines."
+      },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Forage strictement encadré, GESDEC." },
+      "lwwp_aussen": { "details": "Étude de bruit OPB et contraintes urbanistiques renforcées." },
+      "portal": "https://www.ge.ch/dossier/atteindre-objectifs-energetiques-cantonaux",
+      "portal_label": "OCEN Genève",
+      "energieportal": "https://www.ge.ch/subventionner-projet-favorisant-energies-renouvelables-efficacite-energetique",
+      "kontakt": "Office cantonal de l'énergie, Rue du Puits-Saint-Pierre 4, 1204 Genève"
+    },
+    "VS": {
+      "kanton_name": "Valais",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Soumis à autorisation. Solution renouvelable encouragée.", "frist": "AVANT travaux." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "SEFH — Service de l'environnement." },
+      "lwwp_aussen": { "details": "OPB. Considération altitude / climat alpin pour dimensionnement." },
+      "portal": "https://www.vs.ch/web/sefh",
+      "portal_label": "SEFH Valais",
+      "energieportal": "https://www.vs.ch/web/sefh/subventions",
+      "kontakt": "SEFH, Rue des Creusets 5, 1950 Sion"
+    },
+    "TI": {
+      "kanton_name": "Ticino",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Soggetto ad autorizzazione. Soluzione rinnovabile richiesta.", "frist": "PRIMA dell'inizio dei lavori." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "Tramite UFEP." },
+      "lwwp_aussen": { "details": "OIF." },
+      "portal": "https://www4.ti.ch/dt/da/sa/ufep/",
+      "portal_label": "UFEP Cantone Ticino",
+      "energieportal": "https://www4.ti.ch/dt/da/sa/ufep/ufficio/contributi-cantonali/",
+      "kontakt": "UFEP, Via Franco Zorzi 13, 6500 Bellinzona"
+    },
+    "NE": {
+      "kanton_name": "Neuchâtel",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Soumis à autorisation. Solution renouvelable encouragée.", "frist": "AVANT travaux." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "SENE." },
+      "lwwp_aussen": { "details": "OPB." },
+      "portal": "https://www.ne.ch/autorites/DDTE/SENE/",
+      "portal_label": "SENE Neuchâtel",
+      "energieportal": "https://www.ne.ch/autorites/DDTE/SENE/aides-financieres/",
+      "kontakt": "SENE, Rue de Tivoli 16, 2002 Neuchâtel"
+    },
+    "JU": {
+      "kanton_name": "Jura",
+      "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Soumis à autorisation. Solution renouvelable encouragée.", "frist": "AVANT travaux." },
+      "erdsonden": { "bewilligungspflichtig": true, "details": "ENV." },
+      "lwwp_aussen": { "details": "OPB." },
+      "portal": "https://www.jura.ch/DEN/ENV/Energie",
+      "portal_label": "ENV Jura",
+      "energieportal": "https://www.jura.ch/DEN/ENV/Energie/Subventions.html",
+      "kontakt": "Office de l'environnement, Chemin du Bel'Oiseau 12, 2882 St-Ursanne"
+    },
+    "UR": { "kanton_name": "Uri", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umweltschutz." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.ur.ch/themen/2384", "portal_label": "Energiefachstelle Uri", "energieportal": "https://www.ur.ch/themen/2384" },
+    "SZ": { "kanton_name": "Schwyz", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umweltschutz." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.sz.ch/behoerden/staatskanzlei-departemente-und-aemter/volkswirtschaftsdepartement/energie", "portal_label": "Energiefachstelle Schwyz" },
+    "OW": { "kanton_name": "Obwalden", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umwelt OW." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.ow.ch/de/verwaltung/aemter/?amt_id=18137", "portal_label": "Amt für Umwelt OW" },
+    "NW": { "kanton_name": "Nidwalden", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umwelt NW." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.nw.ch/energie", "portal_label": "Energiefachstelle Nidwalden" },
+    "GL": { "kanton_name": "Glarus", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Departement Bau und Umwelt." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.gl.ch/verwaltung/bau-und-umwelt/umweltschutz-und-energie.html", "portal_label": "Departement BU Glarus" },
+    "AR": { "kanton_name": "Appenzell Ausserrhoden", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Amt für Umwelt AR." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.ar.ch/verwaltung/departement-bau-und-volkswirtschaft/amt-fuer-umwelt/energie", "portal_label": "Amt für Umwelt AR" },
+    "AI": { "kanton_name": "Appenzell Innerrhoden", "heizungsersatz": { "bewilligungspflichtig": true, "kurz": "Bewilligungspflichtig. MuKEn-konform.", "frist": "VOR Baubeginn." }, "erdsonden": { "bewilligungspflichtig": true, "details": "Bau- und Umweltdepartement AI." }, "lwwp_aussen": { "details": "LSV." }, "portal": "https://www.ai.ch/themen/wirtschaft-und-arbeit/energie", "portal_label": "Energiefachstelle AI" }
+  }
+}

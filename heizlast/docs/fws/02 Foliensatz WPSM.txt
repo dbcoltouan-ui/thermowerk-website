@@ -1,0 +1,234 @@
+                                     Qualitätssicherung
+
+
+
+                                     •   Einflussfaktoren auf die Energieeffizienz
+                                     •   Aufgaben des Installateurs bei der IBN
+                                     •   Fehlerquellen 2021
+
+
+
+
+© FWS AWB / WPSMPraxis / V. 1-2025
+                              Einflussfaktoren auf die Energieeffizienz
+                              • Heizkurve
+                              • Heizgrenze
+                              • Nachtabsenkung
+                              • Überströmventil
+                              • Warmwasserladestrategie
+                              • Luftmenge bei Luft/Wasser-Wärmepumpen Anlage
+                              • Luftkurzschluss / Kaltluftsee bei Luft/Wasser-WP-Anlage
+                              • Kondensator- und Verdampfer-Umwälzpumpen
+                              • EWS-Länge
+                              • Freecooling nur bei FBH
+                                                                                          18.02.2025   2
+© FWS AWB / WPSMPraxis / V. 1-2025
+                              Aufgaben des Installateurs vor/bei der IBN
+                              • Füllen / entlüften des Heizungssystems nach SWKI BT 102-01
+                              • Elektrischen Anschluss aller Komponenten sicherstellen
+                              • Hydraulischer Abgleich der Hauptstränge mit Servicetechniker
+                              • Hydraulischer Abgleich der Heizkreise (FBH/Heizkörper)
+                              • Einstellung der Heizkurven dem Servicetechniker angeben
+                              • Einstellen des Überströmventils mit dem Servicetechniker inkl.
+                                Funktionskontrolle
+                              • Installateur IBN-Protokoll nach Vorgaben WPSM
+
+
+
+
+                                                                                                 18.02.2025   3
+© FWS AWB / WPSMPraxis / V. 1-2025
+                              Stichprobenkontrollen vor Ort (20%)
+                              • wichtiger Bestandteil der Qualitätssicherung
+                              • Erkenntnisse fliessen in die Praxiskurse und Up-date-Seminare für
+                                Installateure, Lieferanten und Kundendienst ein
+                              • Abweichungen von den Vorgaben des WPSM werden den
+                                Installateuren mitgeteilt.
+                                60 Tage, die Fehler zu beseitigen und mit Fotos nachzuweisen.
+                                Nichtbeachtung wird der Förderstelle des betreffenden Kantons
+                                gemeldet.
+                              • Die Stichprobenkontrollen bewirken eindeutig eine Erhöhung der
+                                Anlagenqualität. Vergleich
+
+
+
+                                                                                                    18.02.2025   8
+© FWS AWB / WPSMPraxis / V. 1-2025
+           Stichprobenkontrollen 1
+                                     Up-date-Tagungen 2025
+
+
+
+
+                                     Die laufende Analyse der
+                                     Stichproben und
+                                     Nachkontrollen zeigt deutlich,
+                                     dass mit dieser Massnahme
+                                     die Qualität der installierten
+                                     Anlagen, sowie auch der
+                                     Betrieb, positiv beeinflusst
+                                     werden.
+
+                                     Die gewonnenen
+                                     Informationen werden der
+                                     Fachbranche zur Verfügung
+                                     gestellt.
+
+
+
+                                                                70
+
+
+
+
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Dämmungen schlecht
+                                     Deutliche Besserung seit Einführung.
+                                     Häufig Wunsch Bauherr, Verzicht Dämmung
+                                     (Bsp. Waschküche) zwecks Temperierung
+                                     oder Eigenleistung.
+                                     Überzeugung und Durchschlagskraft die
+                                     gesetzliche Vorgabe zu vertreten.
+
+
+                                     Energiegesetze schreiben Dämmungen vor!!!
+
+
+
+
+                                                                      18.02.2025   10
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Dämmungen schlecht
+                                     Ungedämmte Leitungen durch kalte
+                                     Kellerräume.
+                                     Leitungen zu Aussengerät. Bei hohen VL
+                                     Temperaturen (z.B. WW) grosse Verluste
+
+
+
+
+                                                                     18.02.2025   11
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Dämmungen schlecht
+                                     Häufig ungenügend gedämmte
+                                     Anschlussleitungen Aussen.
+                                     Verluste sehr hoch und Gefahr von
+                                     Frostschäden
+
+
+
+
+                                                                     18.02.2025   12
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Warmwasser-Siphon
+                                     nicht nur aus Effizienzgründen, sondern
+                                     auch für den Legionellenschutz
+                                     Umsetzung bei Sanierung nicht immer
+                                     einfach lösbar
+
+
+
+
+                                                                      18.02.2025   13
+© FWS AWB / WPSMPraxis / V. 1-2025
+     WP zu gross/WP taktet
+                                     weniger effizient wenn zu gross.
+                                     Lebenserwartung Verdichter durch Takten
+                                     reduziert.
+                                     Bei On-Off sowie bei Inverter problematisch
+                                     Einstellung Auslegeleistung Inverter sehr
+                                     wichtig (bei Inbetriebnahme)
+                                     Überströmventil richtig einstellen
+
+
+
+
+                                                                          18.02.2025   14
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Falsche Hydraulik
+                                     klare Schemavorgaben
+                                     Dreipunktanschluss (Vorlauf direkt auf
+                                     Heizgruppe geführt) ist sehr wichtig
+                                     Vierpunktanschluss (Vorlauf über Speicher
+                                     geführt) Herunterkühlung Vorlauf zwischen
+                                     2-8K (bis 100 Liter Speicherinhalt erlaubt)
+                                     Effizienzreduktion von ca. 4-20% (pro 1K
+                                     rund 2.5%)
+
+
+
+
+                                                                       18.02.2025   15
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Heizgrenze und Heizkurve zu hoch
+                                     hoch eingestellte Heizgrenzen und
+                                     Heizkurven führen zur Reduktion der
+                                     Wärmepumpeneffizienz.
+                                     Gebäudedämmung beachten
+                                     Anlagenbesitzer muss instruiert sein, sollte
+                                     Verstellung/Anpassung der Temperatur
+                                     (Parallelverschiebung) vornehmen können
+                                     (nicht über Einzelraumregler)
+
+
+
+
+                                                                        18.02.2025   16
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Nachtabsenkung
+                                     Keine Nachtabsenkung bei
+                                     Fussbodenheizung, da zu träge
+                                     Bei Heizkörperanlagen nicht zu stark
+                                     absenken (max. 2 – 3 K)
+                                     Anlagen müssen am Morgen mit viel Energie
+                                     auf Komforttemperatur gebracht werden
+
+
+
+
+                                                                       18.02.2025   17
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Ladestrategie Warmwasser
+                                     Warmwasserbereitung effizient betreiben
+                                     und hohe Schalthäufigkeit verhindern
+                                     2 x 3 Std.(Kombispeicher 2 x 2 Std) max. 5 K
+                                     Oder Freigabe 24h 10 K (WW-Ladefühler in
+                                     der Mitte oder höher)
+                                     externe Legionellenschaltung bei
+                                     Inbetriebnahme auf Aus (wird immer wieder
+                                     auf Dauer Ein angetroffen)
+
+
+
+
+                                                                       18.02.2025   18
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Notheizung zu gross
+                                     WPSM-Vorgabe max. 70% der
+                                     Wärmepumpenheizleistung
+                                     Bivalenztemperatur muss eingehalten
+                                     werden
+
+
+
+
+                                                                    18.02.2025   19
+© FWS AWB / WPSMPraxis / V. 1-2025
+     Anlagedokumentation mangelhaft
+                                     Übergabe bei Fertigstellung an Bauherrn
+
+                                     Anlagendokumentation für Optimierung
+                                     dienen und für späteren die notwendigen
+                                     Informationen liefern.
+
+                                     Zweckmässigerweise gut sichtbar an einem
+                                     geschützten Ort in unmittelbarer Nähe des
+                                     Geräts oder der Anlage aufbewahren.
+                                     Digitale Dateien erfüllen diesen Anspruch
+                                     nicht oder kaum.
+
+
+
+                                                                      18.02.2025   20
+© FWS AWB / WPSMPraxis / V. 1-2025
+

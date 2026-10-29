@@ -1,0 +1,2358 @@
+                                         Wärmepumpentechnik
+
+                                         Anlagenplanung/Hydraulik
+                                          für Sanierungen von EFH
+                                             und kleineren MFH
+
+                                                   Modul 3
+                                            Heinz Etter, dipl. Ing. HTL/NDS
+                                                h.etter@neukom.net
+
+                                              Lukas Gasser, dipl. Ing FH
+                                             l.gasser@alera-energies.ch
+
+
+
+
+© FWS / AWB / Modul 3 / Version 1-2025
+         Inhaltsverzeichnis
+         •      Vorgehen bei der Auslegung von Wärmepumpen
+         •      Datenerfassung bei Sanierungen
+         •      Ermitteln Heizwärmebedarf und Heizleistung
+         •      Vergleich mit Kontrollwerten
+         •      Ersatz WP-WP
+         •      Sperrzeiten
+         •      Energiebezugsfläche
+         •      Warmwasserbereitung mit Wärmepumpen
+         •      Auswahl der Wärmequelle
+         •      Solekreislauf und Dimensionierung
+         •      Hydraulische Standardschaltungen
+         •      Auswahl der Wärmepumpe
+         •      Bivalentanlagen
+
+
+                                                        2
+© FWS / AWB / Modul 3 / Version 1-2025
+             Warm-Up !
+              1. Ist die Verdampfungstemperatur tiefer, höher oder gleich wie die
+                 Wärmequellen-Eintrittstemperatur ?
+
+                                         tiefer   gleich                  höher
+
+
+
+
+              2. Um wieviel % (ca.) nimmt der COP der WP zu- oder ab bei einer Änderung
+                 des Temperaturhubes von 1 Grad ?
+
+
+                                         1%        2-3%                       5-6%
+
+
+
+
+              3. Wie wird der Betriebspunkt einer Erdsonden-WP bei Sole 0°C und Wasser
+                 35°C dargestellt ?
+
+                                     E0/W35       S0/W35                  B0/W35
+
+
+
+                                                                          3
+© FWS / AWB / Modul 3 / Version 1-2025
+           Warm-Up !
+      4. Um wieviel Prozent dürfen Inverter WP überdimensioniert werden (Faustregel)
+
+                              Qhmax. ≥ 0.9 * QWP        Qhmax. ≥ 0.75 * QWP        Qhmax. ≥ 0.5 * QWP
+
+
+
+
+      5. Um wieviel Grad nimmt in der Schweiz im Durchschnitt die Temperatur im
+         Erdreich pro 100m Tiefe zu ?
+
+
+                                    1.5 Grad                3 Grad                    5 Grad
+
+
+
+      6. Weshalb muss das Kältemittel vor dem Eintritt in den Kompressor überhitzt werden?
+
+
+                             Damit es keine Gasblasen   Damit der Kompressor    Damit keine Flüssigkeits-
+                             gibt.                      weniger arbeiten muss   Partikel in den Kompressor
+                                                                                eintreten
+
+
+
+
+                                                                                       4
+© FWS / AWB / Modul 3 / Version 1-2025
+      Vorgehen bei der Auslegung von Wärmepumpen
+
+      Fragenstellungen / Vorgehen
+      •      Anforderungen ?
+      •      Wärmequelle ?
+      •      Kältemittel ?
+      •      Benötigte Schnittstellen (SG-ready, PV-ready, Modbus etc.) ?
+      •      Auswahl Wärmepumpe
+
+      Wärmepumpensystemmodul (WPSM) garantiert bis 15 kW:
+
+
+
+
+                                                       Bild: WP-Systemmodul
+
+
+
+                                                                  5
+© FWS / AWB / Modul 3 / Version 1-2025
+      Vorgehen bei der Auslegung von Wärmepumpen
+
+      Anforderungen – Temperaturen
+      Was soll die Wärmepumpe decken – Heizung und/oder Warmwasser?
+
+      -> Massgebende Senkentemperaturen Heizung?
+              - Bestimmung anhand Erfahrungswerte bei Sanierung
+              - Bestimmung mittels Messungen
+              - Bestimmung mittels Berechnung Abgabesystem im Neubau
+
+                                        Maximale Vorlauftemperatur bei Auslegungstemperatur
+                                         z.B. 55°C @ A-8°C
+
+      -> Massgebende Senkentemperaturen Warmwasser?
+              - Bestimmung mittels Warmwasser-System (z.B. Registerboiler,
+              Frischwasserstation usw.)
+
+                                        Maximale Vorlauftemperatur bei Auslegungstemperatur
+                                         z.B. 60°C @ A-8°C
+                                        Maximale Vorlauftemperatur bei Auslegungstemperatur
+                                         z.B. 60°C @ A25°C
+                                                                                 6
+© FWS / AWB / Modul 3 / Version 1-2025
+      Vorgehen bei der Auslegung von Wärmepumpen
+      Anforderungen – Leistung
+      Was soll die WP decken – Heizung und/oder Warmwasser?
+       Erforderliche Heizleistung Heizung & Warmwasser – Sanierung/Neubau?
+              - Bestimmung anhand des bisherigen Energieverbrauchs mit/ohne Warmwasser
+                        - Bestimmung anhand Heizlastberechnung SIA 384.2
+
+
+       Wärmepumpe nicht unnötig
+        überdimensionieren!
+             Überdimensionierung führt zu:
+              Effizienzeinbussen
+              Betriebsprobleme / Störungen
+              Unnötiger Lärmbelastung
+
+
+
+
+                                                                           7
+© FWS / AWB / Modul 3 / Version 1-2025
+      Vorgehen bei der Dimensionierung
+                              Sanierung                                Neubauten
+
+        Ermittlung der Heizleistung aus dem bisherigen   Ermittlung der Heizleistung gemäss SIA 384.2
+        Brennstoffverbrauch oder Messungen               oder Ableitung aus SIA 380/1
+
+
+
+
+       Hinweise:
+       Feldmessungen aus dem Jahr 2023 zeigen, dass Wärmepumpenanlagen in der Schweiz
+       im Durchschnitt ca. 30% überdimensioniert sind.
+
+       Die neue SIA 384/1 (2022) schlägt im Anhang einen neuen Berechnungsansatz für
+       Sanierungen vor, welcher aktuell branchenintern überprüft wird. Ziel ist es ein
+       einfaches und nachvollziehbares Berechnungsverfahren für die Branche zu definieren,
+       welches sowohl ältere wie auch neuere Gebäude korrekt berücksichtigt. In der
+       Zwischenzeit wird empfohlen weiterhin die Methode mit den Vollbetriebsstunden
+       anzuwenden.
+
+
+
+
+                                                                                8
+© FWS / AWB / Modul 3 / Version 1-2025
+      Datenerfassung bei Sanierungen
+      Eine genaue Datenerfassung und Interpretation der aktuellen Situation bei Sanierungen
+      ist unerlässlich und bildet die Grundlage zur korrekten Dimensionierung der neuen
+      Wärmepumpenanlage.
+
+      Falls keine zuverlässigen Angaben zur bestehenden Heizungsanlage und zum bisherigen
+      Energieverbrauch vorliegen, müssen vertiefte Berechnungen über die Gebäudehülle
+      oder Leistungsmessungen durchgeführt werden.
+
+      Zur Unterstützung für die Datenerfassung wurde durch die FWS ein Aufnahmeformular
+      entwickelt, welches in zwei Phasen bearbeitet werden kann:
+      • Phase 1 (hellblaue Felder) für die Erstellung des Angebots
+      • Phase 2 (hellgraue Felder) für die Ausführung
+
+      Das Formular kann unter www.wp-systemmodul.ch heruntergeladen werden.
+
+
+
+
+                                                                       9
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung der Heizleistung
+      Berechnung der Norm-Heizlast bei Sanierungen
+      Zur Berechnung der Norm-Heizlast sind folgende Angaben nötig:
+      • Bisheriger jährlicher Brennstoffverbrauch
+      • spezifischer Brennwert [Ho] des bisherigen Energieträgers
+      • Jahresnutzungsgrad der Anlage [η]
+      • Vollaststunden [tVoll]
+
+      Durch zu kleine Wärmepumpen ergeben sich Komfortverluste und erhöhte Heizkosten. Zu
+      grosse Anlagen verursachen hohe Investitionskosten und takten im Betrieb stärker.
+      Die präzise Dimensionierung von Heizungsanlagen bildet einen wichtigen Beitrag an die
+      rationelle Energienutzung in Gebäuden. Nur korrekt dimensioniert, ist der energiegerechte
+      Betrieb von Heizungsanlagen möglich.
+
+      Hinweise:
+      • Bei sehr gut gedämmten Gebäuden (zB. Minergie oder Minergie P) führt die
+         Berechnung über Vollaststunden tendenziell zu einer Unterdimensionierung.
+      • Beim Wärmepumpen-System-Modul (WPSM) ist für die Berechnung ein
+         Berechnungstool verfügbar.
+
+                                                                       10
+© FWS / AWB / Modul 3 / Version 1-2025
+      Ermitteln der Wärmepumpenleistung
+      Die Wärmeerzeugerleistung von Wärmepumpen berechnet sich gemäss
+      SIA 384-1/2022 (Pos. 4.2.1.4) wie folgt:
+
+
+
+                                         Qh = Qhl + Qw + Qoff + Qas
+
+
+
+      Qh             Wärmeerzeugerleistung in kW
+      Qhl            Normheizlast Gebäude in kW
+      Qw             Leistungszuschlag für Wassererwärmung in kW
+      Qoff           Leistungszuschlag infolge Sperrzeiten in kW
+      Qas            Leistungszuschlag für verbundene Systeme in kW
+
+
+
+
+                                                                      11
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung der Heizleistung
+      aus dem Energieverbrauch
+      Öl- und Gasheizung
+
+
+
+
+       Holzheizung
+
+
+
+
+       Quelle: BFE Leistungsgarantie Haustechnik
+
+                                                   12
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung der Heizleistung
+      aus dem Energieverbrauch
+
+      Elektrospeicherheizung
+
+
+
+
+     Quelle: BFE Leistungsgarantie Haustechnik
+
+
+
+
+     Bemerkungen zur Bestimmung der Heizleistung:
+
+     Bei Sanierungsobjekten kann der Tageswärmebedarf auch durch Messung des Energieverbrauchs
+     direkt ermittelt werden. Weiter gibt es die Möglichkeit einer Berechnung nach SIA 384.2. In
+     diesem Fall müssen die U-Werte der Gebäudehülle ermittelt oder abgeschätzt werden.
+
+
+
+
+                                                                           13
+© FWS / AWB / Modul 3 / Version 1-2025
+      Nutzenergie Heizung und Warmwasser
+
+                                         Verluste durch vorgelagerte
+                                         Prozessketten (Öl, Gas, Holz)                      Verluste
+                                                                                 (zB. Abgasverluste, Abstrahlung)
+
+
+                                                                                         Kesselanlage
+                                                                                        Wassererwärmer        Verluste Warmwasser (zB. Warmhaltung) IST
+                                                                Öl, Gas, Holz
+  Primärenergie
+  Rohstoffe im ursprünglichen                                                                                                    Nutzenergie Warmwasser (IST)
+                                                                Endenergie                      Öl
+  Zustand. zB. Rohöl, Uran                                    (ins Haus geliefert)              Gas                              Nutzenergie Heizung (IST)
+                                                                                                Holz
+                                                                    Strom
+                                                                                                Strom
+                                                                                                                                 •    Nutzungsänderungen
+
+
+
+
+                                                                                                                     Sanierung
+                                         Verluste durch vorgelagerte                                                             •    Betriebsoptimierungen
+                                         Prozessketten (Strom)                                                                   •    Energetische Sanierungen
+                                                                                                                                 •    Aufstockung, Anbauten, etc.
+
+                                                                                          Wärmepumpe
+
+                                                Umweltenergie                                                                        Nutzenergie Heizung (Neu)
+                                              Boden, Luft, Wasser
+                                                                                                                                     Nutzenergie Warmwasser (Neu)
+
+                                                                                                              Verluste Warmwasser (zB. Warmhaltung) Neu
+
+                                                                                           Endenergie
+                                                                                             Strom
+
+                                                                                                                                     14
+© FWS / AWB / Modul 3 / Version 1-2025
+      Ersatz Wärmepumpe durch Wärmepumpe
+      Beim Ersatz einer alten Wärmepumpe durch eine neue Wärmepumpe, speziell bei
+      Sole/Wasser-WP mit Erdwärmesonden, muss die Dimensionierung der alten Wärmepumpe genau
+      analysiert und hinterfragt werden. Oft sind Wärmepumpen überdimensioniert, sei es weil
+      zwischenzeitlich die Gebäudehülle saniert wurde, oder die Maschine von Anfang an zu gross war.
+
+                                                  Wärmepumpe alt
+                                              •   Betriebsstunden ?
+                                              •   Wärmemessungen ?
+                          Umweltenergie       •   Sondenlängen ?
+                                              •   Sondenbelastung ?                      Nutzenergie Heizung (IST)
+                        Boden, Luft, Wasser
+                                              •   Stromzähler ?
+                                              •   Datenblätter WP ?                      Nutzenergie Warmwasser (IST)
+                                              •   EBF ?
+                                              •   Tvorlauf            Verluste Warmwasser (zB. Warmhaltung) IST
+
+
+                                                      Strom                               •   Nutzungsänderungen
+
+
+
+
+                                                                             Sanierung
+                                                                                          •   Betriebsoptimierungen
+                                                                                          •   Energetische Sanierungen
+                                                  Wärmepumpe neu                          •   Aufstockung, Anbauten,etc.
+                                              •   Neue JAZ ?
+                                              •   Sondenbelastung ?
+                                              •   Inverter ?
+                          Umweltenergie                                                  Nutzenergie Heizung (Neu)
+                                              •   Leistung ?
+                        Boden, Luft, Wasser
+                                                                                         Nutzenergie Warmwasser (Neu)
+
+                                                                      Verluste Warmwasser (zB. Warmhaltung) Neu
+
+
+                                                      Strom                                              15
+© FWS / AWB / Modul 3 / Version 1-2025
+      Volllaststunden für die Dimensionierung
+          Volllaststunden tvoll
+
+          Bedarf                         Gebäudetyp               Standort                   Volllaststunden
+
+                                                                                                    tvoll [h/a]
+
+                                             Schulhaus            Mittelland                          1900
+          Raumwärme mit                       Industrie
+          Wochenendabsenkung                  Gewerbe
+                                                Büro              ab 800 m ü. M                       2100
+
+
+                                                                  Mittelland                          2000
+          Raumwärme                        Wohngebäude
+                                                                  ab 800 m ü. M                       2300
+
+
+                                                                  Mittelland                          2300
+          Raumwärme und
+                                           Wohngebäude
+          Warmwasser
+                                                                  ab 800 m ü. M                       2500
+
+          Alle Angabe basieren auf 20 °C Raumtemperatur
+
+
+
+        Bei den angegebenen Werten handelt es sich um Richtwerte für massive Gebäude mit Baujahr 2000 oder älter. Achtung bei
+        Gebäuden in Leichtbauweise, sehr hohem Glasanteil oder sehr geringem Energiebedarf (z.B. Minergie-P). Hier müssen vertiefte
+        Berechnungen durchgeführt werden.
+
+
+                                                                                                      16
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                 Estrich
+
+    Welche Faktoren beeinflussen
+    den bisherigen und zukünftigen                                            Holzbau
+    Wärmeenergiebedarf eines
+    Gebäudes und sind bei der
+    Heizlastberechnung aus dem
+                                                     Wohnen 24°C                                Küche/Essen 22°C
+
+
+    bisherigen Brennstoffverbrauch                          Cheminée
+    zu beachten ?
+                                         Balkon
+
+
+                                                        Büro 22°C             Du/Bad 24°C                Schlafen 18°C
+                                           Storen
+
+
+
+
+                                                                                                                              Vordach
+                                                    Werkstatt/Fitness 18 °C      Korridor                        Warmwasser   Holzlager
+                                                                                            Heizkessel
+
+
+
+
+                                                                                                                 17
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                                           Gebäude
+                                                                                                           • Baujahr
+                                                                                                           • Energiebezugsfläche EBF
+                                                                      Estrich
+                                                                                                           • Dichtigkeit der Gebäudehülle
+                                                                  Holzbau                                  • Bauweise massiv/leicht
+                                                                                                           • Wärmedämmung wo und seit wann ?
+                                                     Wohnen      24°C             Küche/Essen 22°C         • Sanierungen, zB. Fensterersatz, wann ?
+                                                    Cheminée
+                                                                                                           • Geplante Sanierungen, Erweiterungen
+                                                                                                           • Sonnenschutz manuell/automatisch
+                                         Balkon                                                            • Nutzung passive Solarenergie
+                                         Storen                       24°C
+                                                                                                           • Glasanteil
+                                                     Büro 22°C                       Schlafen 18°C
+                                                                                                           • Ausrichtung Gebäude
+                                                                                                           • Geografische Lage, Höhe müM., Verschattung
+                                                                                                           • Windeinfluss, Lage geschützt oder exponiert
+                                                                                                     Vordach
+                                                  Werkstatt/Fitness                           WW
+                                                    ? °C
+
+
+
+                                                                                Heizkessel           Holzlager
+
+
+
+
+                                                                                                                   18
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                                           Gebäude
+                                                                                                           • Baujahr
+                                                                                                           • Energiebezugsfläche EBF
+                                                                      Estrich
+                                                                                                           • Dichtigkeit der Gebäudehülle
+                                                                  Holzbau                                  • Bauweise massiv/leicht
+                                                                                                           • Wärmedämmung wo und seit wann ?
+                                                     Wohnen      24°C             Küche/Essen 22°C         • Sanierungen, zB. Fensterersatz, wann ?
+                                                    Cheminée
+                                                                                                           • Geplante Sanierungen, Erweiterungen
+                                                                                                           • Sonnenschutz manuell/automatisch
+                                         Balkon                                                            • Nutzung passive Solarenergie
+                                         Storen                       24°C
+                                                                                                           • Glasanteil
+                                                     Büro 22°C                       Schlafen 18°C
+                                                                                                           • Ausrichtung Gebäude
+                                                                                                           • Geografische Lage, Höhe müM., Verschattung
+                                                                                                           • Windeinfluss, Lage geschützt oder exponiert
+                                                                                                     Vordach
+                                                  Werkstatt/Fitness                           WW
+                                                    ? °C
+
+
+
+                                                                                Heizkessel           Holzlager
+
+
+
+                                                                                                          Nutzer/Bewohner:
+                                                                                                          • Anzahl Personen bisher und in Zukunft
+                                                                                                          • Alter der Personen
+                                                                                                          • Warmwasserverbrauch
+                                                                                                          • Abwesenheiten im Winter (zB. Ferienhaus im
+                                                                                                            Süden)
+                                                                                                          • Raumtemperaturen pro Nutzungszone
+                                                                                                          • Absenkbetrieb in Teilbereichen
+                                                                                                          • Manuelles Lüften, offene Kippfenster
+
+                                                                                                                   19
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                                                  Gebäude
+                                                                                                                  • Baujahr
+                                                                                                                  • Energiebezugsfläche EBF
+                                                                             Estrich
+                                                                                                                  • Dichtigkeit der Gebäudehülle
+                                                                         Holzbau                                  • Bauweise massiv/leicht
+                                                                                                                  • Wärmedämmung wo und seit wann ?
+                                                            Wohnen      24°C             Küche/Essen 22°C         • Sanierungen, zB. Fensterersatz, wann ?
+                                                           Cheminée
+                                                                                                                  • Geplante Sanierungen, Erweiterungen
+                                                                                                                  • Sonnenschutz manuell/automatisch
+                                               Balkon                                                             • Nutzung passive Solarenergie
+                                                Storen                       24°C
+                                                                                                                  • Glasanteil
+                                                            Büro 22°C                       Schlafen 18°C
+                                                                                                                  • Ausrichtung Gebäude
+                                                                                                                  • Geografische Lage, Höhe müM., Verschattung
+                                                                                                                  • Windeinfluss, Lage geschützt oder exponiert
+                                                                                                            Vordach
+                                                         Werkstatt/Fitness                           WW
+                                                           ? °C
+
+
+
+                                                                                       Heizkessel           Holzlager
+
+
+
+                                         Wärmeerzeugung/Heizkessel/Technik:                                      Nutzer/Bewohner:
+                                         • Brennstoffe (Öl, Gas, Holz) Anteile                                   • Anzahl Personen bisher und in Zukunft
+                                         • Brennstoffverbrauch                                                   • Alter der Personen
+                                         • Nutzung Kondensationstechnik                                          • Warmwasserverbrauch
+                                         • Jahresnutzungsgrad                                                    • Abwesenheiten im Winter (zB. Ferienhaus im
+                                         • Anteil Strom direkt                                                     Süden)
+                                         • Hydraulik                                                             • Raumtemperaturen pro Nutzungszone
+                                         • Komfortlüftung                                                        • Absenkbetrieb in Teilbereichen
+                                         • Cheminée, Umluft, Klappendichtigkeit, Luftzufuhr                      • Manuelles Lüften, offene Kippfenster
+
+                                                                                                                          20
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                                                  Gebäude
+                                                                                                                  • Baujahr
+                                                                                                                  • Energiebezugsfläche EBF
+                                                                             Estrich
+                                                                                                                  • Dichtigkeit der Gebäudehülle
+                                                                         Holzbau                                  • Bauweise massiv/leicht
+                                                                                                                  • Wärmedämmung wo und seit wann ?
+                                                            Wohnen      24°C             Küche/Essen 22°C         • Sanierungen, zB. Fensterersatz, wann ?
+                                                           Cheminée
+                                                                                                                  • Geplante Sanierungen, Erweiterungen
+                                                                                                                  • Sonnenschutz manuell/automatisch
+                                               Balkon                                                             • Nutzung passive Solarenergie
+                                                Storen                       24°C
+                                                                                                                  • Glasanteil
+                                                            Büro 22°C                       Schlafen 18°C
+                                                                                                                  • Ausrichtung Gebäude
+                                                                                                                  • Geografische Lage, Höhe müM., Verschattung
+                                                                                                                  • Windeinfluss, Lage geschützt oder exponiert
+                                                                                                            Vordach
+                                                         Werkstatt/Fitness                           WW
+                                                           ? °C
+
+
+
+                                                                                       Heizkessel           Holzlager
+
+
+
+Heizungsregler:                          Wärmeerzeugung/Heizkessel/Technik:                                      Nutzer/Bewohner:
+• Heizgrenze                             • Brennstoffe (Öl, Gas, Holz) Anteile                                   • Anzahl Personen bisher und in Zukunft
+• Heizkurve                              • Brennstoffverbrauch                                                   • Alter der Personen
+• Nachtabsenkung                         • Nutzung Kondensationstechnik                                          • Warmwasserverbrauch
+• Max. Vorlauftemperatur                 • Jahresnutzungsgrad                                                    • Abwesenheiten im Winter (zB. Ferienhaus im
+• Rücklauftemperaturen                   • Anteil Strom direkt                                                     Süden)
+• Warmwasser Temperatur                  • Hydraulik                                                             • Raumtemperaturen pro Nutzungszone
+• Fernsteuerung (zB. Ferienhaus)         • Komfortlüftung                                                        • Absenkbetrieb in Teilbereichen
+• Betriebsstunden                        • Cheminée, Umluft, Klappendichtigkeit, Luftzufuhr                      • Manuelles Lüften, offene Kippfenster
+
+                                                                                                                          21
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Einflussfaktoren
+                                                                                                                   Gebäude
+                                                                                                                   • Baujahr
+                                                                                                                   • Energiebezugsfläche EBF
+                                                                              Estrich
+                                                                                                                   • Dichtigkeit der Gebäudehülle
+                                                                          Holzbau                                  • Bauweise massiv/leicht
+                                                                                                                   • Wärmedämmung wo und seit wann ?
+                                                             Wohnen      24°C             Küche/Essen 22°C         • Sanierungen, zB. Fensterersatz, wann ?
+                                                            Cheminée
+                                                                                                                   • Geplante Sanierungen, Erweiterungen
+                                                                                                                   • Sonnenschutz manuell/automatisch
+                                                Balkon                                                             • Nutzung passive Solarenergie
+                                                 Storen                       24°C
+                                                                                                                   • Glasanteil
+                                                             Büro 22°C                       Schlafen 18°C
+Wärmeverteilung:                                                                                                   • Ausrichtung Gebäude
+• FBH, Heizkörper, TABS                                                                                            • Geografische Lage, Höhe müM., Verschattung
+• Thermostatventile, Einzelraumregulierung                                                                         • Windeinfluss, Lage geschützt oder exponiert
+• Bodenbelag (zB. Parkett, Teppich, Platten)
+                                                                                                             Vordach
+• Int. Wärmequellen (zB. Beleuchtung)                     Werkstatt/Fitness                           WW
+• Heizkörper in nicht isolierten Räumen                     ? °C
+
+• Dämmung Heizleitungen im UG
+• Defekte (zB. Thermostatventile verklemmt)                                             Heizkessel           Holzlager
+• Hydraulischer Abgleich
+
+Heizungsregler:                           Wärmeerzeugung/Heizkessel/Technik:                                      Nutzer/Bewohner:
+• Heizgrenze                              • Brennstoffe (Öl, Gas, Holz) Anteile                                   • Anzahl Personen bisher und in Zukunft
+• Heizkurve                               • Brennstoffverbrauch                                                   • Alter der Personen
+• Nachtabsenkung                          • Nutzung Kondensationstechnik                                          • Warmwasserverbrauch
+• Max. Vorlauftemperatur                  • Jahresnutzungsgrad                                                    • Abwesenheiten im Winter (zB. Ferienhaus im
+• Rücklauftemperaturen                    • Anteil Strom direkt                                                     Süden)
+• Warmwasser Temperatur                   • Hydraulik                                                             • Raumtemperaturen pro Nutzungszone
+• Fernsteuerung (zB. Ferienhaus)          • Komfortlüftung                                                        • Absenkbetrieb in Teilbereichen
+• Betriebsstunden                         • Cheminée, Umluft, Klappendichtigkeit, Luftzufuhr                      • Manuelles Lüften, offene Kippfenster
+
+                                                                                                                           22
+© FWS / AWB / Modul 3 / Version 1-2025
+   Abschätzen des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+
+                                 Estrich (unbeheizt)
+                                                                      100%
+
+
+
+
+                                                       Heizenergie
+
+
+                                                                        Vor Sanierung
+                                                                     Ausgangslage:
+                                 Keller (unbeheizt)
+                                                                     - EFH, Baujahr ca. 1960
+                                                                     - Energiebezugsfläche 240 m2
+                                                                     - Schlechte bzw. keine Wärmedämmung
+                                                                     - 20-jährige Ölheizung für H+WW
+                                                                     - Heizölverbrauch 4‘700 Liter pro Jahr
+                                                                      Fr. 4‘700 pro Jahr bei 10 Rp./KWh
+
+
+                                                                                           23
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+
+                                                                                  1. Schritt : Fensterersatz
+                                                       100%
+                                                                        85%
+
+
+
+
+                                         Heizenergie
+
+
+                                                        Vor Sanierung
+
+
+                                                                        Fenster
+
+
+
+
+                                                                                          24
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+
+                                                                        2. Schritt : Aussenwärmedämmung
+
+                                                       100%
+                                                                        85%
+
+
+
+
+                                         Heizenergie
+                                                                                  55%
+
+
+
+
+                                                        Vor Sanierung
+
+
+                                                                        Fenster
+
+
+                                                                                  Wand
+
+
+                                                                                         25
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+                                                             3. Schritt : Dämmung Estrichboden
+
+
+                                                       100%
+                                                                        85%
+
+
+
+
+                                         Heizenergie
+                                                                                  55%
+
+
+
+
+                                                        Vor Sanierung
+                                                                                         45%
+
+
+
+
+                                                                        Fenster
+
+
+
+
+                                                                                         Estrich
+                                                                                  Wand
+
+
+                                                                                                   26
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+                                                                         4. Schritt : Dämmung Kellerdecke
+
+                                                       100%
+                                                                        85%
+
+
+
+
+                                         Heizenergie
+                                                                                  55%
+
+
+
+
+                                                        Vor Sanierung
+                                                                                         45%
+                                                                                                   38%
+
+
+
+
+                                                                        Fenster
+
+
+
+
+                                                                                         Estrich
+                                                                                  Wand
+
+
+
+
+                                                                                                   Keller
+                                                                                                   27
+© FWS / AWB / Modul 3 / Version 1-2025
+   Bestimmung des Wärmeenergiebedarfes
+   Sanierungsmassnahmen (Beispiel)
+
+                 Verbrauch 1‘410 Liter Heizöl       5. Schritt : Komfortlüftungsanlage
+
+                                                                                         Einsparung pro Jahr:
+                                                                                          3‘290 Liter Heizöl
+                                                                                          Fr. 3‘290
+                                                              100%
+                                                                               85%
+
+
+
+
+                                                Heizenergie
+                                                                                          55%
+
+
+
+
+                                                               Vor Sanierung
+                                                                                                  45%
+                                                                                                            38% 30%
+
+
+
+
+                                                                               Fenster
+
+
+
+
+                                                                                                  Estrich
+                                                                                           Wand
+
+
+
+
+                                                                                                            Keller
+
+
+                                                                                                                     KWL
+                  Komfortlüftungsanlage (KWL)
+
+
+
+                                                                                                            28
+© FWS / AWB / Modul 3 / Version 1-2025
+  Zusammenfassung Ermitteln Heizwärmebedarfs
+      Basis für die Berechnung bildet der bisherige durchschnittliche Heizwärmebedarf. Um
+      diesen ermitteln zu können, muss eine genaue Analyse des Objektes erfolgen. In einem
+      ersten Schritt muss der korrekte Betrachtungszeitraum für die Ermittlung des
+      durchschnittlichen Brennstoffverbrauches festgelegt werden (üblicherweise min. ca. 3-5
+      relevante Jahre). Weiter müssen nebst diversen technischen Aspekten auch die
+      folgenden Punkte mit der Bauherrschaft besprochen und berücksichtigt werden:
+
+      •     Zeitpunkt und Umfang der letzten Gebäudehüllensanierung ? (zB. Fensterersatz)
+      •     Nutzung des Gebäudes ? (Voll- oder Teilbelegung im Betrachtungszeitraum)
+      •     Periodische Abwesenheiten ? (zB. Ferienhaus im Süden)
+      •     Überhöhte Raumtemperaturen ? (zB. ältere Personen)
+      •     Zweiter Wärmeerzeuger vorhanden ? (zB. Umluft-Cheminée)
+      •     Verbundene Systeme ? (zB. Lüftungsanlagen, Aussenpool, Nachbargebäude, etc.)
+
+      Auch ein Blick in die Zukunft ist wichtig. Es empfiehlt sich die folgenden Punkte mit der
+      Bauherrschaft zu besprechen und schriftlich festzuhalten:
+      • Sind Anbauten/Aufstockungen geplant und sollen diese berücksichtigt werden?
+      • Sind energetische Sanierungen geplant und sollen diese berücksichtigt werden?
+      • Sind Nutzungsänderungen absehbar?
+
+                                                                          29
+© FWS / AWB / Modul 3 / Version 1-2025
+    Sperrzeiten für Wärmepumpen
+                                                                                             Der Leistungszuschlag infolge
+                                      Korrektur Heizleistung infolge Sperrzeiten
+                                                                                             Sperrzeiten durch das Elektrizitätswerk
+                                     160%
+                                                                                             wird wie folgt berechnet:
+                                     150%
+                                     140%
+        installierte Heizleistung
+
+
+
+
+                                     130%
+                                     120%
+                                                                                             Qoff = Qhl .   (    24 -1
+                                                                                                                      )
+                                                                                                                24-toff
+                                     110%
+                                     100%                                                    Qhl Normheizlast in kW
+                                      90%
+                                                                                             Qoff Leistungzuschlag in kW
+                                                                                             Toff Sperrzeit der Wärmepumpe in h
+                                      80%
+                                                0    1    2    3    4    5    6    7    8
+                                    Sanierung 100% 104% 109% 114% 120% 126% 133% 141% 150%
+                                                   kumulierte Sperrzeit pro Tag in Stunden
+
+
+
+
+    Sanierungen:
+    Bei Sanierungen muss die effektive Sperrzeit immer berücksichtigt werden.
+    Neubauten:
+    Bei Neubauten wird der Wärmebedarf nach SIA 384.2 berechnet. Sperrzeiten bis max. 2h können
+    vernachlässigt werden.
+
+                                                                                                            30
+© FWS / AWB / Modul 3 / Version 1-2025
+    Sperrzeiten für Wärmepumpen
+                                                                                             Der Leistungszuschlag infolge
+                                      Korrektur Heizleistung infolge Sperrzeiten
+                                                                                             Sperrzeiten durch das Elektrizitätswerk
+                                     160%
+                                                                                             wird wie folgt berechnet:
+                                     150%
+                                     140%
+        installierte Heizleistung
+
+
+
+
+                                     130%
+                                     120%
+                                                                                             Qoff = Qhl .   (    24 -1
+                                                                                                                      )
+                                                                                                                24-toff
+                                     110%
+                                     100%                                                    Qhl Normheizlast in KW
+                                      90%                                                    Qoff Leistungzuschlag in KW
+                                      80%                                                    Toff Sperrzeit der Wärmepumpe in h
+                                                0    1    2    3    4    5    6    7    8
+                                    Sanierung 100% 104% 109% 114% 120% 126% 133% 141% 150%
+                                                   kumulierte Sperrzeit pro Tag in Stunden   Berechnungsbeispiel: Qhl : 10 kW
+                                                                                             (2 min.)             toff : 4 h
+                                                                                                                  Qoff = ? kW
+    Sanierungen:
+    Bei Sanierungen muss die effektive Sperrzeit immer berücksichtigt werden.
+    Neubauten:
+    Bei Neubauten wird der Wärmebedarf nach SIA 384.201 berechnet. Sperrzeiten bis max. 2h können
+    vernachlässigt werden.
+
+                                                                                                            31
+© FWS / AWB / Modul 3 / Version 1-2025
+    Sperrzeiten für Wärmepumpen
+                                                                                             Der Leistungszuschlag infolge
+                                      Korrektur Heizleistung infolge Sperrzeiten
+                                                                                             Sperrzeiten durch das Elektrizitätswerk
+                                     160%
+                                                                                             wird wie folgt berechnet:
+                                     150%
+                                     140%
+        installierte Heizleistung
+
+
+
+
+                                     130%
+                                     120%
+                                                                                             Qoff = Qhl .   (    24 -1
+                                                                                                                      )
+                                                                                                                24-toff
+                                     110%
+                                     100%                                                    Qhl Normheizlast in kW
+                                      90%                                                    Qoff Leistungzuschlag in kW
+                                      80%                                                    Toff Sperrzeit der Wärmepumpe in h
+                                                0    1    2    3    4    5    6    7    8
+                                    Sanierung 100% 104% 109% 114% 120% 126% 133% 141% 150%
+                                                   kumulierte Sperrzeit pro Tag in Stunden   Resultat:                Qhl : 10 kW
+                                                                                                                      toff : 4 h
+                                                                                                                      Qoff = 2 kW
+
+    Sanierungen:
+    Bei Sanierungen muss die effektive Sperrzeit immer berücksichtigt werden.
+    Neubauten:
+    Bei Neubauten wird der Wärmebedarf nach SIA 384.201 berechnet. Sperrzeiten bis max. 2h können
+    vernachlässigt werden.
+                                                                                                            32
+© FWS / AWB / Modul 3 / Version 1-2025
+      Energiebezugsfläche eines Gebäudes
+
+       Definition der Energiebezugsfläche (EBF) gemäss SIA 380:
+
+       Summe aller ober- und unterirdischen Geschossflächen, die innerhalb der
+       thermischen Gebäudehülle liegen und für deren Nutzung ein Konditionieren
+       notwendig ist. Geschossflächen mit einer lichten Raumhöhe unter 1.0m zählen
+       nicht zur EBF. Für weitere Präzisierungen siehe SIA 380.
+
+       Die Energiebezugsfläche (EBF) kann näherungsweise auch aus der
+       Nettowohnfläche abgeschätzt werden in dem man diese mit dem Faktor 1.1 bis
+       1.15 multipliziert.
+       Zur EBF gehören alle Wohnräume, Schlafzimmer und nicht aktiv beheizten Räume,
+       deren Mitbeheizung für die Nutzung üblich ist, zB. Treppenhaus.
+       Nicht zur EBF gehören Räume, für deren Nutzung ein Beheizen nicht notwendig ist,
+       wie Wasch- und Trockenräume, Heizungs- und Maschinen-räume, Tankräume,
+       Garagen, Abstellräume, Privatkeller, Balkone, Terrassen, Laubengänge, etc.
+
+
+
+                                                                      33
+© FWS / AWB / Modul 3 / Version 1-2025
+      Beispiel Berechnung EBF (5min.)
+                                                                                                        Grundrisse
+                                                                                                                      10m
+                              Gebäudeschnitt
+                                             8m
+                                                                                                                                   Büro
+                       1.5m           2.5m            4m
+
+                                                                                      Schnitt A                                                     10m   DG
+        DG
+
+
+
+
+                                                                                                    Luftraum
+
+                                                                                                               Gallerie
+                                      Gallerie     Bad/DU/WC                   3.0m
+      1m                                                                  1m                                               Bad/Du/WC
+
+
+
+        EG            Wohnen/Essen                    Schlafen/Büro            2.8m                                        Abstellraum
+
+                                                                                                    Wohnen/
+                                                                                                    Essen
+                  Fitness / Basteln                Keller    Waschküche
+                                                                                       Schnitt A
+                                                                                                                            Schlafen
+                                                                                                                                                    10m   EG
+       UG                                                                      2.8m
+
+
+                            5m                                                                                                 Küche
+
+                                             10m
+                                                                                                                            Veloraum
+
+
+
+                         Th. Gebäudehülle                                               Schnitt A
+                                                                                                                                                    10m
+                                                                                                                                                          UG
+
+
+
+
+                                                                                                                                       Waschküche
+                                                                                                                          Keller
+                                                                                                    Fitness/
+              Frage: Wie gross ist die EBF ?                                                        Basteln
+
+
+
+
+                                                                                                                          34
+© FWS / AWB / Modul 3 / Version 1-2025
+      Beispiel Berechnung EBF
+                                                                                                        Grundrisse
+                                                                                                                      10m
+                              Gebäudeschnitt
+                                                                                                               8m
+                                             8m
+                                                                                                                                   Büro
+                       1.5m           2.5m            4m
+
+                                                                                      Schnitt A                                                     10m   DG = 80m2
+        DG
+
+
+
+
+                                                                                                    Luftraum
+
+                                                                                                               Gallerie
+                                      Gallerie     Bad/DU/WC                   3.0m
+      1m                                                                  1m                                               Bad/Du/WC
+
+
+
+        EG            Wohnen/Essen                    Schlafen/Büro            2.8m                                        Abstellraum
+
+                                                                                                    Wohnen/
+                                                                                                    Essen
+                  Fitness / Basteln                Keller    Waschküche                                                     Schlafen
+                                                                                                                                                    10m   EG = 100m2
+                                                                                       Schnitt A
+       UG                                                                      2.8m
+
+
+                            5m                                                                                                 Küche
+
+                                             10m
+                                                                                                                            Veloraum
+
+                         EBF
+                         Th. Gebäudehülle                                               Schnitt A
+                                                                                                                                                    10m   UG = 50m2
+
+
+
+
+                                                                                                                                       Waschküche
+                                                                                                                          Keller
+                                                                                                    Fitness/
+               Resultat:                                                                            Basteln
+
+               EBF = 50m2 + 100m2 + 80m2 = 230m2
+                                                                                                                          35
+© FWS / AWB / Modul 3 / Version 1-2025
+      Überschlagsmässige Berechnung des
+      Heizwärmebedarfs
+                            Bauperiode                  EFH                                MFH
+                                           Spezifischer Heizwärmebedarf     Spezifischer Heizwärmebedarf
+                                                    in kWh/m a2                        in kWh/m2 a
+                            vor 1919                  55 – 125                           65 – 115
+                            1919 – 1945               80 – 135                           80 – 120
+                            1946 – 1960               80 – 140                           70 – 115
+                            1961 – 1970               80 – 145                           75 – 120
+                            1971 – 1980               70 – 125                           75 – 115
+                            1981 – 1985               55 – 105                           70 – 105
+                            1986 – 1990                60 – 95                            65 – 95
+                            1991 – 1995                50 – 90                            60 – 85
+                            1996 – 2000                45 – 85                            55 – 75
+                            2001 – 2005                35 – 80                            55 – 75
+                            2006 – 2010                35 – 75                            45 – 65
+                            2011 – heute               30 – 45                            30 – 40
+                                                                   Quelle: Schneider (2014): GIS Gebäudeenergie
+
+      Hinweis: Der Wärmebedarf für die Warmwasserbereitung ist in den Richtwerten nicht
+      berücksichtigt. Die Werte gelten für unsanierte Gebäude aus der jeweiligen Bauperiode.
+      Durch Sanierungsmassnahmen können folgende Einsparungen erzielt werden:
+      • Sanierung Fenster: - 10 bis 20 %
+      • Fassadendämmung: - 25 bis 40 %
+      • Estrichboden / decke Dämmung: -10 bis 15 %
+      • Kellerdecke Dämmung: - 8 bis 12 %
+                                                                                                 36
+© FWS / AWB / Modul 3 / Version 1-2025
+      Überschlagsmässige Leistungskontrolle
+                                         Bauperiode             EFH                         MFH
+                                                             Spezifische                Spezifische
+                                                        Heizleistung in W/m2       Heizleistung in W/m2
+                                         vor 1919              28 - 63                    33 – 58
+                                         1919 – 1945           40 – 68                    40 – 60
+                                         1946 – 1960           40 – 70                    35 – 58
+                                         1961 – 1970           40 – 73                    38 – 60
+                                         1971 – 1980           35 – 63                    38 – 58
+                                         1981 – 1985           28 – 53                    35 – 53
+                                         1986 – 1990           30 – 48                    33 – 48
+                                         1991 – 1995           25 – 45                    30 – 43
+                                         1996 – 2000           23 – 43                    28 – 38
+                                         2001 – 2005           18 – 40                    28 – 38
+                                         2006 – 2010           18 – 38                    23 – 33
+                                         2011 – heute          15 – 23                    15 – 20
+
+                                                                 Quelle: Schneider (2014): GIS Gebäudeenergie
+      Zur Kontrolle der Resultate dient die spezifische Heizleistung. Sie errechnet sich aus der
+      Norm-Heizleistung des Gebäudes (ohne WW-Bereitstellung) dividiert durch die
+      Energiebezugsfläche.
+      Die Werte sollen annähernd den Tabellenwerten entsprechen.
+      Hinweis: Die spezifische Heizleistung ist nur ein grobes Kontrollinstrument. Die
+      Dimensionierung erfolgt prinzipiell nach den einschlägigen Methoden.
+
+                                                                                                      37
+© FWS / AWB / Modul 3 / Version 1-2025
+                                         Übungsblock 1
+                                          (Aufgabe 1)
+
+
+
+
+                                                         38
+© FWS / AWB / Modul 3 / Version 1-2025
+Warmwasserbereitung mit Wärmepumpen
+Die Warmwasserbereitung sollte, wenn möglich immer mit der Wärmepumpe erfolgen.
+Die Effizienz wird bei richtiger Dimensionierung der Wärmetauscher und der richtigen
+Wahl der Komponenten nicht beeinträchtigt.
+Wenn die Warmwasserbereitung mit Elektroboiler erfolgt ist, muss sie nach MuKEn
+2014 auch mit der Wärmepumpe erfolgen.
+Nach Art. 1.16 "Wassererwärmer":
+Der Neueinbau oder Ersatz einer direkt-elektrischen Erwärmung des Warmwassers ist in
+Wohnbauten nur erlaubt, wenn das Warmwasser
+ a) während der Heizperiode mit dem Wärmeerzeuger für die Raumheizung erwärmt
+   oder vorgewärmt wird; oder
+ b) zu mindestens 50% mittels erneuerbarer Energie oder Abwärme erwärmt wird.
+
+
+Hinweis:
+Die MuKEn 2014 wird nicht in allen Kantonen gleich angewendet. Die Kantone zusätzliche
+Verschärfungen umsetzen.
+
+                                                                  39
+© FWS / AWB / Modul 3 / Version 1-2025
+        Bestimmung des Energiebedarfs für
+        Warmwasser
+             Einzelzapfstellen                           Zirkulationssysteme                                              El. Warmhalteband
+                                                         • Rohr am Rohr
+                                                         • separate Leitung
+                                                                        Bad WC Küche         Ausstoss-
+                                                                                                                               Bad WC Küche          Ausstoss-
+Ausstossleitungen   Bad WC Küche                                                             leitungen                                               leitungen
+
+
+
+
+                                                                                                          warmgehaltene
+                                                warmgehaltene
+
+
+
+
+                                                                                                          Leitungen
+                                                Leitungen
+                                                                       Bad WC Küche                                            Bad WC Küche
+
+                           nicht warm-
+                           gehaltene
+                           Leitungen                                   nicht warmgehaltene                                     nicht warmgehaltene
+                                                                       Leitungen                                               Leitungen
+
+         WW                                WW                                                        WW
+                                                                Zirkulationspumpe                                  Steuergerät
+
+
+
+
+      Ausstosszeit max. 15s                     Ausstosszeit max. 10s                                       Ausstosszeit max. 10s
+      (Zeit zur Erreichung von 40°C bei
+      voll geöffneter Entnahmearmatur)
+
+                                            Speicherverlust: ca. 8-10%                                     Speicherverlust: ca. 8-10%
+      Speicherverlust: ca. 8-10 %
+                                            Leitungsverluste (Warmhaltung): ca. 10-15%                     Ausstossverluste: ca. 15%
+      Ausstossverluste: ca. 20%
+                                            Ausstossverluste: ca. 15%
+
+                                                                                                                          40
+  © FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung des Energiebedarfs für
+      Warmwasser
+      Der Gesamtenergiebedarf für die Warmwasserversorgung pro Tag QWW ist
+      die Summe des Energiebedarfs für die tägliche Bereitstellung des
+      Nutzwarmwasser QW,u , den Speicherwärmeverlusten QW,sto,ls , den
+      Wärmeverlusten der Leitungen QW,hl,ls und den Ausstosswärmeverlusten
+
+
+                                         QWW = QW,u + QW,sto,ls + QW,hl,ls + QW,em,ls
+
+                                   QWW Gesamtwärmebedarf der Warmwasserversorgung pro Tag, in kWh
+
+
+
+
+                                                                                          41
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung des Energiebedarfs für die
+      Bereitstellung des Nutzwarmwassers
+       Der Energiebedarf für die tägliche Bereitstellung des Nutzwarmwassers
+       QW,u wird anhand des Nutzwarmwasserbedarfs pro Person und Tag VW,u,i
+       und der Personenbelegung nP,i aller i Wohneinheiten im Gebäude
+       bestimmt.
+       Hinweis: Eine Wohneinheit ist eine Gruppe von Räumen, welche über
+       eine Küche oder Kochnische verfügt
+       1. Schritt: Ermittlung des Nutzwarmwasserbedarfs pro Person
+       und Tag gemäss SIA 385/2:2015:
+
+        Gebäudeart                       Hinweise                  Nutzwarmwasserbedarf VW,u,i pro
+                                                                   Person in Normlitern pro Tag
+        Einfamilienhaus,                 einfacher Standard                      40
+        Eigentumswohnung                 mittlerer Standard                      45
+                                         gehobener Standard                      55
+        Mehrfamilienhaus                 allgemeiner Wohnungsbau                 35
+                                         gehobener Wohnungsbau                   45
+        Bürogebäude                      ohne Personalrestaurant                  3
+
+
+                                                                                     42
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung des Energiebedarfs für die
+      Bereitstellung des Nutzwarmwassers
+      2. Schritt: Bestimmung der Personenbelegung nP,i anhand der
+      Nutzfläche ANF für jede Wohneinheit i.
+
+
+
+
+                                                     nP,i Anzahl der Personen bei Normbelegung
+                                                     ANF Nutzfläche der Wohneinheit in m2
+                                                     A0 = 100 m2
+
+                                                     Bild: SIA 385/2:2015
+
+
+
+
+      Hinweis: Die Anzahl der Personen nP,i muss keine ganze Zahl sein.
+
+                                                                   43
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung des Energiebedarfs für die
+      Bereitstellung des Nutzwarmwassers
+       3. Schritt: Der gesamte, tägliche Nutzwarmwasserbedarf VW,u wird
+       bestimmt, indem für jede Wohneinheit die Personenbelegung mit dem
+       Nutzwarmwasserbedarf pro Person und Tag multipliziert und dann die
+       Summe aus den Produkten gebildet wird:
+
+                                                       VW,u = ∑i (nP,i ⋅VW,u,i )
+
+
+
+
+       4. Schritt: Der tägliche Wärmebedarf für das Nutzwarmwasser QW,u in
+       kWh wird schliesslich mit folgender Formel berechnet:
+
+
+                                                                 𝑘𝑘𝑘𝑘         𝑘𝑘𝑘𝑘    1 𝑘𝑘𝑘𝑘𝑘
+                                         𝑄𝑄𝑊𝑊,𝑢𝑢 = 𝑉𝑉𝑊𝑊,𝑢𝑢 ⋅ 1        ⋅ 4.2        ⋅          ⋅ 50 𝐾𝐾
+                                                                  𝑙𝑙        𝑘𝑘𝑘𝑘 𝐾𝐾 3600 𝑘𝑘𝑘𝑘
+
+
+                                                                                             44
+© FWS / AWB / Modul 3 / Version 1-2025
+      Berechnung der Speicherwärmeverluste
+
+      • Falls das Speichervolumen bekannt ist, können die
+        Speicherwärmeverluste QW,sto,ls aus dem Diagramm abgelesen
+        werden:
+
+
+
+
+                                                         Bild: prSIA 385/2:2023
+
+
+
+      • Wenn das Speichervolumen nicht bekannt ist, ist als
+        Speicherwärmeverlust QW,sto,ls ein Wert von 8 - 10% des täglichen
+        Wärmebedarfs für das Nutzwarmwasser QW,u einzusetzen.
+
+                                                            45
+© FWS / AWB / Modul 3 / Version 1-2025
+      Berechnung der Wärmeverluste der Leitungen
+      •       Falls die Warmwasserversorgung mit einem Zirkulationssystem warm gehalten wird und
+              die Länge der warmgehaltenen Leitungen bekannt ist, können die Wärmeverluste der
+              Leitungen QW,hl,ls anhand der Richtwerte in der SIA 385/2:2015 berechnet werden:
+
+          −     Rohr-an-Rohr- und Rohr-in-Rohr-Zirkulationssystem:
+                0.15 kWh pro Meter und Tag (Länge = Warmwasserleitung)
+          −     Separat wärmegedämmte Warmwasser- und Zirkulationsleitung:
+                0.12 kWh pro Meter und Tag (Läge = Warmwasserleitung + Zirkulationsleitung)
+
+      •       Falls die Warmwasserversorgung mit einem Zirkulationssystem warm gehalten wird und
+              die Leitungslängen nicht bekannt sind: Annahme von 10 – 15% Verlust bezogen auf QW,u
+
+      •       Falls die Leitungen mit Warmhaltebändern ausgerüstet sind: Keine Berücksichtigung der
+              Verluste bei der Dimensionierung der Wärmepumpe!
+
+
+      •       Falls keine warmgehaltenen Leitungen vorhanden sind: Es wird nur der Zuschlag für die
+              Ausstossverluste gerechnet.
+      •       Ausstossverluste: Annahme von 15-20% bezogen auf QW,u
+
+
+
+                                                                             46
+© FWS / AWB / Modul 3 / Version 1-2025
+  Berechnungsbeispiel (5-10min.)
+  Gegeben:
+  • MFH mit 5 Wohnungen à je 150 m2
+  • Standard allgemeiner Wohnungsbau
+  • WW-Speicher 800 Liter
+  • Zirkulation mit Rohr an Rohrsystem, Länge unbekannt
+
+  Gesucht:
+  Gesamtenergiebedarf für die Warmwasserversorgung pro Tag QWW
+
+  Formel:
+                                                          QW,u:        Energie Nutzwarmwasser
+                                                          QW,sto,ls:   Speicherverluste
+       QWW = QW,u + QW,sto,ls + QW,hl,ls + QW,em,ls       QW,hl,ls:    Leitungsverluste
+                                                          QW,em,ls:    Ausstossverluste
+
+
+
+
+                                                                          47
+© FWS / AWB / Modul 3 / Version 1-2025
+  Berechnungsbeispiel (5-10min.)
+  Gegeben:
+  • MFH mit 5 Wohnungen à je 150 m2
+  • Standard allgemeiner Wohnungsbau
+  • WW-Speicher 800 Liter
+  • Zirkulation mit Rohr an Rohrsystem, Länge unbekannt
+
+  Gesucht:
+  Gesamtenergiebedarf für die Warmwasserversorgung pro Tag QWW
+
+  Formel:
+                                                                QW,u:        Energie Nutzwarmwasser
+                                                                QW,sto,ls:   Speicherverluste
+       QWW = QW,u + QW,sto,ls + QW,hl,ls + QW,em,ls             QW,hl,ls:    Leitungsverluste
+                                                                QW,em,ls:    Ausstossverluste
+  Vorgehen:
+  Schritt 1: Nutzwarmwasserbedarf VW,u,i aus Tabelle  ? l/P
+   Schritt 2: Personenbelegung aus Grafik  ? P/Whg.
+   Schritt 3: Nutzwarmwasser VW,u, = 5 Whg. x ? P/Whg x ? l/P = ? l/d
+   Schritt 4: Wärmebedarf Nutzwarmwasser QW,u = ? l/d x 4.2/3600 x 50K = ? kWh/d
+   Schritt 5: Speicherverluste aus Grafik  QW,sto,ls = ? kWh/d (entspricht hier ? von QW,u )
+   Schritt 6: Zuschlag Zirkulation über Richtwert 15%  QW,hl,ls = 0.15 x ? kWh/d = ? kWh/d
+   Schritt 7: Zuschlag Ausstoosverluste über Richtwert 15%  QW,hl,ls = 0.15 x ? kWh/d = ?kWh/d
+   Schritt 8: Gesamtenergiebedarf WW pro Tag QWW = ? kWh + ? kWh + ? kWh + ? KWh = ? kWh/d
+
+                                                                                48
+© FWS / AWB / Modul 3 / Version 1-2025
+  Berechnungsbeispiel (5-10min.)
+  Gegeben:
+  • MFH mit 5 Wohnungen à je 150 m2
+  • Standard allgemeiner Wohnungsbau
+  • WW-Speicher 800 Liter
+  • Zirkulation mit Rohr an Rohrsystem, Länge unbekannt
+
+  Gesucht:
+  Gesamtenergiebedarf für die Warmwasserversorgung pro Tag QWW
+
+  Formel:
+                                                                 QW,u:        Energie Nutzwarmwasser
+                                                                 QW,sto,ls:   Speicherverluste
+       QWW = QW,u + QW,sto,ls + QW,hl,ls + QW,em,ls              QW,hl,ls:    Leitungsverluste
+                                                                 QW,em,ls:    Ausstossverluste
+  Lösung:
+   Schritt 1: Nutzwarmwasserbedarf VW,u,i aus Tabelle  35 l/P
+   Schritt 2: Personenbelegung aus Grafik  2.8 P/Whg.
+   Schritt 3: Nutzwarmwasser VW,u, = 5 Whg. x 2.8 P/Whg x 35 l/P = 490 l/d
+   Schritt 4: Wärmebedarf Nutzwarmwasser QW,u = 490 l/d x 4.2/3600 x 50K = 28.6 kWh/d
+   Schritt 5: Speicherverluste aus Grafik  QW,sto,ls = 3.1 kWh/d (entspricht hier 10.8% von QW,u )
+   Schritt 6: Zuschlag Zirkulation über Richtwert 15%  QW,hl,ls = 0.15 x 28.6 kWh/d = 4.3 kWh/d
+   Schritt 7: Zuschlag Ausstoosverluste über Richtwert 15%  QW,hl,ls = 0.15 x 28.6 kWh/d = 4.3 kWh/d
+   Schritt 8: Gesamtenergiebedarf WW pro Tag QWW = 28.6kWh + 3.1kWh + 4.3kWh + 4.3kWh = 40.3 kWh/d
+
+                                                                                 49
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung Leistungszuschlag BWW
+     Der Leistungszuschlag für Wohn- und Verwaltungsbauten für die Wassererwärmung
+     wird gemäss SIA 384/1, 2022 Pos. 4.2.4 aufgrund der Ladezeit pro Tag bestimmt.
+
+     Schritt 1: Berechnen der Ladezeit für das Warmwasser pro Tag
+
+             Qww                             td  Ladezeit pro Tag, in h
+        td =                                 Qww Wärmebedarf der Warmwasserversorgung pro Tag, in KWh
+             Qhl                             Qhl Normheizlast Gebäude in KW
+
+     Schritt 2: Berechnen des Leistungszuschlages für die Warmwassererwärmung
+                                             td    Ladezeit pro Tag, in h
+       Qw = Qhl .        (    24 -1
+                             24-td       )   Qw
+                                             Qhl
+                                                   Leistungszuschlag aufgrund der Ladezeit pro Tag in KW
+                                                   Normheizlast Gebäude in KW
+
+
+
+
+                                                                                              50
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung Leistungszuschlag BWW
+     Der Leistungszuschlag für Wohn- und Verwaltungsbauten für die Wassererwärmung
+     wird gemäss SIA 384/1, 2022 Pos. 4.2.4 aufgrund der Ladezeit pro Tag bestimmt.
+
+     Schritt 1: Berechnen der Ladezeit für das Warmwasser pro Tag
+
+             Qww                             td  Ladezeit pro Tag, in h
+        td =                                 Qww Wärmebedarf der Warmwasserversorgung pro Tag, in KWh
+             Qhl                             Qhl Normheizlast Gebäude in KW
+
+     Schritt 2: Berechnen des Leistungszuschlages für die Warmwassererwärmung
+                                             td    Ladezeit pro Tag, in h
+       Qw = Qhl .        (    24 -1
+                             24-td       )   Qw
+                                             Qhl
+                                                   Leistungszuschlag aufgrund der Ladezeit pro Tag in KW
+                                                   Normheizlast Gebäude in KW
+
+
+      Berechnungsbeispiel: Qhl : 15.0 KW
+      (2 min.)             Qww : 40.3 KWh/d
+                           Qw = ? KW
+
+
+
+
+                                                                                              51
+© FWS / AWB / Modul 3 / Version 1-2025
+      Bestimmung Leistungszuschlag BWW
+     Der Leistungszuschlag für Wohn- und Verwaltungsbauten für die Wassererwärmung
+     wird gemäss SIA 384/1, 2022 Pos. 4.2.4 aufgrund der Ladezeit pro Tag bestimmt.
+
+     Schritt 1: Berechnen der Ladezeit für das Warmwasser pro Tag
+
+             Qww                              td  Ladezeit pro Tag, in h
+        td =                                  Qww Wärmebedarf der Warmwasserversorgung pro Tag, in KWh
+             Qhl                              Qhl Normheizlast Gebäude in KW
+
+     Schritt 2: Berechnen des Leistungszuschlages für die Warmwassererwärmung
+                                              td    Ladezeit pro Tag, in h
+       Qw = Qhl .        (    24 -1
+                             24-td       )    Qw
+                                              Qhl
+                                                    Leistungszuschlag aufgrund der Ladezeit pro Tag in KW
+                                                    Normheizlast Gebäude in KW
+
+
+      Resultat:                          Qhl : 15.0 KW
+                                         Qww : 40.3 KWh
+                                         td = 2.69 h
+                                         Qw = 1.89 KW
+
+
+
+                                                                                               52
+© FWS / AWB / Modul 3 / Version 1-2025
+                                         Übungsblock 2
+                                          (Aufgabe 2)
+
+
+
+
+                                                         53
+© FWS / AWB / Modul 3 / Version 1-2025
+      Inhalt eines Warmwasserspeichers (Boilers)
+     Das benötigte Gesamtvolumen des Warmwasserspeichers wird ausgehend
+     vom Gesamtenergiebedarf für die Warmwasserversorgung pro Tag QWW
+     ermittelt. Bei der Berechnung des Speichervolumens wird die effektive
+     Ladetemperatur des Warmwasserspeichers berücksichtigt:
+
+                                                                      𝑄𝑄𝑊𝑊𝑊𝑊
+                             𝑉𝑉𝑊𝑊,𝑆𝑆𝑆𝑆𝑆𝑆 =
+                                               𝑘𝑘𝑘𝑘         𝑘𝑘𝑘𝑘    1 𝑘𝑘𝑘𝑘𝑘
+                                             1      ⋅ 4.2        ⋅           ⋅ 𝑇𝑇𝑆𝑆to,𝑎𝑎𝑎𝑎𝑎𝑎 − 𝑇𝑇𝑆𝑆to,𝑒𝑒𝑒𝑒𝑒𝑒
+                                                 𝑙𝑙       𝑘𝑘𝑘𝑘 𝐾𝐾 3600 𝑘𝑘𝑘𝑘
+
+             QWW            Gesamtenergiebedarf für die Warmwasserversorgung in kWh/d
+             VW,Sto         Gesamtvolumen des Warmwasserspeichers in Liter
+             TSto,aus       Temperatur des Warmwassers am Speicheraustritt (effektive Ladetemperatur)
+             TSto,ein       Temperatur des Kaltwassers am Speichereintritt (gemäss SIA 385-2 10°C)
+
+
+
+
+                                                                                                           54
+© FWS / AWB / Modul 3 / Version 1-2025
+      Inhalt eines Warmwasserspeichers (Boilers):
+      Spitzendeckungsvolumen
+      Zusätzlich zum Gesamtvolumen des Speichers muss das benötigte
+      Spitzendeckungsvolumen ermittelt werden.
+
+      Das Spitzendeckungsvolumen ist das Teilvolumen des Speichers, welches die
+      Verfügbarkeit von Warmwasser während den grössten Verbrauchsspitzen
+      sicherstellt. Am unteren Rand des Spitzendeckungsvolumens befindet sich
+      meist der Temperaturfühler, der die Nachladung einschaltet:
+
+
+
+
+                                         Bild: SIA 385/2:2015
+
+                                                                 55
+© FWS / AWB / Modul 3 / Version 1-2025
+      Inhalt eines Warmwasserspeichers (Boilers):
+      Spitzendeckungsvolumen
+      Das Spitzendeckungsvolumen muss mindestens so gross sein, wie die grösste
+      kurzfristige Stundenspitze in den Säulendiagrammen.
+      Die Säulen geben das minimale Spitzendeckungsvolumen in % des täglichen
+      Nutzwarmwasserbedarfs VW,u an.
+
+
+
+
+                                         Bild: SIA 385/2:2015
+
+
+
+
+                                                                 56
+© FWS / AWB / Modul 3 / Version 1-2025
+      Inhalt eines Warmwasserspeichers (Boilers)
+      Der Inhalt im Warmwasserspeicher sollte aus hygienischen Gründen nicht überdimensioniert
+      werden.
+      Empfehlung EFH: Tagesbedarf à 60°C
+       meistens 400 Liter (Hinweis Registerfläche)
+      Empfehlung MFH: 2-3 Ladezyklen pro Tag
+      Hinweis PV-Eigenoptimierung:
+      WW-Speicher nicht grösser dimensionieren! (Hygiene / Effizienz)
+      Hinweise gemäss Merkblatt des SVGW:
+      Einzuhalten sind die Minimalanforderungen in Bezug auf:
+             − Kein stagnierendes Wasser
+             − Tägliche Erneuerung des Boilerinhalts
+             − Optimale Fliessgeschwindigkeiten
+             − Gute Durchspülung
+             − Kurze Leitungslängen
+             − Werkstoffe mit glatten Oberflächen und Temperaturbeständigkeit
+             − Keine Parallelschaltung von mehreren Wassererwärmer
+
+
+                                                                           57
+© FWS / AWB / Modul 3 / Version 1-2025
+      Ladestrategien für WW-Speicher
+                                         Die Speicherladung erfolgt als Stufenladung, d.h.
+                                         das Wasser wird im Speicher mehrere Male
+                                         umgewälzt bis er voll aufgeladen ist.
+                                         Der Dimensionierungsmassenstrom im
+                                         Ladekreislauf sollte grösser sein als im
+                                         Verbraucherkreislauf ṁWP > ṁVerbraucher
+
+                                         Die Speicherladung erfolgt als Schichtladung, d.h.
+                                         das Wasser wird im Speicher nur ein Mal
+                                         umgewälzt bis er voll aufgeladen ist.
+                                         Die Regelung des Massenstroms kann auch über
+                                         die Drehzahlvariation (mit Frequenzumformer)
+                                         erreicht werden.
+
+                                         Bei der Gleitladung liegt der Wärmetauscher
+                                         zuunterst im Speicher. Das erwärmte Wasser steigt
+                                         auf, bis es eine gleich warme Schicht antrifft. Die
+                                         Gleitladung hat den Vorteil, dass sie die warme
+                                         Schicht am Kopfende des Speichers nicht zerstört und
+                                         gleichzeitig eine gute Arbeitszahl ermöglicht. Sie
+                                         kombiniert also die Vorteile der Stufen- und
+                                         Schichtladung.
+                                                                   58
+© FWS / AWB / Modul 3 / Version 1-2025
+                   Effizienz der Warmwasser-Ladestrategien
+
+                   Schichtladung führt zu Effizienzeinbussen bei der Wärmepumpe in Folge
+                   des permanent hohen Temperaturhubs
+                   70
+
+
+                   60
+
+                                                                                                  Austrittstemperatur der
+                   50
+                                                                                                  Wärmesenke bei
+                                                                                                  Schichtladung
+ Temperatur [°C]
+
+
+
+
+                   40
+                                     Mittlerer Temperaturhub bei Schichtladung: 53.0°C            Austrittstemperatur der
+                                      Mittlerer COP: 3.1                                         Wärmesenke bei Stufen-
+                   30                                                                             und Gleitladung
+                                                  Mittlerer Temperaturhub bei Stufen- und
+                                                  Gleitladung: 45.4°C  Mittlerer COP: 3.6        Eintrittstemperatur der
+                   20                                                                             Wärmequelle
+
+
+                   10
+
+
+                    0
+                                                         Zeit
+                                                                                             59
+© FWS / AWB / Modul 3 / Version 1-2025
+      Wahl des Warmwassersystems
+    Innen liegender Wärmetauscher        Aussen liegender Wärmetauscher   Frischwasserstation
+             (Registerboiler)                     (Magroladung)                 (FRIWA)
+
+
+
+
+                                                    Sprührohr
+
+
+
+
+      Es ist zu beachten, dass die Wärmetauscher-Register für die max. mögliche Heizleistung
+      der WP ausgelegt werden. LW-WP haben im Sommer ca. die 2-2.5-fache Leistung. Bei
+      mehreren Kompressoren muss die Stufigkeit beachtet werden. Bei Erdsonden-WP’s muss
+      die Leistung bei hohen Soletemperaturen (zB. bei Regeneration) beachtet werden.
+      Bei leistungsgeregelten Wärmepumpen ist die Ladesteuerung massgebend.
+
+                                                                              60
+© FWS / AWB / Modul 3 / Version 1-2025
+      Wahl des Warmwassersystems
+      Temperaturanforderungen gemäss SIA 385/1:2020 – System mit Warmhaltung
+
+
+
+
+                                         Erforderliche          ≥ 55°C               ≥ 50°C
+                                         Temperatur             in warmgehaltenen    an Entnahmestellen
+                                         am Speicheraustritt    Trinkwasserleitungen nach 7x Ausstosszeit
+                                         58°C bis 60°C
+
+
+
+
+                                         Bild: SIA 385/1:2020
+
+
+
+
+                                                                                   61
+© FWS / AWB / Modul 3 / Version 1-2025
+      Wahl des Warmwassersystems
+      Temperaturanforderungen gemäss SIA 385/1:2020 – System mit Warmhaltung
+
+      Beispiel: Registerboiler (k-Wert = 500 W/m2K, Heizleistung WP 12 kW)
+
+
+
+
+                                         0.67m2/kW : 8m2
+                                         0.25m2/kW : 3m2
+
+
+
+
+      Faustformel für innen liegende Wärmetauscherfläche:
+      Vorlauf WP: 65°C; erforderliche Speichertemperatur 60°C  A ≈ 0.65 m2/kW Heizleistung
+
+      Faustformel für aussen liegende Wärmetauscherfläche: A ≈ 0.05 m2/kW Heizleistung
+
+                                                                      62
+© FWS / AWB / Modul 3 / Version 1-2025
+      Wahl des Warmwassersystems
+      Temperaturanforderungen gemäss SIA 385/1:2020 – System ohne Warmhaltung
+
+
+
+
+                                         Erforderliche                ≥ 50°C
+                                         Temperatur am                an Entnahmestellen
+                                         Speicheraustritt             nach 7x Ausstosszeit
+                                         ≥ 55°C
+
+
+
+
+                                         Bild: SIA 385/1:2020
+
+      Faustformel für innen liegende Wärmetauscherfläche:
+      - Vorlauf WP: 65°C; erforderliche Speichertemperatur 55°C  A ≈ 0.4 m2/kW Heizleistung
+      - Vorlauf WP: 60°C; erforderliche Speichertemperatur 55°C  A ≈ 0.65 m2/kW Heizleistung
+
+      Faustformel für aussen liegende Wärmetauscherfläche: A ≈ 0.05 m2/kW Heizleistung
+                                                                     63
+© FWS / AWB / Modul 3 / Version 1-2025
+      Kombispeicher
+      Kombispeicher werden bei EFH häufig eingesetzt. Wo zusätzlich noch Solarenergie
+      eingespeist wird, sind sie oft Standard. Im Zusammenhang mit Wärmepumpen können
+      Probleme auftreten. Negativ sind der geringe Warmwasserinhalt, die geringe
+      Nachladeleistung und die oft zu tiefe Warmwassertemperatur.
+
+
+
+
+      Kombispeicher mit innenliegendem Warmwasser-Wärmetauscher, Umschaltung
+      Heizbetrieb oder Warmwasserladung mit Umschaltventilen im Vor- und Rücklauf
+
+
+
+                                                                      64
+© FWS / AWB / Modul 3 / Version 1-2025
+                                    Wo ist der Fehler ?
+                               Warmwasserladung direkt über WP
+
+
+
+                                                                         WW-Speicher
+
+
+                                                   WP mit
+                                                   WW-Kondensator
+                                         KW
+
+
+
+
+                                                         KW
+
+
+
+
+                                                                    65
+© FWS / AWB / Modul 3 / Version 1-2025
+                                    Wo ist der Fehler ?
+                               Warmwasserladung direkt über WP
+                                                 Richtiger Anschluss
+                                                 für Stufenladung bei
+                                                 Tagesnachladung.
+
+                                                                         WW-Speicher
+
+
+
+                                         KW        WP mit
+                                                   WW-Kondensator
+
+
+
+
+                                                          KW
+
+
+
+
+                                                                    66
+© FWS / AWB / Modul 3 / Version 1-2025
+                                         Übungsblock 3
+                                          (Aufgabe 4)
+
+
+
+
+                                                         67
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auswahl der Wärmequelle
+      Welche Wärmequelle soll/kann verwendet werden?
+       Ist die Nutzung von Grundwasser oder Erdwärme möglich?
+              - Nutzungskarte Grundwasser/Erdwärme kantonales Geoportal
+
+
+
+
+                               Bild: geoportal.lu.ch
+
+
+
+
+                                                               68
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auswahl der Wärmequelle
+      Welche Wärmequelle soll/kann verwendet werden?
+      -> Einsatz von L/W-WP wirtschaftlich und energetisch sinnvoll?
+
+
+
+
+      Abhängig vom Warmwasserbedarf bezogen auf den Gesamtenergiebedarf können im
+      Neubau mit L/W-WP gleich gute oder bessere JAZ als bei Verwendung von S/W-WP erzielt
+      werden.
+
+
+
+                                                                       69
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auswahl der Wärmequelle
+      Welche Wärmequelle soll/kann verwendet werden?
+      -> Ist eine Innenaufstellung von L/W-WP möglich/vertretbar?
+               - Bauliche Massnahmen prüfen
+
+
+
+
+                            Bilder: ait Schweiz AG
+
+
+
+
+                                                          70
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auswahl der Wärmequelle
+      Welche Wärmequelle soll/kann verwendet werden?
+      -> Ist eine Aussenaufstellung möglich – Schallnachweis?
+               - Lärmschutznachweis ausfüllen
+
+
+
+
+                   Bild: BFE-Schlussbericht «Integration von Luft/Wasser-Wärmepumpen im städtischen Kontext»
+
+
+
+
+                                                                                      71
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auswahl der Wärmequelle
+      Welche Wärmequelle soll/kann verwendet werden?
+      -> Ist eine Aussenaufstellung möglich – Schallnachweis?
+               - Lärmschutznachweis ausfüllen
+
+
+                                         Aufstellung in vielen Fällen kritisch
+
+
+
+
+                                         Aufstellung in vielen Fällen möglich
+
+
+
+                       Bild: BFE-Schlussbericht «Integration von Luft/Wasser-Wärmepumpen im städtischen Kontext»
+
+
+
+                                                                                       72
+© FWS / AWB / Modul 3 / Version 1-2025
+      Prinzipschema Solekreislauf
+                                                                              Verteiler/Sammler
+                                                                              Entlüftungen               Frosttiefe
+                                                                                                          ca. 80-100cm
+
+                                                   Expansionsgefäss                         A     PD
+                  Heizungs-UWP
+                                                                      SV
+                                                             SD   M
+                                                                                                       Y-Stücke
+
+
+                                    Sole UWP
+                                                                                                             Sonde 1          Sonde 2
+                                                                  Sole Auffangbehälter
+
+
+
+
+       M: Manometer                      A: Absperrungen und Durchflussmessung
+       SD: Soledruckwächter                 (zB. Tacosetter) sofern nötig
+       SV: Sicherheitsventil             PD: Pressringdichtungen Gas und Wasserdicht
+
+
+
+      Über den Solekreislauf wird die aufgenommene Energie dem Verdampfer zugeführt.
+      Der Solekreislauf wird meistens mit einem Sole/Wasser-Gemisch gefüllt. Für eine
+      Frostschutztemperatur von -14°C wird ein Anteil Frostschutz von 25% benötigt.
+
+      Die Erdwärmesonden (Duplexsonden mit Y-Zusammenführung) sollten innerhalb des
+      Gebäudes oder, wenn nicht anders möglich, in einem gut zugänglichen
+      Aussenschacht auf einen Verteiler geführt werden. Jeder Strang muss absperrbar und
+      bei Abweichungen von mehr als ca. 10-15% der Gesamtlängen (Sonde inkl.
+      Verbindungsleitungen) einzeln regulierbar sein.
+                                                                                                                         73
+© FWS / AWB / Modul 3 / Version 1-2025
+      Prinzipschema Solekreislauf
+                                                                                                                ?m          ?m
+
+                               Soleleitungen mit Frostschutztyp und          Verteiler/Sammler
+                               Mischverhältnis beschriften !                 Entlüftungen                   Frosttiefe                  Genaue Lage der Sonden
+                                                                                                             ca. 80-100cm               einmessen, planlich festhalten.
+                                                                                       S1   S2                                          Sonden einzeln beschriften.
+                                                   Expansionsgefäss                              A   PD
+                  Heizungs-UWP
+
+                                                             SD   M   SV
+                                                                                                          Y-Stücke
+
+                                                     Anschluss
+                                    Sole UWP         saugseitig
+                                                     der UWP Sole Auffangbehälter                               Sonde 1               Sonde 2
+
+
+
+
+       M: Manometer                      A: Absperrungen und Durchflussmessung
+       SD: Soledruckwächter                 (zB. Tacosetter) sofern nötig
+       SV: Sicherheitsventil             PD: Pressringdichtungen Gas und Wasserdicht
+
+
+
+      Über den Solekreislauf wird die aufgenommene Energie dem Verdampfer zugeführt.
+      Der Solekreislauf wird meistens mit einem Sole/Wasser-Gemisch gefüllt. Für eine
+      Frostschutztemperatur von -14°C wird ein Anteil Frostschutz von 25% benötigt.
+
+      Die Erdwärmesonden (Duplexsonden mit Y-Zusammenführung) sollten innerhalb des
+      Gebäudes oder, wenn nicht anders möglich, in einem gut zugänglichen
+      Aussenschacht auf einen Verteiler geführt werden. Jeder Strang muss absperrbar und
+      bei Abweichungen von mehr als ca. 10-15% der Gesamtlängen (Sonde inkl.
+      Verbindungsleitungen) einzeln regulierbar sein.
+                                                                                                                                 74
+© FWS / AWB / Modul 3 / Version 1-2025
+      Solekreislauf und Expansionsgefäss
+    Die Anschlussleitungen sind unter Frosttiefe und je nach Rohrqualität in einem Sandbett zu
+    führen und dort, wo die Einbautiefe nicht eingehalten wird, geeignet zu isolieren.
+
+    Der Solekreislauf benötigt ein Expansionsgefäss, das nicht sehr gross ist, jedoch oft zu
+    knapp ausgelegt wird. Bei Kleinanlagen min. 18 Liter Gefäss
+                                                                        Der Ausdehnungsfaktor des Frostschutz-
+                              Min. Volumen Sole-Expansionsgefäss        gemisches ist Abhängig vom Frostschutztyp und
+                                            nach SIA 384/6              dem Mischverhältnis. Im Normalfall wird von 0°C
+               120
+                                                                        auf 20°C ausgegangen. Die Ausdehnung der
+                            Beispiel: EFH mit Anlageninhalt 700 Liter
+               100                                                      Soleflüssigkeit wird mit dem Expansionsgefässes
+                80
+                                                                        kompensiert.
+
+                                                                        Das Volumen des Expansionsgefässes wird in der
+       Liter
+
+
+
+
+                60
+
+                40                                                      Regel mit einem mindestens dreifachen
+                                                                        Sicherheitszuschlag berechneten.
+                20
+
+                -                                                       Die zusätzliche Ausdehnung bei Soletemperaturen
+                                                                        von über 20°C (zB. bei aktiver Regeneration bis
+                                                                        über 30°C) muss berücksichtigt werden.
+
+
+
+
+                                                                                         75
+© FWS / AWB / Modul 3 / Version 1-2025
+ Dimensionierung Solekreislauf
+   Anlagenteil                           Beschrieb                                                      Richtwerte
+   Durchflussmenge                       Durchflussmenge durch den Verdampfer so wählen, dass die       Delta T ca. 3-4.5 K
+                                         Temperaturspreizung zwischen Sonden Vor- und Rücklauf
+                                         ca. 3-4.5 K beträgt.
+                                         In der Erdsonde sollte eine turbulente Strömung herrschen.
+                                         Eine laminare Strömung ergibt eine um ca. 1.5 K kältere
+                                         Wärmeträgerflüssigkeit, was einen ca. 3% grösseren
+                                         Stromverbrauch des Kompressors zur Folge hat.
+   Dimensionierung                       Richtige Dimensionierung der Verbindungsleitungen,             Hauptleitungen max. 1.5 m/s
+   Rohrleitungen                         Sondenverteiler-/Sammler sowie Anschluss bis auf               Sondenverteiler und
+                                         Wärmepumpe.                                                    Zuleitungen max. 1.0 m/s
+   Erdsonden                             Sondenlänge, Anzahl, Durchmesser und Sondentyp sollen          Druckverlust der Sonde
+                                         für eine nachhaltig energieeffiziente Anlage möglichst         ca. 35-70 KPa
+                                         sinnvoll abgestimmt werden. Die Druckfestigkeit richtet sich
+                                         nach der Bohrtiefe.
+
+                                         Die Längen sind auf den Sondenrohren aufgedruckt. So kann
+                                         relativ einfach die eingebaute Länge überprüft werden.
+
+                                         Hinweise:
+                                         Detaillierte Information über Erdsonden und deren
+                                         Auslegung liefert der FWS M6-Kurs
+
+
+                                                                                                        76
+© FWS / AWB / Modul 3 / Version 1-2025
+      Dimensionierung Solekreislauf
+        Anlagenteil                      Beschrieb                                                        Richtwerte
+        Erdsonden                        Übliche Sonden bestehen aus PE100-RC.                            Ab 150m Sondenlänge
+                                                                                                          d= 40 mm
+                                         Standardsonden:                                                  oder grösser wählen
+                                         Standard PN 16       32 x 3.0mm 40 x 3.7mm
+                                         Standard PN 20       40 x 4.5mm
+
+                                         Teilkonische Sonden (Beispiel Haka Gerodur):
+                                         Vario               PN 16 32 x 2.5-3.0 mm / 40 x 3.1-3.7 mm
+                                         Vario               PN 20 40 x 3.7-4.5 mm / 50 x 4.6-5.6 mm
+                                         Flux                PN 32 43 x 3.5-6.5 mm
+                                         Flux                PN 38 53 x 4.3-9.2 mm
+
+                                         Mehrschicht Sonden (Beispiel Jansen):
+                                         HiPress           PN 35 43 x 3.5 mm
+
+        Sondenfluid                      Das heute meistverwendete Frostschutzmittel ist Ethylenglykol.   Ethylenglykol 25%
+                                         Es sind im Markt auch Produkte mit Anteilen von Ethanol
+                                         erhältlich. Bei reinem Wasser müssen deutlich mehr
+                                         Sondenmeter verbaut werden.
+        Sole Umwälzpumpe                 Gesamtdruckverlust und Durchflussmenge ist massgebend für        El. Leistung der UWP
+                                         die korrekte Auslegung. Bei Inverter-WP Drehzahlgeregelte        ca. 2% der
+                                         UWP.                                                             Kompressorleistung
+
+                                                                                                    77
+© FWS / AWB / Modul 3 / Version 1-2025
+      Umwälzpumpen und Optimierung
+
+
+
+             M = Massenstrom             ∆p = Druckverlust   P = Kraftbedarf
+
+            Der Trend zu immer längeren EWS führt dazu, dass die Leistungen der Solepumpen
+            grösser werden.
+            Die meisten Soleumwälzpumpen sind überdimensioniert. Dies wirkt sich im erhöhten
+            Massenstrom aus, sodass der Solekreislauf statt mit ∆T = 3-4 K, nur mit 1.5 - 2.5K
+            betrieben wird. Der grössere Kraftbedarf der Umwälzpumpe wirkt sich damit negativ auf
+            die JAZ aus.
+
+            Der Kraftbedarf der Umwälzpumpen nimmt in der dritten Potenz des Massen-stroms zu
+            oder ab.
+
+
+
+
+                                                                                78
+© FWS / AWB / Modul 3 / Version 1-2025
+      Umwälzpumpen und Optimierung
+
+
+
+
+            Die Auslegung der Umwälzpumpe im Wärmequellenkreislauf soll möglichst optimal sein.
+            Dabei ist darauf zu achten, dass die Fördermenge den Anforderungen an die
+            Erdwärmesonden genügt und andererseits der Druckverlust nicht zu hoch wird.
+
+            Eine Optimierung ist möglich durch die Variation der Sondendurchmesser, der Sondenlänge
+            und die Aufteilung auf mehrere parallel betriebene Erdwärmesonden.
+
+                                                                                79
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 1
+      ohne Speicher und ohne Wassererwärmung
+
+
+
+
+      •     Ohne Speicher und ohne WW-Erwärmung.
+      •     Voraussetzung: SW-WP mit Vorlauftemperatur < 30°C
+            (Anlagen ohne Einzelraumregulierung).
+      •     Bei Bodenheizung kann der Boden als Speicherfunktion genutzt werden.
+
+
+
+
+                                                                          80
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 1a
+      ohne Speicher und ohne Wassererwärmung
+
+
+
+
+      •       Ohne Speicher und ohne WW-Erwärmung
+      •     Anlagen mit Einzelraumregulierung benötigen ein Überströmventil, das richtig eingestellt
+            werden muss.
+      •     Der Überströmer bedingt, dass die Umwälzpumpe nicht auf Konstantdruck/Partialdruck
+            eingestellt ist!
+          −     Alternative: 1-2 Heizkreise durchlaufen lassen
+                (zB. innenliegende Nasszellen, Randzonen) in Abgleich mit Energiegesetz.
+      •       Bei Bodenheizung kann der Boden als Speicherfunktion genutzt werden
+                                                                              81
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 2
+      ohne Speicher und mit Wassererwärmung
+
+
+
+
+      •     Ohne Speicher jedoch mit WW-Erwärmung, hydraulisch mit Umschaltventil.
+      •     Anlagen mit Einzelraumregulierung benötigen ein Überströmventil, das richtig eingestellt
+            werden muss.
+      •     Hinweis: Bei Anlagen ohne Einzelraumregulierung kann auf ein Überströmventil
+            verzichtet werden.
+      •     Bei Bodenheizung kann der Boden als Speicherfunktion genutzt werden.
+
+                                                                             82
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 3
+      mit Seriespeicher, ohne Wassererwärmung
+
+
+
+
+      •     Mit Seriespeicher im Rücklauf, ohne WW-Erwärmung.
+      •     Anlagen mit Einzelraumregulierung benötigen ein Überströmventil, das richtig eingestellt
+            werden muss.
+      •     Hinweis: Bei Anlagen ohne Einzelraumregulierung kann auf ein Überströmventil
+            verzichtet werden.
+      •     Bei L/W-Wärmepumpen ist ein Speicher auch für die Umkehrabtauung notwendig.
+
+                                                                             83
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 4
+      mit Seriespeicher und mit Wassererwärmung
+
+
+
+
+      •     Mit Seriespeicher im Rücklauf, bei längeren Sperrzeiten speziell bei Radiatorenheizungen
+            notwendig.
+      •     mit WW-Erwärmung, vor dem Speicher abgenommen, damit der Speicher bei der WW-
+            Ladung nicht mit überhöhten Temperaturen geladen wird.
+      •     Hinweis: Bei Anlagen ohne Einzelraumregulierung kann auf ein Überströmventil
+            verzichtet werden.
+
+
+                                                                             84
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 5
+      mit Parallelspeicher, ohne Wassererwärmung
+
+
+
+
+      •     Mit Parallelspeicher (hydraulische Entkopplung), ohne WW-Erwärmung.
+      •     Hinweis: Anlagen mit Einzelraumregulierung benötigen kein Überströmventil.
+
+
+
+
+                                                                           85
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 5a
+      mit Parallelspeicher, ohne Wassererwärmung
+
+
+
+
+      •     Mit Parallelspeicher (hydraulische Entkopplung), ohne WW-Erwärmung.
+      •     Anlagen mit Einzelraumregulierung benötigen kein Überströmventil.
+      •     Anlage mit zwei Heizgruppen, wobei meistens nur diejenige mit der tieferen
+            Heiztemperatur einen separaten Regelkreis benötigt.
+      •     Hinweis: In Kombination mit PV-Eigenverbrauchsoptimierung müssen beide Heizgruppen
+            mit einem Mischer ausgestattet sein.
+
+                                                                            86
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 6
+      mit Parallelspeicher, mit Wassererwärmung
+
+
+
+
+      •     Mit Parallelspeicher (hydraulische Entkopplung), beim Parallelspeicher ist eine zweite
+            Umwälzpumpe notwendig.
+      •     mit WW-Erwärmung, hydraulisch vor dem Speicher abgenommen.
+      •     Das Schema, welches am meisten vorkommt!
+      •     Hinweis: In Kombination mit PV-Eigenverbrauchsoptimierung muss die Heizgruppe mit
+            einem Mischer ausgestattet sein.
+
+                                                                              87
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 7.3
+      mit Solarunterstützung für Warmwasser
+
+
+
+
+                                              88
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 8c
+      Warmwasserbereitung mit FRIWA-System
+
+
+
+
+      •     Speicher mit Frischwasserstation und Zirkulation, Umschaltung Heizbetrieb oder
+            Warmwasserladung mit Umschaltventilen im Vor- und Rücklauf.
+
+
+
+
+                                                                            89
+© FWS / AWB / Modul 3 / Version 1-2025
+      Hydraulische Schaltung – Schema 8c
+      Warmwasserbereitung mit FRIWA-System
+
+
+
+
+      •     Speicher mit Frischwasserstation und Zirkulation, Umschaltung Heizbetrieb oder
+            Warmwasserladung mit Umschaltventilen im Vor- und Rücklauf.
+      •     Hinweis: Umschaltung im Zirkulationsbetrieb, um Durchmischung Speicher zu
+            verhindern.
+
+
+
+                                                                            90
+© FWS / AWB / Modul 3 / Version 1-2025
+      Technischer oder Energiespeicher
+       • Speziell bei Luft/Wasser-Wärmepumpen mit einem Abtausystem für Prozess-umkehrung
+         wird ein Speicher benötigt, da sonst bei tiefen Aussentemperaturen in der Abtauphase
+         der Kondensator einfrieren könnte.
+       • Die Speicherung von Wärmeenergie bei Wärmepumpensystemen muss gut überlegt
+         werden, da die Randbedingungen schlecht sind. Einerseits muss die Wärmepumpe
+         allenfalls für eine grössere Leistung dimensioniert werden und andererseits kann nur mit
+         einer kleinen Temperaturdifferenz gerechnet werden. Dies ergibt schon bei kleinem
+         Energiespeicherbedarf grosse bis sehr grosse Speicher.
+       • Speichervolumen für Überbrückung von Sperrzeiten werden in der Regel sehr gross und
+         sind daher oft nicht realisierbar. Problematisch kann es werden, wenn Heizkörper
+         bauphysikalische Aufgaben erfüllen müssen (zB. Kaltluftabfall und hohen
+         Fensterfronten).
+       • Für Lüftungsanlagen mit Lufterhitzer muss auch während den Sperrzeiten genügend
+         Wärmeenergie geliefert werden können. (Hinweis: Tarif mit EW besprechen bzw.
+         anpassen)
+       • Das Vergrössern von Heizungsspeicher im Zusammenhang mit PV- Anlagen zur Erhöhung
+         des Eigenverbrauchanteils muss gut überlegt werden (Ziele, Kosten, Verluste).
+
+
+
+
+                                                                                91
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auslegung von Wärmepumpen
+      Schnittstellen
+      Welche Schnittstellen sind erforderlich?
+      -> Soll die Wärmepumpe übergeordnet angesteuert werden?
+               - SG-Ready® Schnittstelle vorhanden
+                        - Möglichkeit für Ansteuerung über andere Schnittstellen (z.B. Modbus)
+
+      -> Sind Betriebsdaten an übergeordnetes System weiterzuleiten?
+                        - Geeignete Schnittstellen (z.B. Modbus)
+
+
+
+
+                                                                                  92
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auslegung von Wärmepumpen
+      Auswahl der Wärmepumpe
+      Prüfung anhand von Datenblätter ob alle Anforderungen und
+      Randbedingungen eingehalten werden können
+      Beispiel Luft/Wasser-WP Alpha Innotec LWAV 122R3
+
+
+                   Max. erforderliche
+                   Heizleistung @ A-8°C
+
+
+
+                                                             Max. zulässige
+                                         Heizkurve Gebäude   Leistungsaufnahme
+                                                             (Hausanschluss)
+
+
+
+
+       Bilder: ait Schweiz AG
+                                                                  93
+© FWS / AWB / Modul 3 / Version 1-2025
+      Auslegung von Wärmepumpen
+      Auswahl Wärmepumpe
+      Prüfung anhand von Datenblätter ob alle Anforderungen und
+      Randbedingungen eingehalten werden können
+      Beispiel Luft/Wasser-WP Alpha Innotec LWAV 122R3
+
+                Max. erforderliche
+                Vorlauftemp. der WP bei
+                Warmwasser @ A-8°C
+
+
+                Max. erforderliche             Max. erforderliche
+                Vorlauftemp. der WP            Vorlauftemp. Warmwasser
+                bei Heizung @ A-8°C            @ A25°C
+
+
+
+
+                      Bild: ait Schweiz AG
+                                                              94
+© FWS / AWB / Modul 3 / Version 1-2025
+    Bivalentanlagen mit Wärmepumpen
+    Grundsätzlich ist eine einfache Wärmepumpenanlage bezüglich Hydraulik und Regeltechnik immer
+    besser. Die Effizienz und die Störungsanfälligkeit sind bei einfachen Anlagen im Vorteil. Bivalente
+    Anlagen haben diese Vorteile nicht unbedingt, da sie komplexer sind.
+
+
+                                             Luft/Wasser-Wärmepumpe                                  Abschätzung des bivalenten Anteils der
+                                                                                                     Wärmepumpe:
+                           20
+                                                             Heizleistung Wärmepumpe
+                                                                                                     Bei Heizleistung 50%  ca. 80-85% Energie
+                           18
+                           16               Auslegepunkt                                             Bei Heizleistung 33%  ca. 50-60% Energie
+                           14                                                                        Bei Heizleistung 25%  ca. 30-40% Energie
+       Heizleistung [kW]
+
+
+
+
+                           12
+                                                           Bivalenzpunkt
+                           10                                                                        Hinweis:
+                            8
+                                                                                                     Mit dem Berechnungstool WP-Esti kann der
+                            6
+                            4
+                                                                           Heizbedarf Gebäude        bivalente Anteil berechnet werden.
+                            2
+                            0
+                                -15   -10        -5          0        5         10      15      20
+                                                      Aussentemperatur [°C]
+
+
+
+    Bivalentanlagen erfordern einen höheren Planungsaufwand und sollten unter Beizug eines
+    Planungsbüros realisiert werden. Bivalentanlagen sind, sofern sie bewilligungsfähig sind (Energiegesetz),
+    eine Möglichkeit auch grössere Heizleistungen abdecken zu können oder Investitionskosten zu
+    reduzieren. Einsatzgebiet bei grösseren Heizleistungen ab ca. 50 KW
+                                                                                                                       95
+© FWS / AWB / Modul 3 / Version 1-2025
+

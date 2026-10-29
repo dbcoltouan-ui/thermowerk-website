@@ -1,0 +1,147 @@
+Projekt Wärmepumpen Anlage mit Erdwärmesonde
+
+Auftrag: Eine bestehende Ölheizung soll durch eine Sole-Wasser-Wärmepumpe ersetzt werden
+
+Objekt:
+Art:                    EFH mit Anliegerwohnung
+Baujahr:                1993
+Standort:               6023 Rothenburg LU, Parzelle 863
+Gebäudehülle:           Die Gebäudehülle ist in gutem Zustand. Wärmetechnische Sanierungen wurden bis
+                        heute noch nicht vorgenommen und sind in den nächsten Jahren auch nicht vorgese-
+                        hen.
+Zimmer:                 5 ½ Zimmer-Wohnung und eine 2 ½ Zimmer-Wohnung
+Grösse:                 Energiebezugsfläche 5 ½ Zi-Wohnung      222 m2   Anzahl Personen 4
+                        Energiebezugsfläche 2 ½ Zi-Wohnung       65 m2   Anzahl Personen 1
+Raumhöhen:              UG: 2.30 m
+                        EG: 2.60 m
+                        OG: 2.50 m
+Heizung:                Heizkessel aus dem Jahre 1993 ist nicht kondensierend
+Warmwasser:             Warmwasserbereitung via Heizkessel. Warmwasserspeicher Inhalt 300 Liter und Wär-
+                        metauscher innen 3 m2
+                        Warmwasserleitungen ohne Zirkulationssystem bzw. Warmhalteband
+Wärmeabgabe:            Fussbodenheizung, ca. 75 % der Heizkreise sind thermostatisch geregelt
+Energieverbrauch:       2019:        150 Liter Heizöl EL
+                        2020:          0 Liter Heizöl EL
+                        2021:         00 Liter Heizöl EL
+Raumtemperatur:         Wohnbereich in Heizperiode: 22 -23 °C
+Heizkurve:              Bei bestehender Anlage (Reglereinstellung):
+                        Aussentemperatur - 10°C          Heizungsvorlauf    38°C
+                        Aussentemperatur + 10°C          Heizungsvorlauf    30°C
+Elektroversorger:       CKW
+Elektro:                Hausabsicherung: 3 x 60 A
+                        Platz für Einbau weiterer elektr. Komponenten im Elektrotableau und zusätzlichen
+                        Elektrozähler vorhanden
+Sperrzeit:              2h
+
+
+
+Praxiskurs WP-System-Modul                Praxisaufgabe Sole-Wasser-WP                           Seite 47 von 52
+
+
+© FWS AWB/WPSM/V. 1-2025
+Aufgaben
+
+
+Schritt 1:       Handling Datenerfassungsblatt
+                 Aufteilung in 2 Gruppen (Interview)
+                      1 Gruppe Installateur (füllt Datenerfassungsblatt aus)
+                      1 Gruppe Bauherr (gibt Auskunft auf Basis Info-Dokument bestehende Anlage)
+
+
+Schritt 2:       Berechnung Heizleistung
+                 Hilfsmittel FWS Berechnungs-Tool
+
+
+
+Schritt 3:       Wahl der richtigen Wärmepumpe
+
+
+
+Schritt 4:       Wahl des WP-System-Moduls eines Anbieters
+                 Wärmepumpe, Speicher, Wassererwärmer und Funktionsschema
+
+
+
+Schritt 5:       Wahl Standort EWS und Platzierung WP
+
+
+
+Schritt 6:       Erstellen des Grundlagedatenblattes für EWS-Berechnung
+
+
+
+
+Praxiskurs WP-System-Modul             Praxisaufgabe Sole-Wasser-WP                         Seite 52 von 52
+
+
+© FWS AWB/WPSM/V. 1-2025
+Projekt Luft/Wasser-Wärmepumpen Anlage
+
+Auftrag: Eine bestehende Ölheizung soll durch eine Luft-Wasser-Wärmepumpe ersetzt werden
+
+Objekt
+Art:                    Eck-EFH
+Baujahr:                1983
+Standort                6244 Nebikon LU
+Gebäudehülle:           Die Gebäudehülle ist in gutem Zustand. Wärmetechnische Sanierungen wurden im
+                        Jahre 2010 vorgenommen. Neue Fenster, Dach und Kellerdecken isoliert.
+Zimmer:                 5 ½ Zimmer-Wohnung
+Grösse:                 Energiebezugsfläche 191 m2
+Raumhöhen:              EG 2.70 m
+                        OG 2.81 m (ohne Dachschräge)
+Heizung:                Ölheizkessel aus dem Jahr 1983
+Warmwasser:             wird das ganze Jahr mit einem Elektrowassererwärmer produziert (60°C) ohne Zirku-
+                        lation bzw. Warmhalteband. Es ist ein 300 Liter Brauchwasssererwärmer installiert.
+                        Zukünftig soll das Brauchwarmwasser mit der L/W-WP erzeugt werden.
+Wärmeabgabe:            Fussbodenheizung (45/35°C bei -8°C) mit Thermostatventile in allen Räumen.
+Energieverbrauch:       2019:     1'800 Liter Heizöl EL
+                        2020:     1'550 Liter Heizöl EL
+                        2021:     1'900 Liter Heizöl EL
+Raumtemperatur:         Wohnbereich in Heizperiode: 22-23°C
+Heizkurve:              bei bestehender Anlage (Reglereinstellung):
+                        Aussentemperatur - 8°C           Heizungsvorlauf     45°C
+                        Aussentemperatur + 10°C          Heizungsvorlauf     31°C
+Elektroversorger:       EBM Münchenstein
+Elektro:                Hausabsicherung: 3 x 60 A
+                        Platz für Einbau weiterer elektr. Komponenten wie Elektrozähler etc. im Elektro-
+                        tableau vorhanden
+Sperrzeit:              2h
+
+
+
+
+Praxiskurs WP-System-Modul               Praxisaufgabe Luft-Wasser-WP                            Seite 40 von 52
+
+
+© FWS AWB/WPSM/V. 1-2025
+Aufgaben
+
+
+Schritt 1:       Handling Datenerfassungsblatt
+                 Aufteilung in 2 Gruppen (Interview)
+                     1 Gruppe Installateur (füllt Datenerfassungsblatt aus)
+                     1 Gruppe Bauherr (gibt Auskunft auf Basis Info-Dokument bestehende Anlage)
+
+
+Schritt 2:       Berechnung Heizleistung
+                 Hilfsmittel FWS Berechnungs-Tool
+
+
+Schritt 3:       Wahl der richtigen Wärmepumpe
+
+
+Schritt 4:       Wahl des WP-System-Moduls eines Anbieters
+                 Wärmepumpe, Speicher, Wassererwärmer und Funktionsschema
+
+
+Schritt 5:       Platzierung der LW-WP (innen oder aussen)
+                 Lärmschutznachweis mit FWS Lärmschutznachweis
+
+
+
+
+Praxiskurs WP-System-Modul            Praxisaufgabe Luft-Wasser-WP                         Seite 46 von 52
+
+
+© FWS AWB/WPSM/V. 1-2025
+

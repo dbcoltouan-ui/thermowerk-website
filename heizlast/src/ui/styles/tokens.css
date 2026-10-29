@@ -1,0 +1,96 @@
+/* =========================================================================
+   Thermowerk Heizlast — Design-Tokens (Session 1)
+   Abgeleitet aus dem alten Tool (referenz/alt-style/style.css):
+   Farbpalette (Inks = neutrale Slate-Stufen, Brand = Navy, Accent = Rot)
+   und die eckige Formensprache (Radien 0–4 px) werden übernommen (KONTEXT §2).
+   Layout, Dichte und Komponenten sind neu.
+   ========================================================================= */
+
+:root {
+  /* ---- Neutrale Stufen ---- */
+  --ink-0: #ffffff;
+  --ink-50: #f7f9fb;
+  --ink-100: #eef2f6;
+  --ink-200: #e2e8f0;
+  --ink-300: #cbd5e1;
+  --ink-400: #94a3b8;
+  --ink-500: #64748b;
+  --ink-600: #475569;
+  --ink-700: #334155;
+  --ink-800: #1e293b;
+  --ink-900: #0f172a;
+
+  /* ---- Thermowerk-CI: Navy + Rot (wie Hauptseite) ---- */
+  --brand-50: #eef1f6;
+  --brand-100: #d8dde8;
+  --brand-300: #243658;
+  --brand-500: #1b2a4a;
+  --brand-600: #111d33;
+  --brand-700: #0b1424;
+
+  --accent-500: #d93025;
+  --accent-600: #b71c1c;
+
+  /* ---- Semantik / Ampel ---- */
+  --ok-500: #16a34a;
+  --ok-100: #dcfce7;
+  --warn-500: #d97706;
+  --warn-100: #fef3c7;
+  --bad-500: #d93025;
+  --bad-100: #fee2e2;
+  --info-500: #1b2a4a;
+  --info-100: #eef1f6;
+
+  /* ---- Typografie ---- */
+  --ff: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ff-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 28px;
+  --fs-3xl: 40px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ---- Abstände ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* ---- Formensprache: eckig (Radien 0–4 px) ---- */
+  --r-xs: 0px;
+  --r-sm: 2px;
+  --r-md: 3px;
+  --r-lg: 4px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 32px rgba(15, 23, 42, 0.12);
+
+  /* ---- Semantische Aliasse ---- */
+  --c-bg: var(--ink-50);
+  --c-card: var(--ink-0);
+  --c-border: var(--ink-200);
+  --c-border-strong: var(--ink-300);
+  --c-text: var(--ink-900);
+  --c-text-mute: var(--ink-500);
+  --c-brand: var(--brand-500);
+  --c-accent: var(--accent-500);
+  --c-focus: var(--brand-300);
+
+  /* ---- Layout-Masse ---- */
+  --topbar-h: 56px;
+  --stepper-h: 44px;
+  --dashboard-w: 320px;
+  --inhalt-max: 760px;
+}

@@ -1,0 +1,818 @@
+{
+  "$schemaVersion": 1,
+  "exportedAt": "2026-04-27T00:00:00.000Z",
+  "exportedFrom": "manual-seed",
+  "_disclaimer": "Seed-Daten fuer Phase 12. Datenblatt-Werte sind plausibel, aber NICHT mit Hersteller-PDF abgeglichen (verified=false). Vor produktivem Einsatz: Werte gegen aktuelles Datenblatt pruefen und verified auf true setzen.",
+  "heatPumps": [
+    {
+      "_id": "hp-midea-mthermal-arctic-r290-v8-8kw",
+      "_type": "heatPumpProduct",
+      "manufacturer": "Midea",
+      "model": "M-Thermal Arctic R290 V8 8 kW",
+      "productCode": "MHC-V8W/D2N8-B30",
+      "type": "air-water",
+      "refrigerant": "R290",
+      "refrigerantChargeKg": 1.7,
+      "gwp": 3,
+      "powerCurve": [
+        {
+          "tSource": -7,
+          "tSink": 35,
+          "qWp": 7.2,
+          "cop": 2.95
+        },
+        {
+          "tSource": 2,
+          "tSink": 35,
+          "qWp": 8.0,
+          "cop": 4.3
+        },
+        {
+          "tSource": 7,
+          "tSink": 35,
+          "qWp": 8.4,
+          "cop": 4.75
+        },
+        {
+          "tSource": -7,
+          "tSink": 55,
+          "qWp": 6.8,
+          "cop": 2.05
+        },
+        {
+          "tSource": 2,
+          "tSink": 55,
+          "qWp": 7.5,
+          "cop": 2.85
+        },
+        {
+          "tSource": 7,
+          "tSink": 55,
+          "qWp": 8.0,
+          "cop": 3.2
+        }
+      ],
+      "minSourceTemp": -25,
+      "minFlowTemp": 20,
+      "maxFlowTemp": 75,
+      "soundPowerDay": 58,
+      "soundPowerNight": 53,
+      "powerSupply": "230V-1P",
+      "maxCurrentA": 16,
+      "startCurrentA": 12,
+      "weightKg": 132,
+      "dimensions": {
+        "width": 1100,
+        "height": 905,
+        "depth": 440
+      },
+      "datasheetUrl": "https://www.midea.com/global/heating-cooling/heat-pump",
+      "verified": false,
+      "notes": "R290-Variante. Aussengeraet einphasig 230 V/16 A. Hinweis: powerCurve-Punkte aus typischer Datenblatt-Spanne, vor produktivem Einsatz mit aktuellem Midea-Datenblatt abgleichen.",
+      "recommendedSet": {
+        "circulatorPumpId": "pump-grundfos-alpha2-25-60",
+        "storageTankId": "tank-reflex-storatherm-aqua-300",
+        "bufferTankId": "tank-reflex-storatherm-heat-h-200",
+        "expansionTankId": "mag-reflex-n-18"
+      }
+    },
+    {
+      "_id": "hp-bosch-compress-7400i-aw-9-r290",
+      "_type": "heatPumpProduct",
+      "manufacturer": "Bosch",
+      "model": "Compress 7400i AW 9 (R290)",
+      "productCode": "8 738 213 014",
+      "type": "air-water",
+      "refrigerant": "R290",
+      "refrigerantChargeKg": 2.4,
+      "gwp": 3,
+      "powerCurve": [
+        {
+          "tSource": -7,
+          "tSink": 35,
+          "qWp": 7.8,
+          "cop": 3.05
+        },
+        {
+          "tSource": 2,
+          "tSink": 35,
+          "qWp": 8.6,
+          "cop": 4.45
+        },
+        {
+          "tSource": 7,
+          "tSink": 35,
+          "qWp": 9.1,
+          "cop": 4.8
+        },
+        {
+          "tSource": -7,
+          "tSink": 55,
+          "qWp": 7.2,
+          "cop": 2.1
+        },
+        {
+          "tSource": 2,
+          "tSink": 55,
+          "qWp": 8.0,
+          "cop": 2.95
+        },
+        {
+          "tSource": 7,
+          "tSink": 55,
+          "qWp": 8.7,
+          "cop": 3.35
+        }
+      ],
+      "minSourceTemp": -22,
+      "minFlowTemp": 20,
+      "maxFlowTemp": 75,
+      "soundPowerDay": 54,
+      "soundPowerNight": 49,
+      "powerSupply": "400V-3P",
+      "maxCurrentA": 13,
+      "startCurrentA": 9,
+      "weightKg": 165,
+      "dimensions": {
+        "width": 1216,
+        "height": 1308,
+        "depth": 526
+      },
+      "datasheetUrl": "https://www.bosch-homecomfort.com/ch/de/wohngebaeude/produkte/waermepumpen/luft-wasser/compress-7400i-aw/",
+      "verified": false,
+      "notes": "Aussengeraet 9 kW. Innengeraet IDU separat erforderlich. Sehr leise (54 dB Tag laut Datenblatt). Werte vor Einsatz pruefen.",
+      "recommendedSet": {
+        "circulatorPumpId": "pump-grundfos-alpha2-25-60",
+        "storageTankId": "tank-reflex-storatherm-aqua-300",
+        "bufferTankId": "tank-reflex-storatherm-heat-h-200",
+        "expansionTankId": "mag-reflex-n-25"
+      }
+    },
+    {
+      "_id": "hp-mitsubishi-ecodan-puz-wm85vaa-r32",
+      "_type": "heatPumpProduct",
+      "manufacturer": "Mitsubishi Electric",
+      "model": "Ecodan PUZ-WM85VAA (R32) 8.5 kW",
+      "productCode": "PUZ-WM85VAA",
+      "type": "air-water",
+      "refrigerant": "R32",
+      "refrigerantChargeKg": 1.85,
+      "gwp": 675,
+      "powerCurve": [
+        {
+          "tSource": -15,
+          "tSink": 35,
+          "qWp": 7.2,
+          "cop": 2.2
+        },
+        {
+          "tSource": -7,
+          "tSink": 35,
+          "qWp": 7.9,
+          "cop": 2.85
+        },
+        {
+          "tSource": 2,
+          "tSink": 35,
+          "qWp": 8.5,
+          "cop": 4.2
+        },
+        {
+          "tSource": 7,
+          "tSink": 35,
+          "qWp": 8.5,
+          "cop": 4.65
+        },
+        {
+          "tSource": -7,
+          "tSink": 55,
+          "qWp": 7.5,
+          "cop": 1.95
+        },
+        {
+          "tSource": 2,
+          "tSink": 55,
+          "qWp": 8.5,
+          "cop": 2.75
+        },
+        {
+          "tSource": 7,
+          "tSink": 55,
+          "qWp": 8.5,
+          "cop": 3.1
+        }
+      ],
+      "minSourceTemp": -25,
+      "minFlowTemp": 25,
+      "maxFlowTemp": 60,
+      "soundPowerDay": 62,
+      "soundPowerNight": 60,
+      "powerSupply": "230V-1P",
+      "maxCurrentA": 24,
+      "startCurrentA": 5,
+      "weightKg": 80,
+      "dimensions": {
+        "width": 950,
+        "height": 943,
+        "depth": 330
+      },
+      "datasheetUrl": "https://les.mitsubishielectric.ch/de/produkte/heizen-und-warmwasser/ecodan-luft-wasser",
+      "verified": false,
+      "notes": "PUZ-WM-Serie ist die 'Power-Inverter'-Variante. R32 (A2L). Werte vor Einsatz pruefen.",
+      "recommendedSet": {
+        "circulatorPumpId": "pump-grundfos-alpha2-25-60",
+        "storageTankId": "tank-reflex-storatherm-aqua-300",
+        "bufferTankId": "tank-reflex-storatherm-heat-h-200",
+        "expansionTankId": "mag-reflex-n-18"
+      }
+    },
+    {
+      "_id": "hp-oertli-lia-9tes-r410a",
+      "_type": "heatPumpProduct",
+      "manufacturer": "Oertli",
+      "model": "LIA 9 TES (R410A)",
+      "productCode": "LIA-9-TES",
+      "type": "air-water",
+      "refrigerant": "R410A",
+      "refrigerantChargeKg": 2.2,
+      "gwp": 2088,
+      "powerCurve": [
+        {
+          "tSource": -7,
+          "tSink": 35,
+          "qWp": 6.9,
+          "cop": 2.65
+        },
+        {
+          "tSource": 2,
+          "tSink": 35,
+          "qWp": 8.0,
+          "cop": 3.95
+        },
+        {
+          "tSource": 7,
+          "tSink": 35,
+          "qWp": 8.6,
+          "cop": 4.45
+        },
+        {
+          "tSource": -7,
+          "tSink": 55,
+          "qWp": 6.4,
+          "cop": 1.85
+        },
+        {
+          "tSource": 2,
+          "tSink": 55,
+          "qWp": 7.5,
+          "cop": 2.65
+        },
+        {
+          "tSource": 7,
+          "tSink": 55,
+          "qWp": 8.1,
+          "cop": 3.05
+        }
+      ],
+      "minSourceTemp": -20,
+      "minFlowTemp": 25,
+      "maxFlowTemp": 62,
+      "soundPowerDay": 57,
+      "soundPowerNight": 54,
+      "powerSupply": "400V-3P",
+      "maxCurrentA": 14,
+      "startCurrentA": 8,
+      "weightKg": 145,
+      "dimensions": {
+        "width": 1100,
+        "height": 1390,
+        "depth": 480
+      },
+      "datasheetUrl": "https://www.oertli.ch/de/produkte/waermepumpen/",
+      "verified": false,
+      "notes": "Oertli ist Teil der ELCO-Gruppe (CH). LIA-Serie ist Luft/Wasser-Aussengeraet. R410A-Bestandsmodell — neuere R32-Varianten kommen separat. Werte vor Einsatz pruefen.",
+      "recommendedSet": {
+        "circulatorPumpId": "pump-wilo-yonos-para-25-7",
+        "storageTankId": "tank-reflex-storatherm-aqua-300",
+        "bufferTankId": "tank-reflex-storatherm-heat-h-200",
+        "expansionTankId": "mag-reflex-n-25"
+      }
+    },
+    {
+      "_id": "hp-panasonic-aquarea-j-mdc07j3e5-r290",
+      "_type": "heatPumpProduct",
+      "manufacturer": "Panasonic",
+      "model": "Aquarea J Generation WH-MDC07J3E5 (R290) 7 kW",
+      "productCode": "WH-MDC07J3E5",
+      "type": "air-water",
+      "refrigerant": "R290",
+      "refrigerantChargeKg": 1.5,
+      "gwp": 3,
+      "powerCurve": [
+        {
+          "tSource": -7,
+          "tSink": 35,
+          "qWp": 5.9,
+          "cop": 3.1
+        },
+        {
+          "tSource": 2,
+          "tSink": 35,
+          "qWp": 6.8,
+          "cop": 4.55
+        },
+        {
+          "tSource": 7,
+          "tSink": 35,
+          "qWp": 7.0,
+          "cop": 4.9
+        },
+        {
+          "tSource": -7,
+          "tSink": 55,
+          "qWp": 5.4,
+          "cop": 2.05
+        },
+        {
+          "tSource": 2,
+          "tSink": 55,
+          "qWp": 6.4,
+          "cop": 3.05
+        },
+        {
+          "tSource": 7,
+          "tSink": 55,
+          "qWp": 6.9,
+          "cop": 3.45
+        }
+      ],
+      "minSourceTemp": -28,
+      "minFlowTemp": 20,
+      "maxFlowTemp": 75,
+      "soundPowerDay": 54,
+      "soundPowerNight": 50,
+      "powerSupply": "230V-1P",
+      "maxCurrentA": 16,
+      "startCurrentA": 4,
+      "weightKg": 64,
+      "dimensions": {
+        "width": 970,
+        "height": 845,
+        "depth": 370
+      },
+      "datasheetUrl": "https://www.aircon.panasonic.eu/CH_de/range/aquarea-luft-wasser-waermepumpe/",
+      "verified": false,
+      "notes": "Monobloc 7 kW. R290 (A3, brennbar). Sehr leise. Werte vor Einsatz mit Datenblatt der J-Generation pruefen.",
+      "recommendedSet": {
+        "circulatorPumpId": "pump-grundfos-alpha2-25-60",
+        "storageTankId": "tank-reflex-storatherm-aqua-300",
+        "bufferTankId": "tank-reflex-storatherm-heat-h-200",
+        "expansionTankId": "mag-reflex-n-18"
+      }
+    }
+  ],
+  "storageTanks": [
+    {
+      "_id": "tank-reflex-storatherm-aqua-300",
+      "_type": "storageTankProduct",
+      "manufacturer": "Reflex",
+      "model": "Storatherm Aqua AB 300/1 M_C",
+      "productCode": "7611100",
+      "type": "ww",
+      "volumeLiters": 295,
+      "maxPressureBar": 10,
+      "maxTempC": 95,
+      "standbyLossW": 84,
+      "erpClass": "B",
+      "heatExchangers": 1,
+      "hxAreaTopM2": 0,
+      "hxAreaBottomM2": 1.55,
+      "connection": "R 1¼\" Heizung / R 1\" WW",
+      "dimensions": {
+        "diameter": 660,
+        "height": 1565,
+        "tiltHeight": 1610
+      },
+      "weightEmptyKg": 95,
+      "datasheetUrl": "https://www.reflex.de/de/produkte/warmwasser/storatherm-aqua/",
+      "verified": false,
+      "notes": "Standard-WW-Speicher 300 L mit unterer Wendel. Passt zu WP 6-9 kW."
+    },
+    {
+      "_id": "tank-reflex-storatherm-heat-h-200",
+      "_type": "storageTankProduct",
+      "manufacturer": "Reflex",
+      "model": "Storatherm Heat H 200/1_C",
+      "productCode": "7842100",
+      "type": "puffer",
+      "volumeLiters": 200,
+      "maxPressureBar": 3,
+      "maxTempC": 95,
+      "standbyLossW": 60,
+      "erpClass": "B",
+      "heatExchangers": 0,
+      "connection": "R 1\" allseitig",
+      "dimensions": {
+        "diameter": 600,
+        "height": 1300,
+        "tiltHeight": 1330
+      },
+      "weightEmptyKg": 60,
+      "datasheetUrl": "https://www.reflex.de/de/produkte/heizung/storatherm-heat/",
+      "verified": false,
+      "notes": "Reiner Pufferspeicher fuer hydraulische Entkopplung / Sperrzeitueberbrueckung."
+    },
+    {
+      "_id": "tank-vaillant-allstor-vps-500",
+      "_type": "storageTankProduct",
+      "manufacturer": "Vaillant",
+      "model": "allSTOR VPS 500/3-7",
+      "productCode": "0010005153",
+      "type": "kombi",
+      "volumeLiters": 500,
+      "maxPressureBar": 3,
+      "maxTempC": 95,
+      "standbyLossW": 110,
+      "erpClass": "B",
+      "heatExchangers": 0,
+      "connection": "R 1¼\" / R 1\" WW-Wendel",
+      "dimensions": {
+        "diameter": 760,
+        "height": 1845,
+        "tiltHeight": 2010
+      },
+      "weightEmptyKg": 132,
+      "datasheetUrl": "https://www.vaillant.ch/heizung/produkte/speicher/",
+      "verified": false,
+      "notes": "Kombispeicher mit Frischwasserstation kombinierbar. Fuer Anlagen mit hohem WW-Bedarf."
+    }
+  ],
+  "circulatorPumps": [
+    {
+      "_id": "pump-grundfos-alpha2-25-60",
+      "_type": "circulatorPumpProduct",
+      "manufacturer": "Grundfos",
+      "model": "ALPHA2 25-60 180",
+      "productCode": "99411115",
+      "type": "wet-rotor-ec",
+      "maxFlowM3h": 3.5,
+      "maxHeadM": 6.0,
+      "curves": [
+        {
+          "speed": "auto",
+          "points": [
+            {
+              "flowM3h": 0.0,
+              "headM": 5.5,
+              "powerW": 9
+            },
+            {
+              "flowM3h": 0.5,
+              "headM": 5.3,
+              "powerW": 12
+            },
+            {
+              "flowM3h": 1.0,
+              "headM": 5.0,
+              "powerW": 18
+            },
+            {
+              "flowM3h": 1.5,
+              "headM": 4.4,
+              "powerW": 25
+            },
+            {
+              "flowM3h": 2.0,
+              "headM": 3.6,
+              "powerW": 32
+            },
+            {
+              "flowM3h": 2.5,
+              "headM": 2.5,
+              "powerW": 38
+            },
+            {
+              "flowM3h": 3.0,
+              "headM": 1.2,
+              "powerW": 42
+            }
+          ]
+        }
+      ],
+      "eei": 0.18,
+      "maxPowerW": 50,
+      "connection": "G 1½\"",
+      "maxFluidTempC": 95,
+      "maxPressureBar": 10,
+      "powerSupply": "230V-1P",
+      "datasheetUrl": "https://product-selection.grundfos.com/products/alpha/alpha2",
+      "verified": false,
+      "notes": "Hocheffizienz-Nasslaeufer fuer EFH. Standard-Bau-Laenge 180 mm."
+    },
+    {
+      "_id": "pump-wilo-yonos-para-25-7",
+      "_type": "circulatorPumpProduct",
+      "manufacturer": "Wilo",
+      "model": "Yonos PARA 25/7",
+      "productCode": "4525323",
+      "type": "wet-rotor-ec",
+      "maxFlowM3h": 4.5,
+      "maxHeadM": 7.0,
+      "curves": [
+        {
+          "speed": "Δp-v auto",
+          "points": [
+            {
+              "flowM3h": 0.0,
+              "headM": 6.5,
+              "powerW": 8
+            },
+            {
+              "flowM3h": 1.0,
+              "headM": 6.2,
+              "powerW": 22
+            },
+            {
+              "flowM3h": 2.0,
+              "headM": 5.4,
+              "powerW": 38
+            },
+            {
+              "flowM3h": 3.0,
+              "headM": 4.2,
+              "powerW": 52
+            },
+            {
+              "flowM3h": 4.0,
+              "headM": 2.6,
+              "powerW": 65
+            }
+          ]
+        }
+      ],
+      "eei": 0.2,
+      "maxPowerW": 75,
+      "connection": "G 1½\"",
+      "maxFluidTempC": 95,
+      "maxPressureBar": 10,
+      "powerSupply": "230V-1P",
+      "datasheetUrl": "https://wilo.com/ch/de/Produkte-Loesungen/Produktsuche/Yonos-PARA",
+      "verified": false,
+      "notes": "Hocheffizienz-Nasslaeufer mit 7 m Foerderhoehe — geeignet fuer Anlagen mit hoeherem Druckverlust."
+    },
+    {
+      "_id": "pump-wilo-stratos-para-25-1-11",
+      "_type": "circulatorPumpProduct",
+      "manufacturer": "Wilo",
+      "model": "Stratos PARA 25/1-11",
+      "productCode": "2114655",
+      "type": "wet-rotor-ec",
+      "maxFlowM3h": 7.5,
+      "maxHeadM": 11.0,
+      "curves": [
+        {
+          "speed": "Δp-v auto",
+          "points": [
+            {
+              "flowM3h": 0.0,
+              "headM": 10.5,
+              "powerW": 14
+            },
+            {
+              "flowM3h": 1.5,
+              "headM": 9.8,
+              "powerW": 38
+            },
+            {
+              "flowM3h": 3.0,
+              "headM": 8.5,
+              "powerW": 70
+            },
+            {
+              "flowM3h": 4.5,
+              "headM": 6.6,
+              "powerW": 110
+            },
+            {
+              "flowM3h": 6.0,
+              "headM": 4.2,
+              "powerW": 145
+            }
+          ]
+        }
+      ],
+      "eei": 0.2,
+      "maxPowerW": 175,
+      "connection": "G 1½\"",
+      "maxFluidTempC": 110,
+      "maxPressureBar": 10,
+      "powerSupply": "230V-1P",
+      "datasheetUrl": "https://wilo.com/ch/de/Produkte-Loesungen/Produktsuche/Stratos-PARA",
+      "verified": false,
+      "notes": "Hocheffizienz-Nasslaeufer fuer mittlere/grosse Anlagen mit hohem Druckverlust."
+    }
+  ],
+  "radiators": [
+    {
+      "_id": "rad-buderus-logatrend-c-profil",
+      "_type": "radiatorProduct",
+      "manufacturer": "Buderus",
+      "model": "Logatrend C-Profil Typ 22",
+      "series": "Logatrend C-Profil",
+      "type": "panel-22",
+      "exponentN": 1.3,
+      "referenceTemps": {
+        "tVorlauf": 75,
+        "tRuecklauf": 65,
+        "tRaum": 20
+      },
+      "powerTable": [
+        {
+          "heightMm": 600,
+          "lengthMm": 600,
+          "powerW": 1101,
+          "waterVolL": 3.6,
+          "massKg": 18
+        },
+        {
+          "heightMm": 600,
+          "lengthMm": 1000,
+          "powerW": 1835,
+          "waterVolL": 6.0,
+          "massKg": 30
+        },
+        {
+          "heightMm": 600,
+          "lengthMm": 1400,
+          "powerW": 2569,
+          "waterVolL": 8.4,
+          "massKg": 42
+        },
+        {
+          "heightMm": 600,
+          "lengthMm": 1800,
+          "powerW": 3303,
+          "waterVolL": 10.8,
+          "massKg": 54
+        },
+        {
+          "heightMm": 900,
+          "lengthMm": 600,
+          "powerW": 1602,
+          "waterVolL": 5.4,
+          "massKg": 26
+        },
+        {
+          "heightMm": 900,
+          "lengthMm": 1000,
+          "powerW": 2670,
+          "waterVolL": 9.0,
+          "massKg": 43
+        },
+        {
+          "heightMm": 900,
+          "lengthMm": 1400,
+          "powerW": 3738,
+          "waterVolL": 12.6,
+          "massKg": 60
+        }
+      ],
+      "connection": "6-fach 1/2\"",
+      "maxPressureBar": 10,
+      "datasheetUrl": "https://www.buderus.de/de/produkte/heizkoerper/logatrend",
+      "verified": false,
+      "notes": "Plattenheizkoerper Typ 22. Standard fuer EFH-Sanierung. n=1.30 typisch."
+    },
+    {
+      "_id": "rad-zehnder-charleston",
+      "_type": "radiatorProduct",
+      "manufacturer": "Zehnder",
+      "model": "Charleston 3-Saeulen",
+      "series": "Charleston",
+      "type": "tube",
+      "exponentN": 1.28,
+      "referenceTemps": {
+        "tVorlauf": 75,
+        "tRuecklauf": 65,
+        "tRaum": 20
+      },
+      "powerTable": [
+        {
+          "heightMm": 600,
+          "lengthMm": 736,
+          "powerW": 552,
+          "waterVolL": 3.6,
+          "massKg": 12
+        },
+        {
+          "heightMm": 600,
+          "lengthMm": 1380,
+          "powerW": 1035,
+          "waterVolL": 6.7,
+          "massKg": 22
+        },
+        {
+          "heightMm": 900,
+          "lengthMm": 736,
+          "powerW": 759,
+          "waterVolL": 5.0,
+          "massKg": 16
+        },
+        {
+          "heightMm": 900,
+          "lengthMm": 1380,
+          "powerW": 1424,
+          "waterVolL": 9.4,
+          "massKg": 30
+        },
+        {
+          "heightMm": 1200,
+          "lengthMm": 736,
+          "powerW": 952,
+          "waterVolL": 6.4,
+          "massKg": 20
+        },
+        {
+          "heightMm": 1200,
+          "lengthMm": 1380,
+          "powerW": 1786,
+          "waterVolL": 12.0,
+          "massKg": 38
+        }
+      ],
+      "connection": "seitlich oder Mittelanschluss",
+      "maxPressureBar": 10,
+      "datasheetUrl": "https://www.zehnder-systems.ch/produkte/heizkoerper/charleston",
+      "verified": false,
+      "notes": "Roehrenradiator mit 3 Saeulen pro Glied. Klassiker fuer Altbau-Sanierung. n=1.28."
+    }
+  ],
+  "expansionTanks": [
+    {
+      "_id": "mag-reflex-n-18",
+      "_type": "expansionTankProduct",
+      "manufacturer": "Reflex",
+      "model": "N 18",
+      "productCode": "8270100",
+      "volumeLiters": 18,
+      "preChargeBar": 1.5,
+      "maxPressureBar": 6,
+      "maxTempC": 70,
+      "connection": "R 3/4\"",
+      "application": "heating",
+      "membraneType": "fixed",
+      "dimensions": {
+        "diameter": 280,
+        "height": 360
+      },
+      "weightKg": 4.5,
+      "datasheetUrl": "https://www.reflex.de/de/produkte/heizung/reflex-n/",
+      "verified": false,
+      "notes": "Standard-MAG fuer kleine EFH-Anlagen bis ca. 250 L Anlagenvolumen."
+    },
+    {
+      "_id": "mag-reflex-n-25",
+      "_type": "expansionTankProduct",
+      "manufacturer": "Reflex",
+      "model": "N 25",
+      "productCode": "8270400",
+      "volumeLiters": 25,
+      "preChargeBar": 1.5,
+      "maxPressureBar": 6,
+      "maxTempC": 70,
+      "connection": "R 3/4\"",
+      "application": "heating",
+      "membraneType": "fixed",
+      "dimensions": {
+        "diameter": 280,
+        "height": 470
+      },
+      "weightKg": 6.0,
+      "datasheetUrl": "https://www.reflex.de/de/produkte/heizung/reflex-n/",
+      "verified": false,
+      "notes": "Standard-MAG fuer mittlere EFH-Anlagen bis ca. 350 L Anlagenvolumen."
+    },
+    {
+      "_id": "mag-flamco-flexcon-c-25",
+      "_type": "expansionTankProduct",
+      "manufacturer": "Flamco",
+      "model": "Flexcon C 25",
+      "productCode": "27123",
+      "volumeLiters": 25,
+      "preChargeBar": 1.5,
+      "maxPressureBar": 3,
+      "maxTempC": 70,
+      "connection": "R 3/4\"",
+      "application": "heating",
+      "membraneType": "fixed",
+      "dimensions": {
+        "diameter": 280,
+        "height": 480
+      },
+      "weightKg": 5.8,
+      "datasheetUrl": "https://flamcogroup.com/de/products/flexcon-c",
+      "verified": false,
+      "notes": "Universal-MAG fuer geschlossene Heizanlagen. Vordruck p0 = 1,5 bar werksseitig."
+    }
+  ]
+}

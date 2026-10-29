@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "erstellt": "2026-04-22",
+  "quelle_primaer": "Wissensbasis (C:\\Users\\Daniel\\Documents\\Thermowerk\\Wissensbasis\\) — Bereiche A, B, C nach DIN EN 12831-1 / SIA 384.201.",
+  "quelle_sekundaer": "Perplexity-Pro-Research 2026-04-22 — nur für Werte verwendet, die in der Wissensbasis nicht tabelliert sind (nmin pro Raumtyp, SIA-Klimadaten).",
+  "hinweis": "Normwerte = Wahrheitsquelle für die Rechnung. Nicht mit den Fallback-U-Werten (uwerte.json) vermischen.",
+  "deltaUWb": {
+    "beschreibung": "Wärmebrücken-Zuschlag ΔU_WB nach DIN/TS 12831-1.",
+    "quelle": "Wissensbasis B Tab. 3.9 (B4 S.343).",
+    "ohneNachweis": {
+      "deltaU": 0.1,
+      "bemerkung": "Ohne bauseitige Berücksichtigung (Altbau, Sanierung ohne Detailnachweis). Default."
+    },
+    "mitBeiblatt2": {
+      "deltaU": 0.05,
+      "bemerkung": "Mit Bauteilanschlüssen nach DIN 4108 Beiblatt 2 / SIA-Standardlösungen."
+    },
+    "detailNachweis": {
+      "deltaU": 0.02,
+      "bemerkung": "Detaillierter Nachweis (DIN EN ISO 10211). Zielwert für Minergie-P/Passivhaus; in Wissensbasis als 'individuell' vermerkt, Ergänzung aus Perplexity."
+    }
+  },
+  "eWind": {
+    "beschreibung": "Windschutz-/Abschirmungsfaktor e nach DIN/TS 12831-1 in der Infiltrationsformel V̇inf = 2·V·n50·e·ε.",
+    "quelle": "Wissensbasis A Tab. 3.5.",
+    "hinweis": "Matrix nach Abschirmungsklasse × Anzahl exponierter Fassaden.",
+    "keineAbschirmung": {
+      "beschreibung": "Windreich, Hochhäuser, offene Feldlage, Stadtzentren ohne Schutz.",
+      "e_0Fassaden": 0.0,
+      "e_1Fassade": 0.03,
+      "e_mehrereFassaden": 0.05
+    },
+    "moderatAbschirmung": {
+      "beschreibung": "Vororte mit Nachbargebäuden oder Baumbestand als Schutz.",
+      "e_0Fassaden": 0.0,
+      "e_1Fassade": 0.02,
+      "e_mehrereFassaden": 0.03
+    },
+    "guteAbschirmung": {
+      "beschreibung": "Innenstadt in dichter Bebauung oder Waldlage.",
+      "e_0Fassaden": 0.0,
+      "e_1Fassade": 0.01,
+      "e_mehrereFassaden": 0.02
+    }
+  },
+  "fRi_bu": {
+    "beschreibung": "Temperatur-Reduktionsfaktor bu für unbeheizte Nachbarräume. Synonym zu fRi / b-Faktor / fx.",
+    "quelle": "Wissensbasis B Tab. 3.10 (B4 S.343). Pufferraum + Doppelhaus aus Perplexity ergänzt.",
+    "formel_exakt": "fRT = (θint,i − θnachbar) / (θint,i − θe)",
+    "nachbarraumOhneFenster": {
+      "bu": 0.4,
+      "bemerkung": "Nachbarraum mit 1 Außenwand ohne Fenster."
+    },
+    "nachbarraumMitFenster": {
+      "bu_min": 0.5,
+      "bu_max": 0.6,
+      "bu_default": 0.55,
+      "bemerkung": "Nachbarraum mit Außenwand + Fenster/Tür."
+    },
+    "treppenhausInnen": {
+      "bu": 0.8,
+      "bemerkung": "Innenliegendes, nicht beheiztes Treppenhaus."
+    },
+    "dachraumGeschlossen": {
+      "bu_min": 0.4,
+      "bu_max": 0.5,
+      "bu_default": 0.45,
+      "bemerkung": "Geschlossener, nicht belüfteter Dachraum."
+    },
+    "dachraumBelueftet": {
+      "bu": 0.8,
+      "bemerkung": "Stark belüfteter Dachraum (nahe Aussenluft)."
+    },
+    "keller": {
+      "bu_min": 0.25,
+      "bu_max": 0.38,
+      "bu_default": 0.3,
+      "bemerkung": "Kellerräume bei Hausgröße > 20 m."
+    },
+    "nachbarBeheizt": {
+      "bu": 0.0,
+      "bemerkung": "Angrenzender beheizter Nachbar (gleiche Solltemperatur)."
+    },
+    "pufferraum": {
+      "bu": 0.3,
+      "bemerkung": "Teilbeheizte Pufferzone (Wintergarten)."
+    },
+    "doppelhausUnbewohnt": {
+      "bu": 0.3,
+      "bemerkung": "Doppelhaushälfte mit temporär unbeheiztem Nachbarn."
+    }
+  },
+  "erdreich_iso13370": {
+    "beschreibung": "ISO 13370:2017 · EN 12831-1 §6.3.3 — Parameter für Bodenplatte auf Erdreich / unbeheizten Keller.",
+    "quelle": "Wissensbasis B §3.8 (B4 S.342). Stichproben gegen IBO-Formblatt, 238/5-Formblatt R (S.140), Audit §8a O05.",
+    "lambdaGround": 2.0,
+    "lambdaGround_bemerkung": "Feuchter Lehm/Ton (ISO 13370 Anhang D Standard). Sandig trocken 1,5; Kies/Sand gesättigt 2,5.",
+    "wallThickness": 0.3,
+    "Rsi": 0.17,
+    "Rse": 0.04,
+    "fg1": 1.45,
+    "fg1_bemerkung": "Periodische Schwankung Jahresgang (DE/CH Standardwert). ISO 13370 Anhang C ggf. regional anpassen.",
+    "thetaMeDefault": 10.2,
+    "thetaMeDefault_bemerkung": "CH-Mittelland Jahresmittel (Zürich/Bern) — deckt IBO, Referenzhaus 238/5, WBS.",
+    "GW_default": 1.0,
+    "GW_grundwasserNah": 1.15,
+    "GW_bemerkung": "GW = 1,15 wenn Grundwasserspiegel < 1 m unter Bodenplatte; sonst 1,00.",
+    "fallback_pauschal": {
+      "bodenplatte": 0.45,
+      "kein_keller": 0.45,
+      "keller_unbeheizt": 0.3,
+      "keller_beheizt": 0.0,
+      "bemerkung": "Audit-Notbehelf wenn Ag/P nicht vorliegt — explizit als Näherung markieren."
+    },
+    "Uequiv_stuetzpunkte_b4_s342": {
+      "bemerkung": "Tabellen-Stichproben aus B4 S.342 zur Validierung der Formel in calc/heatload.mjs · groundUequiv().",
+      "spalten_Rf": [
+        0,
+        2.0,
+        1.0,
+        0.5
+      ],
+      "zeilen": {
+        "B_prime_2": [
+          1.3,
+          0.33,
+          0.55,
+          0.77
+        ],
+        "B_prime_4": [
+          0.88,
+          0.3,
+          0.45,
+          0.59
+        ],
+        "B_prime_6": [
+          0.68,
+          0.27,
+          0.38,
+          0.48
+        ],
+        "B_prime_8": [
+          0.55,
+          0.25,
+          0.33,
+          0.41
+        ],
+        "B_prime_10": [
+          0.47,
+          0.23,
+          0.3,
+          0.36
+        ]
+      }
+    }
+  },
+  "fRh": {
+    "beschreibung": "Wiederaufheizzuschlag f_RH [W/m²] bei Nachtabsenkung.",
+    "quelle": "Wissensbasis C Tab. 3.5 + B1 LF07 S.443.",
+    "referenzbedingung": {
+      "nutzung": "wohnen",
+      "nachtabsenkung_h": 8,
+      "luftwechsel_1_h": 0.1
+    },
+    "matrix_wohnen_nachtabsenkung_8h": {
+      "leichteBauart": {
+        "aufheizzeit_0_5h": 12,
+        "aufheizzeit_1h": 8,
+        "aufheizzeit_2h": 5,
+        "aufheizzeit_4h": 2,
+        "aufheizzeit_6h": 0
+      },
+      "mittelschwereBauart": {
+        "aufheizzeit_0_5h": 14,
+        "aufheizzeit_1h": 10,
+        "aufheizzeit_2h": 7,
+        "aufheizzeit_4h": 4,
+        "aufheizzeit_6h": 2
+      },
+      "schwereBauart": {
+        "aufheizzeit_0_5h": 18,
+        "aufheizzeit_1h": 14,
+        "aufheizzeit_2h": 11,
+        "aufheizzeit_4h": 9,
+        "aufheizzeit_6h": 7
+      }
+    },
+    "hinweis_beispiel": "Beispielrechnung B1 LF07 S.443: fRH = 21 W/m² bei ΔT = 2 K, tRH = 2 h, mittlere Masse.",
+    "abdeckung_hinweis": "Wissensbasis tabelliert f_RH nur für Wohnnutzung bei 8 h Absenkung."
+  },
+  "thetaInt": {
+    "beschreibung": "Norm-Innentemperatur θint,i pro Raumtyp.",
+    "quelle": "Wissensbasis A Tab. 3.1 (DIN/TS 12831-1:2020-04, B4 S.339).",
+    "wohnen": 20,
+    "kueche": 20,
+    "schlafzimmer": 20,
+    "bad": 24,
+    "wc": 20,
+    "buero": 20,
+    "konferenz": 20,
+    "flur": 15,
+    "treppenhaus": 15,
+    "kellerBeheizt": 15,
+    "kellerUnbeheizt": 10,
+    "nebenraumUnbeheizt": 10
+  },
+  "nmin": {
+    "beschreibung": "Hygienisch notwendiger Mindestluftwechsel [1/h] nach DIN/TS 12831-1:2020-04. Primärdefault uniform 0,5 1/h.",
+    "quelle_primaer": "DIN/TS 12831-1:2020-04 (uniform 0,5 1/h in Planungspraxis IBO/238/5/WBS/AWEL).",
+    "quelle_sekundaer": "DIN 1946-6 / SIA 180 — erhöhte Raumtyp-Werte Bad/Küche/WC (nur bei dokumentierter Lüftungsanlage).",
+    "hinweis_audit": "Norm-konform nach EN 12831-1 ist uniform 0,5 1/h (Audit 2026-04-24 §8a).",
+    "wohnnutzung_uniform": 0.5,
+    "erhoehterHygieneLuftwechsel": {
+      "beschreibung": "Sekundär-Preset nach DIN 1946-6.",
+      "wohnen": {
+        "typ": 0.5,
+        "max": 0.8,
+        "kwl": 0.4
+      },
+      "schlafraum": {
+        "typ": 0.5,
+        "max": 0.8,
+        "kwl": 0.4
+      },
+      "kueche": {
+        "typ": 1.5,
+        "max": 6.0,
+        "kwl": 1.0
+      },
+      "bad": {
+        "typ": 4.0,
+        "max": 10.0,
+        "kwl": 4.0
+      },
+      "wc": {
+        "typ": 4.0,
+        "max": 10.0,
+        "kwl": 4.0
+      },
+      "nebenraum": {
+        "typ": 0.3,
+        "max": 0.5,
+        "kwl": 0.3
+      },
+      "buero": {
+        "typ": 4.0,
+        "max": 6.0,
+        "kwl": 3.0
+      },
+      "kwlGesamtwohnung": {
+        "typ": 0.4,
+        "max": 0.6
+      }
+    }
+  },
+  "klimaCh": {
+    "beschreibung": "Norm-Aussentemperatur θe,min [°C] pro Klimaregion nach SIA 384.201.",
+    "quelle_primaer": "SIA 2028 (lizenzpflichtig). Mittelland-Wert −8 °C mehrfach in offener Fachliteratur bestätigt.",
+    "quelle_alpen": "Praxiswerte aus Wärmepumpenplanung und Installateurliteratur.",
+    "globalerFallback": -8,
+    "globalerFallback_begruendung": "CH-Mittelland-Standardwert. Passt für alle Orte bis ca. 500 m Höhe.",
+    "stationen": {
+      "zuerich": {
+        "thetaEMin": -8,
+        "hoehe_m": 410,
+        "quelle": "sia2028_offen",
+        "bemerkung": "Zürich-SMA."
+      },
+      "bern": {
+        "thetaEMin": -8,
+        "hoehe_m": 540,
+        "quelle": "sia2028_offen",
+        "bemerkung": "Bern-Zollikofen."
+      },
+      "basel": {
+        "thetaEMin": -8,
+        "hoehe_m": 316,
+        "quelle": "mittelland_analog",
+        "bemerkung": "Basel-Binningen."
+      },
+      "genf": {
+        "thetaEMin": -8,
+        "hoehe_m": 420,
+        "quelle": "mittelland_analog",
+        "bemerkung": "Genf-Cointrin."
+      },
+      "lausanne": {
+        "thetaEMin": -8,
+        "hoehe_m": 500,
+        "quelle": "mittelland_analog",
+        "bemerkung": "Lausanne-Pully."
+      },
+      "luzern": {
+        "thetaEMin": -8,
+        "hoehe_m": 435,
+        "quelle": "mittelland_analog",
+        "bemerkung": "Luzern."
+      },
+      "stGallen": {
+        "thetaEMin": -10,
+        "hoehe_m": 670,
+        "quelle": "praxiswert",
+        "bemerkung": "St. Gallen."
+      },
+      "chur": {
+        "thetaEMin": -10,
+        "hoehe_m": 593,
+        "quelle": "praxiswert",
+        "bemerkung": "Chur."
+      },
+      "davos": {
+        "thetaEMin": -15,
+        "hoehe_m": 1560,
+        "quelle": "praxiswert_alpen",
+        "bemerkung": "Davos (Hochalpin)."
+      },
+      "zermatt": {
+        "thetaEMin": -15,
+        "hoehe_m": 1620,
+        "quelle": "praxiswert_alpen",
+        "bemerkung": "Zermatt (Hochalpin)."
+      }
+    },
+    "hoehenstufen": {
+      "bis500m": {
+        "thetaEMin": -8,
+        "quelle": "sia2028_offen",
+        "bemerkung": "Mittelland-Standardwert."
+      },
+      "500_800m": {
+        "thetaEMin": -10,
+        "quelle": "praxiswert",
+        "bemerkung": "Voralpenrand."
+      },
+      "800_1200m": {
+        "thetaEMin": -12,
+        "quelle": "praxiswert_alpen",
+        "bemerkung": "Voralpen / mittlere Höhenlage."
+      },
+      "ueber1200m": {
+        "thetaEMin": -15,
+        "quelle": "praxiswert_alpen",
+        "bemerkung": "Hochalpin."
+      }
+    }
+  }
+}

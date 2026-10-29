@@ -1,0 +1,329 @@
+                                      Praxiskurs
+                                      Wärmepumpen-
+                                      System-Modul
+                                      Désirée Stocker
+
+
+
+
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Inhalt
+                                  • Einführung – Pflichtenheft
+                                  • Funktionsschemata WPSM
+                                  • Projektablauf
+                                         •   Prozess Förderantrag bis Auszahlung
+                                         •   Zertifikatsantrag – Einzelfreigaben
+
+                                  • Hilfsmittel zur Projektbearbeitung – Übungsbeispiele
+                                  • Qualitätssicherung
+                                         •   Einflussfaktoren auf die Energieeffizienz
+                                         •   Verantwortung des Installateurs bei Inbetriebnahmen
+
+                                  • Fehler aus der Praxis und deren Auswirkungen
+                                  • Gruppenarbeit WPSM je eines LW- und SW-Projekts mit
+                                    Präsentationen der Resultate
+                                  ©FWS                                                             18.02.2025   2
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Warum WP-System-Modul
+                                  • Wärmepumpen-System-Modul: Standard in Planung und Ausführung
+                                    von WP-Anlagen
+                                  • Heizleistung bis 15 kW
+                                  • Weg von Einzelkomponenten
+                                  • hin zum Gesamtsystem
+
+
+
+
+                                                                                              18.02.2025   3
+© FWS AWB / WPSM Praxis / V. 1-2025
+         Projektträger
+
+
+
+
+                                      18.02.2025   4
+© FWS AWB / WPSM Praxis / V. 1-2025
+         Inhalt des WP-System-Modul
+
+
+
+
+                                      18.02.2025   5
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Zertifikate
+
+
+
+
+                                                18.02.2025   6
+© FWS AWB / WPSM Praxis / V. 1-2025
+         Werkzeuge - Webseite
+                                      Pflichtenheft
+                                      Reglement Hersteller
+                                      Reglement Installateur
+
+
+
+
+                                                18.02.2025     7
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Pflichtenheft
+                                  Einleitung
+                                  Verantwortlichkeiten
+                                  Anforderungen an Systemkomponenten
+                                  • Quelle Luft
+                                  • Quelle Erdwärmesonden
+                                  • Umwälzpumpen
+                                  • Wassererwärmer
+                                  • Wärmeabgabesystem
+                                  • Inbetriebnahme
+
+                                  Mitgeltende Beilage: Zertifizierte Module gemäss WPSM
+
+
+                                                                                          18.02.2025   8
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Einleitung
+                                  WPSM basiert auf dem internationalen Gütesiegel
+                                  Bis ca. 15 kW bei A-7/W35 – B0/W35 – B10/W35
+                                  Ziele:
+                                  • Standard für Transparenz gegenüber Endkunden
+                                  • Energieeffizienz und Betriebssicherheit der Anlage
+                                  • Regelt Verantwortlichkeiten
+                                  • Einhaltung von Normen und Vorschriften
+
+
+
+
+                                                                                         18.02.2025   9
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Verantwortlichkeiten Lieferant
+                                  • Firmenspezifische WPSM-Module bestehend aus:
+                                    • Wärmepumpe
+                                    • Warmwasser-System
+                                    • Hydraulische Einbindung
+                                    • Steuerung/Regelung
+                                  • Inbetriebnahme mit Protokoll nach Vorgaben WPSM
+                                  • Nachkontrolle bis Ende 3. Betriebsjahr nach Vorgaben WPSM
+
+
+
+
+                                                                                                18.02.2025   10
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Verantwortlichkeiten Installateur
+                                  • Gesamtinstallation inkl. Grundlagen
+                                  • Vom Lieferanten vorgegebene hydraulische Einbindung und
+                                    Systemkomponenten
+                                  • Auslegung Erdwärmesonden nach SIA 384/6
+                                  • Schallschutznachweis gemäss Cercle Bruit
+                                  • Vorbereitung Inbetriebnahme
+                                    • Komponenten elektrisch angeschlossen
+                                    • Anlage nach SWKI-Richtlinie gefüllt und entlüftet
+                                  • Einstellungen Heizkurve / Heizgrenze
+                                  • Inbetriebnahme-Protokoll nach Vorgaben WPSM
+                                  • Anlagedokumentation
+                                                                                              18.02.2025   11
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Quelle Luft
+                                  • Lärmschutzverordnung LSV
+                                  • Lärmschutznachweis FWS (Schallrechner)
+                                  • Kantonale Formulare SG
+
+
+
+
+                                                                             18.02.2025   12
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Quelle Erdwärmesonden (EWS)
+                                  • Dimensionierung nach SIA 384/6
+                                  • Bohrfirma hat FWS-Gütesiegel
+                                  • suissetec-Merkblatt „Anbindungen von Erdwärmesonden an
+                                    Wärmepumpen“
+                                  • GKS-Merkblatt „Füllen von Erdwärmesonden-Anlagen“
+                                  • Sondenmedium nach Vorgaben Lieferant – Nachfüllen nur mit fertigem
+                                    Gemisch
+                                  Sondenlängen:
+                                      • 32 mm Erdwärmesonden ca. 150 m
+                                      • 40 mm Erdwärmesonden ca. 300 m
+                                      • Konische 43 mm Erdwärmesonden ca. 400 m
+                                                                                                  18.02.2025   13
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Umwälzpumpe
+                                  • Umwälzpumpen erfüllen Anforderungen der Energieverordnung
+                                  • Korrekt ausgelegt
+                                  • Entsprechend eingestellt
+                                  • Wärmedämmschalen
+
+
+
+
+                                                                                                18.02.2025   14
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Wassererwärmer
+                                  • SIA 358/1 und SIA 385/2
+                                  • Neubau (EFH und 2FH) keine Zirkulation zugelassen
+                                  • Sanierung mit bestehender Zirkulation
+                                    • Mit Regelung
+                                    • RAR
+                                  • Sanitärinstallateur kennt die Vorgaben WPSM
+                                  • Thermosiphon
+
+
+
+
+                                                                                        18.02.2025   15
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Wärmeabgabesystem
+                                  • Normen zu maximalen Vorlauftemperaturen einhalten
+                                  • Regelung erfolgt über die Heizkurve, nicht über die Thermostatventile
+                                  • Alle notwendigen Armaturen (Regelventile, Durchflussanzeigen usw.)
+                                    für den hydraulischen Abgleich einbauen
+                                  • Einstellungen der Massenströme pro Heizkreis, gemäss Berechnungen
+                                  • Instruktion des Endkunden
+
+
+                                  • Spülen der Anlage (Verschmutzungen)
+
+
+
+
+                                                                                                      18.02.2025   16
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Systemkomponenten – Inbetriebnahme
+                                  • Inbetriebnahme- und Funktionskontroll-Protokoll
+                                  • Nachkontrolle der Betriebsparameter hinsichtlich Anlageneffizienz-
+                                    Optimierung bis Ende 3. Betriebsjahr
+
+
+
+
+                                                                                                     18.02.2025   17
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Funktionsschemas
+
+
+
+
+                                                     18.02.2025   18
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Prozess Förderantrag bis Auszahlung
+                                  • Phase I
+                                    Förderantrag / Behördliche Gesuche (Einverständniserklärung)
+                                  • Phase II
+                                    Installation (evtl. Einzelfreigabe) – IBN durch Lieferant
+                                  • Phase III
+                                    Antrag WPSM
+                                  • Phase IV
+                                    Förderabschluss
+
+
+
+
+                                                                                                   18.02.2025   19
+© FWS AWB / WPSM Praxis / V. 1-2025
+        Abgrenzung WPSM - Behörden
+
+
+
+
+                                      18.02.2025   20
+© FWS AWB / WPSM Praxis / V. 1-2025
+         WPSM                                                Weitere Formulareingaben
+         • Anlageordner                                      • Baugesuch
+         • Online-Erfassung Zertifikatsantrag                • EN-Formulare / WTA
+                •     Objektdaten                            • Lärmschutznachweis
+                •     FWS-Leistungsgarantie
+                                                             • Erdwärmesonden-Bohrgesuch
+                •     IBN-Protokoll Installateur
+                •     Anhänge:                               • Elektroanschlussgesuch TAG
+                      • Bestätigung Installateur / Bauherr
+                                                             • Förderantrag mit Anhängen
+                      • Schema
+                      • IBN-Protokoll Lieferant                • Fotos
+                      • Evtl. Einzelfreigabe                   • Nachweis EBF
+                                                               • Investitionskosten
+                                                               • Zertifikate
+                                                             • Förderabschluss mit Anhängen
+                                                                                              18.02.2025   21
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Einzelfreigaben
+                                  Richtlinie Einzelfreigabe
+                                  • Sonderfälle mit geringen Abweichungen vom Standard können
+                                    zertifiziert werden
+                                  • Gleichwertige Effizienz muss gewährleistet sein
+                                  Antrag Einzelfreigabe
+
+
+
+
+                                                                                                18.02.2025   22
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Hilfsmittel zur Projektbearbeitung
+                                  • Ermittlung Wärmeerzeugerleistung – Neubau
+                                  • Übungsbeispiel:
+                                    Normheizlast gemäss SIA 384.201        ΦHL      4.5 kW
+                                    Energiebezugsfläche (EBF)                      225 m2
+                                    Sperrzeiten EVU                        fsperrzeit 6 h
+                                  • Lösung:
+                                    ΦWP = (ΦHL + ΦW + ΦAS) * f sperrzeit
+
+                                      ΦHL = 4’500 W
+
+                                      ΦW = 225 m2 * 2 W/m2 = 450 W
+
+                                      (4‘500 W + 450 W) * 1.16 = 5‘742 W = 5.74 kW
+                                                                                             18.02.2025   23
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Hilfsmittel zur Projektbearbeitung
+                                  • Grundlagendaten Heizungsersatz
+                                  • Ermittlung Wärmeerzeugerleistung – Sanierung (Online-Tool)
+                                  • Übungsbeispiel
+
+
+
+
+                                                                                                 18.02.2025   24
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Übungsbeispiel
+                                  • EFH
+                                    Standort                  Bern
+                                    Baujahr                   1990
+                                    Energiebezugsfläche       200 m2
+                                    Warmwasser                elektrisch
+                                    Heizkessel Baujahr        1990
+                                    Heizenergie               Heizöl EL
+                                    Heizenergieverbrauch      2019       2‘180 l
+                                                              2020       1‘950 l
+                                                              2021       2‘500 l
+                                      Sperrzeit               2h
+
+                                      Warmwasser soll mit WP erzeugt werden
+
+                                                                                   18.02.2025   25
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Hilfsmittel zur Projektbearbeitung
+                                  • Ermittlung Wärmeerzeugerleistung – Neubau
+                                  • Grundlagendaten Heizungsersatz
+                                  • Ermittlung Wärmeerzeugerleistung – Sanierung (Online-Tool)
+                                  • Merkblatt WP mit Inverter
+                                  • Dimensionierung Warmwasser – Merkblatt Einstellparameter
+                                  • Dimensionierungsvorgaben Speicher
+
+
+
+
+                                                                                                 18.02.2025   26
+© FWS AWB / WPSM Praxis / V. 1-2025
+                                  Protokollvorlagen
+                                  Protokoll Hersteller
+                                  Protokoll Pumpen
+                                  Protokoll Abgleich
+                                  Protokoll Nachkontrolle
+
+
+
+
+                                                            18.02.2025   27
+© FWS AWB / WPSM Praxis / V. 1-2025
+

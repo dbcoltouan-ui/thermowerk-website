@@ -1,0 +1,220 @@
+{
+  "_meta": {
+    "name": "Etagenwohnung 238/5",
+    "quelle": "SHK-Schulung B5 Kap.8 / Projekt-Nr. 238/5 / Formblätter R, G1, G2, V — S.138-145",
+    "norm": "DIN EN 12831-1",
+    "berechnungsdatum": "27.08.",
+    "tool_quelle": "Heizlast Pro/REFERENZHAUS-238-5.md",
+    "toleranz_raum": "±2 %",
+    "toleranz_gebaeudesumme": "±5 %",
+    "hinweis": "Raum-Einzelsumme (4447 W) > Gebäude-Soll (3560 W) wegen doppelt gezählter Innentransmissionen. Tool prüft beide separat."
+  },
+  "stamm": {
+    "gebaeudetyp": "MFH",
+    "name": "Etagenwohnung",
+    "te": -12,
+    "tme": 10.2,
+    "luftdichtheit_kategorie": "II",
+    "n50": 4,
+    "abschirmung": "gut",
+    "exponierte_fassaden": 1,
+    "e_wind": 0.01,
+    "epsilon_hoehe": 1.0,
+    "bauart": "mittelschwer",
+    "absenkung": true,
+    "delta_t_rh": 2,
+    "aufheizzeit_h": 2,
+    "f_rh_default": 22,
+    "delta_u_wb": 0.05,
+    "fx": 1.00
+  },
+  "raeume": [
+    {
+      "id": 1,
+      "name": "Küche",
+      "tint": 20,
+      "nmin": 0.5,
+      "delta_t_rh": 2,
+      "trh_h": 2,
+      "f_rh_W_pro_m2": 22,
+      "geometrie": { "b": 2.62, "l": 4.135, "A": 10.83, "h": 2.50, "V": 27.1 },
+      "bauteile": [
+        { "label": "AW NW",      "orientierung": "NW", "typ": "AW", "u": 1.29, "delta_u_wb": 0.05, "uc": 1.34, "A": 10.1, "fRT": 1.00,  "ht": 13.53, "phiT": 433 },
+        { "label": "AF NW",      "orientierung": "NW", "typ": "AF", "u": 2.60, "delta_u_wb": 0.05, "uc": 2.65, "A":  1.8, "fRT": 1.00,  "ht":  4.77, "phiT": 153 },
+        { "label": "IW NO→Flur", "orientierung": "NO", "typ": "IW", "u": 1.94, "delta_u_wb": 0.00, "uc": 1.94, "A":  3.2, "fRT": 0.15,  "ht":  0.93, "phiT":  30, "thetaNb": 15 },
+        { "label": "IT NO→Flur", "orientierung": "NO", "typ": "IT", "u": 2.00, "delta_u_wb": 0.00, "uc": 2.00, "A":  1.6, "fRT": 0.15,  "ht":  0.48, "phiT":  15, "thetaNb": 15 },
+        { "label": "IW N→Bad",   "orientierung": "N",  "typ": "IW", "u": 2.00, "delta_u_wb": 0.00, "uc": 2.00, "A":  8.4, "fRT": -0.12, "ht": -2.01, "phiT": -64, "thetaNb": 24 },
+        { "label": "IW S→Flur",  "orientierung": "S",  "typ": "IW", "u": 1.43, "delta_u_wb": 0.00, "uc": 1.43, "A":  8.4, "fRT": 0.15,  "ht":  1.80, "phiT":  58, "thetaNb": 15 },
+        { "label": "DE Dach",    "orientierung": "H",  "typ": "DE", "u": 0.81, "delta_u_wb": 0.00, "uc": 0.81, "A": 13.1, "fRT": 0.15,  "ht":  1.59, "phiT":  51 },
+        { "label": "FB Keller",  "orientierung": "U",  "typ": "FB", "u": 0.81, "delta_u_wb": 0.05, "uc": 0.86, "A": 13.1, "fRT": 0.50,  "ht":  5.63, "phiT": 180 }
+      ],
+      "soll": {
+        "sigma_HT_W_pro_K": 26.72,
+        "phiT_W": 856,
+        "v_inf_m3h": 2.17,
+        "v_min_m3h": 13.55,
+        "v_therm_m3h": 13.55,
+        "HV_W_pro_K": 4.6,
+        "phiV_W": 147,
+        "phiHL_W": 1003,
+        "phiHL_W_pro_m2": 92.6,
+        "phiHL_W_pro_m3": 37.0,
+        "phiRH_W": 238,
+        "phiAuslg_W": 1241
+      }
+    },
+    {
+      "id": 2,
+      "name": "Dusche",
+      "tint": 24,
+      "nmin": 0.5,
+      "delta_t_rh": 2,
+      "trh_h": 2,
+      "f_rh_W_pro_m2": 22,
+      "geometrie": { "b": 2.365, "l": 2.62, "A": 6.22, "h": 2.50, "V": 15.6 },
+      "bauteile": [
+        { "label": "AW NW",          "orientierung": "NW", "typ": "AW", "u": 1.29,  "delta_u_wb": 0.05, "uc": 1.34, "A": 5.6, "fRT": 1.00, "ht": 7.50, "phiT": 270 },
+        { "label": "AF NW",          "orientierung": "NW", "typ": "AF", "u": 2.60,  "delta_u_wb": 0.05, "uc": 2.65, "A": 1.4, "fRT": 1.00, "ht": 3.71, "phiT": 134 },
+        { "label": "IW N→Treppenh.", "orientierung": "N",  "typ": "IW", "u": 1.46,  "delta_u_wb": 0.05, "uc": 1.51, "A": 8.4, "fRT": 0.45, "ht": 5.70, "phiT": 205, "anschluss": "unbeheizt" },
+        { "label": "IW S→Raum 20°C", "orientierung": "S",  "typ": "IW", "u": 2.00,  "delta_u_wb": 0.00, "uc": 2.00, "A": 8.4, "fRT": 0.11, "ht": 1.85, "phiT": 67,  "thetaNb": 20 },
+        { "label": "IW NO→Flur",     "orientierung": "NO", "typ": "IW", "u": 2.00,  "delta_u_wb": 0.00, "uc": 2.00, "A": 5.7, "fRT": 0.25, "ht": 2.85, "phiT": 103, "thetaNb": 15 },
+        { "label": "IT NO→Flur",     "orientierung": "NO", "typ": "IT", "u": 2.00,  "delta_u_wb": 0.00, "uc": 2.00, "A": 1.3, "fRT": 0.25, "ht": 0.65, "phiT":  23, "thetaNb": 15 },
+        { "label": "DE→Nachbarw.",   "orientierung": "H",  "typ": "DE", "u": 0.81,  "delta_u_wb": 0.05, "uc": 0.87, "A": 7.8, "fRT": 0.19, "ht": 1.20, "phiT":  43, "thetaNb": 17.1 },
+        { "label": "FB→Keller",      "orientierung": "U",  "typ": "FB", "u": 0.821, "delta_u_wb": 0.05, "uc": 0.876, "A": 7.8, "fRT": 0.50, "ht": 3.39, "phiT": 122 }
+      ],
+      "soll": {
+        "sigma_HT_W_pro_K": 26.85,
+        "phiT_W": 967,
+        "v_inf_m3h": 1.24,
+        "v_min_m3h": 7.8,
+        "v_therm_m3h": 7.8,
+        "HV_W_pro_K": 2.65,
+        "phiV_W": 95,
+        "phiHL_W": 1062,
+        "phiHL_W_pro_m2": 171,
+        "phiHL_W_pro_m3": 68,
+        "phiRH_W": 137,
+        "phiAuslg_W": 1199
+      }
+    },
+    {
+      "id": 3,
+      "name": "Flur",
+      "tint": 15,
+      "nmin": 0.5,
+      "delta_t_rh": null,
+      "trh_h": null,
+      "f_rh_W_pro_m2": 0,
+      "geometrie": { "b": 1.26, "l": 4.11, "A": 5.18, "h": 2.50, "V": 13.0 },
+      "bauteile": [
+        { "label": "IW NO→Treppenh.",  "orientierung": "NO", "typ": "IW", "u": 1.43, "delta_u_wb": 0.05, "uc": 1.48, "A": 1.6, "fRT": 0.45, "ht": 1.06, "phiT": 29, "anschluss": "unbeheizt" },
+        { "label": "IT NO→Treppenh.",  "orientierung": "NO", "typ": "IT", "u": 2.00, "delta_u_wb": 0.00, "uc": 2.00, "A": 2.2, "fRT": 0.45, "ht": 1.98, "phiT": 54, "anschluss": "unbeheizt" },
+        { "label": "DE W→Nachbarw.",   "orientierung": "W",  "typ": "DE", "u": 0.81, "delta_u_wb": 0.00, "uc": 0.81, "A": 5.9, "fRT": 0.11, "ht": 0.52, "phiT": 14, "thetaNb": 12.6 },
+        { "label": "FB W→Keller",      "orientierung": "U",  "typ": "FB", "u": 0.75, "delta_u_wb": 0.05, "uc": 0.80, "A": 5.9, "fRT": 0.50, "ht": 2.36, "phiT": 64 }
+      ],
+      "waermegewinne_innen": [
+        { "von_raum": 1, "raum": "Küche",       "thetaNb": 20, "phi_W": -45 },
+        { "von_raum": 2, "raum": "Dusche",      "thetaNb": 24, "phi_W": -126 },
+        { "von_raum": 4, "raum": "Wohnzimmer",  "thetaNb": 20, "phi_W": -80 },
+        { "von_raum": 5, "raum": "Schlafzimmer","thetaNb": 20, "phi_W": -65 }
+      ],
+      "soll": {
+        "sigma_HT_direkt_W_pro_K": 5.92,
+        "phiT_direkt_W": 160,
+        "phiT_innengewinne_W": -316,
+        "phiT_netto_W": -155,
+        "v_min_m3h": 6.5,
+        "HV_W_pro_K": 2.2,
+        "phiV_W": 60,
+        "phiHL_W": -95,
+        "phiRH_W": 0,
+        "phiAuslg_W": -95,
+        "_kommentar": "Negativer phiHL = Wärmegewinn, kein aktiver Heizbedarf."
+      }
+    },
+    {
+      "id": 4,
+      "name": "Wohnzimmer",
+      "tint": 20,
+      "nmin": 0.5,
+      "delta_t_rh": 2,
+      "trh_h": 2,
+      "f_rh_W_pro_m2": 22,
+      "geometrie": { "b": 4.135, "l": 5.510, "A": 20.4, "h": 2.50, "V": 51.0 },
+      "bauteile": [
+        { "label": "AW SO",        "orientierung": "SO", "typ": "AW", "u": 1.29, "delta_u_wb": 0.05, "uc": 1.34, "A": 10.1, "fRT": 1.00, "ht": 13.53, "phiT": 453 },
+        { "label": "AF SO",        "orientierung": "SO", "typ": "AF", "u": 2.60, "delta_u_wb": 0.05, "uc": 2.65, "A":  1.8, "fRT": 1.00, "ht":  4.77, "phiT": 153 },
+        { "label": "IW NW→Flur",   "orientierung": "NW", "typ": "IW", "u": 1.94, "delta_u_wb": 0.00, "uc": 1.94, "A":  7.0, "fRT": 0.15, "ht":  2.03, "phiT":  65, "thetaNb": 15 },
+        { "label": "IT NW→Flur",   "orientierung": "NW", "typ": "IT", "u": 2.00, "delta_u_wb": 0.00, "uc": 2.00, "A":  1.6, "fRT": 0.15, "ht":  0.48, "phiT":  15, "thetaNb": 15 },
+        { "label": "IW SW",        "orientierung": "SW", "typ": "IW", "u": 1.43, "delta_u_wb": 0.00, "uc": 1.43, "A": 16.3, "fRT": 0.15, "ht":  3.49, "phiT": 112, "thetaNb": 15 },
+        { "label": "DE H",         "orientierung": "H",  "typ": "DE", "u": 0.81, "delta_u_wb": 0.00, "uc": 0.81, "A": 23.2, "fRT": 0.15, "ht":  2.81, "phiT":  90 },
+        { "label": "FB Keller",    "orientierung": "U",  "typ": "FB", "u": 0.75, "delta_u_wb": 0.05, "uc": 0.80, "A": 23.2, "fRT": 0.50, "ht":  9.28, "phiT": 297 }
+      ],
+      "soll": {
+        "sigma_HT_W_pro_K": 36.39,
+        "phiT_W": 1165,
+        "v_inf_m3h": 4.08,
+        "v_min_m3h": 25.5,
+        "v_therm_m3h": 25.5,
+        "HV_W_pro_K": 8.67,
+        "phiV_W": 277,
+        "phiHL_W": 1442,
+        "phiHL_W_pro_m2": 70.7,
+        "phiHL_W_pro_m3": 28.3,
+        "phiRH_W": 449,
+        "phiAuslg_W": 1891
+      }
+    },
+    {
+      "id": 5,
+      "name": "Schlafzimmer",
+      "tint": 20,
+      "nmin": 0.5,
+      "delta_t_rh": 0,
+      "trh_h": null,
+      "f_rh_W_pro_m2": 0,
+      "geometrie": { "b": 2.375, "l": 4.135, "A": 9.82, "h": 2.50, "V": 24.6 },
+      "_hinweis_quelle": "PDF S.144 trägt fälschlich Header 'Wohnzimmer' — siehe REFERENZHAUS-238-5.md §7.",
+      "bauteile": [
+        { "label": "AW SO",            "orientierung": "SO", "typ": "AW", "u": 1.29, "delta_u_wb": 0.05, "uc": 1.34, "A":  5.2, "fRT": 1.00, "ht": 6.97, "phiT": 223 },
+        { "label": "AF SO",            "orientierung": "SO", "typ": "AF", "u": 2.60, "delta_u_wb": 0.05, "uc": 2.65, "A":  1.8, "fRT": 1.00, "ht": 4.77, "phiT": 153 },
+        { "label": "IW N→Treppenh.",   "orientierung": "N",  "typ": "IW", "u": 1.43, "delta_u_wb": 0.05, "uc": 1.48, "A": 12.5, "fRT": 0.45, "ht": 8.23, "phiT": 266, "anschluss": "unbeheizt" },
+        { "label": "IW SW→Flur",       "orientierung": "SW", "typ": "IW", "u": 1.94, "delta_u_wb": 0.00, "uc": 1.94, "A":  5.4, "fRT": 0.15, "ht": 1.57, "phiT":  50, "thetaNb": 15 },
+        { "label": "IT SW→Flur",       "orientierung": "SW", "typ": "IT", "u": 2.00, "delta_u_wb": 0.00, "uc": 2.00, "A":  1.6, "fRT": 0.15, "ht": 0.48, "phiT":  15, "thetaNb": 15 },
+        { "label": "DE H→Nachbarw.",   "orientierung": "H",  "typ": "DE", "u": 0.81, "delta_u_wb": 0.00, "uc": 0.81, "A": 11.6, "fRT": 0.15, "ht": 1.40, "phiT":  45, "thetaNb": 15 },
+        { "label": "FB→Keller",        "orientierung": "U",  "typ": "FB", "u": 0.75, "delta_u_wb": 0.05, "uc": 0.80, "A": 11.6, "fRT": 0.50, "ht": 4.64, "phiT": 149 }
+      ],
+      "soll": {
+        "sigma_HT_W_pro_K": 28.15,
+        "phiT_W": 901,
+        "v_inf_m3h": 1.96,
+        "v_min_m3h": 12.3,
+        "v_therm_m3h": 12.3,
+        "HV_W_pro_K": 4.18,
+        "phiV_W": 134,
+        "phiHL_W": 1035,
+        "phiHL_W_pro_m2": 105,
+        "phiHL_W_pro_m3": 42.1,
+        "phiRH_W": 0,
+        "phiAuslg_W": 1035,
+        "_kommentar": "ΔϑRH = 0 → keine Wiederaufheizung."
+      }
+    }
+  ],
+  "soll_gebaeude": {
+    "phiT_geb_W": 2847,
+    "phiV_geb_W": 713,
+    "phiHL_geb_W": 3560,
+    "phiRH_geb_W": 824,
+    "phiAuslg_geb_W": 4384,
+    "AN_m2": 52.4,
+    "VN_m3": 131.3,
+    "A_umfassung_m2": 61.1,
+    "phiHL_pro_AN_W_pro_m2": 83.7,
+    "phiHL_pro_VN_W_pro_m3": 33.4,
+    "HTN_W_pro_m2K": 1.45,
+    "summe_raeume_W": 4447,
+    "differenz_zu_geb_W": -887,
+    "_kommentar_summe": "Raum-Einzelsumme (4447 W) > Gebäude-Soll (3560 W) wegen doppelt gezählter Innentransmissionen zwischen Räumen verschiedener θint. EN 12831 saldiert beide; raumweise Summierung ist konservativ."
+  }
+}

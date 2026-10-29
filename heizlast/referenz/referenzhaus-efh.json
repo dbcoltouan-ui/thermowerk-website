@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "name": "IBO Musterhaus EFH",
+    "quelle": "Ingenieurbüro Oertel (Iserlohn) — 'Heizlast DIN EN 12831 — Musterhaus Heizung (HLB ohne KWL)' (PDF, 20 S.)",
+    "norm": "DIN EN 12831, ausführliches Verfahren",
+    "tool_quelle": "Heizlast Pro/REFERENZHAUS-IBO-MUSTERHAUS.md (+ docs/IBO-MUSTERHAUS_Heizlastberechnung-detailliert.pdf)",
+    "toleranz_raum": "±2 %",
+    "toleranz_gebaeudesumme": "±5 %",
+    "hinweis_summe": "Raum-Summe Σ phiHL = 7895 W liegt über Gebäudesumme 6344 W (PDF saldiert innere fij-Flüsse). Tool addiert raumweise → konservativ."
+  },
+  "stamm": {
+    "gebaeudenummer": "001",
+    "gebaeudetyp": "EFH",
+    "name": "EFH Muster",
+    "te": -12,
+    "tme": 6.8,
+    "breite_m": 10.00,
+    "laenge_m": 9.38,
+    "grundflaeche_m2": 93.8,
+    "geschossanzahl": 4,
+    "_geschoss_aufteilung": "Keller, EG, DG, Spitzboden",
+    "hoehe_m": 9.5,
+    "luftdichtheit_kategorie": "Ib",
+    "n50": 1.5,
+    "abschirmung": "gut",
+    "epsilon_hoehe": 1.0,
+    "bauart": "mittelschwer-bis-schwer",
+    "absenkung": false,
+    "delta_t_rh": 0,
+    "f_rh_W_pro_m2": 0,
+    "delta_u_wb": 0.05,
+    "fx": 1.00,
+    "erdreich": {
+      "z_m": 2.9,
+      "B_strich_m": 4.84,
+      "fg1": 1.45,
+      "GW_faktor": 1.15
+    }
+  },
+  "u_werte_typisch": {
+    "aussenwand": 0.27,
+    "fenster_3fach": 0.90,
+    "dach": 0.17,
+    "boden_erdreich": 0.17,
+    "innenwand": 2.00,
+    "innentuer": 2.00,
+    "bodenplatte_keller": 0.17
+  },
+  "raeume": [
+    { "id": "001", "geschoss": "Keller", "name": "Büro 1",        "A_m2": 19.1, "tint": 20, "HT_W_pro_K": 15.8, "phiT_W": 504, "HV_W_pro_K": 8.13, "phiV_W": 260, "phiHL_W":  765, "phiHL_pro_m2": 40.0, "phiRH_W": 0, "phiAuslg_W":  765 },
+    { "id": "002", "geschoss": "Keller", "name": "Büro 2",        "A_m2": 19.6, "tint": 20, "HT_W_pro_K": 13.0, "phiT_W": 413, "HV_W_pro_K": 8.35, "phiV_W": 267, "phiHL_W":  680, "phiHL_pro_m2": 34.6, "phiRH_W": 0, "phiAuslg_W":  680 },
+    { "id": "003", "geschoss": "Keller", "name": "HWR",            "A_m2": 12.4, "tint": 15, "HT_W_pro_K": -0.3, "phiT_W":  -8, "HV_W_pro_K": 5.26, "phiV_W": 142, "phiHL_W":  134, "phiHL_pro_m2": 10.8, "phiRH_W": 0, "phiAuslg_W":  134, "_kommentar": "HT negativ — Wärmegewinn von Nachbarräumen; phiHL kommt aus Lüftung." },
+    { "id": "005", "geschoss": "Keller", "name": "Flur",           "A_m2": 15.9, "tint": 20, "HT_W_pro_K": 18.2, "phiT_W": 580, "HV_W_pro_K": 6.77, "phiV_W": 217, "phiHL_W":  797, "phiHL_pro_m2": 50.0, "phiRH_W": 0, "phiAuslg_W":  797 },
+    { "id": "101", "geschoss": "EG",     "name": "Wohnen/Essen",   "A_m2": 39.3, "tint": 20, "HT_W_pro_K": 24.1, "phiT_W": 769, "HV_W_pro_K":16.69, "phiV_W": 534, "phiHL_W": 1305, "phiHL_pro_m2": 33.2, "phiRH_W": 0, "phiAuslg_W": 1305 },
+    { "id": "102", "geschoss": "EG",     "name": "Küche",          "A_m2": 12.4, "tint": 20, "HT_W_pro_K": 11.4, "phiT_W": 363, "HV_W_pro_K": 5.27, "phiV_W": 169, "phiHL_W":  532, "phiHL_pro_m2": 42.9, "phiRH_W": 0, "phiAuslg_W":  532 },
+    { "id": "103", "geschoss": "EG",     "name": "Gäste-Bad",      "A_m2":  4.0, "tint": 24, "HT_W_pro_K":  5.9, "phiT_W": 213, "HV_W_pro_K": 1.70, "phiV_W":  61, "phiHL_W":  272, "phiHL_pro_m2": 68.0, "phiRH_W": 0, "phiAuslg_W":  272 },
+    { "id": "105", "geschoss": "EG",     "name": "Diele",          "A_m2": 17.4, "tint": 20, "HT_W_pro_K": 14.4, "phiT_W": 461, "HV_W_pro_K": 7.40, "phiV_W": 237, "phiHL_W":  699, "phiHL_pro_m2": 40.1, "phiRH_W": 0, "phiAuslg_W":  699 },
+    { "id": "201", "geschoss": "DG",     "name": "Kind 1",         "A_m2": 13.2, "tint": 20, "HT_W_pro_K": 10.3, "phiT_W": 332, "HV_W_pro_K": 4.37, "phiV_W": 140, "phiHL_W":  471, "phiHL_pro_m2": 35.6, "phiRH_W": 0, "phiAuslg_W":  471 },
+    { "id": "202", "geschoss": "DG",     "name": "Bad",            "A_m2":  7.3, "tint": 24, "HT_W_pro_K":  7.1, "phiT_W": 252, "HV_W_pro_K": 3.10, "phiV_W": 112, "phiHL_W":  364, "phiHL_pro_m2": 49.8, "phiRH_W": 0, "phiAuslg_W":  364 },
+    { "id": "203", "geschoss": "DG",     "name": "Kind 2",         "A_m2": 13.6, "tint": 20, "HT_W_pro_K": 10.1, "phiT_W": 325, "HV_W_pro_K": 4.52, "phiV_W": 144, "phiHL_W":  470, "phiHL_pro_m2": 34.6, "phiRH_W": 0, "phiAuslg_W":  470 },
+    { "id": "204", "geschoss": "DG",     "name": "Schlafzimmer",   "A_m2": 17.1, "tint": 20, "HT_W_pro_K": 12.7, "phiT_W": 409, "HV_W_pro_K": 5.98, "phiV_W": 191, "phiHL_W":  599, "phiHL_pro_m2": 35.1, "phiRH_W": 0, "phiAuslg_W":  599 },
+    { "id": "205", "geschoss": "DG",     "name": "Ankleide",       "A_m2":  6.7, "tint": 20, "HT_W_pro_K":  5.4, "phiT_W": 174, "HV_W_pro_K": 2.84, "phiV_W":  91, "phiHL_W":  265, "phiHL_pro_m2": 39.6, "phiRH_W": 0, "phiAuslg_W":  265 },
+    { "id": "206", "geschoss": "DG",     "name": "Flur",           "A_m2": 19.0, "tint": 20, "HT_W_pro_K": 10.0, "phiT_W": 324, "HV_W_pro_K": 6.78, "phiV_W": 217, "phiHL_W":  542, "phiHL_pro_m2": 28.6, "phiRH_W": 0, "phiAuslg_W":  542 }
+  ],
+  "soll_gebaeude": {
+    "AN_m2": 217.0,
+    "VN_m3": 512.7,
+    "A_umfassung_m2": 527.0,
+    "phiHL_geb_W": 6344,
+    "phiHL_pro_AN_W_pro_m2": 29.2,
+    "phiHL_pro_VN_W_pro_m3": 12.4,
+    "HTN_strich_W_pro_m2K": 0.29,
+    "phiHL_summe_raeume_W": 7895,
+    "differenz_zu_geb_W": 1551,
+    "anteils_verteilung": {
+      "dach_W":             { "anteil": 0.10, "wert_W":  677 },
+      "fenster_tueren_W":   { "anteil": 0.32, "wert_W": 2180 },
+      "waende_W":           { "anteil": 0.25, "wert_W": 1750 },
+      "waermebruecken_W":   { "anteil": 0.10, "wert_W":  656 },
+      "erdreich_W":         { "anteil": 0.04, "wert_W":  246 },
+      "lueftung_natuerlich_W": { "anteil": 0.20, "wert_W": 1391 },
+      "lueftung_RLT_W":     { "anteil": 0.00, "wert_W":    0 }
+    },
+    "_kommentar_summe": "Σ Raum-phiHL (7895 W) > Gebäudesumme (6344 W) wegen saldierter innerer fij-Flüsse in der PDF-Methode. Tool nutzt raumweise Summe für WP-Auslegung (konservativ)."
+  },
+  "fokus_test": "Neubau-Lüftung (n50=1.5), Erdreich B'-Wert-Methode, negative HT-Beiträge (Raum 003 HWR), 14 Räume über 4 Geschosse."
+}

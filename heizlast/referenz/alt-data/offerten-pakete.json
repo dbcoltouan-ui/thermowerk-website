@@ -1,0 +1,300 @@
+{
+  "_meta": {
+    "version": "v1.0.0",
+    "schema_version": "offerten-pakete.v1",
+    "stand": "2026-04",
+    "anzahl_pakete": 2,
+    "quelle": "OFFERTEN-RESEARCH.md §8",
+    "generiert_am": "2026-04-29"
+  },
+  "pakete": [
+    {
+      "id": "paket-lw-aussen-oel-ersatz",
+      "name": "Standard L/W-WP 8–14 kW Aussenaufstellung — Heizungsersatz Öl",
+      "beschreibung": "Standardumfang Heizungsersatz Öl → Luft/Wasser-WP, Aussenaufstellung. Erwartete Bruttosumme exkl. Förderung ca. CHF 38'000–48'000.",
+      "ziel_anlage": "lw_aussen_heizungsersatz_oel",
+      "erwartete_summe_min": 38000,
+      "erwartete_summe_max": 48000,
+      "positionen": [
+        {
+          "position_id": "demontage-bestandsheizung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "oeltank-entleerung-reinigung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "oeltank-demontage-entsorgung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "kamin-verschliessen",
+          "menge_override": 1
+        },
+        {
+          "position_id": "spuelen-anlage-chemisch",
+          "menge_override": 1
+        },
+        {
+          "position_id": "wp-lw-8-14kw",
+          "menge_override": 1
+        },
+        {
+          "position_id": "wp-schwingungsdaempfer-konsole",
+          "menge_override": 1
+        },
+        {
+          "position_id": "kondensatablauf-heizung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "wp-aussen-rahmen-wetterschutz",
+          "menge_override": 1
+        },
+        {
+          "position_id": "ww-speicher-emailliert-300l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "pufferspeicher-200l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "sicherheitsgruppe-sv-kappenventil",
+          "menge_override": 1
+        },
+        {
+          "position_id": "mag-35l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "umwaelzpumpe-heizkreis",
+          "menge_override": 1
+        },
+        {
+          "position_id": "ventil-3wege-ww-vorrang",
+          "menge_override": 1
+        },
+        {
+          "position_id": "schnellentlueftung-kfe",
+          "menge_override": 1
+        },
+        {
+          "position_id": "vl-rl-cu28-isoliert",
+          "menge_override": 12
+        },
+        {
+          "position_id": "anschluss-bestandsverteiler",
+          "menge_override": 1
+        },
+        {
+          "position_id": "mauerdurchbruch-abdichtung",
+          "menge_override": 2
+        },
+        {
+          "position_id": "elektroanschluss-wp",
+          "menge_override": 1
+        },
+        {
+          "position_id": "evu-sperrkontakt",
+          "menge_override": 1
+        },
+        {
+          "position_id": "anschluss-pumpen-regelung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "aussenfuehler",
+          "menge_override": 1
+        },
+        {
+          "position_id": "raumregelung-wandthermostat",
+          "menge_override": 1
+        },
+        {
+          "position_id": "inbetriebnahme-einregulierung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "schallnachweis-lsv",
+          "menge_override": 1
+        },
+        {
+          "position_id": "hydraulikschema-anlageschema",
+          "menge_override": 1
+        },
+        {
+          "position_id": "inbetriebnahme-protokoll",
+          "menge_override": 1
+        },
+        {
+          "position_id": "anfahrt-logistik",
+          "menge_override": 1
+        },
+        {
+          "position_id": "material-pauschale-kleinteile",
+          "menge_override": 1
+        },
+        {
+          "position_id": "bauleitung-projektleitung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "baustellenreinigung",
+          "menge_override": 1
+        }
+      ]
+    },
+    {
+      "id": "paket-sw-erdsonde-150m",
+      "name": "Sole/Wasser-WP 8–14 kW mit Erdsonde 150 m",
+      "beschreibung": "Standardumfang Sole/Wasser-WP mit einer Erdsonde 150 m. Erwartete Bruttosumme exkl. Förderung ca. CHF 60'000–80'000.",
+      "ziel_anlage": "sw_erdsonde_neubau_oder_ersatz",
+      "erwartete_summe_min": 60000,
+      "erwartete_summe_max": 80000,
+      "positionen": [
+        {
+          "position_id": "demontage-bestandsheizung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "oeltank-entleerung-reinigung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "oeltank-demontage-entsorgung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "kamin-verschliessen",
+          "menge_override": 1
+        },
+        {
+          "position_id": "spuelen-anlage-chemisch",
+          "menge_override": 1
+        },
+        {
+          "position_id": "wp-sw-8-14kw",
+          "menge_override": 1
+        },
+        {
+          "position_id": "wp-schwingungsdaempfer-konsole",
+          "menge_override": 1
+        },
+        {
+          "position_id": "ww-speicher-emailliert-300l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "pufferspeicher-200l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "sicherheitsgruppe-sv-kappenventil",
+          "menge_override": 1
+        },
+        {
+          "position_id": "mag-35l",
+          "menge_override": 1
+        },
+        {
+          "position_id": "umwaelzpumpe-heizkreis",
+          "menge_override": 1
+        },
+        {
+          "position_id": "umwaelzpumpe-speicherladung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "ventil-3wege-ww-vorrang",
+          "menge_override": 1
+        },
+        {
+          "position_id": "schnellentlueftung-kfe",
+          "menge_override": 1
+        },
+        {
+          "position_id": "vl-rl-cu28-isoliert",
+          "menge_override": 12
+        },
+        {
+          "position_id": "anschluss-bestandsverteiler",
+          "menge_override": 1
+        },
+        {
+          "position_id": "mauerdurchbruch-abdichtung",
+          "menge_override": 2
+        },
+        {
+          "position_id": "solekreislauf-glykol",
+          "menge_override": 1
+        },
+        {
+          "position_id": "bohrung-erdsonde-150m",
+          "menge_override": 150
+        },
+        {
+          "position_id": "sondenmaterial-pe100-sdr11",
+          "menge_override": 150
+        },
+        {
+          "position_id": "sondenanschluss-verteiler",
+          "menge_override": 1
+        },
+        {
+          "position_id": "geothermie-bewilligung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "elektroanschluss-wp",
+          "menge_override": 1
+        },
+        {
+          "position_id": "evu-sperrkontakt",
+          "menge_override": 1
+        },
+        {
+          "position_id": "anschluss-pumpen-regelung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "aussenfuehler",
+          "menge_override": 1
+        },
+        {
+          "position_id": "raumregelung-wandthermostat",
+          "menge_override": 1
+        },
+        {
+          "position_id": "inbetriebnahme-einregulierung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "hydraulikschema-anlageschema",
+          "menge_override": 1
+        },
+        {
+          "position_id": "inbetriebnahme-protokoll",
+          "menge_override": 1
+        },
+        {
+          "position_id": "anfahrt-logistik",
+          "menge_override": 1
+        },
+        {
+          "position_id": "material-pauschale-kleinteile",
+          "menge_override": 1
+        },
+        {
+          "position_id": "bauleitung-projektleitung",
+          "menge_override": 1
+        },
+        {
+          "position_id": "baustellenreinigung",
+          "menge_override": 1
+        }
+      ]
+    }
+  ]
+}

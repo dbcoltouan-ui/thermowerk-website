@@ -29,6 +29,12 @@
 
 ---
 
+## Heizlast — Neubau (seit 2026-10-29, Ordner `heizlast/`)
+
+Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
+
+---
+
 ## Heizlast-Rechner — Single-File-Variante (aktueller Stand 2026-04-21)
 
 > **Überblick:** Der alte Astro-v2-Rechner unter `/heizlast` ist entfernt. Stattdessen läuft jetzt ein **Single-File-HTML-Rechner** (~184 KB) aus dem konsolidierten Master-Ordner `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\` (seit 2026-04-22; vorher `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`). Dieser wird für das Live-Deploy 1:1 nach `thermowerk-website/public/heizlast/` kopiert — keine Astro-Komponenten, kein Build-Schritt für den Rechner selbst.

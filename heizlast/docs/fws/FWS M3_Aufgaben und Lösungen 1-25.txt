@@ -1,0 +1,414 @@
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Aufgabe 1
+Für zwei verschiedene Gebäude (A+B) soll der durchschnittliche Brennstoff-Jahresverbrauch für
+die Wärmeerzeugung in KWh umgerechnet werden sowie die benötigte Heizleistung und den
+Sperrzeitzuschlag für den Einsatz einer Wärmepumpe berechnet werden. Das Warmwasser wird
+bei allen Gebäuden wie bisher separat über Wärmepumpenboiler erzeugt.
+
+
+Objekt A:
+
+Gegeben:
+   • Ölheizung mit durchschnittlichem Verbrauch von 2‘800 l/a Heizöl EL
+   • Kesselalter 25 Jahre, nicht kondensierend
+   • Sperrzeit toff = 2 h/d
+   • Lage Mittelland
+   • Heizkörperauslegung 60°C/50°C
+
+Gesucht:
+   • Benötigte Heizenergie Qa für das Gebäude in KWh/a (Nutzenergie)
+   • Benötigte Heizleistung Qh in KW des Gebäudes
+   • Leistungszuschlag Qoff für die Sperrzeit toff
+   • Benötigte Heizleistung der WP
+
+
+
+
+Objekt B:
+
+Gegeben:
+   • Bivalente Gas-/Holzheizung
+   • Durchschnittlicher Gasverbrauch von 2‘500 mn3/a
+   • Durchschnittlicher Holzverbrauch 5 Ster/a Hartholz
+   • Gaskessel 22 Jahre, kondensierend
+   • Sperrzeit toff = 4 h/d
+   • Lage Mittelland
+   • Bodenheizung Auslegung 45°C/35°C
+
+Gesucht:
+   • Benötigte Heizenergie Qa für das Gebäude in kWh/a
+   • Benötigte Heizleistung Qh in KW des Gebäudes
+   • Leistungszuschlag Qoff für die Sperrzeit toff
+   • Benötigte Heizleistung der WP
+
+
+
+
+Seite 1 von 10                       © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Lösung Objekt A:
+
+Berechnung Nutzenergie Wärme
+1Liter Heizöl entspricht 10.5 kWh
+geschätzter Jahresnutzungsgrad Ölkessel 0.85
+Nutzenergie Qn = 2’800 [l/a] ∗ 10.5 [kWh/l] * 0.85 = 24’990 kWh/a
+
+Berechnung Heizleistung Gebäude
+Vollbetriebsstunden Mittelland, Wohnnutzung ohne Warmwasser = 2’000 h/a
+Heizleistung Qh = Qn / tvoll = 24’990 [kWh/a] / 2'000 [h/a] = 12.5 KW
+
+Zuschlag Sperrzeit
+Qoff =Qh*(24/(24-toff)-1)= 12.5 [KW] * (24/(24-2)-1) = 1.14 KW
+
+WP-Leistung
+Qhwp=12.5 KW+1.14 KW=13.64 KW
+
+
+
+
+Lösung Objekt B:
+
+Berechnung Nutzenergie Wärme
+1 mn3 Gas entspricht 10.4 kWh
+Geschätzter Jahresnutzungsgrad Gaskessel 0.92
+Nutzenergie Gaskessel Qn = 2’500 [mn3/a] ∗ 10.4 [kWh/mn3] * 0.92 = 23'920 kWh/a
+
+1 Ster Hartholz entspricht 2500 KWh
+Geschätzter Jahresnutzungsgrad Holzkessel 0.75
+Nutzenergie Holzkessel Qn = 5 [Ster/a] ∗ 2500 [kWh/Ster] *0.75 = 9’375 kWh/a
+
+Nutzenergie Qn total = 23’920 KWh/a + 9’375 KWh/a = 33'295 KWh/a
+
+Berechnung Heizleistung Gebäude
+Vollbetriebsstunden Mittelland, Wohnnutzung ohne Warmwasser = 2’000 h/a
+Heizleistung Qh = Qn / tvoll = 33’295 [KWh/a] / 2'000 [h/a] = 16.65 KW
+
+Zuschlag Sperrzeit
+Qoff =Qh*(24/(24-toff)-1)= 16.65 [KW] * (24/(24-4)-1) = 3.33 KW
+
+WP-Leistung
+Qhwp=16.65 KW+3.33 KW=19.98 KW
+
+
+
+
+Seite 2 von 10                        © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Aufgabe 2
+In einem EFH aus dem Jahr 1975 in Bern soll der alte Ölkessel durch eine Erdsonden-
+Wärmepumpe ersetzt werden. Das Gebäude war die letzten 5 Jahre voll belegt mit 4 Personen.
+Die Bauherrschaft möchte gerne einen Vorschlag für die Auswahl einer geeigneten Sole-Wasser
+Wärmepumpe. Zudem möchten Sie wissen welchen Einfluss eine Verbesserung der
+Gebäudedämmung auf die Wärmepumpendimensionierung hat. Zur Diskussion steht der Ersatz
+sämtlicher Fenster, inkl. Dämmung der Kellerdecke und die Dämmung des Estrichbodens.
+
+Gegeben:
+   • Ölheizung Ø Verbrauch der letzten 5 Jahre 3‘500 l/a Heizöl für Heizung + Warmwasser
+   • Warmwasserverbrauch: Ø 160 l/d
+   • Kesselalter 25 Jahre, nicht kondensierend
+   • Sperrzeit toff = 3 h/d
+   • Lage Bern Mittelland
+   • Eingestellte Heizkurve Heizkörper: Bei Ta -8°C Vorlauftemperatur = 60°C
+   • Die Heizung wird in der Nacht abgesenkt
+   • Energiebezugsfläche 270m2
+   • Warmwasserspeicher 60°C, Elektroheizband für Warmhaltung, Speicherverluste 10%,
+      Ausstoosverluste 15%
+
+Gesucht:
+   • Heizleistung des Gebäudes inkl. Plausibilisierung
+   • Wärmepumpenleistung ohne Dämmmassnahmen
+   • Abschätzung Wärmepumpenleistung mit Dämmmassnahmen
+   • Auswahl der WP (mit Dämmmassnahmen) aus Diagramm (WP A oder WP B )
+
+
+
+
+       WP A
+                                                       WP B
+
+
+
+
+Seite 3 von 10                      © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Aufgabe 2 Lösung:
+
+Berechnung Nutzenergie Heizung und Warmwasser
+1Liter Heizöl entspricht 10.5 kWh, geschätzter Jahresnutzungsgrad Ölkessel 0.8
+Nutzenergie Qnhww= 3’500 [l/a] ∗ 10.5 [kWh/l] * 0.8 = 29’400 kWh/a
+
+Berechnung Nutzenergie Warmwasser pro Jahr
+Qnww = 160 [l/d] * 4.2[kJ/kgK] * 50[K] / 3600 [kWh/KJ] * 1.1 * 1.15* 365 [d/a]) = 4'309 kWh/a
+
+Berechnung Nutzenergie Heizung
+Qn=Qnhww – Qnww = 29'400 [kWh/a] – 4'309 [kWh/a] = 25'091 kWh/a
+
+Berechnung Heizleistung Gebäude und Plausibilitätskontrolle
+Qh = Qn / tvoll = 25’091 [kWh/a] / 2'000 [h/a] = 12.55 KW
+Spez. Heizleistung: 12'550 W / 270 m2= 46.5 W/m2
+Das Resultat ist plausibel da es sich um ein eher mittelmässig gut isoliertes Gebäude aus dem
+Jahr 1975 handelt. Nicht sanierte Gebäude aus dieser Zeit liegen oft im Bereich zwischen 40-50
+W/m2.
+
+Berechnung Zuschlag Sperrzeit
+Qoff =Qh*(24/(24-toff)-1)= 12.55 [KW] * (24/(24-3)-1) = 1.79 KW
+
+Berechnung Zuschlag Warmwasser
+Warmwasserbedarf pro Tag = Qnww / 365 = 4'309 [kWh/a] / 365 = 11.8 kWh/d
+Ladezeit td =Qnww / Qh =11.8 [kWh/d] / 12.55 [KW] =0.94 h/d
+Leistungszuschlag Qw= Qh * (24/(24-td)-1) = 12.55 KW*(24/(24-0.94)-1) = 0.51 KW
+Zur Info: Dies ergibt einen spezifischen Leistungszuschlag von 1.88 W/m2 EBF
+
+Berechnung Wärmepumpenleistung ohne Dämmmassnahmen
+Qwp = Qh+Qw+Qoff = 12.55 KW + 0.51 KW + 1.79 KW = 14.85 KW
+
+Abschätzung Wärmepumpenleistung mit Dämmmassnahmen
+Einsparung Fensterersatz: ca. 15%
+Einsparung Dämmung Kellerdecke: ca. 8%
+Einsparung Dämmung Estrichboden: ca. 10%
+
+Reduzierte Heizleistung: 12.55 KW * 0.85 * 0.92 * 0.9 = 8.8 KW
+Zuschlag Sperrzeit: Qoff =Qh*(24/(24-toff)-1)= 8.8 [KW] * (24/(24-3)-1) = 1.26 KW
+Ladezeit td =Qwwd/Qh =11.8 [kWh] / 8.8 [KW] =1.34 h
+Leistungszuschlag Qw= Qh*(24/(24-td)-1) = 8.8 KW*(24/(24-1.34)-1) = 0.52 KW
+
+WP-Leistung mit Dämmmassnahmen = 8.8 KW + 0.52 KW +1.26 KW = 10.58 KW
+
+→ Auswahl WP A oder B ? : Diskussion
+
+
+
+
+Seite 4 von 10                        © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+
+       WP A                                  WP B
+
+
+
+
+Seite 5 von 10               © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Aufgabe 3
+Ein MFH in gehobenem Standard in der Stadt Zürich mit 11 Wohnungen welches im Minergie P
+Standard erstellt wurde, hat eine defekte Inverter Sole-Wasser Wärmepumpe, welche ersetzt
+werden muss. Die bisherige Wärmepumpe hatte einen Leistungsbereich von 6-26 KW und
+konnte das Warmwasser auf 58°C erwärmen. Der Wärmebedarf für Heizung und Warmwasser
+wurde separat gemessen. Es liegen Berechnungen nach SIA 384.2 vor.
+
+Wohnungsspiegel:
+   Wohnung        Wohnfläche Personenbelegung
+    Zimmer            m2          P/Whg.
+      3.5             100           2.3
+      3.5              94           2.3
+      4.5             109           2.4
+      4.5             112           2.5
+      4.5             109           2.4
+      4.5             112           2.5
+      3.5              94           2.3
+      5.5             127           2.8
+      3.5              94           2.3
+      5.5             127           2.8
+      4.5             124           2.8
+Total Personen (theoretisch)       27.4
+Berechnung gemäss SIA 385/2: 2015
+
+
+
+Gegeben:
+   • EBF 1832 m2
+   • Theo. Personenbelegung 27.4
+   • Messwert Durchschnittlicher Wärmebedarf Heizung: 23'000 KWh/a
+   • Messwert Durchschnittlicher Wärmebedarf Warmwasser: 20'000 KWh/a
+   • Keine Sperrzeit
+   • Selbstregulierende Bodenheizung mit 30°C / 25°C
+   • Elektroheizband für Warmhaltung, Speicherverluste 10%, Ausstossverluste 15%
+   • Erdsonden 3 x 230m
+   • Naturalcooling über Erdsonden und Fussbodenheizung im Sommer
+   • Wärmeleistungsbedarf nach SIA 384.2 = 21.5 KW (bei 22°C Raumtemperatur)
+
+Gesucht:
+   • Schätzung BWW-Bedarf anhand der Wohnungsgrössen und Vergleich/Interpretation mit
+      den Messwerten
+   • Abschätzen der benötigten Heizleistung der neuen Sole-Wasser Wärmepumpe nach der
+      Methode der Vollbetriebsstunden. Vergleich und Interpretation mit Wärmeleistung nach
+      SIA 384.2
+
+
+
+
+Seite 6 von 10                     © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+Aufgabe 3 Lösung
+
+Berechnung Nutzenergie Heizung und Warmwasser aus Messungen
+Nutzenergie Qnhww= 23’000+20’000 = 43’000 kWh/a
+
+Berechnen Nutzenergie Warmwasser (Schätzung aufgrund Personenbelegung)
+Annahme 27.4 Personen à 45 Liter pro Person
+Tagesbedarf = 27.4 x 45 l/P = 1’233 l/d
+Qnww = 1’233 [l/a]*1.1*1.15*4.2[kJ/kgK]*50[K]*365 [d/a] / 3600 [kWh/KJ) = 33'210 kWh/a
+
+Interpretation Warmwasserbedarf:
+Tatsächlich gemessen wurde für das Warmwasser aber nur 20'000 KWh/a was eine erhebliche
+Abweichung zum theoretischen Wert bedeutet. Die Gründe liegen wahrscheinlich am sparsamen
+Umgang mit Warmwasser und einer deutlich geringeren Personenbelegung in den letzten
+Jahren.
+
+Nutzenergie Heizung (Messung)
+Gemäss Messungen Qnh= 23'000 kWh/a
+
+Abschätzung Heizleistung aus Messergebnis und Plausibilitätskontrolle:
+Heizleistung Qh = Qnh / tvoll = 23’000 [KWh/a] / 2'000 [h/a] = 11.5 KW
+Spez. Heizleistung: 11'500 W / 1832 m2= 6.3 W/m2
+
+Interpretation Heizleistung :
+Das Resultat ist nicht plausibel. Minergie P-Gebäude weisen in der Regel eine spezifische
+Heizleistung von ca. 8-12 W/m2 auf. Bei Minergie P-Gebäuden spielen die internen
+Wärmequellen und die passive Sonnenenergie eine wesentlich grössere Rolle als bei älteren
+Gebäuden. Die Berechnung mit den Vollbetriebsstunden liefert hier zu ungenaue Werte.
+
+Wir rechnen trotzdem weiter mit Heizleistung =11.5 KW und Warmwasser 33’210 kWh/a
+
+Zuschlag Warmwasser
+Warmwasserbedarf pro Tag = Qnww / 365 = 33'210 [KWh/a] / 365 = 91 KWh/d
+Ladezeit td =Qnww / Qh =91 [KWh/d] / 11.5 [KW] =7.9 h/d
+Leistungszuschlag Qw= Qh * (24/(24-td)-1) = 11.5 KW*(24/(24-7.9)-1) = 5.64 KW
+Dies ergibt einen spezifischen Leistungszuschlag von 3.1 W/m2 EBF
+
+Wärmepumpenleistung (theoretisch)
+Qwp = Qh+Qw = 11.5 KW + 5.64 KW = 17.14 KW
+
+
+
+
+Seite 7 von 10                       © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+Diskussion zu Aufgabe 3:
+
+Gemäss Berechnung nach SIA 384.2 ergibt sich eine Heizleistung von 21.5 KW bzw. eine spez.
+Heizleistung von 11.7 W/m2 für dieses Gebäude. Zusammen mit dem Zuschlag für Warmwasser
+von theoretisch 5.64 KW würde sich eine max. WP-Leistung von 27.1 KW ergeben. Wichtig zu
+wissen: Die Berechnung nach SIA 384.2 beinhaltet in der Regel Reserven im Bereich von 10-20%.
+
+Es ist davon auszugehen, dass eine max. WP-Leistung von 17.14 KW nicht genügen würde um
+während einer längeren Kälteperiode die Raumtemperaturen von ca. 22°C zu halten. Auf der
+anderen Seite wäre eine WP mit 27.1 KW mit grosser Wahrscheinlichkeit überdimensioniert.
+
+Würde man die Leistung nach SIA 384.2 zB. um 20% reduzieren, ergäbe sich eine max. WP-
+Leistung von 17.2 KW+5.64 KW=22.84 KW.
+
+Im vorliegenden Fall war die bestehende Inverter WP mit dem Leistungsbereich von 6-26 KW
+gut dimensioniert. Dieses Beispiel zeigt den Vorteil moderne Inverter-WP’s mit einem guten
+Regelbereich.
+
+
+
+
+Seite 8 von 10                      © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+
+Aufgabe 4
+
+Ein bestehendes EFH im Schweizer Mittelland wird mit einer 1-stufigen Sole-Wasser
+Wärmepumpe beheizt. Die Wärmepumpe ist 10-jährig und mit einem Betriebsstundenzähler
+ausgerüstet. Die Wassererwärmung erfolgt über einen Elektroboiler mit Zirkulationssystem der
+nun defekt ist. Daher soll geprüft werden ob die Wassererwärmung neu auch über die
+bestehende Wärmepumpe erfolgen kann. Im Haushalt leben aktuell 4 Personen.
+
+Gegeben:
+   • Heizleistung der Wärmepumpe bei BO/W35 = 12KW, COP=4.2
+   • Betriebsstundenzähler zeigt 14'000 h
+   • Erdsonde Standard DN40/PN16, 1 x 160m
+   • Haushalt mit 4 Personen
+   • Länge Zirkulation unbekannt
+   • Keine Sperrzeiten
+
+Gesucht:
+   • Genügt die installierte WP-Leistung ?
+   • Reicht die Erdsondenleistung noch aus ?
+   • Wie viele Betriebsstunden sind neu zu erwarten ?
+
+
+
+
+Seite 9 von 10                       © FWS AWB/Modul 3/V. 1-2025
+FWS AWB WP-Kurs Modul M3 / Aufgaben und Lösungen
+
+
+Aufgabe 4 Lösung:
+
+Berechnung der Nutzenergie Heizung pro Jahr
+Betriebsstunden pro Jahr = 14'000h / 10 Jahre = 1’400 h/a
+Nutzenergie Qnh= 1’400h/a ∗ 12 KW = 16’800 kWh/a
+
+Berechnung der tatsächlich erforderlichen Heizleistung
+Vollbetriebsstunden Mittelland, Wohnnutzung ohne Warmwasser = 2’000 h/a
+Qn=Qnh / tvoll = 16’800 [KWh/a] / 2000 = 8.4 [KW]
+Das heisst, die WP ist mit der installierten Leistung von 12 KW überdimensioniert.
+
+Berechnung Nutzenergie Warmwasser pro Jahr
+Annahmen:
+4 Personen à 40l pro Tag =160 l/d, Speicherverluste: 10%
+Zirkulationsverluste 15%, Ausstossverluste 15%
+
+Qnww = 160[l/d]*4.2[kJ/kgK]*50[K] / 3600 [kWh/KJ] *1.1*1.15*1.15* 365 [d/a]) = 4'956 kWh/a
+
+Berechnen Zuschlag Warmwasser
+Warmwasserbedarf pro Tag = Qnww / 365 = 4'956 [KWh/a] / 365 = 13.6 kWh/d
+Ladezeit td =Qnww / Qh =13.6 [kWh/d] / 8.4 [KW] =1.62 h/d
+Leistungszuschlag Qw= Qh * (24/(24-td)-1) = 8.4KW*(24/(24-1.62)-1) = 0.6 KW
+
+Tatsächlich benötigte WP-Leistung inkl. Warmwasserzuschlag
+Qwp = Qh+Qw = 8.4 KW + 0.6 KW = 9.0 KW
+
+Interpretation:
+Die Wärmepumpe ist auch unter Berücksichtigung der Warmwassererwärmung immer noch
+überdimensioniert.
+
+Nutzenergie Heizung und Warmwasser und Betriebsstunden neu:
+Nutzenergie Qn= Qnh+Qnww =16’800+4’956 = 21’756 kWh/a
+Betriebsstunden neu inkl. Warmwasser = 21'756 [kWh/a] / 12 [KW] = 1813 h/a
+
+Berechnen der Kälteleistung der bestehenden WP:
+Qk = Qh * (COP-1)/COP → bei B0/W35 COP 4.2
+Qk = 12 [KW] * (4.2-1)/4.2 = 9.14 KW
+Die ergibt eine spezifische Entzugsleistung der Erdsonden von: 9.14 KW / 160m= 57 W/m
+
+Beurteilung der Erdwärmesonde:
+Die spez. Entzugsleistung ist zu gross. Gemäss SIA 384/6 würde für dieses Objekt eine Sonde
+von min. 200m Länge benötigt. Sofern die Soletemperaturen der bestehenden Erdsonden bis
+dato einwandfrei waren (Grössenordnung 5-7°C anfangs Heizsaison), könnte man sich
+überlegen die Anlage ohne weitere Massnahmen auf zusehen hin und mit Einverständnis der
+Bauherrschaft, weiter zu betreiben und mittels Überwachung der Soletemperaturen den Betrieb
+sicher zu stellen. Ablesen der Soletemperaturen jeweils am Beginn und Ende der Heizperiode
+während ca. 5 Jahren. Sinkt die Soletemperatur in dieser Zeit stetig ab, muss reagiert werden. Es
+empfiehlt sich dieses Vorgehen schriftlich mit der Bauherrschaft zu vereinbaren.
+
+
+Seite 10 von 10                       © FWS AWB/Modul 3/V. 1-2025
+

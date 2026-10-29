@@ -14,3 +14,9 @@ _backup-*.zip
 test-out.log
 test-state.log
 test-state-out.log
+
+# Heizlast-Neubau (heizlast/): Abhängigkeiten, Testartefakte, Vite-Output (wird im Pages-Build erzeugt)
+heizlast/node_modules/
+heizlast/test-results/
+heizlast/playwright-report/
+public/heizlast-neu/

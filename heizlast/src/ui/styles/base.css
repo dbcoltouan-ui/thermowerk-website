@@ -1,0 +1,158 @@
+/* ---- Reset / Basis ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--c-bg);
+}
+body {
+  font-family: var(--ff);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+  line-height: 1.25;
+}
+p {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: var(--c-brand);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+small {
+  font-size: var(--fs-xs);
+}
+:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 8px 14px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  background: var(--ink-0);
+  color: var(--ink-800);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--ink-100);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+  color: #fff;
+}
+.btn--primary:hover {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+}
+.btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-700);
+}
+.btn--ghost:hover {
+  background: var(--ink-100);
+}
+
+/* ---- Kacheln / Karten ---- */
+.karte {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+}
+.karte__titel {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text-mute);
+  margin-bottom: var(--s-3);
+}
+
+/* ---- Felder ---- */
+.feld {
+  display: grid;
+  gap: var(--s-1);
+}
+.feld__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--ink-700);
+}
+.feld__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  background: var(--ink-0);
+  font-size: var(--fs-md);
+}
+.feld__input:focus {
+  border-color: var(--brand-500);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand-100);
+}
+.feld__hilfe {
+  font-size: var(--fs-xs);
+  color: var(--c-text-mute);
+}
+
+/* ---- Hilfsklassen ---- */
+.mute {
+  color: var(--c-text-mute);
+}
+.leer {
+  color: var(--ink-400);
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
