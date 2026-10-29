@@ -1,6 +1,6 @@
 # KONTEXT — Neubau «Thermowerk Heizlast» (für jede Folge-Session zuerst lesen)
 
-Stand: 2026-10-29 · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
+Stand: 2026-10-29 (Regel 10 + Design 16:34) · Auftraggeber: Daniel (Thermowerk, Heizungs-/WP-Fachbetrieb, Schweiz) · Ausführung: Claude (Sessions laut `PLAN.md`), Daniel prüft und gibt frei.
 
 ## 1. Zweck (verbindlich)
 Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbaren Modi:
@@ -27,7 +27,7 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 | Wärmeabgabe (HK) | Datenmodell je Heizfläche: `bauart` (Enum), bedingte Masse (Höhe/Länge/Tiefe bzw. Säulen/Glieder), optional Modell/Typenschild (mit Bezugstemperaturen), Minderungen; Rechenkette: Q_N aus Tabellen (W/m je Typ×Höhe; W/Glied je Höhe×Tiefe/Säulen) → n aus **einer** Tabelle → Q(θ_VL) mit log. Übertemperatur → Raum: Σ Q/Φ_HL, θ_VL,req per **Bisektion** → Gebäude-Max → Ampel ≤55 / 55–65 / >65 °C → Massnahmen (Typ-Upgrade gleiche Nische, Länge, FBH, Hybrid) → `Ergebnis.auslegungsVL` speist Gerätefilter, Dashboard, Bericht. | `befund_heizkoerper.md §6`. |
 | Backend | Cloudflare Pages Functions + D1 bleiben. Auth neu: HMAC-signiertes Cookie (`HEIZLAST_COOKIE_SECRET`), Ablauf, timing-safe Passwortvergleich, Rate-Limit; Projekte: Grössenlimit, ID-Format, optimistisches Locking (409 bei `updated_at`-Konflikt), 404 bei unbekannter ID. SQL aus `heizlast-projects.js` übernehmen. D1-Schema ins Repo. | BUILD-06–09, 12. |
 | Daten | Nur in `data/*.json`, nie als Kopie im Code. Einheitliches `_meta { version, stand, quellen[] }`; jede Tabelle mit Quelle (Norm/Seite/Tabelle oder Datenblatt-URL + Datum). KI-Recherche ist keine Primärquelle. Schema-Tests je Datei. | DATA-01, 10. |
-| Design | Farbpalette und die **eckige** Formensprache (Kacheln/Konturen wie heute, keine runden Ecken) des alten Tools übernehmen; Layout, Navigation, Dichte, Komponenten frei neu. Design-Tokens in Session 1 aus dem alten `style.css` ableiten. | Daniel 29.10. |
+| Design | Farbpalette und die **eckige** Formensprache (Radien 0–4 px, wie im alten `style.css`) übernehmen; Layout, Navigation, Dichte, Komponenten frei neu. Tokens liegen seit Session 1 in `src/ui/styles/tokens.css`; **Radien wie auf Schritt 0 der neuen App sind von Daniel bestätigt (29.10., 16:34) und bleiben so.** | Daniel 29.10. |
 | Sprache/Stil | UI und Doku Deutsch, Schweizer Schreibweise (ss, 23'000). Bezeichner: Domänensprache Deutsch, camelCase, Einheit im Namen wo nicht SI (`qhlKW` vermeiden → intern alles in W und °C, Formatierung nur in UI). Keine ß, keine «ae/oe/ue»-Umschreibungen in sichtbaren Texten. | CODE-22–27. |
 | Zusatzmodule | Förderung, Bewilligung, Offerte: bestehende reine Module übernehmen, an neuen State anbinden, in separater Navigationsgruppe. Hydraulik-Schemas: zurückgestellt (nicht im Umfang). | CODE-10, `code-qualitaet.md §5`. |
 
@@ -41,6 +41,10 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 9. **Ablauf:** je Session ein neuer Chat im Claude-Projekt «thermowerk», Modell laut PLAN wählen, Prompt aus PLAN.md §4 einfügen. Dieses KONTEXT.md liegt in der Projekt-Wissensbasis und wird in jedem Chat zuerst gelesen.
 6. Doku an Daniel **als PDF oder Text im Chat**; für Claude als Markdown im Repo.
 7. Nichts doppelt, nichts veraltet: ersetzte Dateien nach `_to_delete/`, keine Leichen.
+10. **Daniel ist kein Entwickler** (Daniel 29.10., 16:34): Entwicklung, Backend, Deploy, Konfiguration und deren Prüfung sind zu 100 % Claudes Arbeit. Claude organisiert und prüft selbst — auch Funktionen in der laufenden App (Playwright, Fetch der Staging-URL, curl gegen die API). Daniel ist nur **Backup-Tester** (Klicks im Browser, fachliche Plausibilität) und prüft nichts, was Entwickler-Wissen braucht.
+    - Wenn etwas dauert (Cloudflare-Build, DNS, Cache): einige Minuten warten, erneut prüfen; eine Session wird **erst abgeschlossen, wenn Claude das Ergebnis bestätigt hat** (z. B. Staging-URL liefert die neue Version). «Daniel bestätigt» ist nirgends Voraussetzung für «fertig».
+    - Einstellungen im Cloudflare-Dashboard, in GitHub oder in Sanity nimmt Claude selbst vor (Browser-Tools), wenn möglich; nur wenn das nicht geht, bekommt Daniel eine Klickanleitung in Alltagssprache (wo klicken, was eintragen) — ohne Fachjargon. Geheimnisse (Secrets, Tokens) erzeugt Claude und sagt Daniel nur, wo sie einzutragen sind, falls Claude es nicht selbst kann.
+    - Kommunikation mit Daniel: Klartext, Fachbegriffe beim ersten Auftauchen in einem Halbsatz erklären, Entscheidungen als Frage («Soll ich A oder B?»), keine Terminal-Befehle an Daniel.
 
 ## 4. Definition of Done je Session
 - Ziel der Session erreicht und im Chat **knapp** berichtet (keine Aufzählung erledigter Schritte).
@@ -49,6 +53,7 @@ Heizlast eines Gebäudes berechnen und als Bericht ausgeben, in zwei umschaltbar
 - Jeder neue Fallback liefert `Wert` mit Herkunft/Begründung; Property-Tests für Monotonie wo relevant.
 - Commit mit sprechender Message; `PROTOKOLL.md` ergänzt; `README.md` im Repo aktuell (Architektur, Befehle, Datenquellen, offene Punkte).
 - Keine Rechenlogik in `src/ui/`; keine Daten-Kopien im Code.
+- **Deploy von Claude verifiziert**: nach Push warten, bis Cloudflare gebaut hat (Staging-URL `https://thermowerk.ch/heizlast-neu/` per Fetch prüfen: HTTP 200 und neuer Asset-Hash/Inhalt; bei Bedarf alle 1–2 Minuten erneut, bis bestätigt). Live `/heizlast/` weiterhin 200. Funktionen des Session-Ziels hat Claude selbst in der deployten App geprüft (Playwright gegen Staging oder Fetch). Daniel wird nur informiert, nicht als Prüfer vorausgesetzt (Regel 10).
 
 ## 5. Referenzmaterial (Pfade auf dem PC)
 - Befund: `D:\Users\Daniel\Documents\Thermowerk\Heizlast Tool\REVISION\` (BEFUND.md, PLAN.md, KONTEXT.md, Teilberichte, shots/).
