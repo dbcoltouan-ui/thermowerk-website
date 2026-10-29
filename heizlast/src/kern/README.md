@@ -16,7 +16,7 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `klima.ts` | 4 | Standort → SIA-2028-Station (PLZ/Kanton), θe mit Höhenkorrektur, Jahresmittel, HGT; Override mit Herkunft |
 | `huelle.ts` | 4 | Bauteiltypen auf Gebäudeebene: Stufen-Picker, EINE Schichtkette (Epochen-Default Bestand → bekannte Stufen → ISO 6946 → Clamp), Sanierung ab Jahr, Override, Fenster/Türen/Innenbauteile |
 | `raumweise.ts` | 4 | Räume und Bauteile (Referenz auf Hüllentyp + Fläche + Anschluss), Φ_T mit ΔU_WB/b_u/U_equiv, Φ_V = V·n_min·0.34, Σ Räume und saldierte Gebäude-Heizlast, EBF aus Räumen, nicht erfasster Rest |
-| `waermeabgabe.ts` | 5 | Heizkörper-Modul |
+| `waermeabgabe.ts` | 5 | Heizkörper-Modul: Q_N je Heizfläche (Typenschild/Modell/Bauart+Massen/alte Heizkurve), n aus einer Tabelle, Minderungen, Raum-Deckung, θ_VL,req (Bisektion), Gebäude-Auslegungs-VL + Ampel, Massnahmen |
 | `berechne.ts`, `relevanz.ts` | 6 | Orchestrierung, Relevanz |
 | `zusatz/` | 11 | Förderung, Bewilligung, Offerte |
 
@@ -114,3 +114,25 @@ heizlastRaumweise(e: RaumweiseEingabe, { sia: siaDaten(), fws: fwsDaten() }) →
 `tests/kern/*.test.ts` — Sollwerte ausschliesslich extern: Kurslösungen A1/1B/2/3/4, Folien 31/32/43/45/48/49/52/54, BEISPIELRECHNUNG, Wissensbasis K §5, Handrechnungen (im Test dokumentiert). Eine bekannte Abweichung: die Kurslösungen verketten WW-Verluste multiplikativ (1.1·1.15·1.15), der Kern rechnet additiv (Folie 49/SIA 385/2) — Q_hl und Q_h bleiben innerhalb ±1 %, Q_w weicht bis 3 % ab (dokumentiert in `fws.test.ts`).
 
 Session 4 (`klima.test.ts`, `huelle.test.ts`, `raumweise.test.ts`): SIA-2028-Stationswerte, ISO-6946-Handrechnungen, Referenzhaus 238/5 (Räume ±2 %, Flur echt gerechnet: −106 W gegenüber −95 W, Formblatt rundet f_RT), IBO-Musterhaus (Lüftung 14 Räume, Erdreich: ISO-Formel +17 % gegenüber DIN-Tabelle auf 4 % der Last), eigenes CH-EFH von Hand, U_equiv-Tabelle ±8 %; Property-Tests: Bestätigen der Defaults ändert nichts, epochentypische Bauweise bleibt in der Spanne, Dämmung↑ ⇒ U↓, Dicke↑ ⇒ U↓, jüngere Fenster ⇒ U↓, Saldierung ≤ Σ Räume, Hülle → Raum, Override gewinnt.
+
+## Kern-API Session 5
+
+### `waermeabgabe.ts`
+
+```ts
+waermeabgabe(e: WaermeabgabeEingabe, { hk: heizkoerperDaten(), fws: fwsDaten(), sia: siaDaten() }): WaermeabgabeErgebnis
+```
+
+`WaermeabgabeEingabe`: `heizkreise[] { id, bezeichnung?, tVLC?, spreizungK?, gemischt? }` (IDs intern, nicht editierbar), `raeume[] { id, name, typ?, thetaIntC? | thetaInt (Wert), flaecheM2?, phiHL (Wert aus raumweise) | phiHLManuellW?, beheizt?, ausklammern?, ausklammernGrund?, heizflaechen[] }`, `zielVLC?` (Standard 55 °C), `verteilung? { qhl: Wert, ebfM2? }` (FWS-Modus ohne raumweise Heizlast), `heizkurveAlt? { tVLC, tRLC? }`, `auslegungsVLOverrideC?`.
+
+Heizfläche `{ id, bauart, kreisId?, bezeichnung?, hoeheMm?, laengeMm?, tiefeMm?, nabenabstandMm?, glieder?, gliedbreiteMm?, einbau?, designTyp?, flaecheM2?, verlegeabstandMm?, belag?, rlb?, system?, modellId?, typenschild? { qNW, tVLC, tRLC, tRaumC, n? }, minderungen? { nische?, verkleidung?, oberflaeche?, anschluss? }, nOverride? }`. Bauarten: `BAUARTEN` (Platte 10–33, Guss-/Stahlglieder, Röhren 2–6, Konvektor passiv/Gebläse, Bad, Vertikal, FBH, Wand). `relevanteMasse(bauart)` sagt, welche Felder gelten (UI-Relevanz); fremde Felder ignoriert der Kern. `heizflaecheBauartWechseln(hf, neu)` setzt Masse zurück (Platte ↔ Platte behält Höhe/Länge = gleiche Nische).
+
+- Q_N (75/65/20; Flächenheizung 35/28/20): Typenschild ±2 % (Umrechnung über Δθ_log, 90/70 → 0.795) > Modell-DB ±5 % > Tabelle nach Massen ±15 % (Platten W/m × Länge, interpoliert über Höhe; Glieder W/Glied nach Bauhöhe bzw. Nabenabstand × Tiefe, gemessene Höhe rastet ±30 mm auf DIN-Stufe ein; Röhren W/Glied je Säulen × Höhe; Konvektor W/m nach Höhe × Tiefe, verkleidet oder Unterflur; Bad/Vertikal nach Höhe × Breite; FBH q(ΔθH 15 K) nach VA × Rλ,B, Oberflächengrenze 100 W/m²; Wand 80 W/m² bzw. WEM-Systeme) > alte Heizkurve (Mindest-Q_N, ±30 %). Extrapolation ±25 %, Standardwert-Masse (Guss-Tiefe 160 mm, FBH VA 150/Rλ,B 0.10, Konvektor verkleidet, Vertikal Typ 22) ±25 %, quadratisch kombiniert.
+- n aus `exponenten.werte` (eine Tabelle); Modell/Typenschild/Override gewinnen.
+- f_m = f1·f2·f3·f4·f5 (Nische, Verkleidung je Bauart, Oberfläche; f4/f5 nur bei Anschluss «reitend»), ohne Angaben 1.
+- Raum: Q je Heizfläche bei Kreis-VL bzw. Ziel-VL und Kreis-Spreizung (Standard 10 K Radiatoren, 7 K Flächen), Deckung = Σ Q / Φ_HL (grün ≥ 1.0, gelb ≥ 0.85, rot), θ_VL,req per Bisektion über Σ Q(θ) (gemischte Kreise gedeckelt), Suchbereich bis 90 °C (darüber: nicht erreichbar).
+- Massnahmen bei Deckung < 1: Typ-Upgrade gleiche Nische (alle stärkeren Plattentypen mit neuer θ_VL,req), nötige Länge bzw. Gliederzahl bei Ziel-VL (Platte zusätzlich als Typ 33), FBH-Fläche bei 35/28, Gebläsekonvektor-Q_N für die fehlende Leistung, Vorlauf halten (Hybrid).
+- Gebäude: `auslegungsVL` = max θ_VL,req der beheizten, nicht ausgeklammerten Räume (unerreichbar → 90 °C, rot); ohne Bewertung höchster Kreis-VL; Override gewinnt mit Hinweis (Warnung, wenn tiefer als der Bedarf). Ampel ≤ 55 gut / ≤ 65 kritisch / > 65 ungeeignet mit Klartext-`urteil`, `kritischeRaeume` (Top 3), `massgebenderRaum`.
+- FWS-Modus: Φ_HL,Raum = Q_hl / EBF × 1.10 × A_Raum (bzw. Anteil der erfassten Raumflächen), Schätzung ±25 %.
+
+Hilfsfunktionen: `dTlog`, `leistungsfaktor`, `bisektionVorlauf`, `vorlaufNaeherungArithmetisch` (nur Vergleich), `normleistung`, `minderungsfaktor`, `ampelVorlauf`, `interpoliere1/2`, `kategorieVon`, `bauartDaten`.

@@ -223,3 +223,22 @@ describe('heizkoerper-tabellen.json — Modell-DB (HK-07, DATA-06)', () => {
     expect(pur.wProM7565).toBe(1709);
   });
 });
+
+describe('heizkoerper-tabellen.json — auslegung (Session 5)', () => {
+  type A = { auslegung: { spreizungDefaultK: { radiator: number; flaeche: number }; zielVLDefaultC: number; vlSuchbereichC: number[]; unsicherheitProzent: Record<string, number>; gussTiefeDefaultMm: number; fbhDefault: { verlegeabstandMm: number; rlb: number } }; ampel: { vorlaufC: { gutBis: number } }; glieder: { guss: { werte: { tiefeMm: number }[] } }; fbh: { verlegeabstandMm: number[]; rlbStufen: string[] } };
+  const d = ladeJson<A>('heizkoerper-tabellen.json');
+  it('Standardwerte konsistent mit den Tabellen: Ziel-VL = Grenze «gut», Guss-Tiefe und FBH-System in den Tabellen, Unsicherheit Typenschild < Modell < Tabelle', () => {
+    const a = d.auslegung;
+    expect(a.zielVLDefaultC).toBe(d.ampel.vorlaufC.gutBis);
+    expect(a.spreizungDefaultK.radiator).toBeGreaterThan(0);
+    expect(a.spreizungDefaultK.flaeche).toBeGreaterThan(0);
+    expect(a.vlSuchbereichC[1]).toBeGreaterThan(a.zielVLDefaultC);
+    expect(d.glieder.guss.werte.map((w) => w.tiefeMm)).toContain(a.gussTiefeDefaultMm);
+    expect(d.fbh.verlegeabstandMm).toContain(a.fbhDefault.verlegeabstandMm);
+    expect(d.fbh.rlbStufen.map(Number)).toContain(a.fbhDefault.rlb);
+    const u = a.unsicherheitProzent;
+    expect(u.typenschild!).toBeLessThan(u.modell!);
+    expect(u.modell!).toBeLessThan(u.tabelle!);
+    expect(u.tabelle!).toBeLessThan(u.heizkurve!);
+  });
+});

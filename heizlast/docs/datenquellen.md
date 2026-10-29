@@ -133,6 +133,16 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 | `klimastationen.json` jahresmittel: 11.5 °C − 0.5 K/100 m, RMSE 0.8 K | Regression über 53 SIA-381/2-Stationen < 2000 m | lesosai-sia381-2, tw-abgeleitet | A |
 | `fws.json` ebf.faktorNwfZuEbf 1.10 (1.10–1.15) | EBF ≈ NWF × 1.1–1.15; Beispiel 50+100+80 = 230 m² | FWS M3 Folie 33–35 | P |
 
+## 6b. Ergänzungen Session 5 (2026-10-29)
+
+| Datei / Tabelle | Zahl | Quelle | Status |
+|---|---|---|---|
+| `heizkoerper-tabellen.json` auslegung.spreizungDefaultK Radiatoren 10 K, Flächen 7 K | wie f_u-Tabellen 55/45, 45/35 bzw. Auslegung 35/28 | Wissensbasis E Tab. 3.2/3.10, F | S / A |
+| auslegung.zielVLDefaultC 55 °C | Grenze «gut» der WP-Tauglichkeit | Befund §6.2; FWS M3 Senkentemperatur 55 °C @ A−8 | A |
+| auslegung.vlSuchbereichC 20–90 °C, hoeheEinrastenToleranzMm 30 | — | tw-annahme | A |
+| auslegung.unsicherheitProzent Typenschild 2, Modell 5, Tabelle 15, extrapoliert 25, Standardwert-Mass 25, Heizkurve 30, Verteilung nach Fläche 25 | — | Befund §6.1 (2/5/15); Rest tw-annahme | S / A |
+| auslegung.gussTiefeDefaultMm 160; fbhDefault VA 150, Rλ,B 0.10 (Bad 0.00); Konvektor-Einbau verkleidet | Rλ,B 0.10 = Planungswert Wohnen | fbh.rlbTypisch (V&N/Viessmann); tw-annahme | S / A |
+
 ## 7. Nicht belegt (offen, als Annahme gekennzeichnet)
 
 - Höhengradient θe (K/100 m) und τ-Korrektur nach SIA 384/2 Kap. 4/5 (Normtext nicht öffentlich) → 0.6 K/100 m ab 200 m Differenz.

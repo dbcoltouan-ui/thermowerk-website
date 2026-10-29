@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "stand": "2026-10-29",
     "beschreibung": "Heizflächen-Tabellen für das Wärmeabgabe-Modul: Normwärmeleistung EN 442 bei 75/65/20 °C (Δθ_log 49.83 K) je Bauart aus Massen (Platten W/m je Typ × Höhe als Mittel mehrerer Hersteller; Glieder W/Glied je Nabenabstand × Tiefe; Röhren W/Element je Säulen × Höhe; Konvektoren W/m je Höhe × Tiefe; Bad-HK, Vertikal-HK, FBH W/m², Wandheizung), eine Exponenten-Tabelle, Minderungsfaktoren, Umrechnungs-Kontrollwerte und bereinigte Modell-DB (nur Datenblatt-belegte Zahlen, `abgeleitet` gekennzeichnet). Keine Rechenlogik: der Kern interpoliert/rechnet selbst (Session 5).",
     "quellen": [
@@ -213,6 +213,11 @@
         "titel": "docs/revision/befund_heizkoerper.md §2A/§5: Nachrechnungen B1–B3, Umrechnung 90/70 → 75/65 = 0.795 (log, n 1.3)",
         "art": "Revisionsbefund",
         "fundort": "docs/revision/befund_heizkoerper.md"
+      },
+      {
+        "id": "tw-annahme",
+        "titel": "Thermowerk-Annahme (Standardwert der Rechenkette Wärmeabgabe, im Tool als «Standardwert» markiert und überschreibbar; Session 5)",
+        "art": "Annahme"
       }
     ],
     "referenzbedingung": {
@@ -3226,6 +3231,42 @@
       "kritischBis": 65
     },
     "starkUeberdimensioniertAb": 2.0
+  },
+  "auslegung": {
+    "beschreibung": "Standardwerte der Rechenkette Wärmeabgabe (Session 5), alle als «Standardwert» sichtbar und überschreibbar: Spreizung je Heizflächen-Kategorie (Radiatoren 10 K wie die fᵤ-Tabellen 55/45, 45/35 der Wissensbasis E Tab. 3.2/3.10; Flächenheizung 7 K wie Auslegung 35/28), Ziel-Vorlauf für Deckung und Massnahmen = Grenze «gut» der WP-Tauglichkeit (55 °C), Suchbereich der Bisektion θ_VL,req, Einrasten gemessener Höhen auf DIN-4703-Bauhöhen, Unsicherheit je Herkunftsstufe, Standard-Bautiefe Gussradiator, FBH-Standardsystem, Konvektor-Einbauart.",
+    "quelle": [
+      "wb-e",
+      "wb-f",
+      "befund-hk",
+      "tw-annahme"
+    ],
+    "spreizungDefaultK": {
+      "radiator": 10,
+      "flaeche": 7
+    },
+    "zielVLDefaultC": 55,
+    "vlSuchbereichC": [
+      20,
+      90
+    ],
+    "hoeheEinrastenToleranzMm": 30,
+    "unsicherheitProzent": {
+      "typenschild": 2,
+      "modell": 5,
+      "tabelle": 15,
+      "extrapoliert": 25,
+      "standardMass": 25,
+      "heizkurve": 30,
+      "verteilungNachFlaeche": 25
+    },
+    "gussTiefeDefaultMm": 160,
+    "fbhDefault": {
+      "verlegeabstandMm": 150,
+      "rlb": 0.1,
+      "rlbBad": 0.0
+    },
+    "konvektorEinbauDefault": "verkleidet",
+    "hinweis": "Spreizung 10 K ist konservativ: WP-Betrieb mit 5–7 K Spreizung senkt die nötige Vorlauftemperatur um 1–3 K (log. Übertemperatur). Gussradiator-Tiefe 160 mm = häufigste Bautiefe im CH-Bestand (Thermowerk-Annahme, Datenblatt-Tabelle enthält 70/110/160/220). Verteilung der Gebäude-Heizlast nach Raumfläche (FWS-Modus ohne raumweise Heizlast) ±25 %: Aussenräume und Bäder brauchen mehr als der Mittelwert, Innenräume weniger."
   },
   "modelle": [
     {
