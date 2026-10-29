@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "stand": "2026-10-29",
     "beschreibung": "Fachdaten FWS-Modus (Verbrauchsmethode nach FWS/AWB Kurs Modul 3, Version 1-2025) inkl. Warmwasser, Zuschläge, Speicher, Puffer, Bivalenz. Keine Rechenlogik; jede Tabelle nennt ihre Quelle über `quelle` (IDs aus `_meta.quellen`). Werte in SI-nahen Einheiten (kWh, kW, h, l, K); Konvention siehe `heizwerte`.",
     "quellen": [
@@ -1340,5 +1340,16 @@
       "gelbBis": 60,
       "hinweis": "Ampel nach referenz/FWS-RECHENWEGE.md §11.3 (SIA 384/6, nicht im Kurs-Skript belegt) — Annahme"
     }
+  },
+  "ebf": {
+    "beschreibung": "Energiebezugsfläche nach SIA 380: Summe aller beheizten Geschossflächen innerhalb der thermischen Hülle (inkl. Wände). Näherung aus der Nettowohnfläche (Summe der Raumflächen): EBF ≈ NWF × 1.10–1.15 (Folie 33); Beispiel Folie 34/35: 50 + 100 + 80 = 230 m².",
+    "faktorNwfZuEbf": {
+      "typ": 1.1,
+      "spanne": [
+        1.1,
+        1.15
+      ]
+    },
+    "fundstelle": "FWS M3 Folie 33–35"
   }
 }

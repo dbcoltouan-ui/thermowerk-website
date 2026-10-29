@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "stand": "2026-10-29",
-    "beschreibung": "Gebäudehülle Bestand nach Bauepoche (Schweiz): Default-Schichtaufbau BESTAND (nicht Sanierung) je Bauteil × Epoche mit λ, U-Spanne (min/max aus belegten Quellen) und berechnetem Kontrollwert des Default-Aufbaus (ISO 6946 Reihenschaltung, Rsi/Rse nach Richtung/Grenze). Bauweisen-Katalog, λ-Kataloge Baustoffe/Dämmstoffe, Fenstergenerationen × Rahmen (eine Tabelle), Türen, SIA-380/1-Grenzwerte je Ausgabe. Fallback-Kaskade (KONTEXT §2): Epochen-Default → jede bekannte Stufe ersetzt ihre Schicht → U nach ISO 6946 → Clamp in uSpanne mit Hinweis. Tabellen-U dient nur der Kalibrierung, nie als zweiter Rechenpfad. Alle U in W/(m²K), Dicken in m, λ in W/(mK).",
+    "beschreibung": "Gebäudehülle Bestand nach Bauepoche (Schweiz): Default-Schichtaufbau BESTAND (nicht Sanierung) je Bauteil × Epoche mit λ, U-Spanne (min/max aus belegten Quellen) und berechnetem Kontrollwert des Default-Aufbaus (ISO 6946 Reihenschaltung, Rsi/Rse nach Richtung/Grenze). Bauweisen-Katalog, λ-Kataloge Baustoffe/Dämmstoffe, Fenstergenerationen × Rahmen (eine Tabelle), Türen, SIA-380/1-Grenzwerte je Ausgabe. Fallback-Kaskade (KONTEXT §2): Epochen-Default → jede bekannte Stufe ersetzt ihre Schicht → U nach ISO 6946 → Clamp in uSpanne mit Hinweis. Tabellen-U dient nur der Kalibrierung, nie als zweiter Rechenpfad. Alle U in W/(m²K), Dicken in m, λ in W/(mK). Session 4: Schichtvorlagen für Bauweisen ohne Epochen-Default (Bruchstein, Blockwand, Kalksandstein, Beton, Porenbeton, Innendämmung, Holzrahmen), Pauschal-U Gewölbedecke, Innenbauteile (Innenwand/Innendecke/Innentür) für Raum-Raum-Transmission.",
     "quellen": [
       {
         "id": "geak-typ",
@@ -70,6 +70,11 @@
         "id": "tw-abgeleitet",
         "titel": "Thermowerk-Ableitung (Kalibrierung eines Default-Aufbaus oder eines effektiven λ aus belegten Bauteil-U-Werten; im Bericht als Annahme auszuweisen)",
         "art": "Ableitung"
+      },
+      {
+        "id": "tw-session4",
+        "titel": "Thermowerk Session 4 (2026-10-29): Schichtvorlagen aus Bauteilekatalog-Materialien zusammengesetzt (λ belegt, Aufbau = Annahme); Innentür 2.0 nach Wissensbasis B Tab. 3.6",
+        "art": "Annahme"
       }
     ],
     "konventionen": {
@@ -559,6 +564,26 @@
         "quelle": [
           "btk-san",
           "eren-2018"
+        ],
+        "schichten": [
+          {
+            "material": "innenputz",
+            "dickeM": 0.015,
+            "rolle": "innen",
+            "label": "Innenputz 15 mm"
+          },
+          {
+            "material": "bruchsteinmauerwerk",
+            "dickeM": 0.5,
+            "rolle": "tragschicht",
+            "label": "Bruchsteinmauerwerk 50 cm"
+          },
+          {
+            "material": "aussenputz",
+            "dickeM": 0.02,
+            "rolle": "aussen",
+            "label": "Aussenputz 20 mm"
+          }
         ]
       },
       "fachwerk": {
@@ -587,6 +612,14 @@
         ],
         "quelle": [
           "btk-san"
+        ],
+        "schichten": [
+          {
+            "material": "nutzholz",
+            "dickeM": 0.12,
+            "rolle": "tragschicht",
+            "label": "Blockwand Nutzholz 12 cm"
+          }
         ]
       },
       "zweischalen_luft": {
@@ -631,6 +664,26 @@
         ],
         "quelle": [
           "btk-san"
+        ],
+        "schichten": [
+          {
+            "material": "innenputz",
+            "dickeM": 0.015,
+            "rolle": "innen",
+            "label": "Innenputz 15 mm"
+          },
+          {
+            "material": "kalksandstein",
+            "dickeM": 0.175,
+            "rolle": "tragschicht",
+            "label": "Kalksandstein 17.5 cm"
+          },
+          {
+            "material": "aussenputz",
+            "dickeM": 0.02,
+            "rolle": "aussen",
+            "label": "Aussenputz 20 mm"
+          }
         ]
       },
       "beton": {
@@ -650,6 +703,26 @@
         "quelle": [
           "btk-san",
           "eren-2018"
+        ],
+        "schichten": [
+          {
+            "material": "innenputz",
+            "dickeM": 0.015,
+            "rolle": "innen",
+            "label": "Innenputz 15 mm"
+          },
+          {
+            "material": "beton",
+            "dickeM": 0.2,
+            "rolle": "tragschicht",
+            "label": "Beton 20 cm"
+          },
+          {
+            "material": "aussenputz",
+            "dickeM": 0.02,
+            "rolle": "aussen",
+            "label": "Aussenputz 20 mm"
+          }
         ]
       },
       "wdvs": {
@@ -677,7 +750,34 @@
         "quelle": [
           "btk-san",
           "eren-2018"
-        ]
+        ],
+        "schichten": [
+          {
+            "material": "gipskarton",
+            "dickeM": 0.0125,
+            "rolle": "innen",
+            "label": "Gipskarton 12.5 mm"
+          },
+          {
+            "daemmstoff": "bestand_alt",
+            "dickeM": 0.04,
+            "rolle": "daemmung",
+            "label": "Innendämmung 4 cm"
+          },
+          {
+            "material": "sichtbackstein",
+            "dickeM": 0.3,
+            "rolle": "tragschicht",
+            "label": "Backstein 30 cm"
+          },
+          {
+            "material": "aussenputz",
+            "dickeM": 0.02,
+            "rolle": "aussen",
+            "label": "Aussenputz 20 mm"
+          }
+        ],
+        "hinweis": "Innendämmung: Dämmschicht raumseitig vor dem Mauerwerk; Holz-/Ständeranteile nicht berücksichtigt."
       },
       "porenbeton": {
         "label": "Porenbeton (Gasbeton) 25 cm, verputzt",
@@ -692,6 +792,26 @@
         ],
         "quelle": [
           "btk-san"
+        ],
+        "schichten": [
+          {
+            "material": "innenputz",
+            "dickeM": 0.015,
+            "rolle": "innen",
+            "label": "Innenputz 15 mm"
+          },
+          {
+            "material": "porenbeton_500",
+            "dickeM": 0.25,
+            "rolle": "tragschicht",
+            "label": "Porenbeton 25 cm"
+          },
+          {
+            "material": "aussenputz",
+            "dickeM": 0.02,
+            "rolle": "aussen",
+            "label": "Aussenputz 20 mm"
+          }
         ]
       },
       "holzrahmen": {
@@ -704,6 +824,33 @@
         ],
         "quelle": [
           "btk-san"
+        ],
+        "schichten": [
+          {
+            "material": "gipskarton",
+            "dickeM": 0.0125,
+            "rolle": "innen",
+            "label": "Gipskarton 12.5 mm"
+          },
+          {
+            "daemmstoff": "mineralwolle",
+            "dickeM": 0.16,
+            "rolle": "daemmung",
+            "label": "Dämmung zwischen Ständern 16 cm"
+          },
+          {
+            "material": "holzfaserplatte",
+            "dickeM": 0.016,
+            "rolle": "aussen",
+            "label": "Holzfaserplatte 16 mm (Beplankung)"
+          }
+        ],
+        "hinweis": "Homogene Näherung ohne Holzanteil der Ständer (real ca. +10 % U); Ständerdicke = Dämmdicke.",
+        "dickenTypischM": [
+          0.12,
+          0.16,
+          0.2,
+          0.24
         ]
       }
     },
@@ -820,8 +967,12 @@
         ],
         "quelle": [
           "btk-san",
-          "eren-2018"
-        ]
+          "eren-2018",
+          "tw-session4",
+          "wb-b"
+        ],
+        "uPauschal": 1.5,
+        "hinweis": "Keine Schichtrechnung (inhomogen); Wissensbasis B Tab. 3.4 Kellerdecke 1919–1977 «Gewölbe mit Dielen» 1.2–1.69, Mitte 1.5 (Thermowerk-Annahme)."
       },
       "hourdis": {
         "label": "Hourdis-/Trägerdecke mit Zementüberzug",
@@ -3050,6 +3201,225 @@
           0.1,
           0.29
         ]
+      }
+    }
+  },
+  "innenbauteile": {
+    "beschreibung": "Bauteile zwischen Räumen (Rsi beidseitig, ISO 6946): für Transmission zu Nachbarräumen anderer Temperatur bzw. zu unbeheizten Räumen innerhalb des Gebäudes. Schichten = Annahme (tw-session4), λ aus Bauteilekatalog.",
+    "quelle": [
+      "btk-san",
+      "wb-b",
+      "tw-session4"
+    ],
+    "innenwand": {
+      "richtung": "horizontal",
+      "default": "backstein_12",
+      "bauweisen": {
+        "backstein_12": {
+          "label": "Innenwand Backstein 12 cm, beidseitig verputzt",
+          "schichten": [
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Innenputz 15 mm"
+            },
+            {
+              "material": "sichtbackstein",
+              "dickeM": 0.12,
+              "rolle": "tragschicht",
+              "label": "Backstein 12 cm"
+            },
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "aussen",
+              "label": "Innenputz 15 mm"
+            }
+          ]
+        },
+        "backstein_15": {
+          "label": "Innenwand Backstein 15 cm, beidseitig verputzt",
+          "schichten": [
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Innenputz 15 mm"
+            },
+            {
+              "material": "sichtbackstein",
+              "dickeM": 0.15,
+              "rolle": "tragschicht",
+              "label": "Backstein 15 cm"
+            },
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "aussen",
+              "label": "Innenputz 15 mm"
+            }
+          ]
+        },
+        "beton_20": {
+          "label": "Innenwand Beton 20 cm",
+          "schichten": [
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Innenputz 15 mm"
+            },
+            {
+              "material": "beton",
+              "dickeM": 0.2,
+              "rolle": "tragschicht",
+              "label": "Beton 20 cm"
+            },
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "aussen",
+              "label": "Innenputz 15 mm"
+            }
+          ]
+        },
+        "staender_gedaemmt": {
+          "label": "Ständerwand Gipskarton mit 10 cm Dämmung",
+          "schichten": [
+            {
+              "material": "gipskarton",
+              "dickeM": 0.0125,
+              "rolle": "innen",
+              "label": "Gipskarton 12.5 mm"
+            },
+            {
+              "daemmstoff": "mineralwolle",
+              "dickeM": 0.1,
+              "rolle": "daemmung",
+              "label": "Dämmung 10 cm"
+            },
+            {
+              "material": "gipskarton",
+              "dickeM": 0.0125,
+              "rolle": "aussen",
+              "label": "Gipskarton 12.5 mm"
+            }
+          ]
+        },
+        "holz_taefer": {
+          "label": "Holzwand / Täfer 4 cm (ungedämmt)",
+          "schichten": [
+            {
+              "material": "nutzholz",
+              "dickeM": 0.04,
+              "rolle": "tragschicht",
+              "label": "Nutzholz 4 cm"
+            }
+          ]
+        }
+      }
+    },
+    "innendecke": {
+      "richtung": "aufwaerts",
+      "default": "beton_estrich",
+      "bauweisen": {
+        "beton_estrich": {
+          "label": "Betondecke 18 cm mit Zementüberzug 5 cm",
+          "schichten": [
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Deckenputz 15 mm"
+            },
+            {
+              "material": "beton",
+              "dickeM": 0.18,
+              "rolle": "tragschicht",
+              "label": "Betondecke 18 cm"
+            },
+            {
+              "material": "zementestrich",
+              "dickeM": 0.05,
+              "rolle": "oben",
+              "label": "Zementüberzug 5 cm"
+            }
+          ]
+        },
+        "beton_estrich_gedaemmt": {
+          "label": "Betondecke 18 cm mit Trittschalldämmung 3 cm und Zementüberzug",
+          "schichten": [
+            {
+              "material": "innenputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Deckenputz 15 mm"
+            },
+            {
+              "material": "beton",
+              "dickeM": 0.18,
+              "rolle": "tragschicht",
+              "label": "Betondecke 18 cm"
+            },
+            {
+              "daemmstoff": "mineralwolle",
+              "dickeM": 0.03,
+              "rolle": "daemmung",
+              "label": "Trittschalldämmung 3 cm"
+            },
+            {
+              "material": "zementestrich",
+              "dickeM": 0.05,
+              "rolle": "oben",
+              "label": "Zementüberzug 5 cm"
+            }
+          ]
+        },
+        "holzbalken_schlacke": {
+          "label": "Holzbalkendecke mit Schlackenfüllung",
+          "schichten": [
+            {
+              "material": "gipsputz",
+              "dickeM": 0.015,
+              "rolle": "innen",
+              "label": "Deckenputz 15 mm"
+            },
+            {
+              "material": "nutzholz",
+              "dickeM": 0.024,
+              "rolle": "schiebboden",
+              "label": "Schiebboden 24 mm"
+            },
+            {
+              "material": "schlackenschuettung",
+              "dickeM": 0.1,
+              "rolle": "fuellung",
+              "label": "Schlackenfüllung 10 cm"
+            },
+            {
+              "material": "nutzholz",
+              "dickeM": 0.027,
+              "rolle": "oben",
+              "label": "Bretterboden 27 mm"
+            }
+          ]
+        },
+        "holzbalken_leer": {
+          "label": "Holzbalkendecke ohne Füllung",
+          "uPauschal": 2.0
+        }
+      }
+    },
+    "innentuer": {
+      "richtung": "horizontal",
+      "default": "holz",
+      "bauweisen": {
+        "holz": {
+          "label": "Innentür Holz",
+          "uPauschal": 2.0,
+          "hinweis": "Wissensbasis B Tab. 3.6 (B1 LF07 S.431): Innentür 2.0"
+        }
       }
     }
   }

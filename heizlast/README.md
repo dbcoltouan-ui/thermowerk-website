@@ -11,7 +11,8 @@ Verbindliche Grundlage: `docs/revision/KONTEXT.md` (Zweck, Architektur-Entscheid
 | 1 | **erledigt** (2026-10-29) | Repo-Ordner, Stack, Pages-Build, Referenzmaterial, Shell + Schritt 0, Design-Tokens |
 | 2 | **erledigt** (2026-10-29) | Datenbasis `data/*.json` (6 Dateien, Quellen je Tabelle), Daten-Tests (141), `docs/datenquellen.md`, Recherche-Berichte `docs/recherche/` |
 | 3 | **erledigt** (2026-10-29) | Kern FWS-Modus: `src/kern/fws.ts`, `warmwasser.ts`, `zuschlaege.ts`, `speicher.ts`, `plausi.ts` mit Herkunftsmodell; `src/daten/fws.ts` (Loader + Schema), `data/hydraulik.json`; 74 Kern-Tests gegen Kurslösungen (API: `src/kern/README.md`) |
-| 4–12 | offen | siehe `docs/revision/PLAN.md` §3 |
+| 4 | **erledigt** (2026-10-29) | Kern raumweise SIA 384/2 + Hüllen-Kaskade: `src/kern/klima.ts`, `huelle.ts`, `raumweise.ts`; Loader `src/daten/huelle.ts`, `sia384.ts`, `klima.ts`; Daten 1.1.0 (Schichtvorlagen, Innenbauteile, Erdreich-Formel, Jahresmittel-Regression, EBF-Faktor); 61 Kern-Tests (Referenzhäuser 238/5 + IBO, CH-EFH von Hand, Property-Tests) |
+| 5–12 | offen | siehe `docs/revision/PLAN.md` §3 |
 
 Staging-URL: `https://thermowerk.ch/heizlast-neu/` (bzw. `*.pages.dev/heizlast-neu/`). Das Live-Tool unter `/heizlast/` bleibt bis Session 12 unverändert.
 
@@ -66,13 +67,15 @@ Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Ast
 
 ## Datenquellen
 
-`data/` enthält sieben JSON-Dateien (Übersicht in `data/README.md`): `fws.json`, `hydraulik.json` (MAG/Sicherheitsventil, Session 3), `waermepumpen.json`, `klimastationen.json`, `huelle-epochen.json`, `sia384-2.json`, `heizkoerper-tabellen.json`. Der Kern bekommt sie über `src/daten/` (`fwsDaten()`, `hydraulikDaten()`; Schema per TypeScript-Interface, vom Build geprüft). Primärquellen: SIA 2028-C1:2015, SIA 384.201-C1:2014 / SN EN 12831-1-C1:2020, SIA 380/1-Vollzugshilfen, BFE Bauteilekatalog 2002, GEAK/BFE-UFELD, EnFK Merkblatt Fenster 2021, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter (Buderus, Kermi, Purmo, V&N, Stelrad, Brugman, HG-TEC, Zehnder, JOCO, Uponor, WEM …). Stichproben mit Zahl/Quelle/Datum: `docs/datenquellen.md`; vollständige Recherche-Berichte: `docs/recherche/`. Tests: `tests/daten/*.test.ts` (Schema je Datei, Plausibilität, externe Referenzwerte wie Kurslösungen und Befund-Beispiele B1–B3).
+`data/` enthält sieben JSON-Dateien (Übersicht in `data/README.md`): `fws.json`, `hydraulik.json` (MAG/Sicherheitsventil, Session 3), `waermepumpen.json`, `klimastationen.json`, `huelle-epochen.json`, `sia384-2.json`, `heizkoerper-tabellen.json`. Der Kern bekommt sie über `src/daten/` (`fwsDaten()`, `hydraulikDaten()`, `huelleDaten()`, `siaDaten()`, `klimaDaten()`; Schema per TypeScript-Interface, vom Build geprüft). Primärquellen: SIA 2028-C1:2015, SIA 384.201-C1:2014 / SN EN 12831-1-C1:2020, SIA 380/1-Vollzugshilfen, BFE Bauteilekatalog 2002, GEAK/BFE-UFELD, EnFK Merkblatt Fenster 2021, FWS-Kursunterlagen M3 (`docs/fws/*.txt`), Wissensbasis A–N (`docs/wissensbasis/`), Hersteller-Datenblätter (Buderus, Kermi, Purmo, V&N, Stelrad, Brugman, HG-TEC, Zehnder, JOCO, Uponor, WEM …). Stichproben mit Zahl/Quelle/Datum: `docs/datenquellen.md`; vollständige Recherche-Berichte: `docs/recherche/`. Tests: `tests/daten/*.test.ts` (Schema je Datei, Plausibilität, externe Referenzwerte wie Kurslösungen und Befund-Beispiele B1–B3).
 
-Als Annahme gekennzeichnet (nicht öffentlich belegbar): Höhengradient θe 0.6 K/100 m, SIA 384/2 Anhang A/B (ersetzt durch ND.3 / ISO-13370-Tabelle), ΔU_WB 0.10/0.05, SIA-2024-Innentemperaturen, Exponent Gliederradiatoren, FBH bei exakt 35/28, Epochenzuordnung Böden/Türen.
+Als Annahme gekennzeichnet (nicht öffentlich belegbar): Höhengradient θe 0.6 K/100 m, SIA 384/2 Anhang A/B (ersetzt durch ND.3 / ISO-13370-Formel mit f_g1·f_g2·f_GW), ΔU_WB 0.10/0.05, SIA-2024-Innentemperaturen, Exponent Gliederradiatoren, FBH bei exakt 35/28, Epochenzuordnung Böden/Türen, Jahresmittel-Höhenregression (±1 K), Schichtvorlagen der Bauweisen ohne Epochen-Default, Innenbauteil-Aufbauten, EBF = Σ Nettoflächen × 1.10 (FWS Folie 33), Unsicherheits-Stufen der Hüllen-Kaskade (±30/20/10 %).
 
 ## Offene Punkte
 
-- Sessions 4–12 gemäss Plan.
+- Sessions 5–12 gemäss Plan.
+- Session 4, dokumentierte Abweichungen: Referenzhaus 238/5 Flur −106 W statt −95 W (Formblatt rundet f_RT auf −0.18); saldierte Gebäude-Heizlast 4289 W gegenüber Formblatt G 3560 W (DIN-Erdreichfaktoren auf Gebäudeebene, nicht reproduzierbar); IBO Erdreich 289 W statt 246 W (ISO-13370-Formel statt DIN-Tabelle, 4 % der Last). Property «mehr Wissen ⇒ |ΔU| ≤ 25 % gegen Spannenmitte» ist physikalisch nicht für alle legitimen Eingaben haltbar (Beton 20 cm ungedämmt vs. Hohlmauer: +46 %); getestet wird stattdessen: Bestätigen der Defaults ändert nichts, epochentypische Eingaben bleiben in der Epochen-Spanne (Clamp), Dicke ±1 typische Stufe ≤ 25 %, Monotonie.
+- Raumhöhe ≥ 4 m (SIA 384/2 Tabelle 9) nur als Warnung; Wärmegewinne (SIA 384/2 Kap. 7) nicht angerechnet; Trägheitskorrektur θe (Kap. 5) nicht angewendet (konservativ).
 - Fragerunde 3 beantwortet (29.10.): Bad 22 °C, Flur 20 °C, Eingangsbereich 15 °C, WW-Standard 45 l/P·d, HK primär nach Bauart/Masse.
 - Session 3, dokumentierte Abweichung: WW-Verluste additiv (Folie 49/SIA 385/2); die Kurslösungen 2–4 verketten multiplikativ — Q_h innerhalb ±1 %, Q_w bis 3 %.
 - Klimabereinigung (HGT) braucht HGT-Istwerte je Jahr und Station als Eingabe (HEV/MeteoSchweiz); keine Jahreswerte in `data/`.

@@ -174,6 +174,8 @@ export interface FwsDaten {
     entzugsleistungAmpelWProM: { gruenBis: number; gelbBis: number };
     kursbeispiel: { zaehlerH: number; jahre: number; qWpKW: number; cop: number; qnKwhA: number; qhlKW: number; qkKW: number; sondeM: number; entzugWProM: number };
   };
+  /** Energiebezugsfläche aus Nettowohnfläche (Folie 33–35), Session 4. */
+  ebf: { beschreibung: string; faktorNwfZuEbf: { typ: number; spanne: number[] }; fundstelle: string };
 }
 
 export interface HydraulikDaten {

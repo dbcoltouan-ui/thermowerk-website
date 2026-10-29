@@ -121,10 +121,23 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 | 90/70 → 75/65 = 0.795 (n 1.3) | — | EN 442 Rechnung; Befund HK-08 | P |
 | Ampel-Schwellen Deckung 1.0/0.85, VL 55/65 °C | — | Befund §6.2; Wissensbasis E §5 | A |
 
+## 6a. Ergänzungen Session 4 (2026-10-29)
+
+| Datei / Tabelle | Zahl | Quelle | Status |
+|---|---|---|---|
+| `huelle-epochen.json` bauweisen: Schichtvorlagen bruchstein (50 cm), holz_blockwand (12 cm), kalksandstein (17.5), beton (20), porenbeton (25), innendaemmung (4 cm bestand_alt), holzrahmen (16 cm MW, homogen) | λ je Material aus Bauteilekatalog; Aufbau = Annahme | BFE Bauteilekatalog 2002 (λ), tw-session4 (Aufbau) | A |
+| `huelle-epochen.json` bodenKeller.gewoelbe uPauschal 1.5 | 1.2–1.69 Mitte | Wissensbasis B Tab. 3.4 (B4 S.345) Kellerdecke 1919–1977 | S |
+| `huelle-epochen.json` innenbauteile: Backstein 12/15, Beton 20, Ständerwand, Holz; Betondecke ± Trittschall, Holzbalkendecke; Innentür 2.0 | Innentür 2.0 | Wissensbasis B Tab. 3.6 (B1 LF07 S.431); Aufbauten tw-session4 | S/A |
+| `sia384-2.json` erdreich.formelIso13370: d_t = w + λ(Rsi + R_f + Rse), U = 2λ/(πB'+d_t)·ln(πB'/d_t+1) bzw. λ/(0.457B'+d_t); w 0.3 m, λ 2.0 | reproduziert Tabelle B 3.8 (20 Stützpunkte) auf ±2 %, B'2/R_f2 +7.6 % | ISO 13370 (Wissensbasis B §3.8, alt normwerte.json erdreich_iso13370) | P |
+| `sia384-2.json` erdreich.faktoren f_g1 1.45, f_g2 = (θint − θm,e)/(θint − θe), f_GW 1.0/1.15 | Beuth-Errata 1.45; IBO 1.45/1.15; 238/5 θm,e 10.2 | EN 12831:2003 §7.1.3 (SIA 384.201), DIN/TS 12831-1 Beispiel | S |
+| `klimastationen.json` jahresmittel: 11.5 °C − 0.5 K/100 m, RMSE 0.8 K | Regression über 53 SIA-381/2-Stationen < 2000 m | lesosai-sia381-2, tw-abgeleitet | A |
+| `fws.json` ebf.faktorNwfZuEbf 1.10 (1.10–1.15) | EBF ≈ NWF × 1.1–1.15; Beispiel 50+100+80 = 230 m² | FWS M3 Folie 33–35 | P |
+
 ## 7. Nicht belegt (offen, als Annahme gekennzeichnet)
 
 - Höhengradient θe (K/100 m) und τ-Korrektur nach SIA 384/2 Kap. 4/5 (Normtext nicht öffentlich) → 0.6 K/100 m ab 200 m Differenz.
-- SIA 384/2 Anhang A (b-Faktoren), Anhang B (U_eq) und Wärmebrückenzuschlag → Ersatz: SIA 384.201 ND.3, ISO-13370-Tabelle, DIN-Pauschale 0.10/0.05.
+- SIA 384/2 Anhang A (b-Faktoren), Anhang B (U_eq) und Wärmebrückenzuschlag → Ersatz: SIA 384.201 ND.3, ISO-13370-Formel mit f_g1·f_g2·f_GW (EN 12831:2003), DIN-Pauschale 0.10/0.05.
+- Unsicherheits-Stufen der Hüllen-Kaskade (Epoche: halbe Spanne/U; Dämmung bekannt ±30 %; Dämmdicke bekannt ±20 %; alle Stufen ±10 %; Fenster ±10/5 %; Innenbauteile ±15 %) → Thermowerk-Annahme.
 - SIA 2024 Tabelle 11 Innentemperaturen (nur eine Zeile öffentlich) → DIN/TS-Werte.
 - Exponent n für Guss-/Stahl-Gliederradiatoren (kein Datenblatt nennt n) → 1.30 (Wissensbasis; HG-TEC-Werte 75/65→55/45 implizieren ≈1.30).
 - FBH-Tabelle bei exakt 35/28/20 → Kern skaliert von ΔθH 15 K mit n 1.10.

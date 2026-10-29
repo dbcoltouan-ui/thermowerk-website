@@ -1,6 +1,6 @@
 # src/kern — Rechenkern
 
-Reine TypeScript-Funktionen, kein DOM, kein Dateisystem, kein Import aus `src/ui` oder `src/bericht` (eslint erzwingt das). Daten kommen als Parameter (`fwsDaten()`, `hydraulikDaten()` aus `src/daten/fws.ts`), nie per Datei-Lesen im Kern.
+Reine TypeScript-Funktionen, kein DOM, kein Dateisystem, kein Import aus `src/ui` oder `src/bericht` (eslint erzwingt das). Daten kommen als Parameter (`fwsDaten()`, `hydraulikDaten()` aus `src/daten/fws.ts`; `huelleDaten()`, `siaDaten()`, `klimaDaten()` aus `src/daten/huelle.ts`, `sia384.ts`, `klima.ts`), nie per Datei-Lesen im Kern.
 
 Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder berechnete oder ergänzte Wert ist ein `Wert` mit Herkunft (siehe `wert.ts`).
 
@@ -13,7 +13,9 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `zuschlaege.ts` | 3 | Sperrzeit-Zuschlag, Zusatzleistung, Q_h = Q_hl + Q_w + Q_off + Q_as |
 | `speicher.ts` | 3 | WW-Speicher (ΔT = T_Lade − 10, f_sto, Spitzendeckung, Marktrundung), Heizungspuffer (max-Regel), MAG, Sicherheitsventil |
 | `plausi.ts` | 3 | Spez. Heizleistung gegen Bauperioden-/Minergie-Band, Vergleich Norm ↔ Verbrauch |
-| `huelle.ts`, `raumweise.ts`, `klima.ts` | 4 | raumweise SIA 384/2 + Hüllen-Kaskade |
+| `klima.ts` | 4 | Standort → SIA-2028-Station (PLZ/Kanton), θe mit Höhenkorrektur, Jahresmittel, HGT; Override mit Herkunft |
+| `huelle.ts` | 4 | Bauteiltypen auf Gebäudeebene: Stufen-Picker, EINE Schichtkette (Epochen-Default Bestand → bekannte Stufen → ISO 6946 → Clamp), Sanierung ab Jahr, Override, Fenster/Türen/Innenbauteile |
+| `raumweise.ts` | 4 | Räume und Bauteile (Referenz auf Hüllentyp + Fläche + Anschluss), Φ_T mit ΔU_WB/b_u/U_equiv, Φ_V = V·n_min·0.34, Σ Räume und saldierte Gebäude-Heizlast, EBF aus Räumen, nicht erfasster Rest |
 | `waermeabgabe.ts` | 5 | Heizkörper-Modul |
 | `berechne.ts`, `relevanz.ts` | 6 | Orchestrierung, Relevanz |
 | `zusatz/` | 11 | Förderung, Bewilligung, Offerte |
@@ -68,6 +70,47 @@ Verluste **additiv** auf Q_W,u (Folie 49). Zirkulation: `{ art: 'keine' | 'rohrA
 
 `spezifischeHeizleistung({ qhlUnsaniertW, ebfM2, baujahr, gebaeudetyp, energiestandard?, saniert? }, daten)` → Ampel gegen Folie-37-Band (±15 % gelb) bzw. Minergie-P 8–12 W/m² · `vergleichNormVerbrauch(qhlNorm, qhlVerbrauch, daten)` → grün bei Norm 10–25 % über Verbrauch.
 
+## Kern-API Session 4
+
+### `klima.ts`
+
+```ts
+klimaStandort({ plz?, kanton?, hoeheM?, stationOverride?, thetaEOverrideC?, thetaMittelOverrideC? }, klimaDaten()) → KlimaErgebnis
+```
+
+`KlimaErgebnis`: `station`, `stationsStufe` (`override|plz3|plz2|kanton`), `thetaE` (massgebend; `tabelle` ohne Korrektur, `berechnet` mit Höhenkorrektur, `override` manuell), `thetaEStation`, `hoehenkorrektur` [K] (`schaetzung`: 0.6 K/100 m ab |Δh| ≥ 200 m, gerundet, max ±6 K), `thetaMittelJahr` (Stationswert SIA 381/2 oder Höhenregression 11.5 − 0.5 K/100 m, ±1 K), `hgt`, `bezeichnung` («θe −8 °C, Station Zürich-Kloten (SIA 2028)»), `annahmen[]`, `hinweise[]` (`klima.keineStation` fehler, `klima.stationAusKanton`, `klima.hoehenkorrektur`, `klima.hoehenkorrekturBegrenzt`, `klima.hoeheFehlt`, `klima.overrideAbweichung`). Temperaturen tragen ein `band` [min, max] statt ±%. Hilfen: `findeStation`, `hoehenkorrekturK`, `jahresmittel`, `stationenListe`, `thetaEEingabe` (Fixtures).
+
+### `huelle.ts`
+
+```ts
+huelleAufloesen({ baujahr, bauteiltypen: Bauteiltyp[], bezugsjahr?, zustand?: 'ist'|'geplant' }, huelleDaten()) → HuelleErgebnis
+aufloesenBauteiltyp(typ, { baujahr, bezugsjahr?, zustand? }, daten) → BauteilU
+standardBauteiltypen({ dachform?, dachraumBeheizt?, keller? }) → Bauteiltyp[]      // aw, dach|decke, boden, fenster, tuer, iw, id, it
+stufenDefinition(art, baujahr, stufen, daten) → StufenDefinition[]                  // Optionen + sichtbarer Standardwert je Stufe (UI)
+```
+
+- `Bauteiltyp { id, art, bezeichnung?, stufen?, sanierung?, uOverride? }`; Arten: `aussenwand | dachSteil | dachFlach | deckeEstrich | bodenKeller | bodenErdreich | fenster | tuer | innenwand | innendecke | innentuer`.
+- `Stufen { bauweise?, dickeM?, daemmung?, daemmstoff?, daemmdickeM?, generation?, rahmen?, typ? }` — alles optional; unbekannte Stufen bleiben beim Epochen-Default und sind in `stufenStandard[]` aufgeführt. `dickeM` ist bei Zweischalenmauerwerk die Gesamtdicke ohne Putz (Innenschale = Gesamt − Aussenschale − Zwischenraum).
+- Kette: Epochen-Default **Bestand** → Bauweise (Epochen-Default mit dieser Bauweise, sonst Schichtvorlage `bauweisen[].schichten`, sonst Pauschal-U) → Dicke ersetzt die Tragschicht → Dämmung ja/nein (nein: Kerndämmung → Luftschicht; ja ohne Default: Dämmdicke der nächsten gedämmten Epoche = geringste typische Dicke) → Dämmstoff/Dämmdicke ersetzen die Dämmschicht → U = 1/(Rsi + ΣR + Rse) (Rsi nach Richtung, Rse: aussen 0.04, Erdreich 0, hinterlüftet/unbeheizt = Rsi) → **Clamp** in die Epochen-Spanne nur, solange die Dämm-Stufe geschätzt ist (Hinweis `huelle.clamp`); mit bekannter Dämmung gewinnt die Schichtrechnung (`huelle.ausserhalbSpanne` als Info).
+- Sanierung `{ status: 'ausgefuehrt'|'geplant', jahr?, stufen?, uOverride? }`: Stufen der Sanierung ersetzen ihre Schicht; ohne Angabe gilt der Dämm-/Fenster-/Tür-Default der Sanierungs-Epoche (als Standard markiert); Clamp-Spanne = Sanierungs-Epoche; `uUnsaniert` bleibt erhalten; geplante Sanierungen wirken nur mit `zustand: 'geplant'` (`uNachSanierung` informativ).
+- Herkunft: alles geschätzt → `fallback`/`epoche` mit Epochen-Unsicherheit (halbe Spanne / U, max. 100 %); Stufen bekannt → `schaetzung` (Dämmung ja/nein bekannt ±30 %, Dämmdicke bekannt ±20 %, alle Stufen ±10 %); Fenster/Tür-Tabellen `tabelle` (Generation ±10 %, + Rahmen ±5 %; Türtyp ±10 %); `override`. Begründung im Klartext: «geschätzt aus Baujahr 1965 (1961–1977): Aussenwand … Backstein 30 cm, ungedämmt — … → U 1.26 W/m²K; bekannt: Bauweise, Dicke, ±10 %».
+- Bodenplatte gegen Erdreich: U ohne Erdreich-Korrektur (Rse 0); U_equiv rechnet `raumweise.ts`. Innenbauteile: Rsi beidseitig, Bauweise wählbar (Backstein 12/15, Beton 20, Ständerwand, Holz; Betondecke, Holzbalkendecke; Innentür 2.0).
+
+### `raumweise.ts`
+
+```ts
+heizlastRaumweise(e: RaumweiseEingabe, { sia: siaDaten(), fws: fwsDaten() }) → RaumweiseErgebnis
+```
+
+- `RaumweiseEingabe`: `thetaE` (aus klima.ts), `thetaMittelJahr?`, `huelle` (HuelleErgebnis), `baujahr`, `gebaeudetyp?`, `lueftung? { konzept: natuerlich|wrg|lufterwaermung|abluftDauer, dichtheit: neubau|altbau, fensterErsetzt? }`, `waermebruecken? { key: bestand|neubau|nachweis | deltaU }`, `erdreich? { bodenflaecheM2, umfangM | bStrichM, grundwasserNah?, wandDickeM?, boden? }`, `geschosshoeheM?`, `raeume[]`, `ebf? { modus: raeume|manuell, manuellM2?, faktorNwfZuEbf? }`, `rest?`.
+- `RaumEingabe { id, name, geschoss?, typ (sia384-2 Raumtypen), flaecheM2 | laengeM×breiteM, hoeheM?, thetaIntC?, nMinOverride?, zuluft?, aussenbezug?, beheizt?, inEbf?, bauteile[] }`; `RaumBauteilEingabe { typId? (Hülle vererbt U) | art, flaecheM2, anschluss, uOverride? }`.
+- `Anschluss`: `aussen` (f 1) · `unbeheizt { situation keller|dachraum|garage|treppenhaus|nebenraum | nd3 {lage, flaechen, dicht} | bU | thetaNachbarC }` (Tabelle ND.3) · `erdreich { tiefeM? }` (Böden: U_equiv nach ISO 13370 mit B' = A/(0.5·P), f = f_g1 1.45 · f_g2 (θint − θm,e)/(θint − θe) · f_GW; Wände: < 2 m wie aussen, > 2 m wie unbeheizt) · `beheizt { thetaNachbarC?, andereEinheit? }` (f = (θint − θnb)/(θint − θe); zählt nur bei anderer Nutzungseinheit zur Hülle) · `faktor { f }`.
+- Φ_T,k = (U + ΔU_WB)·A·f·(θint − θe) (ΔU_WB nur auf Hüllbauteile), Φ_V = V·n_min·0.34·(θint − θe) mit n_min aus Tabelle NA.7 (Raumtyp × Konzept × Dichtheit; «Raum ohne Aussenbezug» = ohne Fenster/Aussentür/Aussenwand). Kein n50-Term, kein Wiederaufheizzuschlag.
+- Ergebnis: je Raum `phiT`, `phiV`, `phiHL` (Σ Räume, Heizflächen; negativ bei Innengewinnen), `phiHuelle` (Anteil saldiert); Gebäude `summeRaeume`, `saldiertRaeume` (nur Hülle + Lüftung), `rest`, `gebaeude` (= saldiert + Rest, massgebend), `summeMitRest`, `ebf` (Σ Nettoflächen × 1.10, Band 1.10–1.15, oder manuell), `spezifisch`, `innentransmissionAnteil`, `annahmen[]`, `hinweise[]`, `vollstaendig`, `methode` (Berichtstext).
+- Rest (nicht raumweise erfasst): `{ modus: 'huellflaechen', aAussenwandM2, aFensterM2, aDachM2|aDeckeEstrichM2, aBodenM2, bodenAnschluss, volumenM3|flaecheM2 }` mit Hüllen-U, b_u, ΔU_WB, Lüftung wie Wohnraum — oder `{ modus: 'spezifisch', flaecheM2?, phiSpezWm2? }` mit Φ' = Bandmitte Folie 37 (grobe Schätzung, Hinweis). Kein «1 m² Wand pro m² EBF».
+
 ## Tests
 
 `tests/kern/*.test.ts` — Sollwerte ausschliesslich extern: Kurslösungen A1/1B/2/3/4, Folien 31/32/43/45/48/49/52/54, BEISPIELRECHNUNG, Wissensbasis K §5, Handrechnungen (im Test dokumentiert). Eine bekannte Abweichung: die Kurslösungen verketten WW-Verluste multiplikativ (1.1·1.15·1.15), der Kern rechnet additiv (Folie 49/SIA 385/2) — Q_hl und Q_h bleiben innerhalb ±1 %, Q_w weicht bis 3 % ab (dokumentiert in `fws.test.ts`).
+
+Session 4 (`klima.test.ts`, `huelle.test.ts`, `raumweise.test.ts`): SIA-2028-Stationswerte, ISO-6946-Handrechnungen, Referenzhaus 238/5 (Räume ±2 %, Flur echt gerechnet: −106 W gegenüber −95 W, Formblatt rundet f_RT), IBO-Musterhaus (Lüftung 14 Räume, Erdreich: ISO-Formel +17 % gegenüber DIN-Tabelle auf 4 % der Last), eigenes CH-EFH von Hand, U_equiv-Tabelle ±8 %; Property-Tests: Bestätigen der Defaults ändert nichts, epochentypische Bauweise bleibt in der Spanne, Dämmung↑ ⇒ U↓, Dicke↑ ⇒ U↓, jüngere Fenster ⇒ U↓, Saldierung ≤ Σ Räume, Hülle → Raum, Override gewinnt.

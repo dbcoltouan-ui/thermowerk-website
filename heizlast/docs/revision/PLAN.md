@@ -1,6 +1,6 @@
 # PLAN — Überarbeitung / Neubau «Thermowerk Heizlast»
 
-Stand: 2026-10-29 (Sessions 1 und 2 erledigt; Prüfungen gemäss Regel 10 angepasst) · Grundlage: `BEFUND.md` (198 Befunde), `KONTEXT.md` (Architektur-Entscheide, Arbeitsregeln, Definition of Done).
+Stand: 2026-10-29 (Sessions 1–4 erledigt; Prüfungen gemäss Regel 10 angepasst) · Grundlage: `BEFUND.md` (198 Befunde), `KONTEXT.md` (Architektur-Entscheide, Arbeitsregeln, Definition of Done).
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.0.1",
+    "version": "1.1.0",
     "stand": "2026-10-29",
     "beschreibung": "Tabellen für die raumweise Norm-Heizlast nach SIA 384/2:2020 (Anwendung von SN EN 12831-1:2017 in der Schweiz): Mindestluftwechsel n_min je Raumtyp × Lüftungskonzept, Reduktionsfaktoren b_u unbeheizter Räume, Wärmebrückenzuschlag ΔU_WB (pauschal), äquivalenter U-Wert gegen Erdreich (B'-Tabelle), Rsi/Rse, Innentemperaturen je Raumtyp, Methodenregeln (kein n50-Term, kein Wiederaufheizzuschlag, saldierte Gebäude-Heizlast). Wo der SIA-Normtext nicht öffentlich ist, sind die belegten Ersatztabellen der gleichzeitig revidierten nationalen Anhänge (SIA 384.201-C1:2014, SN EN 12831-1/C1:2020) und DIN-Tabellen (Wissensbasis) verwendet und als solche gekennzeichnet. Keine Rechenlogik.",
     "quellen": [
@@ -491,6 +491,30 @@
       "beschreibung": "Alte Empfehlung SIA 384/2:1982: Erdreich 0 °C, unbeheizt 5 °C — veraltet, nur Plausibilisierung",
       "thetaErdreichC": 0,
       "thetaUnbeheiztC": 5
+    },
+    "formelIso13370": {
+      "beschreibung": "Kern rechnet U_equiv,bf nach ISO 13370 (Bodenplatte auf Erdreich): d_t = w + λ_Erde·(Rsi + R_f + Rse); d_t < B': U = 2λ/(π·B' + d_t)·ln(π·B'/d_t + 1); d_t ≥ B': U = λ/(0.457·B' + d_t). R_f = 1/U_Boden − Rsi (Konstruktionswiderstand ohne Erdreich). Die Tabelle uEquivBodenplatteZ0 dient als Kontrolle (Test ±5 %).",
+      "quelle": [
+        "wb-b",
+        "beuth-errata",
+        "tw-annahme"
+      ],
+      "wandDickeDefaultM": 0.3,
+      "rsiAbwaerts": 0.17,
+      "rseErdreichOberflaeche": 0.04,
+      "bStrichMinM": 1.0,
+      "bStrichDefaultM": 5.0,
+      "bStrichDefaultHinweis": "ohne Bodenfläche/Umfang: EFH-typisch B' ≈ 5 m (Standardwert, als Annahme ausweisen)"
+    },
+    "faktoren": {
+      "beschreibung": "Φ_T,g = f_g1 · f_g2 · f_GW · U_equiv · A · (θint − θe); f_g1 = fThetaAnn (Jahresgang), f_g2 = (θint − θm,e)/(θint − θe) mit Jahresmitteltemperatur θm,e des Standorts (klimastationen.json), f_GW Grundwasser. Entspricht EN 12831:2003/SIA 384.201 §7.1.3 bzw. den Referenzrechnungen (IBO: f_g1 1.45, GW 1.15, θm,e 6.8; 238/5: θm,e 10.2); SIA 384/2:2020 Anhang B nicht öffentlich → als Annahme ausweisen.",
+      "quelle": [
+        "wb-b",
+        "beuth-errata",
+        "tw-annahme"
+      ],
+      "fG1": 1.45,
+      "fG2Formel": "(θint − θm,e) / (θint − θe)"
     }
   },
   "innentemperaturen": {
@@ -611,7 +635,8 @@
       }
     ],
     "korrekturGrenzwert": "SIA 380/1: ±5 % je K Abweichung von 20 °C (betrifft Grenzwerte, nicht Heizlast)",
-    "hinweisUnbeheizt": "Temperaturen unbeheizter Räume dienen nur der Nachbarraum-Berechnung (alternativ b_u-Faktor)."
+    "hinweisUnbeheizt": "Temperaturen unbeheizter Räume dienen nur der Nachbarraum-Berechnung (alternativ b_u-Faktor).",
+    "nachbarUnbeheiztHinweis": "Für Bauteile gegen unbeheizte Nachbarräume wird b_u (Tabelle ND.3) verwendet; alternativ Nachbartemperatur eingeben."
   },
   "plausibilitaet": {
     "beschreibung": "Prüfbänder für die raumweise Rechnung (Thermowerk-Annahmen, Kurs- und Befund-Werte).",
