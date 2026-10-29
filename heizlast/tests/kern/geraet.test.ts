@@ -5,7 +5,9 @@
 import { describe, expect, it } from 'vitest';
 import { fwsDaten } from '../../src/daten/fws';
 import { waermepumpenDaten } from '../../src/daten/waermepumpen';
+import { heizkoerperDaten } from '../../src/daten/heizkoerper';
 import { bivalenz, dimensionierung, geraetWaehlen } from '../../src/kern/geraet';
+import { ampelAufSkala, skalaVorlauf, skalaWpGroesse } from '../../src/kern/skala';
 import { eingabe } from '../../src/kern/wert';
 
 const fws = fwsDaten();
@@ -81,5 +83,53 @@ describe('Gerätefilter', () => {
     const u = geraetWaehlen({ qh, auslegungsVL: null, filter: { quelle: 'luftWasser' }, auswahlId: 'XX-9999' }, { fws, wp });
     expect(u.gewaehlt).toBeNull();
     expect(u.hinweise.some((h) => h.code === 'geraet.auswahlUnbekannt')).toBe(true);
+  });
+});
+
+describe('Prozent-Skala WP-Grösse (Wunsch Daniel 29.10.)', () => {
+  it('Bereiche aus der Kursregel: grün 0 … +33 %, gelb −9 … 0 und +33 … +67 %, sonst rot; Grenzen zum milderen Bereich', () => {
+    const s = skalaWpGroesse(fws, null);
+    expect(s.wert).toBeNull();
+    expect(s.ampel).toBe('grau');
+    const gruen = s.bereiche.find((b) => b.ampel === 'gruen')!;
+    expect(gruen.von).toBe(0);
+    expect(gruen.bis).toBeCloseTo(33.33, 2);
+    expect(ampelAufSkala(s.bereiche, 0)).toBe('gruen');
+    expect(ampelAufSkala(s.bereiche, 100 / 3)).toBe('gruen');
+    expect(ampelAufSkala(s.bereiche, (1 / 1.1 - 1) * 100)).toBe('gelb');
+    expect(ampelAufSkala(s.bereiche, -15)).toBe('rot');
+    expect(ampelAufSkala(s.bereiche, 50)).toBe('gelb');
+    expect(ampelAufSkala(s.bereiche, 80)).toBe('rot');
+  });
+  it('Beispiel Leistungsstufen: Bedarf 11 kW → 12-kW-Gerät +9 % grün, 10-kW-Gerät −9 % gelb (knapp)', () => {
+    const gross = dimensionierung(11000, 12000, fws);
+    expect(gross.uebergroesse.wert).toBeCloseTo(9.09, 1);
+    expect(gross.skala.wert).toBeCloseTo(9.09, 1);
+    expect(gross.ampel).toBe('gruen');
+    expect(gross.text).toContain('9 % grösser');
+    const klein = dimensionierung(11000, 10000, fws);
+    expect(klein.uebergroesse.wert).toBeCloseTo(-9.09, 1);
+    expect(klein.ampel).toBe('gelb');
+    expect(klein.text).toContain('kleiner');
+  });
+  it('Datenblattwert am Auslegungspunkt (Folie 93) ersetzt den Datenbankwert A−7/W35 für die Ampel', () => {
+    const qh = eingabe(10000, 'W');
+    const nenn = geraetWaehlen({ qh, auslegungsVL: eingabe(55, '°C'), filter: { quelle: 'luftWasser' }, auswahlId: 'OE-0001' }, { fws, wp });
+    expect(nenn.gewaehlt!.qWpMassgebend).toBe(nenn.gewaehlt!.qWp);
+    const ap = geraetWaehlen({ qh, auslegungsVL: eingabe(55, '°C'), filter: { quelle: 'luftWasser' }, auswahlId: 'OE-0001', qWpAuslegungW: 9500 }, { fws, wp });
+    expect(ap.gewaehlt!.qWpMassgebend).toMatchObject({ wert: 9500, herkunft: 'eingabe' });
+    expect(ap.gewaehlt!.dimensionierung.ampel).toBe('gelb');
+    expect(nenn.gewaehlt!.dimensionierung.ampel).toBe('gruen');
+  });
+});
+
+describe('Skala Auslegungs-Vorlauf', () => {
+  it('≤ 55 grün, ≤ 65 gelb, darüber rot (heizkoerper-tabellen.json ampel.vorlaufC)', () => {
+    const hk = heizkoerperDaten();
+    expect(skalaVorlauf(hk, 55).ampel).toBe('gruen');
+    expect(skalaVorlauf(hk, 60).ampel).toBe('gelb');
+    expect(skalaVorlauf(hk, 65).ampel).toBe('gelb');
+    expect(skalaVorlauf(hk, 70).ampel).toBe('rot');
+    expect(skalaVorlauf(hk, null).ampel).toBe('grau');
   });
 });

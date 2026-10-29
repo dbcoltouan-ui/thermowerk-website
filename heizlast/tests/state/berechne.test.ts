@@ -112,6 +112,8 @@ describe('berechne — raumweise (CH-EFH von Hand)', () => {
     // Gerätefilter und MAG lesen dieselbe VL (keine zweite Vorlauftemperatur, FLOW-01)
     expect(e.geraet.filterVorlauf!.wert).toBeCloseTo(Math.max(e.auslegungsVL.wert, e.speicher.ww!.tLade.wert), 6);
     expect(e.speicher.mag!.n.begruendung).toContain(`${Math.round(e.auslegungsVL.wert)} °C`);
+    expect(e.skalen.vorlauf.wert).toBeCloseTo(e.auslegungsVL.wert, 6);
+    expect(e.skalen.vorlauf.ampel).toBe('gelb');
   });
 
   it('Snapshot', () => {
@@ -195,6 +197,12 @@ describe('berechne — Fälle und Leitplanken', () => {
     expect(g.bivalenz.monovalent).toBe(true);
     expect(e.status.waermepumpe).not.toBe('offen');
     if (g.mindestPuffer) expect(e.speicher.puffer!.kriterien.some((k) => k.key === 'hersteller')).toBe(true);
+    // Prozent-Skala im Ergebnis: Übergrösse 11.2 / 10.73 kW − 1 = +4.4 %, grün
+    expect(e.skalen.wpGroesse).toBe(g.dimensionierung.skala);
+    expect(e.skalen.wpGroesse.wert).toBeCloseTo((11200 / 10731.6 - 1) * 100, 1);
+    expect(e.skalen.wpGroesse.ampel).toBe('gruen');
+    // ohne Heizflächen keine Vorlauf-Marke (nur Standardwert)
+    expect(e.skalen.vorlauf.wert).toBeNull();
   });
 
   it('Sanierung raumweise: Massnahme «Fenster» setzt die Fenstertypen auf «saniert ab Jahr» (eine Liste für beide Modi)', () => {

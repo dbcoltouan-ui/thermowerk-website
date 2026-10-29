@@ -157,7 +157,11 @@ Regeln: Sanierungen sind EINE Liste — FWS wertet Massnahme/Einsparung/Datum au
 
 ### `geraet.ts`
 
-`geraetWaehlen({ qh, auslegungsVL, wwLadetemperaturC?, filter { quelle, toleranzUntenProzent?, aufstellung?, schallNachtMaxDb?, vorlaufC? }, auswahlId? }, { fws, wp })` → `{ filterVorlauf, qWpMin, qWpMax, liste[] (sortiert nach |Q_WP − Q_h|, Ampel je Gerät), gewaehlt { qWp, vorlaufMax, mindestPuffer, dimensionierung, bivalenz }, annahmen, hinweise }`. `dimensionierung(qhW, qWpW, fws)`: r = Q_h/Q_WP, grün 0.75 ≤ r ≤ 1 (Kurs-Faustregel), gelb 0.60–0.75 bzw. 1.00–1.10, sonst rot (Bänder Thermowerk-Annahme, fws.json `geraetewahl`). `bivalenz(qhW, qWpW, fws)`: Folie-95-Tabelle, zwischen 50 % und 100 % gegen monovalent interpoliert (Schätzung), unter 25 % nicht abschätzbar.
+`geraetWaehlen({ qh, auslegungsVL, wwLadetemperaturC?, filter { quelle, toleranzUntenProzent?, aufstellung?, schallNachtMaxDb?, vorlaufC? }, auswahlId? }, { fws, wp })` → `{ filterVorlauf, qWpMin, qWpMax, liste[] (sortiert nach |Q_WP − Q_h|, Ampel je Gerät), gewaehlt { qWp, vorlaufMax, mindestPuffer, dimensionierung, bivalenz }, annahmen, hinweise }`. `dimensionierung(qhW, qWpW, fws)`: r = Q_h/Q_WP, grün 0.75 ≤ r ≤ 1 (Kurs-Faustregel), gelb 0.60–0.75 bzw. 1.00–1.10, sonst rot (Bänder Thermowerk-Annahme, fws.json `geraetewahl`). Jede `Dimensionierung` trägt `uebergroesse` [%] und eine `skala` (Bereiche grün/gelb/rot + Wert); `qWpAuslegungW` (Datenblatt bei θe und Auslegungs-VL, Folie 93) ersetzt für Ampel und Bivalenz den Datenbankwert A−7/W35. `bivalenz(qhW, qWpW, fws)`: Folie-95-Tabelle, zwischen 50 % und 100 % gegen monovalent interpoliert (Schätzung), unter 25 % nicht abschätzbar.
+
+### `skala.ts`
+
+`Skala { titel, einheit, min, max, wert, ampel, bereiche[{ von, bis, ampel, label }], marken[] }` — Ampel als Achse mit Bereichen (Wunsch Daniel 29.10.). `skalaWpGroesse(fws, uebergroesseProzent)` (grün 0 … +33 %, gelb −9 … 0 und +33 … +67 %, sonst rot; aus fws.json `geraetewahl`), `skalaVorlauf(hk, tVL)` (≤ 55 / ≤ 65 °C), `ampelAufSkala` (Grenzen zählen zum milderen Bereich). `Ergebnis.skalen { vorlauf, wpGroesse }`; die UI-Komponente `src/ui/komponenten/Skala.tsx` zeichnet nur.
 
 ### `raumweise.ts` (Ergänzung)
 

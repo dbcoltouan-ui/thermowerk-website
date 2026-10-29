@@ -103,6 +103,8 @@ export const RELEVANZ_REGELN: ReadonlyArray<RelevanzRegel> = [
   { muster: 'speicher.puffer.einzelraumregelung', wenn: 'Puffer nicht abgewählt', pruefe: (s) => s.speicher.puffer.aktiv !== false },
   { muster: 'speicher.puffer.volumenOverrideLiter', wenn: 'Puffer nicht abgewählt', pruefe: (s) => s.speicher.puffer.aktiv !== false },
   { muster: 'speicher.puffer.sperrzeitUeberbrueckung', wenn: 'Puffer nicht abgewählt und Sperrzeit vorhanden', pruefe: (s) => s.speicher.puffer.aktiv !== false && s.zuschlaege.sperrzeitAktiv === true },
+  // Schritt 9 Wärmepumpe
+  { muster: 'geraet.qWpAuslegungW', wenn: 'Gerät gewählt', pruefe: (s) => s.geraet.auswahlId !== null },
   { muster: 'speicher.puffer.heizflaechen', wenn: 'keine Heizflächen erfasst (sonst abgeleitet)', pruefe: (s) => s.speicher.puffer.aktiv !== false && !heizflaechenVorhanden(s) },
 ];
 

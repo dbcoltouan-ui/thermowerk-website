@@ -422,3 +422,67 @@
     display: inline;
   }
 }
+
+/* ---- Ampel-Skala (Session 6): Bereiche grün/gelb/rot + Zeiger ---- */
+.skala {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.skala__kopf {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+.skala__wert--gruen { color: var(--ok-500); }
+.skala__wert--gelb { color: var(--warn-500); }
+.skala__wert--rot { color: var(--bad-500); }
+.skala__wert--grau { color: var(--c-text-mute); }
+.skala__achse {
+  position: relative;
+  height: 10px;
+  background: var(--ink-100);
+  border-radius: var(--r-xs);
+  overflow: visible;
+}
+.skala__bereich {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.skala__bereich--gruen { background: var(--ok-500); opacity: 0.55; }
+.skala__bereich--gelb { background: var(--warn-500); opacity: 0.55; }
+.skala__bereich--rot { background: var(--bad-500); opacity: 0.55; }
+.skala__marke {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--ink-700);
+}
+.skala__zeiger {
+  position: absolute;
+  top: -5px;
+  width: 0;
+  height: 20px;
+  border-left: 3px solid var(--c-text);
+  transform: translateX(-1.5px);
+}
+.skala__beschriftung {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  height: 14px;
+  font-size: var(--fs-xs);
+  color: var(--c-text-mute);
+}
+.skala__label {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.skala__text {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--c-text-mute);
+}

@@ -3,6 +3,7 @@ import { ergebnis, methode } from '../../state/ui';
 import { METHODEN } from '../../state/typen';
 import type { SchrittStatus } from '../schritte';
 import { kW, zahl } from '../format';
+import { Skala } from './Skala';
 
 interface Props {
   anzahlSchritte: number;
@@ -56,10 +57,16 @@ function DashboardInhalt({ anzahlSchritte, status }: Props) {
           </span>
         </div>
         <div class="dashboard__zeile">
+          <span class="mute">Wärmepumpe</span>
+          <span data-testid="kpi-wp">{e.geraet.gewaehlt ? `${e.geraet.gewaehlt.bezeichnung} · ${kW(e.geraet.gewaehlt.qWpMassgebend.wert, 1)}` : '—'}</span>
+        </div>
+        <div class="dashboard__zeile">
           <span class="mute">Annahmen</span>
           <span data-testid="kpi-annahmen">{e.annahmen.length}</span>
         </div>
       </div>
+      <Skala skala={e.skalen.vorlauf} testid="skala-vorlauf" text={e.auslegungsVL.herkunft === 'fallback' ? 'Noch keine Heizflächen bewertet' : e.waermeabgabe?.gebaeude.urteil} />
+      {e.geraet.gewaehlt && <Skala skala={e.skalen.wpGroesse} testid="skala-wp" text={e.geraet.gewaehlt.dimensionierung.text} />}
       <div class="kpi">
         <span class="kpi__label">Fortschritt</span>
         <div class="fortschritt" role="progressbar" aria-valuenow={prozent} aria-valuemin={0} aria-valuemax={100}>

@@ -27,6 +27,8 @@ import { spezifischeHeizleistung, vergleichNormVerbrauch } from './plausi';
 import type { RaumweiseEingabe, RaumweiseErgebnis } from './raumweise';
 import { ebfBestimmen, flaecheAus, heizlastRaumweise } from './raumweise';
 import type { SchrittId, SchrittStatus } from './relevanz';
+import type { Skala } from './skala';
+import { skalaVorlauf, skalaWpGroesse } from './skala';
 import { heizflaechenVorhanden, SCHRITT_IDS, schrittRelevant } from './relevanz';
 import type { MagErgebnis, PufferErgebnis, SicherheitsventilErgebnis, WwSpeicherErgebnis } from './speicher';
 import { mag, puffer, sicherheitsventil, wwSpeicher } from './speicher';
@@ -112,6 +114,13 @@ export interface Ergebnis {
     pufferEffektiv: Wert;
     mag: MagErgebnis | null;
     sicherheitsventil: SicherheitsventilErgebnis | null;
+  };
+  /** Ampel-Skalen mit Bereichen und Wert-Marke (Dashboard, Gerätedetail, Bericht zeichnen nur). */
+  skalen: {
+    /** Auslegungs-VL gegen ≤ 55 / ≤ 65 °C; Wert null, solange die VL nur ein Standardwert ist. */
+    vorlauf: Skala;
+    /** Übergrösse des gewählten Geräts gegenüber Q_h [%]; Wert null ohne Gerät. */
+    wpGroesse: Skala;
   };
   annahmen: Annahme[];
   hinweise: ErgebnisHinweis[];
@@ -478,6 +487,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
       wwLadetemperaturC: w.wwKuenftig === true ? wwSp?.tLade.wert : undefined,
       filter: def({ quelle: ge.quelle, ...ge.filterOverrides }),
       auswahlId: ge.auswahlId,
+      qWpAuslegungW: ge.qWpAuslegungW,
     },
     { fws: daten.fws, wp: daten.wp },
   );
@@ -574,6 +584,10 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     auslegungsVL,
     geraet,
     speicher: { ww: wwSp, puffer: pufferErg, pufferEffektiv, mag: magErg, sicherheitsventil: sv },
+    skalen: {
+      vorlauf: skalaVorlauf(daten.hk, auslegungsVL.herkunft === 'fallback' ? null : auslegungsVL.wert),
+      wpGroesse: geraet.gewaehlt ? geraet.gewaehlt.dimensionierung.skala : skalaWpGroesse(daten.fws, null),
+    },
     annahmen,
     hinweise,
     vollstaendigkeit,

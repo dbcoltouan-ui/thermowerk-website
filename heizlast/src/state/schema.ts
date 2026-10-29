@@ -189,6 +189,8 @@ export interface SpeicherState {
 export interface GeraetState {
   quelle: WpQuelle;
   auswahlId: string | null;
+  /** Heizleistung des gewählten Geräts am Auslegungspunkt (θe, Auslegungs-VL) laut Datenblatt [W] (FWS Folie 93). */
+  qWpAuslegungW?: number;
   filterOverrides: { toleranzUntenProzent?: number; aufstellung?: 'aussen' | 'innen'; schallNachtMaxDb?: number; vorlaufC?: number };
 }
 
@@ -611,6 +613,7 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
   const geraet: GeraetState = {
     quelle: nullbarEnum(ge.quelle, ['luftWasser', 'soleWasser', 'wasserWasser'] as const, 'geraet.quelle', p) ?? 'luftWasser',
     auswahlId: typeof ge.auswahlId === 'string' && ge.auswahlId ? ge.auswahlId : null,
+    ...felder(ge, { qWpAuslegungW: 'zahl' }, 'geraet', p),
     filterOverrides: felder(ge.filterOverrides, { toleranzUntenProzent: 'zahl', aufstellung: ['aussen', 'innen'], schallNachtMaxDb: 'zahl', vorlaufC: 'zahl' }, 'geraet.filterOverrides', p),
   };
 

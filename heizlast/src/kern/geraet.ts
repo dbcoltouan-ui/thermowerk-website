@@ -17,8 +17,10 @@
 import type { FwsDaten } from '../daten/fws';
 import type { WpDaten, WpGeraet } from '../daten/waermepumpen';
 import type { Ampel, WpQuelle } from './typen';
+import type { Skala } from './skala';
+import { skalaWpGroesse } from './skala';
 import type { Hinweis, Wert } from './wert';
-import { berechnet, fallback, fmt, schaetzung, tabelle } from './wert';
+import { berechnet, eingabe, fallback, fmt, schaetzung, tabelle } from './wert';
 
 export interface GeraetFilterEingabe {
   quelle: WpQuelle;
@@ -38,6 +40,8 @@ export interface GeraetEingabe {
   wwLadetemperaturC?: number | undefined;
   filter: GeraetFilterEingabe;
   auswahlId?: string | null | undefined;
+  /** Heizleistung des gewählten Geräts am Auslegungspunkt (θe, Auslegungs-VL) laut Datenblatt [W] — Folie 93. */
+  qWpAuslegungW?: number | undefined;
 }
 
 export interface GeraetTreffer {
@@ -46,6 +50,8 @@ export interface GeraetTreffer {
   qWpW: number;
   vorlaufMaxC: number | null;
   verhaeltnis: number;
+  /** (Q_WP / Q_h − 1) · 100 [%]. */
+  uebergroesseProzent: number;
   ampel: Ampel;
   unplausibel: boolean;
   preisChf: number | null;
@@ -54,8 +60,12 @@ export interface GeraetTreffer {
 export interface Dimensionierung {
   /** r = Q_h / Q_WP [-]. */
   verhaeltnis: Wert;
+  /** Übergrösse der WP gegenüber Q_h [%] (negativ = zu klein). */
+  uebergroesse: Wert;
   ampel: Ampel;
   text: string;
+  /** Prozent-Skala mit grünen/gelben/roten Bereichen (UI zeichnet nur). */
+  skala: Skala;
 }
 
 export interface Bivalenz {
@@ -70,7 +80,10 @@ export interface Bivalenz {
 export interface GewaehltesGeraet {
   id: string;
   bezeichnung: string;
+  /** Heizleistung laut Datenbank (A−7/W35). */
   qWp: Wert;
+  /** Massgebend für Dimensionierung/Bivalenz: Datenblattwert am Auslegungspunkt, sonst qWp. */
+  qWpMassgebend: Wert;
   vorlaufMax: Wert | null;
   mindestPuffer: Wert | null;
   dimensionierung: Dimensionierung;
@@ -99,30 +112,19 @@ export function geraetBezeichnung(g: WpGeraet): string {
 /** Dimensionierungs-Ampel r = Q_h / Q_WP (eine Logik für Liste, Detail, Dashboard, Bericht). */
 export function dimensionierung(qhW: number, qWpW: number, fws: FwsDaten): Dimensionierung {
   const g = fws.geraetewahl;
-  const r = qWpW > 0 ? qhW / qWpW : 0;
-  const v = berechnet(r, '', `r = Q_h / Q_WP = ${fmt(qhW / 1000, 2)} / ${fmt(qWpW / 1000, 2)} kW = ${fmt(r, 2)}`, [], { quelle: g.fundstelle });
-  let ampel: Ampel;
+  const ok = qhW > 0 && qWpW > 0;
+  const r = ok ? qhW / qWpW : 0;
+  const d = ok ? (qWpW / qhW - 1) * 100 : null;
+  const verhaeltnis = berechnet(r, '', `r = Q_h / Q_WP = ${fmt(qhW / 1000, 2)} / ${fmt(qWpW / 1000, 2)} kW = ${fmt(r, 2)}`, [], { quelle: g.fundstelle });
+  const uebergroesse = berechnet(d ?? 0, '%', ok ? `Übergrösse = Q_WP / Q_h − 1 = ${fmt(qWpW / 1000, 2)} / ${fmt(qhW / 1000, 2)} kW − 1 = ${d! >= 0 ? '+' : ''}${fmt(d!, 1)} %` : 'Q_h oder Q_WP fehlt', []);
+  const skala = skalaWpGroesse(fws, d);
+  const ampel = skala.ampel;
+  const bereich = skala.bereiche.find((b) => b.ampel === ampel && d !== null && d >= b.von - 1e-9 && d <= b.bis + 1e-9);
   let text: string;
-  if (!(qhW > 0) || !(qWpW > 0)) {
-    ampel = 'grau';
-    text = 'Q_h oder Q_WP fehlt';
-  } else if (r >= g.inverterMinVerhaeltnis && r <= 1) {
-    ampel = 'gruen';
-    text = `WP deckt Q_h und ist höchstens ${fmt((1 / g.inverterMinVerhaeltnis - 1) * 100, 0)} % grösser (Inverter-Faustregel Q_h ≥ ${fmt(g.inverterMinVerhaeltnis, 2)} · Q_WP)`;
-  } else if (r < g.inverterMinVerhaeltnis && r >= g.ueberdimensioniertRotUnter) {
-    ampel = 'gelb';
-    text = `WP ${fmt((1 / r - 1) * 100, 0)} % grösser als Q_h — überdimensioniert, kürzere Laufzeiten`;
-  } else if (r < g.ueberdimensioniertRotUnter) {
-    ampel = 'rot';
-    text = `WP ${fmt((1 / r - 1) * 100, 0)} % grösser als Q_h — deutlich überdimensioniert`;
-  } else if (r <= g.knappGelbBis) {
-    ampel = 'gelb';
-    text = `WP ${fmt((1 - 1 / r) * 100, 0)} % kleiner als Q_h — knapp, Spitze über Elektroeinsatz`;
-  } else {
-    ampel = 'rot';
-    text = `WP ${fmt((1 - 1 / r) * 100, 0)} % kleiner als Q_h — zu klein, bivalenter Betrieb`;
-  }
-  return { verhaeltnis: v, ampel, text };
+  if (d === null) text = 'Q_h oder Q_WP fehlt';
+  else if (d >= 0) text = `WP ${fmt(d, 0)} % grösser als der Bedarf — ${bereich?.label ?? ''}`;
+  else text = `WP ${fmt(-d, 0)} % kleiner als der Bedarf — ${bereich?.label ?? ''}`;
+  return { verhaeltnis, uebergroesse, ampel, text, skala };
 }
 
 /** Bivalenz nach FWS M3 Folie 95 (Leistungsanteil → Energieanteil der WP). */
@@ -197,7 +199,7 @@ export function geraetWaehlen(e: GeraetEingabe, daten: { fws: FwsDaten; wp: WpDa
       if (e.filter.aufstellung && d.aufstellung && d.aufstellung !== e.filter.aufstellung) continue;
       if (e.filter.schallNachtMaxDb !== undefined && d.schallNachtMaxDb !== null && d.schallNachtMaxDb > e.filter.schallNachtMaxDb) continue;
       const dim = dimensionierung(qh, qWpW, daten.fws);
-      liste.push({ id: d.id, bezeichnung: geraetBezeichnung(d), qWpW, vorlaufMaxC: d.vorlaufMaxC, verhaeltnis: dim.verhaeltnis.wert, ampel: dim.ampel, unplausibel: d.plausibilitaet.unplausibel, preisChf: d.preisChf });
+      liste.push({ id: d.id, bezeichnung: geraetBezeichnung(d), qWpW, vorlaufMaxC: d.vorlaufMaxC, verhaeltnis: dim.verhaeltnis.wert, uebergroesseProzent: dim.uebergroesse.wert, ampel: dim.ampel, unplausibel: d.plausibilitaet.unplausibel, preisChf: d.preisChf });
     }
     liste.sort((a, b) => Math.abs(a.qWpW - qh) - Math.abs(b.qWpW - qh));
     if (!liste.length) hinweise.push({ stufe: 'warnung', code: 'geraet.keineTreffer', text: `Kein Gerät der Datenbank passt (Q_WP ${fmt(qMin / 1000, 1)}–${fmt(qMax / 1000, 1)} kW${filterVorlauf ? `, Vorlauf ≥ ${fmt(filterVorlauf.wert, 0)} °C` : ''}).` });
@@ -219,8 +221,13 @@ export function geraetWaehlen(e: GeraetEingabe, daten: { fws: FwsDaten; wp: WpDa
       if (d.plausibilitaet.unplausibel) gh.push({ stufe: 'warnung', code: 'geraet.unplausibel', text: `Datenbank-Werte von ${geraetBezeichnung(d)} sind unplausibel (${d.plausibilitaet.hinweis ?? 'COP × P passt nicht zu Q(A−7)'}) — Datenblatt prüfen.` });
       if (filterVorlauf && d.vorlaufMaxC !== null && d.vorlaufMaxC < filterVorlauf.wert) gh.push({ stufe: 'warnung', code: 'geraet.vorlaufZuTief', text: `Vorlauf max. ${fmt(d.vorlaufMaxC, 0)} °C liegt unter dem nötigen Vorlauf ${fmt(filterVorlauf.wert, 1)} °C.` });
       if (d.verifikationHinweis) gh.push({ stufe: 'info', code: 'geraet.verifikation', text: d.verifikationHinweis });
-      gh.push({ stufe: 'info', code: 'geraet.kennlinie', text: g.hinweise[0] ?? '' });
-      gewaehlt = { id: d.id, bezeichnung: geraetBezeichnung(d), qWp, vorlaufMax, mindestPuffer, dimensionierung: dimensionierung(qh, qWpW, daten.fws), bivalenz: bivalenz(qh, qWpW, daten.fws), hinweise: gh };
+      let qWpMassgebend = qWp;
+      if (e.qWpAuslegungW !== undefined && e.qWpAuslegungW > 0) {
+        qWpMassgebend = eingabe(e.qWpAuslegungW, 'W', `Q_WP am Auslegungspunkt ${fmt(e.qWpAuslegungW / 1000, 2)} kW (Datenblatt, Eingabe; Datenbank A−7/W35: ${fmt(qWpW / 1000, 2)} kW)`);
+        if (e.qWpAuslegungW > qWpW * 1.05) gh.push({ stufe: 'warnung', code: 'geraet.auslegungUeberNenn', text: `Leistung am Auslegungspunkt (${fmt(e.qWpAuslegungW / 1000, 1)} kW) liegt über dem Datenbankwert bei A−7/W35 (${fmt(qWpW / 1000, 1)} kW) — Datenblatt prüfen.`, pfad: 'geraet.qWpAuslegungW' });
+      } else gh.push({ stufe: 'info', code: 'geraet.kennlinie', text: `${g.hinweise[0] ?? ''} Datenblattwert bei θe und Auslegungs-VL kann eingetragen werden.`, pfad: 'geraet.qWpAuslegungW' });
+      const qM = qWpMassgebend.wert;
+      gewaehlt = { id: d.id, bezeichnung: geraetBezeichnung(d), qWp, qWpMassgebend, vorlaufMax, mindestPuffer, dimensionierung: dimensionierung(qh, qM, daten.fws), bivalenz: bivalenz(qh, qM, daten.fws), hinweise: gh };
       if (gewaehlt.bivalenz.energieanteil && gewaehlt.bivalenz.energieanteil.herkunft !== 'berechnet') annahmen.push(gewaehlt.bivalenz.energieanteil);
       hinweise.push(...gh);
     }
