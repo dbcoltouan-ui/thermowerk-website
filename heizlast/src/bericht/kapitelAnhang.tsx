@@ -11,7 +11,7 @@ import { SCHRITTE } from '../ui/schritte';
 import type { BerichtDaten } from './kontext';
 import { quelleAus } from './kontext';
 import { raeumeMitHeizflaechen } from './kapitelAnlage';
-import { AmpelMarke, berichtText, Tabelle, Unterkapitel } from './teile';
+import { AmpelMarke, bandDezimalen, berichtText, Tabelle, Unterkapitel } from './teile';
 
 const AMPEL_TEXT = { gruen: 'im Bereich', gelb: 'prüfen', rot: 'ausserhalb', grau: '—' } as const;
 
@@ -61,7 +61,7 @@ function herkunftOhneSpanne(w: Wert<unknown>): string {
 function spanne(w: Wert<unknown>): string {
   const teile: string[] = [];
   if (w.unsicherheit !== undefined && w.unsicherheit > 0) teile.push(`±${fmt(w.unsicherheit, 0)} %`);
-  const band = bandText(w, typeof w.wert === 'number' && Math.abs(w.wert) < 10 ? 2 : 0);
+  const band = bandText(w, bandDezimalen(w));
   if (band) teile.push(band);
   return teile.join(' · ') || '—';
 }

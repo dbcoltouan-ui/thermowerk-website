@@ -21,12 +21,19 @@ export function berichtText(text: string): string {
     .trim();
 }
 
+/** Nachkommastellen für eine Spanne nach Grösse der Grenzen (η 0.7–0.75, θe −8 – −6 °C, Q 7'400 – 9'100 W). */
+export function bandDezimalen(w: Wert<unknown>): number {
+  if (!w.band) return 0;
+  const m = Math.max(Math.abs(w.band[0]), Math.abs(w.band[1]));
+  return m < 10 ? 2 : m < 100 ? 1 : 0;
+}
+
 /** Kurze Herkunftsangabe unter einem Wert — nur für Annahmen oder Werte mit Unsicherheit/Spanne. */
 export function HerkunftNotiz({ wert, mitBand }: { wert: Wert<unknown> | null | undefined; mitBand?: boolean }) {
   if (!wert) return null;
   const zeigen = istAnnahme(wert) || (wert.unsicherheit ?? 0) > 0 || !!wert.band;
   if (!zeigen) return null;
-  const band = mitBand ? bandText(wert, 0) : null;
+  const band = mitBand ? bandText(wert, bandDezimalen(wert)) : null;
   return (
     <span class="bericht__herkunft">
       {herkunftKurz(wert)}

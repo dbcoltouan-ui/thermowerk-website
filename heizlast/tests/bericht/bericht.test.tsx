@@ -316,3 +316,11 @@ describe('Vollständigkeit, Export', () => {
     expect(berichtText('Q_hl = 9.3 kW')).toBe('Q_hl = 9.3 kW');
   });
 });
+
+describe('Spannen im Bericht', () => {
+  it('Nachkommastellen nach Grösse: η-Band 0.7–0.75 bleibt lesbar (nicht «1 – 1»)', () => {
+    const t = nurText(bericht(oelMitTankstaenden()).html);
+    expect(t).toContain('Spanne 0.7 – 0.75');
+    expect(t).not.toContain('Spanne 1 – 1');
+  });
+});
