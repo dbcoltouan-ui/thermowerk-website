@@ -51,6 +51,11 @@ export default tseslint.config(
     },
   },
   {
+    // Node-Skripte (Datengeneratoren): Node-Globals erlaubt.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', fetch: 'readonly', console: 'readonly' } },
+  },
+  {
     // Rechenkern: rein, DOM-frei, kein UI-Import.
     files: ['src/kern/**/*.{ts,tsx}', 'src/daten/**/*.{ts,tsx}'],
     rules: {

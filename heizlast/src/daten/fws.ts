@@ -104,7 +104,8 @@ export interface FwsDaten {
   verbrauch: {
     mindestJahreEmpfohlen: number;
     maxJahreEmpfohlen: number;
-    streuung: { mindestTageJeEintrag: number; gelbAbProzent: number; rotAbProzent: number };
+    lueckeHinweisAbTagen: number;
+    streuung: { mindestTageJeEintrag: number; mindestHgtAnteil: number; gelbAbProzent: number; rotAbProzent: number };
   };
   klimabereinigung: { defaultAktiv: boolean; faktorPlausibelMin: number; faktorPlausibelMax: number };
   sperrzeit: { toffMaxH: number; faktorTabelle: Record<string, number>; fundstelle: string };

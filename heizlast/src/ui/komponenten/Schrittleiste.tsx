@@ -15,9 +15,18 @@ interface Props {
  */
 export function Schrittleiste({ schritte, aktiv, status, onWahl }: Props) {
   const liste = useRef<HTMLOListElement>(null);
+  // Aktiven Schritt horizontal in die Mitte der Leiste rollen — nur die Leiste scrollt, nie die Seite (Session 7b).
   useEffect(() => {
-    const el = liste.current?.querySelector<HTMLElement>('[aria-current="step"]');
-    el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    const l = liste.current;
+    const el = l?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!l || !el) return;
+    const lr = l.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    const ziel = l.scrollLeft + (er.left - lr.left) - (l.clientWidth - er.width) / 2;
+    const max = Math.max(0, l.scrollWidth - l.clientWidth);
+    const links = Math.max(0, Math.min(max, ziel));
+    if (typeof l.scrollTo === 'function') l.scrollTo({ left: links, behavior: 'smooth' });
+    else l.scrollLeft = links;
   }, [aktiv]);
   const index = schritte.findIndex((s) => s.id === aktiv);
   return (

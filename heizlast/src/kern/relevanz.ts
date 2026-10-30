@@ -62,7 +62,11 @@ export const RELEVANZ_REGELN: ReadonlyArray<RelevanzRegel> = [
   { muster: 'sanierungen.*.uOverride', wenn: 'raumweise (wirkt auf Bauteiltypen)', pruefe: raumweise },
   // Schritt 3A Verbrauch
   { muster: 'verbrauch', wenn: 'Methode FWS', pruefe: fws },
-  { muster: 'verbrauch.eintraege', wenn: 'Rechnungen vorhanden', pruefe: rechnungen },
+  { muster: 'verbrauch.reihen', wenn: 'Rechnungen vorhanden', pruefe: rechnungen },
+  { muster: 'verbrauch.reihen.*.zeitraeume', wenn: 'Erfassungsart Zeiträume/Kalenderjahre', pruefe: (s, [id]) => s.verbrauch.reihen.find((r) => r.id === id)?.art === 'zeitraeume' },
+  { muster: 'verbrauch.reihen.*.ablesungen', wenn: 'Erfassungsart Lieferungen und Tank-/Lagerstände', pruefe: (s, [id]) => s.verbrauch.reihen.find((r) => r.id === id)?.art === 'lieferungen' },
+  { muster: 'verbrauch.reihen.*.lieferungen', wenn: 'Erfassungsart Lieferungen und Tank-/Lagerstände', pruefe: (s, [id]) => s.verbrauch.reihen.find((r) => r.id === id)?.art === 'lieferungen' },
+  { muster: 'verbrauch.reihen.*.zaehlerstaende', wenn: 'Erfassungsart Zählerstände', pruefe: (s, [id]) => s.verbrauch.reihen.find((r) => r.id === id)?.art === 'zaehlerstaende' },
   { muster: 'verbrauch.eta', wenn: 'Rechnungen vorhanden', pruefe: rechnungen },
   { muster: 'verbrauch.konvention', wenn: 'Rechnungen vorhanden', pruefe: rechnungen },
   { muster: 'verbrauch.klimabereinigung', wenn: 'Rechnungen vorhanden', pruefe: rechnungen },
@@ -187,7 +191,10 @@ export function schrittVonPfad(pfad: string, s: State): SchrittId | null {
  */
 export function ruhendeAngaben(s: State): { pfad: string; text: string }[] {
   const out: { pfad: string; text: string }[] = [];
-  if (s.methode !== 'fws' && (s.verbrauch.eintraege.length > 0 || s.verbrauch.quelle !== null)) out.push({ pfad: 'verbrauch', text: `Verbrauchsdaten (${s.verbrauch.eintraege.length} Einträge)` });
+  if (s.methode !== 'fws' && (s.verbrauch.reihen.length > 0 || s.verbrauch.quelle !== null)) {
+    const n = s.verbrauch.reihen.reduce((a, r) => a + (r.zeitraeume?.length ?? 0) + (r.ablesungen?.length ?? 0) + (r.lieferungen?.length ?? 0) + (r.zaehlerstaende?.length ?? 0), 0);
+    out.push({ pfad: 'verbrauch', text: `Verbrauchsdaten (${n} Einträge)` });
+  }
   if (s.methode !== 'raumweise') {
     if (s.huelle.bauteiltypen.length) out.push({ pfad: 'huelle', text: `Gebäudehülle (${s.huelle.bauteiltypen.length} Bauteiltypen)` });
     const mitBauteilen = s.raeume.filter((r) => r.bauteile.length > 0).length;

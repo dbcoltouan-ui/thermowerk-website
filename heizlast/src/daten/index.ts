@@ -6,6 +6,8 @@ import type { FwsDaten, HydraulikDaten } from './fws';
 import { fwsDaten, hydraulikDaten } from './fws';
 import type { HkDaten } from './heizkoerper';
 import { heizkoerperDaten } from './heizkoerper';
+import type { HgtDaten } from './heizgradtage';
+import { heizgradtageDaten } from './heizgradtage';
 import type { HuelleDaten } from './huelle';
 import { huelleDaten } from './huelle';
 import type { KlimaDaten } from './klima';
@@ -23,6 +25,8 @@ export interface Datensatz {
   klima: KlimaDaten;
   hk: HkDaten;
   wp: WpDaten;
+  /** Monats-Heizgradtage je Station (Session 7b). */
+  hgt: HgtDaten;
 }
 
 export function alleDaten(): Datensatz {
@@ -34,5 +38,6 @@ export function alleDaten(): Datensatz {
     klima: klimaDaten(),
     hk: heizkoerperDaten(),
     wp: waermepumpenDaten(),
+    hgt: heizgradtageDaten(),
   };
 }

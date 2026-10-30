@@ -184,6 +184,83 @@ export function TextFeld({ pfad, label, info, platzhalter, testid, breit, muster
   );
 }
 
+/** Taggenaues Datum über den Datumswähler des Browsers (ISO YYYY-MM-DD im State). */
+export function DatumFeld({ pfad, label, info, testid, min, max, hinweisPfad }: { pfad: string; label: ComponentChildren; info?: ComponentChildren; testid?: string; min?: string; max?: string; hinweisPfad?: string }) {
+  const id = useFeldId();
+  const wert = lese<string>(pfad) ?? '';
+  const gueltig = /^\d{4}-\d{2}-\d{2}$/.test(wert);
+  return (
+    <FeldRahmen label={label} info={info} id={id}>
+      <div class={`eingabe eingabe--datum${wert && !gueltig ? ' eingabe--fehler' : ''}`}>
+        <input
+          id={id}
+          class="eingabe__feld"
+          type="date"
+          value={gueltig ? wert : ''}
+          min={min ?? '1990-01-01'}
+          max={max ?? '2099-12-31'}
+          data-testid={testid}
+          onInput={(e) => {
+            const t = (e.currentTarget as HTMLInputElement).value;
+            setze(pfad, t === '' ? undefined : t);
+          }}
+        />
+      </div>
+      <FeldHinweise pfad={hinweisPfad ?? pfad} lokal={wert && !gueltig ? 'Datum als Tag.Monat.Jahr wählen.' : null} />
+    </FeldRahmen>
+  );
+}
+
+const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+/**
+ * Monat/Jahr-Auswahl (ISO YYYY-MM im State; ohne Monat nur YYYY, wenn `nurJahrErlaubt`). Vorhandene Tagesangaben
+ * (YYYY-MM-DD) werden auf den Monat gekürzt angezeigt und beim nächsten Ändern überschrieben.
+ */
+export function MonatFeld({ pfad, label, info, testid, vonJahr, bisJahr, nurJahrErlaubt, hinweisPfad }: { pfad: string; label: ComponentChildren; info?: ComponentChildren; testid?: string; vonJahr?: number; bisJahr?: number; nurJahrErlaubt?: boolean; hinweisPfad?: string }) {
+  const id = useFeldId();
+  const wert = lese<string>(pfad) ?? '';
+  const m = /^(\d{4})(?:-(\d{2}))?/.exec(wert);
+  const jahr = m ? m[1]! : '';
+  const monat = m?.[2] ?? '';
+  const heute = new Date().getFullYear();
+  const von = vonJahr ?? 1950;
+  const bis = bisJahr ?? heute + 5;
+  const jahre: string[] = [];
+  for (let j = bis; j >= von; j--) jahre.push(String(j));
+  const schreibe = (j: string, mo: string) => {
+    if (!j) return setze(pfad, undefined);
+    setze(pfad, mo ? `${j}-${mo}` : j);
+  };
+  return (
+    <FeldRahmen label={label} info={info} id={id}>
+      <div class="paar paar--monat">
+        <div class="eingabe eingabe--auswahl">
+          <select id={id} class="eingabe__feld" value={monat} data-testid={testid ? `${testid}-monat` : undefined} aria-label="Monat" onChange={(e) => schreibe(jahr || String(heute), (e.currentTarget as HTMLSelectElement).value)}>
+            <option value="">{nurJahrErlaubt ? 'Monat (optional)' : 'Monat'}</option>
+            {MONATE.map((name, i) => (
+              <option value={String(i + 1).padStart(2, '0')} key={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div class="eingabe eingabe--auswahl">
+          <select class="eingabe__feld" value={jahr} data-testid={testid ? `${testid}-jahr` : undefined} aria-label="Jahr" onChange={(e) => schreibe((e.currentTarget as HTMLSelectElement).value, monat)}>
+            <option value="">Jahr</option>
+            {jahre.map((j) => (
+              <option value={j} key={j}>
+                {j}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <FeldHinweise pfad={hinweisPfad ?? pfad} />
+    </FeldRahmen>
+  );
+}
+
 export interface Option<T> {
   wert: T;
   label: string;

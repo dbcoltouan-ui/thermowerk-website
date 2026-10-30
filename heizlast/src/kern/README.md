@@ -18,6 +18,9 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `raumweise.ts` | 4 | Räume und Bauteile (Referenz auf Hüllentyp + Fläche + Anschluss), Φ_T mit ΔU_WB/b_u/U_equiv, Φ_V = V·n_min·0.34, Σ Räume und saldierte Gebäude-Heizlast, EBF aus Räumen, nicht erfasster Rest |
 | `waermeabgabe.ts` | 5 | Heizkörper-Modul: Q_N je Heizfläche (Typenschild/Modell/Bauart+Massen/alte Heizkurve), n aus einer Tabelle, Minderungen, Raum-Deckung, θ_VL,req (Bisektion), Gebäude-Auslegungs-VL + Ampel, Massnahmen |
 | `berechne.ts`, `relevanz.ts`, `geraet.ts` | 6 | Orchestrierung (einziger Rechenpfad), Relevanz bedingter Felder, WP-Gerätefilter/Dimensionierung/Bivalenz |
+| `verbrauchsreihe.ts` | 7b | Vier Eingabearten je Energieträger → Zeiträume mit Menge und Rechenweg (Lieferungen + Tank-/Lagerstände, Zählerstände, von–bis, Kalenderjahr), Prüfungen, Heizgradtage je Zeitraum |
+| `heizgradtage.ts` | 7b | HGT 20/12 je Zeitraum aus Monatswerten (Teilmonate anteilig), Jahresreferenz für die Hochrechnung |
+| `standardtypen.ts` | 7b | Standard-Bauteiltypen ohne eigenen Typ, generische Raum-Bauteilarten `boden`/`decke`, Anschluss `auto` aus Keller/Dachform |
 | `zusatz/` | 11 | Förderung, Bewilligung, Offerte |
 
 ## Konventionen
@@ -37,15 +40,16 @@ heizlastFws(e: FwsEingabe, daten: FwsDaten): FwsErgebnis
 
 `FwsEingabe`: `methode: 'verbrauch' | 'wpBetriebsstunden' | 'messung' | 'bauperiode'` (explizit, keine «erste aktive gewinnt»), `tvoll { bedarfsart?, hoeheM?, override? }`, `verbrauch? { eintraege[], eta, konvention, wwAbzug?, klimabereinigung? }`, `wpBetriebsstunden?`, `messung?`, `bauperiode?`, `sanierungen?`, `heute?`.
 
-- Eintrag des Jahresrasters: `{ energietraeger, menge, jahr }` (= 365 Tage) oder `{ …, von, bis }` (ISO, beide inklusiv; Lieferungen als «Tank voll bis Tank voll»). Jahresmenge je Träger = Σ Menge · 365 / Σ Tage; Summe nur über verschiedene Träger. Überlappung desselben Trägers → `fehler`, `qhl = null`.
-- Streuung: grösste Abweichung der annualisierten Einträge (≥ 300 Tage) vom Mittel; ≥ 10 % gelb, ≥ 20 % rot (fws.json `verbrauch.streuung`, Thermowerk-Annahme).
+- Eintrag des Jahresrasters: `{ energietraeger, menge, jahr }` (= 365 Tage) oder `{ …, von, bis }` (ISO, beide inklusiv; `bis` als JJJJ-MM = Monatsende). Seit Session 7b optional vorab bestimmt (`zeitraum`, `mengeWert`, `pfad`, `ganzesJahr`) und mit Heizgradtagen (`hgtIst`, `hgtTabelle`, `hgtRef`, `hgtNorm`) — geliefert von `verbrauchsreihe.ts`.
+- **Jahresanteil** je Zeitraum (`jahresanteil()`): ganzes Kalenderjahr = Tage/365 (Kurs, unverändert → Kurslösungen identisch); sonst HGT(Zeitraum)/Jahres-HGT der umgebenden Kalenderjahre (Hochrechnung nach Heizgradtagen, Thermowerk-Regel); ohne Heizgradtage Tage/365 als `fallback` mit Warnung. Mit Klimabereinigung gilt für die Heizenergie aller Zeiträume HGT/HGT_norm (Daniel 30.10.: «bereinigt = alles bereinigt, sonst laut Kurs»). Jahresmenge = Heizanteil/Σ Jahresanteile + Warmwasser/Σ (Tage/365); Überlappung desselben Trägers → `fehler`, `qhl = null`. Je Zeitraum liefert `TraegerErgebnis.zeitraeume[]` Menge, HGT, Anteil, hochgerechneten Jahreswert, Sanierungs-Teilperioden und Lage jeder Massnahme (vorher/innerhalb/nachher).
+- Streuung: grösste Abweichung der hochgerechneten Zeiträume vom Mittel, berücksichtigt ab 300 Tagen bzw. ab 60 % der Jahres-HGT; ≥ 10 % gelb, ≥ 20 % rot (fws.json `verbrauch.streuung`, Thermowerk-Annahme).
 - Konvention `fwsKurs` (Ho 10.5/10.4, Kurs-η, Default) oder `hi` (BFE 10.0/10.08; Presets werden mit Ho/Hi umgerechnet, eigener η gilt als Hi-bezogen).
 - `wwAbzug.qnWwKwhA` (aus `warmwasserBedarf` mit den **bisherigen** WW-Angaben) wird nur übergeben, wenn «WW bisher über die Heizung»; Zuordnung zum Träger mit grösstem Anteil oder `traeger`.
 - Sanierungen: `{ massnahme: 'fenster'|'fassade'|'estrich'|'kellerdecke'|'individuell', einsparungProzent?, status: 'ausgefuehrt'|'geplant', datum? }`. Ausgeführte Massnahmen werden je Zeitraum nach FWS-RECHENWEGE §3a gewichtet (`subperiodenKorrektur`: W_pre = W·L/Σ(L_j·F_j), W_ist = W_pre·F_heute); geplante wirken multiplikativ auf `qhlKorr`.
 - Ergebnis: `qhlUnsaniert` (vor allen Massnahmen; Plausi-Band), `qhlIst` (ausgeführte), `qhlKorr` (= `qhl`, massgebend), `traeger[]` mit Rechenweg je Energieträger, `sanierungen`, `streuung`, `wp` (Methode B: h/a, Q_k, Entzugsleistung), `annahmen[]`, `hinweise[]`, `vollstaendig`.
-- Klimabereinigung (HGT_norm/HGT_ist je Eintrag) nur auf Wunsch, Default aus, als «nicht FWS-Kurs» markiert.
+- Klimabereinigung (HGT_norm/HGT_ist für alle Zeiträume, auch ganze Jahre) nur auf Wunsch, Default aus, als «nicht FWS-Kurs» markiert; Brutto und Warmwasser bleiben unverändert.
 
-Hilfsfunktionen: `volllaststunden`, `heizwert`, `jahresnutzungsgrad`, `sanierungsEinsparung`, `zeitraumVonEintrag`, `parseDatum`, `tageInklusiv`, `bauperiodeFuerBaujahr`, `bauperiodeBandWm2`, `betriebsstundenNeu`, `etaPresetsFuer`.
+Hilfsfunktionen: `volllaststunden`, `heizwert`, `jahresnutzungsgrad`, `sanierungsEinsparung`, `zeitraumVonEintrag`, `parseDatum`, `parseDatumEnde`, `tageInklusiv`, `jahresanteil`, `bauperiodeFuerBaujahr`, `bauperiodeBandWm2`, `betriebsstundenNeu`, `etaPresetsFuer`.
 
 ### `warmwasser.ts`
 
@@ -166,3 +170,26 @@ Regeln: Sanierungen sind EINE Liste — FWS wertet Massnahme/Einsparung/Datum au
 ### `raumweise.ts` (Ergänzung)
 
 `ebfBestimmen({ modus, manuellM2?, faktorNwfZuEbf? }, summeFlaecheRaeume, fws)` und `flaecheAus(raum)` sind exportiert (gemeinsam mit `berechne`).
+
+## Kern-API Session 7b
+
+### `verbrauchsreihe.ts`
+
+```ts
+zeitraeumeAusReihe(reihe: VerbrauchsReihe, pfad, fwsDaten()) → ReiheErgebnis { energietraeger, art, zeitraeume[], hinweise, fehler }
+eintragMitHgt(zeitraum, { stationKey, hgt: heizgradtageDaten(), klima: klimaDaten() }, hinweise) → VerbrauchsEintrag   // für fws.ts
+```
+
+`VerbrauchsReihe { energietraeger, art: 'zeitraeume' | 'lieferungen' | 'zaehlerstaende', zeitraeume?[{ menge, jahr | von, bis, hgtIstKd? }], ablesungen?[{ datum, bestand, hgtIstKd? }], lieferungen?[{ datum, menge }], zaehlerstaende?[{ datum, stand, hgtIstKd? }] }`.
+
+- Lieferungen: Verbrauch zwischen zwei Ständen = Stand alt + Σ Lieferungen (Datum ≥ alt, < neu) − Stand neu; Zeitraum [alt, neu − 1 Tag]; ein Stand am Tag einer Lieferung ist der Stand **vor** der Lieferung (FWS-Rechner «Tankinhalt Anfang»). Zählerstände: Differenzen aufeinanderfolgender Stände. Zeiträume/Kalenderjahr wie bisher.
+- Prüfungen (Hinweis-Codes): `verbrauch.negativ` (fehler), `verbrauch.ablesungen.zuWenig` / `verbrauch.zaehler.zuWenig` (fehler), `verbrauch.lieferung.ohneAblesung`, `verbrauch.lieferung.vorErsterAblesung`, `verbrauch.ablesung.gleicherTag`, `verbrauch.ueberlappung` (fehler), `verbrauch.luecke` (ab 14 Tagen, fws.json), `verbrauch.zeitraum.kurzerEintrag` (< 300 Tage), `verbrauch.hgt.fehlt` (warnung; ohne Station/Monatswerte wird nach Tagen hochgerechnet). Zeitraum-Hinweise tragen den Pfad `<eintrag>.zeitraum`.
+- `eintragMitHgt`: HGT manuell (`hgtIstKd`, Herkunft `override`) > Tabelle (`hgtFuerZeitraum`, `tabelle`); `hgtRef` = Jahresreferenz (n Kalenderjahre bis Zeitraumende, n = ⌈Tage/366⌉), `hgtNorm` = SIA-2028-Wert der Station.
+
+### `heizgradtage.ts`
+
+`hgtFuerZeitraum(stationKey, vonMs, bisMs, heizgradtageDaten())` → `{ wert (Kd, tabelle; Stufe monate|teilmonate, Teilmonate ±5 %), monate[], teilmonate, fehlend[] }`; `hgtJahresreferenz(stationKey, bisMs, n, daten)`; `hgtVerfuegbar(stationKey, daten)`; `referenzJahre(tage)`. Definition HGT 20/12 wie SIA 2028/MeteoSchweiz; Daten `data/heizgradtage.json` (2015-01 bis letzter vollständiger Monat, erzeugt mit `scripts/heizgradtage-bauen.mjs`).
+
+### `standardtypen.ts`
+
+`konkretisiereBauteil(bauteil, { keller, dachform, dachraumBeheizt }, eigeneTypen)` → Kern-Bauteil mit konkreter Art/Anschluss und `typId` (eigener Typ oder `std-<art>`), Flags `standardTyp`, `ausGebaeude`; `anschlussAuto(art, gebaeude)`, `konkreteArt(art, anschluss, gebaeude)`, `standardTypenFuer(arten, huelleDaten())`, `standardTypId`, `istStandardTypId`, `ALLE_ARTEN`. `berechne()` löst die benötigten Standard-Typen mit `huelleAufloesen` auf (Begründung «Standard aus Baujahr …», Sanierungen aus der Liste wirken); ihr U zählt nur als Annahme, wenn es vererbt wird. `Ergebnis.heizlast.raumBauteile[raumId][bauteilId]` liefert die Konkretisierung für die UI.

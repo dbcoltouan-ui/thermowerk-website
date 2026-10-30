@@ -2,7 +2,9 @@
  * FWS-Verbrauchsmethode (FWS/AWB WP-Kurs Modul 3, Version 1-2025) — reine Funktionen mit Herkunftsmodell.
  *
  * Rechenweg (Folien 12–16, 29, 36; Aufgaben 1–4):
- *   Jahresmenge je Energieträger = Σ Menge_i · 365 / Σ Tage_i          (Mittel über das Jahresraster)
+ *   Jahresmenge je Energieträger = Σ Menge_i / Σ Jahresanteil_i          (Mittel über alle Zeiträume)
+ *     Jahresanteil_i: ganzes Kalenderjahr = Tage/365 (Kurs); Teil- oder Mehrjahreszeitraum = HGT_i / Jahres-HGT
+ *     (heizgradtage.json, Session 7b), ohne Heizgradtage Tage/365; mit Klimabereinigung HGT_i / HGT_norm für alle.
  *   Q_n,brutto = Σ_Träger Jahresmenge · Heizwert(Konvention) · η        [kWh/a]
  *   Q_n,Heizung = Q_n,brutto − Q_n,WW   (nur wenn WW bisher über die Heizung lief)
  *   Sanierungen: ausgeführte Massnahmen jahresgenau nach FWS-RECHENWEGE §3a (Sub-Perioden, kumulativer
@@ -23,18 +25,38 @@ export type Bedarfsart = 'raumwaerme_wohnen' | 'raumwaerme_ww_wohnen' | 'raumwae
 export type Massnahme = 'fenster' | 'fassade' | 'estrich' | 'kellerdecke' | 'individuell';
 export type FwsMethode = 'verbrauch' | 'wpBetriebsstunden' | 'messung' | 'bauperiode';
 
-/** Ein Eintrag des Jahresrasters: entweder ein Kalenderjahr (= 365 Tage) oder ein Zeitraum von–bis (beide inklusiv). */
+/**
+ * Ein Zeitraum mit Menge: Kalenderjahr (= 365 Tage) oder von–bis (beide inklusiv). Die Felder ab `zeitraum`
+ * ergänzt `verbrauchsreihe.ts` (abgeleitete Zeiträume aus Lieferungen/Zählerständen, Heizgradtage); ohne sie
+ * rechnet der Kern wie in Session 3 (Tage/365).
+ */
 export interface VerbrauchsEintrag {
   id?: string;
   energietraeger: Energietraeger;
   /** Menge in der Verbrauchseinheit des Trägers (l, m³n, rm, kg, kWh). */
   menge: number;
   jahr?: number;
-  /** ISO-Datum YYYY-MM-DD (auch YYYY-MM); von und bis inklusiv. */
+  /** ISO-Datum YYYY-MM-DD (auch YYYY-MM: von = Monatsanfang, bis = Monatsende); von und bis inklusiv. */
   von?: string;
   bis?: string;
-  /** Heizgradtage des Zeitraums [Kd] — nur für die optionale Klimabereinigung. */
+  /** Heizgradtage des Zeitraums [Kd] manuell (Klimabereinigung und Hochrechnung). */
   hgtIstKd?: number;
+  /** Vorab bestimmter Zeitraum (verbrauchsreihe.ts); gewinnt über jahr/von/bis. */
+  zeitraum?: Zeitraum;
+  /** Menge mit Rechenweg (Lieferungen, Zählerdifferenz). */
+  mengeWert?: Wert;
+  /** State-Pfad für Hinweise. */
+  pfad?: string;
+  /** Ganzes Kalenderjahr (365/366 Tage) → keine Hochrechnung nach Heizgradtagen. */
+  ganzesJahr?: boolean;
+  /** Heizgradtage des Zeitraums (Tabelle oder manuell). */
+  hgtIst?: Wert;
+  /** Tabellenwert der Heizgradtage (auch wenn manuell überschrieben) — Standardwert für die UI. */
+  hgtTabelle?: Wert;
+  /** Jahres-HGT der umgebenden Kalenderjahre (Referenz für die Hochrechnung). */
+  hgtRef?: Wert;
+  /** HGT des Normjahrs der Station (Klimabereinigung). */
+  hgtNorm?: Wert;
 }
 
 export interface EtaAngabe {
@@ -112,10 +134,45 @@ export interface FwsEingabe {
 
 export interface Streuung {
   ampel: Ampel;
-  /** Grösste relative Abweichung eines annualisierten Einzelwerts vom Mittel [%], null wenn nicht beurteilbar. */
+  /** Grösste relative Abweichung eines hochgerechneten Einzelwerts vom Mittel [%], null wenn nicht beurteilbar. */
   prozent: number | null;
-  /** Annualisierte Einzelwerte [Einheit/a] der berücksichtigten Einträge. */
+  /** Hochgerechnete Einzelwerte [kWh/a] der berücksichtigten Zeiträume. */
   werte: number[];
+}
+
+/** Rechenweg je Zeitraum (Session 7b): Menge, Jahresanteil, Hochrechnung, Sanierungs-Teilperioden. */
+export interface ZeitraumErgebnis {
+  id: string;
+  pfad: string;
+  zeitraum: Zeitraum;
+  ganzesJahr: boolean;
+  menge: Wert;
+  hgtIst: Wert | null;
+  hgtTabelle: Wert | null;
+  hgtRef: Wert | null;
+  /** Anteil eines Heizjahres für die Heizenergie (Tage/365, HGT/Jahres-HGT; mit Klimabereinigung HGT/HGT_norm). */
+  anteil: Wert;
+  /** Anteil ohne Klimabereinigung (Hochrechnung der gemessenen Menge). */
+  anteilRoh: Wert;
+  anteilBasis: 'tage' | 'hgt';
+  /** HGT_norm/HGT_ist, nur mit aktiver Klimabereinigung. */
+  klimaFaktor: number | null;
+  /** Auf ein Jahr hochgerechnete Menge [Einheit/a]. */
+  hochgerechnet: Wert;
+  /** Zählt für die Streuungs-Ampel. */
+  inStreuung: boolean;
+  energieKwh: number;
+  wwKwh: number;
+  heizKwh: number;
+  sanierung: {
+    faktorIst: number;
+    faktorUnsaniert: number;
+    subperioden: { tage: number; faktor: number }[];
+    /** Ausgeführte Massnahmen mit Datum innerhalb des Zeitraums (Bruchstellen). */
+    wirksam: { id?: string | undefined; label: string; datumMs: number; faktor: number }[];
+    /** Lage jeder ausgeführten Massnahme mit Datum zum Zeitraum: vorher (Zeitraum ganz vor der Massnahme → wird umgerechnet), innerhalb, nachher (schon enthalten). */
+    bezug: { id?: string | undefined; label: string; datumMs: number; lage: 'vorher' | 'innerhalb' | 'nachher' }[];
+  };
 }
 
 export interface TraegerErgebnis {
@@ -123,6 +180,9 @@ export interface TraegerErgebnis {
   einheit: string;
   anzahlEintraege: number;
   tage: number;
+  /** Σ Jahresanteile der Zeiträume (Nenner der Mittelung). */
+  jahresanteile: number;
+  zeitraeume: ZeitraumErgebnis[];
   jahresmenge: Wert;
   heizwert: Wert;
   eta: Wert;
@@ -197,6 +257,17 @@ export function parseDatum(s: string | undefined): number | null {
   return ms;
 }
 
+/** Enddatum: YYYY → 31.12., YYYY-MM → Monatsende, sonst wie parseDatum. */
+export function parseDatumEnde(s: string | undefined): number | null {
+  if (!s) return null;
+  const m = /^(\d{4})(?:-(\d{1,2}))?$/.exec(s.trim());
+  if (!m) return parseDatum(s);
+  const j = Number(m[1]);
+  const mo = m[2] ? Number(m[2]) : 12;
+  if (mo < 1 || mo > 12) return null;
+  return Date.UTC(j, mo, 0);
+}
+
 /** Kalendertage zwischen zwei Tagen, beide inklusiv. */
 export function tageInklusiv(vonMs: number, bisMs: number): number {
   return Math.round((bisMs - vonMs) / TAG_MS) + 1;
@@ -208,14 +279,15 @@ export interface Zeitraum {
   tage: number;
 }
 
-/** Zeitraum eines Eintrags: Kalenderjahr = 365 Tage (1.1.–31.12.), sonst von–bis inklusiv. */
-export function zeitraumVonEintrag(e: { jahr?: number; von?: string; bis?: string }): Zeitraum | null {
+/** Zeitraum eines Eintrags: vorab bestimmt, Kalenderjahr = 365 Tage (1.1.–31.12.), sonst von–bis inklusiv. */
+export function zeitraumVonEintrag(e: { jahr?: number; von?: string; bis?: string; zeitraum?: Zeitraum }): Zeitraum | null {
+  if (e.zeitraum) return e.zeitraum;
   if (e.jahr !== undefined) {
     const vonMs = Date.UTC(e.jahr, 0, 1);
     return { vonMs, bisMs: Date.UTC(e.jahr, 11, 31), tage: 365 };
   }
   const vonMs = parseDatum(e.von);
-  const bisMs = parseDatum(e.bis);
+  const bisMs = parseDatumEnde(e.bis);
   if (vonMs === null || bisMs === null || bisMs < vonMs) return null;
   return { vonMs, bisMs, tage: tageInklusiv(vonMs, bisMs) };
 }
@@ -374,10 +446,53 @@ function schlechtereAmpel(a: Ampel, b: Ampel): Ampel {
 interface EintragAuswertung {
   eintrag: VerbrauchsEintrag;
   zeitraum: Zeitraum;
-  energieKwh: number;
 }
 
-/** Auswertung des Jahresrasters je Energieträger inkl. WW-Abzug, Sanierungs- und Klimakorrektur. */
+function datumKurz(ms: number): string {
+  const d = new Date(ms);
+  return `${d.getUTCDate()}.${d.getUTCMonth() + 1}.${d.getUTCFullYear()}`;
+}
+
+/**
+ * Jahresanteil eines Zeitraums (Mass für «wie viel eines Heizjahres» er abdeckt):
+ *  - `roh` (Hochrechnung der gemessenen Menge): ganzes Kalenderjahr = Tage/365 (Kurs, unverändert); sonst
+ *    HGT_ist / Jahres-HGT der umgebenden Kalenderjahre; ohne Heizgradtage Tage/365 (Fallback mit Warnung).
+ *  - `heizung` (Nenner für die Heizenergie): wie `roh`; mit Klimabereinigung HGT_ist / HGT_norm für alle
+ *    Zeiträume (Normjahr-Äquivalent, Daniel 30.10.: «bereinigt = alle bereinigt, sonst laut Kurs»).
+ */
+export function jahresanteil(e: VerbrauchsEintrag, z: Zeitraum, klima: { aktiv: boolean; hgtNormKd?: number | undefined }, hinweise: Hinweis[], daten: FwsDaten): { roh: Wert; heizung: Wert; basis: 'tage' | 'hgt'; klimaFaktor: number | null } {
+  const ganzesJahr = e.ganzesJahr ?? (e.jahr !== undefined || ((z.tage === 365 || z.tage === 366) && new Date(z.vonMs).getUTCDate() === new Date(z.bisMs + TAG_MS).getUTCDate() && new Date(z.vonMs).getUTCMonth() === new Date(z.bisMs + TAG_MS).getUTCMonth()));
+  const hgtIstW = e.hgtIst?.wert ?? (e.hgtIstKd !== undefined && e.hgtIstKd > 0 ? e.hgtIstKd : undefined);
+  const hgtNormW = e.hgtNorm?.wert ?? klima.hgtNormKd;
+  const tageText = `${datumKurz(z.vonMs)}–${datumKurz(z.bisMs)}`;
+  let roh: Wert;
+  let basis: 'tage' | 'hgt';
+  if (ganzesJahr) {
+    const a = z.tage / 365;
+    roh = berechnet(a, '', `Jahresanteil = ${z.tage} Tage / 365 = ${fmt(a, 3)} (ganzes Kalenderjahr${e.jahr !== undefined ? ` ${e.jahr}` : ''}, Kurs: keine Hochrechnung)`, [], { quelle: 'FWS M3 Folie 29' });
+    basis = 'tage';
+  } else if (hgtIstW !== undefined && e.hgtRef && e.hgtRef.wert > 0) {
+    const a = hgtIstW / e.hgtRef.wert;
+    roh = berechnet(a, '', `Jahresanteil = HGT ${fmt(hgtIstW, 0)} / Jahres-HGT ${fmt(e.hgtRef.wert, 0)} Kd = ${fmt(a, 3)} (${tageText}, ${z.tage} Tage: Hochrechnung nach Heizgradtagen)`, [e.hgtIst, e.hgtRef], { quelle: 'heizgradtage.json; Thermowerk-Regel (Hochrechnung nach HGT-Anteil)' });
+    basis = 'hgt';
+  } else {
+    const a = z.tage / 365;
+    roh = fallback(a, '', `geschätzt nach Tagen: Jahresanteil = ${z.tage} Tage / 365 = ${fmt(a, 3)} (${tageText}; keine Heizgradtage verfügbar)`, { stufe: 'tage', unsicherheit: Math.round(Math.min(50, (365 / Math.max(z.tage, 30)) * 10)), quelle: 'FWS M3 Folie 29 (Mittel über Tage)' });
+    basis = 'tage';
+  }
+  if (klima.aktiv && hgtIstW !== undefined && hgtNormW !== undefined && hgtNormW > 0) {
+    const a = hgtIstW / hgtNormW;
+    const k = hgtNormW / hgtIstW;
+    if (k < daten.klimabereinigung.faktorPlausibelMin || k > daten.klimabereinigung.faktorPlausibelMax) {
+      hinweise.push({ stufe: 'warnung', code: 'klima.faktor.unplausibel', text: `Klimafaktor ${fmt(k, 2)} für ${tageText} unplausibel (HGT_norm ${fmt(hgtNormW, 0)} / HGT_ist ${fmt(hgtIstW, 0)}).`, ...(e.pfad ? { pfad: e.pfad } : {}) });
+    }
+    const heizung = berechnet(a, '', `Jahresanteil klimabereinigt = HGT ${fmt(hgtIstW, 0)} / HGT_norm ${fmt(hgtNormW, 0)} Kd = ${fmt(a, 3)} (${tageText}; Klimafaktor ${fmt(k, 3)}, nicht FWS-Kurs)`, [e.hgtIst, e.hgtNorm], { quelle: 'fws.json klimabereinigung (Thermowerk-Annahme)' });
+    return { roh, heizung, basis, klimaFaktor: k };
+  }
+  return { roh, heizung: roh, basis, klimaFaktor: null };
+}
+
+/** Auswertung der Zeiträume je Energieträger inkl. WW-Abzug, Sanierungs- und Klimakorrektur. */
 function verbrauchAuswerten(
   v: VerbrauchsEingabe,
   ausgefuehrt: SanierungErgebnis[],
@@ -388,9 +503,9 @@ function verbrauchAuswerten(
   let streuung: Streuung = { ampel: 'grau', prozent: null, werte: [] };
   let fehler = false;
   const klima = v.klimabereinigung?.aktiv === true;
-  const hgtNorm = v.klimabereinigung?.hgtNormKd;
-  if (klima && !(hgtNorm !== undefined && hgtNorm > 0)) {
-    hinweise.push({ stufe: 'fehler', code: 'klima.hgtNorm.fehlt', text: 'Klimabereinigung aktiv, aber HGT-Normwert der Station fehlt.', pfad: 'verbrauch.klimabereinigung.hgtNormKd' });
+  const hgtNormGlobal = v.klimabereinigung?.hgtNormKd;
+  if (klima && !(hgtNormGlobal !== undefined && hgtNormGlobal > 0) && !v.eintraege.some((e) => e.hgtNorm)) {
+    hinweise.push({ stufe: 'fehler', code: 'klima.hgtNorm.fehlt', text: 'Klimabereinigung aktiv, aber HGT-Normwert der Station fehlt (Standort in Schritt 1 erfassen).', pfad: 'verbrauch.klimabereinigung' });
     fehler = true;
   }
 
@@ -399,15 +514,15 @@ function verbrauchAuswerten(
   for (const e of v.eintraege) {
     const z = zeitraumVonEintrag(e);
     if (!z) {
-      hinweise.push({ stufe: 'fehler', code: 'verbrauch.zeitraum.ungueltig', text: `Eintrag ${e.id ?? ''} (${e.energietraeger}): Zeitraum ungültig (Jahr oder von/bis nötig, bis ≥ von).`, pfad: e.id ? `verbrauch.eintraege.${e.id}` : 'verbrauch.eintraege' });
+      hinweise.push({ stufe: 'fehler', code: 'verbrauch.zeitraum.ungueltig', text: `Eintrag ${e.id ?? ''} (${e.energietraeger}): Zeitraum ungültig (Jahr oder von/bis nötig, bis ≥ von).`, pfad: e.pfad ?? (e.id ? `verbrauch.eintraege.${e.id}` : 'verbrauch.eintraege') });
       fehler = true;
       continue;
     }
-    if (!(e.menge > 0)) {
-      hinweise.push({ stufe: 'warnung', code: 'verbrauch.menge.leer', text: `Eintrag ${e.id ?? ''} (${e.energietraeger}): Menge fehlt oder 0 — wird als Nullverbrauch im Zeitraum gewertet.`, pfad: e.id ? `verbrauch.eintraege.${e.id}.menge` : 'verbrauch.eintraege' });
+    if (!(e.menge > 0) && !e.mengeWert) {
+      hinweise.push({ stufe: 'warnung', code: 'verbrauch.menge.leer', text: `Eintrag ${e.id ?? ''} (${e.energietraeger}): Menge fehlt oder 0 — wird als Nullverbrauch im Zeitraum gewertet.`, pfad: e.pfad ? `${e.pfad}.menge` : e.id ? `verbrauch.eintraege.${e.id}.menge` : 'verbrauch.eintraege' });
     }
     const liste = gruppen.get(e.energietraeger) ?? [];
-    liste.push({ eintrag: e, zeitraum: z, energieKwh: 0 });
+    liste.push({ eintrag: e, zeitraum: z });
     gruppen.set(e.energietraeger, liste);
   }
 
@@ -441,7 +556,7 @@ function verbrauchAuswerten(
           stufe: 'fehler',
           code: 'verbrauch.ueberlappung',
           text: `${t}: Die Zeiträume der Einträge ${liste[i - 1]!.eintrag.id ?? i} und ${liste[i]!.eintrag.id ?? i + 1} überlappen sich — bitte korrigieren.`,
-          pfad: liste[i]!.eintrag.id ? `verbrauch.eintraege.${liste[i]!.eintrag.id}` : 'verbrauch.eintraege',
+          pfad: liste[i]!.eintrag.pfad ?? (liste[i]!.eintrag.id ? `verbrauch.eintraege.${liste[i]!.eintrag.id}` : 'verbrauch.eintraege'),
         });
       }
     }
@@ -451,71 +566,106 @@ function verbrauchAuswerten(
     }
     const hw = heizwert(t, v.konvention, daten);
     const eta = jahresnutzungsgrad(t, v.eta[t], v.konvention, daten);
-    const tage = liste.reduce((s, a) => s + a.zeitraum.tage, 0);
-    const menge = liste.reduce((s, a) => s + a.eintrag.menge, 0);
-    const jahresmengeW = (menge * 365) / tage;
     const einheit = hw.einheit.replace(/^kWh\//, '');
-    const jahresmenge = berechnet(
-      jahresmengeW,
-      `${einheit}/a`,
-      liste.length === 1 && liste[0]!.zeitraum.tage === 365
-        ? `${fmt(menge, 1)} ${einheit} in einem Jahr`
-        : `Σ ${fmt(menge, 1)} ${einheit} über ${liste.length} Einträge / ${tage} Tage × 365 = ${fmt(jahresmengeW, 1)} ${einheit}/a (Mittel)`,
-      [],
-      { quelle: 'FWS M3 Folie 29 (Mittel über 3–5 relevante Jahre)' },
-    );
-    const qnBruttoW = jahresmengeW * hw.wert * eta.wert;
-    const qnBrutto = berechnet(qnBruttoW, 'kWh/a', `Q_n = ${fmt(jahresmengeW, 1)} ${einheit}/a × ${fmt(hw.wert, 2)} kWh/${einheit} × η ${fmt(eta.wert, 3)} = ${fmt(qnBruttoW, 0)} kWh/a`, [hw, eta], { quelle: 'FWS M3 Folie 12/13' });
+    const tage = liste.reduce((s, a) => s + a.zeitraum.tage, 0);
+    const menge = liste.reduce((s, a) => s + Math.max(0, a.eintrag.menge), 0);
 
-    // WW-Abzug anteilig je Zeitraum, dann Korrekturen je Zeitraum, dann annualisieren.
+    // Je Zeitraum: Jahresanteil, WW-Abzug (zeitanteilig), Sanierungskorrektur.
     const wwJahr = wwTraeger === t ? (v.wwAbzug?.qnWwKwhA.wert ?? 0) : 0;
+    const zeitraeume: ZeitraumErgebnis[] = [];
+    let summeAnteil = 0;
+    let summeAnteilRoh = 0;
+    let summeTage = 0;
+    let summeHeizRoh = 0;
     let summeIst = 0;
     let summeUnsaniert = 0;
     let summeWw = 0;
-    let klimaHinweis = false;
+    let klimaFehlt = false;
+    const jahreswerte: number[] = [];
     for (const a of liste) {
-      const energie = a.eintrag.menge * hw.wert * eta.wert;
-      const ww = (wwJahr * a.zeitraum.tage) / 365;
-      let heiz = energie - ww;
-      if (heiz < 0) {
-        hinweise.push({ stufe: 'warnung', code: 'verbrauch.wwAbzug.zuGross', text: `${t}: Warmwasser-Abzug (${fmt(ww, 0)} kWh) übersteigt die Nutzenergie des Zeitraums ${a.eintrag.id ?? ''} (${fmt(energie, 0)} kWh) — Heizanteil auf 0 gesetzt. Warmwasser-Angaben «bisher» prüfen.` });
-        heiz = 0;
+      const e = a.eintrag;
+      const mengeE = Math.max(0, e.menge);
+      const { roh: anteilRoh, heizung: anteil, basis, klimaFaktor } = jahresanteil(e, a.zeitraum, { aktiv: klima, hgtNormKd: hgtNormGlobal }, hinweise, daten);
+      if (klima && klimaFaktor === null) klimaFehlt = true;
+      const energieW = mengeE * hw.wert * eta.wert;
+      const wwW = (wwJahr * a.zeitraum.tage) / 365;
+      let heizW = energieW - wwW;
+      if (heizW < 0) {
+        hinweise.push({ stufe: 'warnung', code: 'verbrauch.wwAbzug.zuGross', text: `${t}: Warmwasser-Abzug (${fmt(wwW, 0)} kWh) übersteigt die Nutzenergie des Zeitraums ${e.id ?? ''} (${fmt(energieW, 0)} kWh) — Heizanteil auf 0 gesetzt. Warmwasser-Angaben «bisher» prüfen.`, ...(e.pfad ? { pfad: e.pfad } : {}) });
+        heizW = 0;
       }
-      summeWw += Math.min(ww, energie);
-      let k = 1;
-      if (klima && hgtNorm) {
-        const ist = a.eintrag.hgtIstKd;
-        if (ist !== undefined && ist > 0) {
-          k = hgtNorm / ist;
-          if (k < daten.klimabereinigung.faktorPlausibelMin || k > daten.klimabereinigung.faktorPlausibelMax) {
-            hinweise.push({ stufe: 'warnung', code: 'klima.faktor.unplausibel', text: `Klimafaktor ${fmt(k, 2)} für Eintrag ${a.eintrag.id ?? ''} unplausibel (HGT_norm ${fmt(hgtNorm, 0)} / HGT_ist ${fmt(ist, 0)}).` });
-          }
-        } else klimaHinweis = true;
-      }
+      summeWw += Math.min(wwW, energieW);
       const korr = subperiodenKorrektur(a.zeitraum, ausgefuehrt);
-      summeIst += heiz * korr.faktorIst * k;
-      summeUnsaniert += heiz * korr.faktorUnsaniert * k;
+      summeAnteil += anteil.wert;
+      summeAnteilRoh += anteilRoh.wert;
+      summeTage += a.zeitraum.tage;
+      summeHeizRoh += heizW;
+      summeIst += heizW * korr.faktorIst;
+      summeUnsaniert += heizW * korr.faktorUnsaniert;
+      const hochW = anteilRoh.wert > 0 ? mengeE / anteilRoh.wert : 0;
+      const hochgerechnet = berechnet(hochW, `${einheit}/a`, `${fmt(mengeE, 0)} ${einheit} / Jahresanteil ${fmt(anteilRoh.wert, 3)} = ${fmt(hochW, 0)} ${einheit}/a`, [e.mengeWert ?? null, anteilRoh], { quelle: 'FWS M3 Folie 29' });
+      const wirksam = ausgefuehrt.filter((s) => s.datumMs !== null && s.datumMs > a.zeitraum.vonMs && s.datumMs <= a.zeitraum.bisMs);
+      const bezug = ausgefuehrt.filter((s) => s.datumMs !== null).map((s) => ({ id: s.sanierung.id, label: s.label, datumMs: s.datumMs!, lage: (s.datumMs! > a.zeitraum.bisMs ? 'vorher' : s.datumMs! <= a.zeitraum.vonMs ? 'nachher' : 'innerhalb') as 'vorher' | 'innerhalb' | 'nachher' }));
+      const zaehlt = basis === 'tage' ? a.zeitraum.tage >= daten.verbrauch.streuung.mindestTageJeEintrag : anteilRoh.wert >= daten.verbrauch.streuung.mindestHgtAnteil;
+      if (zaehlt) jahreswerte.push(hochW);
+      zeitraeume.push({
+        id: e.id ?? `${t}-${zeitraeume.length + 1}`,
+        pfad: e.pfad ?? (e.id ? `verbrauch.eintraege.${e.id}` : 'verbrauch.eintraege'),
+        zeitraum: a.zeitraum,
+        ganzesJahr: e.ganzesJahr ?? e.jahr !== undefined,
+        menge: e.mengeWert ?? eingabe(mengeE, einheit, `${fmt(mengeE, 0)} ${einheit}`),
+        hgtIst: e.hgtIst ?? null,
+        hgtTabelle: e.hgtTabelle ?? null,
+        hgtRef: e.hgtRef ?? null,
+        anteil,
+        anteilRoh,
+        anteilBasis: basis,
+        klimaFaktor,
+        hochgerechnet,
+        inStreuung: zaehlt,
+        energieKwh: energieW,
+        wwKwh: Math.min(wwW, energieW),
+        heizKwh: heizW,
+        sanierung: { faktorIst: korr.faktorIst, faktorUnsaniert: korr.faktorUnsaniert, subperioden: korr.subperioden, wirksam: wirksam.map((s) => ({ id: s.sanierung.id, label: s.label, datumMs: s.datumMs!, faktor: s.faktor })), bezug },
+      });
     }
-    if (klimaHinweis) hinweise.push({ stufe: 'warnung', code: 'klima.hgtIst.fehlt', text: `${t}: Klimabereinigung aktiv, aber nicht alle Einträge haben HGT-Istwerte — diese Einträge bleiben unkorrigiert.` });
+    if (klima && klimaFehlt) hinweise.push({ stufe: 'warnung', code: 'klima.hgtIst.fehlt', text: `${t}: Klimabereinigung aktiv, aber nicht alle Zeiträume haben Heizgradtage — diese bleiben unbereinigt (nach Tagen bzw. HGT-Anteil).` });
 
-    const wwAbzug = wwTraeger === t && v.wwAbzug ? berechnet((summeWw * 365) / tage, 'kWh/a', `Q_n,WW bisher ${fmt(v.wwAbzug.qnWwKwhA.wert, 0)} kWh/a vom Verbrauch ${t} abgezogen (Aufgabe 2: Q_n = Q_n,HWW − Q_n,WW)`, [v.wwAbzug.qnWwKwhA]) : null;
-    const qnIstW = (summeIst * 365) / tage;
-    const qnUnsW = (summeUnsaniert * 365) / tage;
+    // Jahreswerte: Heizanteil über die Jahresanteile (Heizgradtage), Warmwasser über die Zeit (Tage/365).
+    const wwJahrW = summeTage > 0 ? (summeWw * 365) / summeTage : 0;
+    const heizRohJahrW = summeAnteilRoh > 0 ? summeHeizRoh / summeAnteilRoh : 0;
+    const qnBruttoW = heizRohJahrW + wwJahrW;
+    const jahresmengeW = hw.wert * eta.wert > 0 ? qnBruttoW / (hw.wert * eta.wert) : 0;
+    const nurTage = zeitraeume.every((z) => z.anteilBasis === 'tage');
+    const jahresmenge = berechnet(
+      jahresmengeW,
+      `${einheit}/a`,
+      liste.length === 1 && liste[0]!.zeitraum.tage === 365 && nurTage
+        ? `${fmt(menge, 1)} ${einheit} in einem Jahr`
+        : nurTage
+          ? `Σ ${fmt(menge, 1)} ${einheit} über ${liste.length} Zeiträume / ${tage} Tage × 365 = ${fmt(jahresmengeW, 1)} ${einheit}/a (Mittel)`
+          : `Σ ${fmt(menge, 1)} ${einheit} über ${liste.length} Zeiträume, Heizanteil / Σ Jahresanteile ${fmt(summeAnteilRoh, 3)} (Teiljahre nach Heizgradtagen hochgerechnet) = ${fmt(jahresmengeW, 1)} ${einheit}/a (Mittel)`,
+      zeitraeume.map((z) => z.anteilRoh),
+      { quelle: 'FWS M3 Folie 29 (Mittel über 3–5 relevante Jahre)' },
+    );
+    const qnBrutto = berechnet(qnBruttoW, 'kWh/a', `Q_n = ${fmt(jahresmengeW, 1)} ${einheit}/a × ${fmt(hw.wert, 2)} kWh/${einheit} × η ${fmt(eta.wert, 3)} = ${fmt(qnBruttoW, 0)} kWh/a`, [jahresmenge, hw, eta], { quelle: 'FWS M3 Folie 12/13' });
+
+    const wwAbzug = wwTraeger === t && v.wwAbzug ? berechnet(wwJahrW, 'kWh/a', `Q_n,WW bisher ${fmt(v.wwAbzug.qnWwKwhA.wert, 0)} kWh/a vom Verbrauch ${t} abgezogen (Aufgabe 2: Q_n = Q_n,HWW − Q_n,WW)`, [v.wwAbzug.qnWwKwhA]) : null;
+    const qnIstW = summeAnteil > 0 ? summeIst / summeAnteil : 0;
+    const qnUnsW = summeAnteil > 0 ? summeUnsaniert / summeAnteil : 0;
     const korrText = ausgefuehrt.length ? `, ausgeführte Sanierungen zeitgewichtet (§3a, Faktor ${fmt(qnIstW / Math.max(qnUnsW, 1e-9), 4)})` : '';
     const klimaText = klima ? ', Klimabereinigung HGT (nicht FWS-Kurs)' : '';
     const qnHeizungIst = berechnet(qnIstW, 'kWh/a', `Q_n,Heizung ${t} = ${fmt(qnBruttoW, 0)}${wwAbzug ? ' − ' + fmt(wwAbzug.wert, 0) : ''} kWh/a${korrText}${klimaText} = ${fmt(qnIstW, 0)} kWh/a`, [qnBrutto, wwAbzug, ...ausgefuehrt.map((s) => s.einsparung)]);
     const qnHeizungUnsaniert = berechnet(qnUnsW, 'kWh/a', `Q_n,Heizung ${t} vor allen Sanierungen = ${fmt(qnUnsW, 0)} kWh/a`, [qnBrutto, wwAbzug]);
 
-    const minTage = daten.verbrauch.streuung.mindestTageJeEintrag;
-    const jahreswerte = liste.filter((a) => a.zeitraum.tage >= minTage).map((a) => (a.eintrag.menge * 365) / a.zeitraum.tage);
     const st = streuungAuswerten(jahreswerte, daten);
     alleJahreswerte = alleJahreswerte.concat(jahreswerte.map((w) => w * hw.wert * eta.wert));
     streuung = { ampel: schlechtereAmpel(streuung.ampel, st.ampel), prozent: Math.max(streuung.prozent ?? 0, st.prozent ?? 0) || null, werte: alleJahreswerte };
-    if (st.ampel === 'rot') hinweise.push({ stufe: 'warnung', code: 'verbrauch.streuung.rot', text: `${t}: Die Jahresverbräuche streuen um ${fmt(st.prozent ?? 0, 0)} % — Teilbelegung, Abwesenheiten oder Sanierungen im Zeitraum klären (Folie 29).` });
-    else if (st.ampel === 'gelb') hinweise.push({ stufe: 'info', code: 'verbrauch.streuung.gelb', text: `${t}: Jahresverbräuche streuen um ${fmt(st.prozent ?? 0, 0)} %.` });
+    if (st.ampel === 'rot') hinweise.push({ stufe: 'warnung', code: 'verbrauch.streuung.rot', text: `${t}: Die hochgerechneten Jahresverbräuche streuen um ${fmt(st.prozent ?? 0, 0)} % — Teilbelegung, Abwesenheiten oder Sanierungen im Zeitraum klären (Folie 29).` });
+    else if (st.ampel === 'gelb') hinweise.push({ stufe: 'info', code: 'verbrauch.streuung.gelb', text: `${t}: Hochgerechnete Jahresverbräuche streuen um ${fmt(st.prozent ?? 0, 0)} %.` });
     tageGesamt = Math.max(tageGesamt, tage);
 
-    traegerListe.push({ energietraeger: t, einheit, anzahlEintraege: liste.length, tage, jahresmenge, heizwert: hw, eta, qnBrutto, wwAbzug, qnHeizungUnsaniert, qnHeizungIst, streuung: st });
+    traegerListe.push({ energietraeger: t, einheit, anzahlEintraege: liste.length, tage, jahresanteile: summeAnteil, zeitraeume, jahresmenge, heizwert: hw, eta, qnBrutto, wwAbzug, qnHeizungUnsaniert, qnHeizungIst, streuung: st });
   }
 
   if (!fehler && traegerListe.length && tageGesamt < daten.verbrauch.mindestJahreEmpfohlen * 365) {

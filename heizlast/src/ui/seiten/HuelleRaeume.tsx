@@ -1,25 +1,28 @@
 import { useState } from 'preact/hooks';
 import type { BauteilArt } from '../../kern/huelle';
 import { bauteilArtLabel } from '../../kern/huelle';
-import type { Anschluss, RaumBauteilEingabe, RaumEingabe, RaumErgebnis } from '../../kern/raumweise';
-import type { HuelleBauteiltyp } from '../../state/schema';
+import type { Anschluss, RaumErgebnis } from '../../kern/raumweise';
+import type { AnschlussAuto, RaumBauteilArtGenerisch } from '../../kern/standardtypen';
+import { ALLE_ARTEN, anschlussAuto, istStandardTypId, konkreteArt } from '../../kern/standardtypen';
+import type { HuelleBauteiltyp, RaumBauteilState, RaumState } from '../../state/schema';
 import { daten, rel, setze, store } from '../bindung';
 import { Abschnitt, AuswahlFeld, FeldHinweise, JaNeinFeld, Raster, SegmentFeld, TextFeld, ZahlFeld } from '../komponenten/Felder';
-import { WertAnzeige } from '../komponenten/Herkunft';
+import { HerkunftChip, WertAnzeige } from '../komponenten/Herkunft';
 import { Fehlend, Meldungen } from '../komponenten/Meldungen';
+import { Info } from '../komponenten/Popover';
 import { StufenPicker } from '../komponenten/StufenPicker';
 import { zahl } from '../format';
 
-const ARTEN: ReadonlyArray<BauteilArt> = ['aussenwand', 'dachSteil', 'dachFlach', 'deckeEstrich', 'bodenKeller', 'bodenErdreich', 'fenster', 'tuer', 'innenwand', 'innendecke', 'innentuer'];
 const RAUMTYPEN = daten.sia.innentemperaturen.raumtypen.map((r) => ({ wert: r.key, label: `${r.label} (${r.thetaIntC} °C)` }));
 const KONZEPTE = daten.sia.nMin.lueftungskonzepte.map((k) => ({ wert: k.key, label: k.label }));
 const KONZEPT_STD = daten.sia.nMin.lueftungskonzepte.find((k) => k.default);
 const WB = daten.sia.deltaUWb.werte.map((w) => ({ wert: w.key, label: `${w.label} (ΔU ${w.deltaU})` }));
 
 const typLabel = (t: HuelleBauteiltyp) => t.bezeichnung ?? bauteilArtLabel(t.art, daten.huelle);
+const artLabel = (a: RaumBauteilArtGenerisch) => (a === 'boden' ? 'Boden (nach Lage: Keller/Erdreich)' : a === 'decke' ? 'Decke oben (nach Lage: Dach/Estrich)' : bauteilArtLabel(a, daten.huelle));
 
 /* ---------------------------------------------------------------------------------------------- */
-/* Bauteiltypen                                                                                    */
+/* Bauteiltypen (eigene, optional) und Standardaufbauten                                           */
 /* ---------------------------------------------------------------------------------------------- */
 
 function Bauteiltyp({ typ, baujahr }: { typ: HuelleBauteiltyp; baujahr: number }) {
@@ -46,6 +49,34 @@ function Bauteiltyp({ typ, baujahr }: { typ: HuelleBauteiltyp; baujahr: number }
   );
 }
 
+/** Standardaufbauten, die der Kern gerade für Räume ohne eigenen Typ verwendet (nicht im State). */
+function Standardaufbauten() {
+  const e = store.ergebnis.value;
+  const huelle = e.heizlast.huelle;
+  if (!huelle) return null;
+  const std = Object.values(huelle.bauteile).filter((b) => istStandardTypId(b.typId));
+  if (!std.length) return null;
+  return (
+    <div class="standardtypen" data-testid="standardtypen">
+      <h3 class="unterblock__titel">
+        Standardaufbauten aus Baujahr {huelle.baujahr} ({huelle.epocheLabel})
+        <Info text="Räume ohne eigenen Bauteiltyp rechnen mit diesen typischen Aufbauten der Bauperiode (inklusive der Sanierungen aus Schritt 2). «Anpassen» macht daraus einen eigenen Typ mit Aufbau-Auswahl; die Räume dieser Art verweisen dann darauf." />
+      </h3>
+      <div class="stdliste">
+        {std.map((b) => (
+          <div class="stdliste__zeile" key={b.typId} data-testid={`std-${b.art}`}>
+            <span class="stdliste__name">{bauteilArtLabel(b.art, daten.huelle)}</span>
+            <WertAnzeige wert={b.u} text={zahl(b.u.wert, 'W/m²K', 2)} testid={`std-${b.art}-u`} immerChip />
+            <button type="button" class="link-knopf" onClick={() => store.standardTypAnpassen(b.art)} data-testid={`std-${b.art}-anpassen`}>
+              Anpassen
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Bauteiltypen() {
   const s = store.state.value;
   const [neueArt, setNeueArt] = useState<BauteilArt>('aussenwand');
@@ -53,13 +84,11 @@ function Bauteiltypen() {
   if (baujahr === undefined) return <p class="leerzustand">Baujahr in Schritt 1 erfassen — daraus werden die typischen Bauteilaufbauten geschätzt.</p>;
   return (
     <>
+      <Standardaufbauten />
       {s.huelle.bauteiltypen.length === 0 ? (
-        <div class="leerzustand">
-          <p>Noch keine Bauteiltypen. Vorschlag aus Baujahr, Keller und Dachform anlegen und danach anpassen.</p>
-          <button type="button" class="btn btn--primary" onClick={() => store.standardBauteiltypenAnlegen()} data-testid="typen-anlegen">
-            Bauteiltypen vorschlagen
-          </button>
-        </div>
+        <p class="zeile-info" data-testid="typen-leer">
+          Noch keine eigenen Bauteiltypen — nicht nötig: Räume rechnen mit den Standardaufbauten. Eigene Typen lohnen sich, wenn der Aufbau bekannt ist (Dämmung, Dicke, Fenstergeneration).
+        </p>
       ) : (
         <div class="typen">{s.huelle.bauteiltypen.map((t) => <Bauteiltyp typ={t} baujahr={baujahr} key={t.id} />)}</div>
       )}
@@ -68,15 +97,20 @@ function Bauteiltypen() {
           Bauteilart
         </label>
         <select id="neue-art" class="eingabe__feld eingabe__feld--klein" value={neueArt} onChange={(e) => setNeueArt((e.currentTarget as HTMLSelectElement).value as BauteilArt)} data-testid="typ-neu-art">
-          {ARTEN.map((a) => (
+          {ALLE_ARTEN.map((a) => (
             <option value={a} key={a}>
               {bauteilArtLabel(a, daten.huelle)}
             </option>
           ))}
         </select>
         <button type="button" class="btn" onClick={() => store.hinzufuegen('huelle.bauteiltypen', { art: neueArt }, 't')} data-testid="typ-neu">
-          Typ hinzufügen
+          Eigenen Typ hinzufügen
         </button>
+        {s.huelle.bauteiltypen.length === 0 && (
+          <button type="button" class="btn" onClick={() => store.standardBauteiltypenAnlegen()} data-testid="typen-anlegen">
+            Alle als eigene Typen anlegen
+          </button>
+        )}
       </div>
     </>
   );
@@ -86,7 +120,8 @@ function Bauteiltypen() {
 /* Räume                                                                                           */
 /* ---------------------------------------------------------------------------------------------- */
 
-const ANSCHLUSS: ReadonlyArray<{ key: string; label: string; wert: Anschluss }> = [
+const ANSCHLUSS: ReadonlyArray<{ key: string; label: string; wert: Anschluss | AnschlussAuto }> = [
+  { key: 'auto', label: 'wie Gebäude (Schritt 1)', wert: { art: 'auto' } },
   { key: 'aussen', label: 'gegen aussen', wert: { art: 'aussen' } },
   { key: 'u:keller', label: 'gegen unbeheizten Keller', wert: { art: 'unbeheizt', situation: 'keller' } },
   { key: 'u:dachraum', label: 'gegen unbeheizten Dachraum', wert: { art: 'unbeheizt', situation: 'dachraum' } },
@@ -96,26 +131,88 @@ const ANSCHLUSS: ReadonlyArray<{ key: string; label: string; wert: Anschluss }> 
   { key: 'erdreich', label: 'gegen Erdreich', wert: { art: 'erdreich' } },
   { key: 'beheizt', label: 'gegen beheizten Nachbarraum', wert: { art: 'beheizt' } },
 ];
-function anschlussKey(a: Anschluss): string {
+function anschlussKey(a: Anschluss | AnschlussAuto): string {
   if (a.art === 'unbeheizt') return `u:${a.situation ?? 'keller'}`;
   if (a.art === 'faktor') return 'aussen';
   return a.art;
 }
+function anschlussText(a: Anschluss['art'], situation?: string): string {
+  if (a === 'unbeheizt') return ANSCHLUSS.find((x) => x.key === `u:${situation ?? 'keller'}`)?.label ?? 'gegen unbeheizt';
+  return ANSCHLUSS.find((x) => x.key === a)?.label ?? a;
+}
 
-function BauteilZeile({ raum, raumNr, bauteil, nr, erg }: { raum: RaumEingabe; raumNr: number; bauteil: RaumBauteilEingabe & { id: string }; nr: number; erg: RaumErgebnis | undefined }) {
+function BauteilZeile({ raum, raumNr, bauteil, nr, erg }: { raum: RaumState; raumNr: number; bauteil: RaumBauteilState; nr: number; erg: RaumErgebnis | undefined }) {
+  const e = store.ergebnis.value;
   const typen = store.state.value.huelle.bauteiltypen;
   const p = `raeume.${raum.id}.bauteile.${bauteil.id}`;
   const be = erg?.bauteile.find((x) => x.id === bauteil.id);
+  const konkret = e.heizlast.raumBauteile[raum.id]?.[bauteil.id];
   const t = `raum-${raumNr}-bauteil-${nr}`;
+  const eigener = bauteil.typId && !istStandardTypId(bauteil.typId) && typen.some((x) => x.id === bauteil.typId);
+  const wahl = eigener ? `typ:${bauteil.typId}` : `art:${bauteil.art ?? 'aussenwand'}`;
+  const stdTypU = konkret?.typId ? e.heizlast.huelle?.bauteile[konkret.typId]?.u : undefined;
+  const standardU = be && be.u.herkunft !== 'override' ? be.u : stdTypU;
+  const arten: RaumBauteilArtGenerisch[] = ['aussenwand', 'fenster', 'tuer', 'boden', 'decke', 'dachSteil', 'dachFlach', 'deckeEstrich', 'bodenKeller', 'bodenErdreich', 'innenwand', 'innendecke', 'innentuer'];
+  const auto = bauteil.anschluss.art === 'auto';
   return (
     <div class="bauteil" data-testid={t}>
-      <AuswahlFeld
-        pfad={`${p}.typId`}
-        label="Bauteil"
-        optionen={typen.map((x) => ({ wert: x.id, label: typLabel(x) }))}
-        leerText={bauteil.art ? `${bauteilArtLabel(bauteil.art, daten.huelle)} (ohne Typ)` : '— Typ wählen —'}
-        testid={`${t}-typ`}
-      />
+      <div class="feld">
+        <div class="feld__kopf">
+          <label class="feld__label" for={`${t}-typ`}>
+            Bauteil
+          </label>
+          {konkret?.standardTyp && stdTypU && <HerkunftChip wert={stdTypU} testid={`${t}-standard`} />}
+        </div>
+        <div class={`eingabe eingabe--auswahl${konkret?.standardTyp ? ' eingabe--standard' : ''}`}>
+          <select
+            id={`${t}-typ`}
+            class="eingabe__feld"
+            value={wahl}
+            data-testid={`${t}-typ`}
+            data-standard={konkret?.standardTyp ? 'ja' : undefined}
+            onChange={(ev) => {
+              const v = (ev.currentTarget as HTMLSelectElement).value;
+              store.aktion((s) => ({
+                ...s,
+                raeume: s.raeume.map((r) => {
+                  if (r.id !== raum.id) return r;
+                  return {
+                    ...r,
+                    bauteile: r.bauteile.map((b) => {
+                      if (b.id !== bauteil.id) return b;
+                      const { typId: _t, art: _a, ...rest } = b;
+                      return v.startsWith('typ:') ? { ...rest, typId: v.slice(4) } : { ...rest, art: v.slice(4) as RaumBauteilArtGenerisch };
+                    }),
+                  };
+                }),
+              }));
+            }}
+          >
+            <optgroup label={`Standard aus Baujahr${store.state.value.gebaeude.baujahr ? ` ${store.state.value.gebaeude.baujahr}` : ''}`}>
+              {arten.map((a) => (
+                <option value={`art:${a}`} key={a}>
+                  {artLabel(a)}
+                </option>
+              ))}
+            </optgroup>
+            {typen.length > 0 && (
+              <optgroup label="Eigene Bauteiltypen">
+                {typen.map((x) => (
+                  <option value={`typ:${x.id}`} key={x.id}>
+                    {typLabel(x)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+          </select>
+        </div>
+        {konkret && konkret.ausGebaeude && konkret.art && (
+          <span class="zeile-info zeile-info--klein" data-testid={`${t}-konkret`}>
+            → {bauteilArtLabel(konkret.art, daten.huelle)}, {anschlussText(konkret.anschluss.art, konkret.anschluss.art === 'unbeheizt' ? konkret.anschluss.situation : undefined)}
+          </span>
+        )}
+        <FeldHinweise pfad={`${p}.typId`} />
+      </div>
       <ZahlFeld pfad={`${p}.flaecheM2`} label="Fläche" einheit="m²" min={0} max={10000} dez={2} testid={`${t}-flaeche`} />
       <div class="bauteil__anschluss">
         <div class="feld">
@@ -124,11 +221,11 @@ function BauteilZeile({ raum, raumNr, bauteil, nr, erg }: { raum: RaumEingabe; r
               Grenzt an
             </label>
           </div>
-          <div class="eingabe eingabe--auswahl">
-            <select id={`${t}-anschluss`} class="eingabe__feld" value={anschlussKey(bauteil.anschluss)} data-testid={`${t}-anschluss`} onChange={(e) => setze(`${p}.anschluss`, ANSCHLUSS.find((a) => a.key === (e.currentTarget as HTMLSelectElement).value)?.wert ?? { art: 'aussen' })}>
+          <div class={`eingabe eingabe--auswahl${auto ? ' eingabe--standard' : ''}`}>
+            <select id={`${t}-anschluss`} class="eingabe__feld" value={anschlussKey(bauteil.anschluss)} data-testid={`${t}-anschluss`} data-standard={auto ? 'ja' : undefined} onChange={(ev) => setze(`${p}.anschluss`, ANSCHLUSS.find((a) => a.key === (ev.currentTarget as HTMLSelectElement).value)?.wert ?? { art: 'aussen' })}>
               {ANSCHLUSS.map((a) => (
                 <option value={a.key} key={a.key}>
-                  {a.label}
+                  {a.key === 'auto' && konkret ? `wie Gebäude: ${anschlussText(konkret.anschluss.art, konkret.anschluss.art === 'unbeheizt' ? konkret.anschluss.situation : undefined)}` : a.label}
                 </option>
               ))}
             </select>
@@ -136,7 +233,7 @@ function BauteilZeile({ raum, raumNr, bauteil, nr, erg }: { raum: RaumEingabe; r
         </div>
         {bauteil.anschluss.art === 'beheizt' && <ZahlFeld pfad={`${p}.anschluss.thetaNachbarC`} label="Nachbarraum" einheit="°C" min={-10} max={30} dez={1} testid={`${t}-nachbar`} />}
       </div>
-      <ZahlFeld pfad={`${p}.uOverride`} label="U-Wert" einheit="W/m²K" min={0.05} max={6} dez={2} standard={be && be.u.herkunft !== 'override' ? be.u : bauteil.typId ? store.ergebnis.value.heizlast.huelle?.bauteile[bauteil.typId]?.u : undefined} zuruecksetzenText="Wert aus Hülle verwenden" testid={`${t}-u`} hinweisPfad={`${p}.typId`} />
+      <ZahlFeld pfad={`${p}.uOverride`} label="U-Wert" einheit="W/m²K" min={0.05} max={6} dez={2} standard={standardU} zuruecksetzenText={konkret?.standardTyp ? 'Standard verwenden' : 'Wert aus Hülle verwenden'} testid={`${t}-u`} hinweisPfad={`${p}.uOverride`} />
       <div class="bauteil__ergebnis">
         <span class="mute">Φ<sub>T</sub></span>
         <span data-testid={`${t}-phit`}>{zahl(be?.phiT.wert, 'W')}</span>
@@ -148,26 +245,37 @@ function BauteilZeile({ raum, raumNr, bauteil, nr, erg }: { raum: RaumEingabe; r
   );
 }
 
-/** Lage-Fragen für einen Raum ohne Bauteile: legt Bauteile als Referenz auf die Hüllentypen an. */
-function LageFragen({ raum, nr, flaecheM2 }: { raum: RaumEingabe; nr: number; flaecheM2: number | undefined }) {
-  const typen = store.state.value.huelle.bauteiltypen;
+/** Lage-Fragen für einen Raum ohne Bauteile: legt Bauteile mit generischer Art an (Keller/Dach folgen dem Gebäude). */
+function LageFragen({ raum, nr, flaecheM2 }: { raum: RaumState; nr: number; flaecheM2: number | undefined }) {
+  const g = store.state.value.gebaeude;
   const [aussen, setAussen] = useState(true);
-  const [unten, setUnten] = useState<'keller' | 'erdreich' | 'beheizt'>(store.state.value.gebaeude.keller === 'unbeheizt' ? 'keller' : 'beheizt');
-  const [oben, setOben] = useState<'dach' | 'estrich' | 'beheizt'>('beheizt');
-  const typVon = (...arten: BauteilArt[]) => typen.find((t) => arten.includes(t.art))?.id;
+  const [unten, setUnten] = useState<'auto' | 'keller' | 'erdreich' | 'beheizt'>('auto');
+  const [oben, setOben] = useState<'beheizt' | 'auto' | 'dach' | 'estrich'>('beheizt');
   const t = `raum-${nr}-lage`;
+  const kellerText = g.keller === 'keiner' ? 'Erdreich' : g.keller === 'beheizt' ? 'beheizter Keller' : 'unbeheizter Keller';
+  const dachText = (g.dachform ?? 'steil') === 'steil' && g.dachraumBeheizt === false ? 'unbeheizter Estrich' : (g.dachform ?? 'steil') === 'flach' ? 'Flachdach' : 'Steildach';
+  const typen = store.state.value.huelle.bauteiltypen;
   const anlegen = () => {
     const flaeche = flaecheM2 ?? 0;
-    const neu: Omit<RaumBauteilEingabe, 'id'>[] = [];
-    const mit = (typId: string | undefined, art: BauteilArt, flaecheM2: number, anschluss: Anschluss) => neu.push(typId ? { typId, flaecheM2, anschluss } : { art, flaecheM2, anschluss });
+    const neu: Omit<RaumBauteilState, 'id'>[] = [];
+    const lage = { keller: g.keller, dachform: g.dachform, dachraumBeheizt: g.dachraumBeheizt };
+    // Generische Art + Anschluss; gibt es einen eigenen Typ der konkreten Art, verweist das Bauteil darauf (Kern-Helfer bestimmen die Art).
+    const mit = (art: RaumBauteilArtGenerisch, flaecheM2: number, anschluss: Anschluss | AnschlussAuto) => {
+      const konkretAnschluss = anschluss.art === 'auto' ? anschlussAuto(art, lage) : anschluss;
+      const kArt = konkreteArt(art, konkretAnschluss, lage);
+      const eigener = kArt ? typen.find((x) => x.art === kArt) : undefined;
+      neu.push(eigener ? { typId: eigener.id, flaecheM2, anschluss: konkretAnschluss } : { art, flaecheM2, anschluss });
+    };
     if (aussen) {
-      mit(typVon('aussenwand'), 'aussenwand', 0, { art: 'aussen' });
-      mit(typVon('fenster'), 'fenster', 0, { art: 'aussen' });
+      mit('aussenwand', 0, { art: 'aussen' });
+      mit('fenster', 0, { art: 'aussen' });
     }
-    if (unten === 'keller') mit(typVon('bodenKeller'), 'bodenKeller', flaeche, { art: 'unbeheizt', situation: 'keller' });
-    if (unten === 'erdreich') mit(typVon('bodenErdreich'), 'bodenErdreich', flaeche, { art: 'erdreich' });
-    if (oben === 'dach') mit(typVon('dachSteil', 'dachFlach'), 'dachSteil', flaeche, { art: 'aussen' });
-    if (oben === 'estrich') mit(typVon('deckeEstrich'), 'deckeEstrich', flaeche, { art: 'unbeheizt', situation: 'dachraum' });
+    if (unten === 'auto') mit('boden', flaeche, { art: 'auto' });
+    if (unten === 'keller') mit('boden', flaeche, { art: 'unbeheizt', situation: 'keller' });
+    if (unten === 'erdreich') mit('boden', flaeche, { art: 'erdreich' });
+    if (oben === 'auto') mit('decke', flaeche, { art: 'auto' });
+    if (oben === 'dach') mit('decke', flaeche, { art: 'aussen' });
+    if (oben === 'estrich') mit('decke', flaeche, { art: 'unbeheizt', situation: 'dachraum' });
     for (const b of neu) store.hinzufuegen(`raeume.${raum.id}.bauteile`, b as unknown as Record<string, unknown>, 'b');
   };
   const seg = <T extends string>(label: string, wert: T, setzen: (v: T) => void, opt: ReadonlyArray<[T, string]>, id: string) => (
@@ -184,10 +292,10 @@ function LageFragen({ raum, nr, flaecheM2 }: { raum: RaumEingabe; nr: number; fl
   );
   return (
     <div class="lage" data-testid={t}>
-      <p class="lage__text">Wo liegt der Raum? Daraus entstehen die Bauteile; Flächen von Wand und Fenster danach eintragen.</p>
+      <p class="lage__text">Wo liegt der Raum? Daraus entstehen die Bauteile mit den Standardaufbauten; Flächen von Wand und Fenster danach eintragen.</p>
       {seg('Aussenwand mit Fenster', aussen ? 'ja' : 'nein', (v) => setAussen(v === 'ja'), [['ja', 'ja'], ['nein', 'nein']], 'aussen')}
-      {seg('Darunter', unten, setUnten, [['keller', 'unbeheizter Keller'], ['erdreich', 'Erdreich'], ['beheizt', 'beheizter Raum']], 'unten')}
-      {seg('Darüber', oben, setOben, [['dach', 'Dach'], ['estrich', 'unbeheizter Estrich'], ['beheizt', 'beheizter Raum']], 'oben')}
+      {seg('Darunter', unten, setUnten, [['auto', `wie Gebäude (${kellerText})`], ['keller', 'unbeheizter Keller'], ['erdreich', 'Erdreich'], ['beheizt', 'beheizter Raum']], 'unten')}
+      {seg('Darüber', oben, setOben, [['beheizt', 'beheizter Raum'], ['auto', `wie Gebäude (${dachText})`], ['dach', 'Dach'], ['estrich', 'unbeheizter Estrich']], 'oben')}
       <button type="button" class="btn" onClick={anlegen} data-testid={`${t}-anlegen`}>
         Bauteile anlegen
       </button>
@@ -195,7 +303,7 @@ function LageFragen({ raum, nr, flaecheM2 }: { raum: RaumEingabe; nr: number; fl
   );
 }
 
-function Raum({ raum, nr }: { raum: RaumEingabe; nr: number }) {
+function Raum({ raum, nr }: { raum: RaumState; nr: number }) {
   const e = store.ergebnis.value;
   const erg = e.heizlast.raumweise?.raeume.find((r) => r.id === raum.id);
   const p = `raeume.${raum.id}`;
@@ -241,7 +349,7 @@ function Raum({ raum, nr }: { raum: RaumEingabe; nr: number }) {
                 if (r.id !== raum.id) return r;
                 const { flaecheM2: _f, laengeM: _l, breiteM: _b, ...rest } = r;
                 return rest;
-              }) as RaumEingabe[],
+              }) as RaumState[],
             }));
           }}
         >
@@ -254,9 +362,9 @@ function Raum({ raum, nr }: { raum: RaumEingabe; nr: number }) {
       ) : (
         <div class="bauteile">
           {raum.bauteile.map((b, i) => (
-            <BauteilZeile raum={raum} raumNr={nr} bauteil={b as RaumBauteilEingabe & { id: string }} nr={i + 1} erg={erg} key={b.id} />
+            <BauteilZeile raum={raum} raumNr={nr} bauteil={b} nr={i + 1} erg={erg} key={b.id} />
           ))}
-          <button type="button" class="btn btn--klein" onClick={() => store.hinzufuegen(`${p}.bauteile`, { flaecheM2: 0, anschluss: { art: 'aussen' }, ...(store.state.value.huelle.bauteiltypen[0] ? { typId: store.state.value.huelle.bauteiltypen[0].id } : { art: 'aussenwand' }) }, 'b')} data-testid={`${t}-bauteil-neu`}>
+          <button type="button" class="btn btn--klein" onClick={() => store.hinzufuegen(`${p}.bauteile`, { art: 'aussenwand', flaecheM2: 0, anschluss: { art: 'aussen' } }, 'b')} data-testid={`${t}-bauteil-neu`}>
             Bauteil hinzufügen
           </button>
         </div>
@@ -292,7 +400,7 @@ export function HuelleRaeume() {
   return (
     <>
       <Fehlend schritt="huelle" />
-      <Abschnitt titel="Bauteiltypen des Gebäudes" text="Jeder Typ wird einmal beschrieben; Räume verweisen nur darauf. Ohne Angaben gilt der typische Aufbau der Bauperiode.">
+      <Abschnitt titel="Bauteilaufbauten" text="Räume rechnen ohne weiteres Zutun mit den typischen Aufbauten des Baujahrs (Standardwerte, Sanierungen aus Schritt 2 eingerechnet). Eigene Bauteiltypen beschreiben einen Aufbau einmal; Räume verweisen darauf.">
         <Bauteiltypen />
         <Meldungen schritt="huelle" codes={['huelle.']} testid="huelle-meldungen" />
       </Abschnitt>
@@ -317,7 +425,7 @@ export function HuelleRaeume() {
 
       <Abschnitt
         titel="Räume"
-        text="Nettofläche, Raumtyp und Bauteile. Bauteile verweisen auf die Typen oben; ein eigener U-Wert ist als «eigener Wert» markiert."
+        text="Nettofläche, Raumtyp und Bauteile. Jedes Bauteil hat sofort eine Bauteilart mit Standardaufbau; ein eigener U-Wert ist als «eigener Wert» markiert."
         aktion={
           <button type="button" class="btn" onClick={() => store.raumHinzufuegen()} data-testid="raum-neu">
             Raum hinzufügen

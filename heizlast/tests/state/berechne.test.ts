@@ -153,7 +153,7 @@ describe('berechne — Fälle und Leitplanken', () => {
     const fwsState = fixture('state-v2-fws-moosseedorf.json');
     const umgeschaltet = setzeImState(fwsState, 'methode', 'raumweise');
     const e = berechne(umgeschaltet, daten);
-    expect(umgeschaltet.verbrauch.eintraege).toHaveLength(1);
+    expect(umgeschaltet.verbrauch.reihen).toHaveLength(1);
     expect(e.heizlast.massgebend.quelle).toBe('raumweise');
     expect(e.heizlast.massgebend.wert).toBeNull(); // keine Räume erfasst
     expect(e.vollstaendigkeit.some((f) => f.pfad === 'raeume')).toBe(true);
@@ -161,7 +161,7 @@ describe('berechne — Fälle und Leitplanken', () => {
 
     // raumweise mit echten Rechnungen → Gegenprobe FWS
     let rw = fixture('state-v2-raumweise-efh.json');
-    rw = setzeImState(rw, 'verbrauch', { ...fwsState.verbrauch, eintraege: [{ id: 'v1', energietraeger: 'erdgas', menge: 800, jahr: 2024 }] });
+    rw = setzeImState(rw, 'verbrauch', { ...fwsState.verbrauch, reihen: [{ id: 'r1', energietraeger: 'erdgas', art: 'zeitraeume', zeitraeume: [{ id: 'v1', menge: 800, jahr: 2024 }] }] });
     const e2 = berechne(rw, daten);
     expect(e2.heizlast.gegenprobe?.methode).toBe('fws');
     expect(e2.heizlast.massgebend.quelle).toBe('raumweise');

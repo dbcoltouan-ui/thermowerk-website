@@ -14,8 +14,12 @@
  */
 import type { Datensatz } from '../daten/index';
 import type { HuelleBauteiltyp, SanierungState, State, WwAngaben } from '../state/schema';
-import type { FwsEingabe, FwsErgebnis, Sanierung } from './fws';
+import type { FwsEingabe, FwsErgebnis, Sanierung, VerbrauchsEintrag } from './fws';
 import { heizlastFws, parseDatum } from './fws';
+import type { KonkretesBauteil } from './standardtypen';
+import { ALLE_ARTEN, konkretisiereBauteil, standardTypenFuer } from './standardtypen';
+import type { ReiheErgebnis } from './verbrauchsreihe';
+import { eintragMitHgt, zeitraeumeAusReihe } from './verbrauchsreihe';
 import type { GeraetErgebnis } from './geraet';
 import { geraetWaehlen } from './geraet';
 import type { BauteilArt, Bauteiltyp, HuelleErgebnis, SanierungBauteiltyp } from './huelle';
@@ -24,7 +28,7 @@ import type { KlimaErgebnis, StandortEingabe } from './klima';
 import { klimaStandort } from './klima';
 import type { SpezHeizleistungErgebnis, VergleichErgebnis } from './plausi';
 import { spezifischeHeizleistung, vergleichNormVerbrauch } from './plausi';
-import type { RaumweiseEingabe, RaumweiseErgebnis } from './raumweise';
+import type { RaumEingabe, RaumweiseEingabe, RaumweiseErgebnis } from './raumweise';
 import { ebfBestimmen, flaecheAus, heizlastRaumweise } from './raumweise';
 import type { SchrittId, SchrittStatus } from './relevanz';
 import type { Skala } from './skala';
@@ -80,6 +84,9 @@ export interface Gegenprobe {
   vergleich: VergleichErgebnis;
 }
 
+/** Konkretisierte Raum-Bauteile (Standard-Typ, generische Art/Anschluss aufgelöst) je Raum-id → Bauteil-id. */
+export type RaumBauteilKonkret = Record<string, Record<string, KonkretesBauteil>>;
+
 export interface Ergebnis {
   methode: State['methode'];
   klima: KlimaErgebnis | null;
@@ -95,6 +102,10 @@ export interface Ergebnis {
     gegenprobe: Gegenprobe | null;
     /** Massgebende Heizlast je m² EBF [W/m²]; null ohne EBF. */
     spezifisch: Wert | null;
+    /** Abgeleitete Zeiträume je Verbrauchsreihe (Session 7b) — nur FWS mit Rechnungen. */
+    verbrauchsreihen: ReiheErgebnis[];
+    /** Konkretisierte Raum-Bauteile (Session 7b) — nur raumweise. */
+    raumBauteile: RaumBauteilKonkret;
   };
   plausi: { spezifisch: SpezHeizleistungErgebnis | null };
   warmwasser: {
@@ -199,24 +210,36 @@ function summeRaumflaechen(s: State): number {
   return s.raeume.filter((r) => (r.beheizt ?? true) && (r.inEbf ?? r.beheizt ?? true)).reduce((acc, r) => acc + (flaecheAus(r) ?? 0), 0);
 }
 
-function fwsRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, ebf: Wert | null, heute: string, mitAbzug: boolean): { fws: FwsErgebnis | null; wwBisher: WarmwasserErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[] } {
+function fwsRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, ebf: Wert | null, heute: string, mitAbzug: boolean): { fws: FwsErgebnis | null; wwBisher: WarmwasserErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[]; reihen: ReiheErgebnis[]; reihenHinweise: Hinweis[] } {
   const v = s.verbrauch;
   const fehlend: Omit<Fehlend, 'schritt'>[] = [];
+  const reihen: ReiheErgebnis[] = [];
+  const reihenHinweise: Hinweis[] = [];
   const tvoll = def<FwsEingabe['tvoll']>({ bedarfsart: v.bedarfsart, hoeheM: s.gebaeude.standort.hoeheM, override: v.tvollOverride });
   const sanierungen: Sanierung[] = s.sanierungen.map((x) => def<Sanierung>({ id: x.id, massnahme: x.massnahme, einsparungProzent: x.einsparungProzent, bezeichnung: x.bezeichnung, status: x.status, datum: x.datum }));
   let e: FwsEingabe | null = null;
   let wwBisher: WarmwasserErgebnis | null = null;
   if (v.quelle === 'rechnungen') {
-    if (!v.eintraege.length) fehlend.push({ pfad: 'verbrauch.eintraege', text: 'Keine Verbrauchseinträge erfasst' });
+    if (!v.reihen.length) fehlend.push({ pfad: 'verbrauch.reihen', text: 'Keine Verbrauchsangaben erfasst' });
     if (v.wwBisher === null) fehlend.push({ pfad: 'verbrauch.wwBisher', text: 'Frage «Enthielt der Verbrauch Warmwasser?» offen' });
     if (v.wwBisher === true && mitAbzug) wwBisher = warmwasserBedarf(wwEingabe(v.abzug), daten.fws);
+    // Zeiträume je Reihe ableiten (Lieferungen/Zählerstände/von–bis/Jahr) und Heizgradtage der Station ergänzen.
+    const hgtKontext = { stationKey: klima?.station?.key ?? null, hgt: daten.hgt, klima: daten.klima };
+    const eintraege: VerbrauchsEintrag[] = [];
+    for (const r of v.reihen) {
+      const re = zeitraeumeAusReihe(r, `verbrauch.reihen.${r.id}`, daten.fws);
+      reihen.push(re);
+      reihenHinweise.push(...re.hinweise);
+      if (re.fehler) continue;
+      for (const z of re.zeitraeume) eintraege.push(eintragMitHgt(z, hgtKontext, reihenHinweise));
+    }
     e = def<FwsEingabe>({
       methode: 'verbrauch',
       tvoll,
       sanierungen,
       heute,
       verbrauch: def({
-        eintraege: v.eintraege,
+        eintraege,
         eta: v.eta,
         konvention: v.konvention,
         wwAbzug: wwBisher ? { qnWwKwhA: wwBisher.qnWw } : undefined,
@@ -242,7 +265,12 @@ function fwsRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, ebf
       e = { methode: 'bauperiode', tvoll, sanierungen, heute, bauperiode: { ebfM2: ebf.wert, gebaeudetyp: g.typ, baujahr: g.baujahr } };
     }
   }
-  return { fws: e ? heizlastFws(e, daten.fws) : null, wwBisher, fehlend };
+  const fws = e ? heizlastFws(e, daten.fws) : null;
+  if (fws && reihen.some((r) => r.fehler)) {
+    // Fehler in einer Reihe: keine Heizlast (wie Überlappung in fws.ts)
+    return { fws: { ...fws, qhl: null, qhlIst: null, qhlKorr: null, qhlUnsaniert: null, vollstaendig: false }, wwBisher, fehlend, reihen, reihenHinweise };
+  }
+  return { fws, wwBisher, fehlend, reihen, reihenHinweise };
 }
 
 /**
@@ -256,15 +284,78 @@ export function thetaEAuslegung(klima: KlimaErgebnis | null, daten: Datensatz): 
   return { thetaE, hinweise: [{ stufe: 'info', code: 'klima.standardwert', text: `Kein Standort erfasst — Auslegungs-Aussentemperatur ${fmt(t, 0)} °C als Standardwert.`, pfad: 'gebaeude.standort' }] };
 }
 
-function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, thetaE: Wert | null, hinweise: Hinweis[]): { huelle: HuelleErgebnis | null; raumweise: RaumweiseErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[] } {
+/** Bauteilarten, die der Rest (Hüllflächen) ohne eigenen Typ braucht. */
+function restArten(s: State): BauteilArt[] {
+  const r = s.huelle.rest;
+  if (r.modus !== 'huellflaechen') return [];
+  const out: BauteilArt[] = [];
+  if ((r.aAussenwandM2 ?? 0) > 0) out.push('aussenwand');
+  if ((r.aFensterM2 ?? 0) > 0) out.push('fenster');
+  if ((r.aTuerM2 ?? 0) > 0) out.push('tuer');
+  if ((r.aDachM2 ?? 0) > 0) out.push((s.gebaeude.dachform ?? 'steil') === 'flach' ? 'dachFlach' : 'dachSteil');
+  if ((r.aDeckeEstrichM2 ?? 0) > 0) out.push('deckeEstrich');
+  if ((r.aBodenM2 ?? 0) > 0) out.push(r.bodenAnschluss === 'erdreich' ? 'bodenErdreich' : 'bodenKeller');
+  return out;
+}
+
+/**
+ * Räume konkretisieren (Session 7b): generische Art/Anschluss aus dem Gebäude, Standard-Typ ohne eigenen Typ.
+ * Liefert die Kern-Räume und die Liste der benötigten Standard-Arten.
+ */
+function raeumeKonkret(s: State): { raeume: RaumEingabe[]; konkret: RaumBauteilKonkret; stdArten: Set<BauteilArt>; stdGenutzt: Set<BauteilArt> } {
+  const g = { keller: s.gebaeude.keller, dachform: s.gebaeude.dachform, dachraumBeheizt: s.gebaeude.dachraumBeheizt };
+  const eigene = s.huelle.bauteiltypen;
+  const eigeneArten = new Set(eigene.map((t) => t.art));
+  const konkret: RaumBauteilKonkret = {};
+  const stdArten = new Set<BauteilArt>();
+  // Standard-Typen, deren U wirklich vererbt wird (kein eigener U-Wert am Raum-Bauteil) → nur diese sind Annahmen.
+  const stdGenutzt = new Set<BauteilArt>();
+  const raeume: RaumEingabe[] = s.raeume.map((r) => {
+    const map: Record<string, KonkretesBauteil> = {};
+    const bauteile = r.bauteile.map((b) => {
+      const k = konkretisiereBauteil(b, g, eigene);
+      map[b.id] = k;
+      if (k.standardTyp && k.art) {
+        stdArten.add(k.art);
+        if (k.uOverride === undefined) stdGenutzt.add(k.art);
+      }
+      const { standardTyp: _s, ausGebaeude: _a, ...kern } = k;
+      return kern;
+    });
+    konkret[r.id] = map;
+    return { ...r, bauteile };
+  });
+  for (const a of restArten(s)) {
+    if (eigeneArten.has(a)) continue;
+    stdArten.add(a);
+    stdGenutzt.add(a);
+  }
+  return { raeume, konkret, stdArten, stdGenutzt };
+}
+
+function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | null, thetaE: Wert | null, hinweise: Hinweis[]): { huelle: HuelleErgebnis | null; raumweise: RaumweiseErgebnis | null; fehlend: Omit<Fehlend, 'schritt'>[]; raumBauteile: RaumBauteilKonkret } {
   const fehlend: Omit<Fehlend, 'schritt'>[] = [];
   const g = s.gebaeude;
-  if (g.baujahr === undefined) return { huelle: null, raumweise: null, fehlend };
+  if (g.baujahr === undefined) return { huelle: null, raumweise: null, fehlend, raumBauteile: {} };
   const zustand: 'ist' | 'geplant' = s.sanierungen.some((x) => x.status === 'geplant') ? 'geplant' : 'ist';
-  const bauteiltypen: Bauteiltyp[] = s.huelle.bauteiltypen.map((t) => def<Bauteiltyp>({ ...t, sanierung: sanierungFuerTyp(t, s.sanierungen, zustand, daten, hinweise) }));
+  const rk = raeumeKonkret(s);
+  // Eigene Typen zuerst (gewinnen in Rest-Lookups), dann die Standard-Typen der benötigten Arten.
+  const standard = standardTypenFuer([...ALLE_ARTEN].filter((a) => rk.stdArten.has(a)), daten.huelle).map((t) => ({ id: t.id, art: t.art, bezeichnung: t.bezeichnung! }));
+  const bauteiltypen: Bauteiltyp[] = [...s.huelle.bauteiltypen, ...standard].map((t) => def<Bauteiltyp>({ ...t, sanierung: sanierungFuerTyp(t, s.sanierungen, zustand, daten, hinweise) }));
   const huelle = huelleAufloesen({ baujahr: g.baujahr, bauteiltypen, zustand }, daten.huelle);
+  for (const t of standard) {
+    const b = huelle.bauteile[t.id];
+    if (!b) continue;
+    if (b.u.herkunft !== 'override') {
+      const neu = { ...b.u, begruendung: `Standard aus Baujahr ${g.baujahr}: ${b.u.begruendung.replace(/^geschätzt aus Baujahr \d+ /, '')}` };
+      huelle.annahmen = huelle.annahmen.map((a) => (a === b.u ? neu : a));
+      b.u = neu;
+    }
+    // U eines Standard-Typs ist nur eine Annahme, wenn es irgendwo vererbt wird (kein eigener U-Wert am Bauteil).
+    if (!rk.stdGenutzt.has(t.art)) huelle.annahmen = huelle.annahmen.filter((a) => a !== b.u);
+  }
   if (!s.raeume.length) fehlend.push({ pfad: 'raeume', text: 'Keine Räume erfasst' });
-  if (!thetaE) return { huelle, raumweise: null, fehlend };
+  if (!thetaE) return { huelle, raumweise: null, fehlend, raumBauteile: rk.konkret };
   const h = s.huelle;
   const e = def<RaumweiseEingabe>({
     thetaE,
@@ -276,11 +367,11 @@ function raumweiseRechnen(s: State, daten: Datensatz, klima: KlimaErgebnis | nul
     waermebruecken: h.waermebruecken,
     erdreich: h.erdreich,
     geschosshoeheM: h.geschosshoeheM,
-    raeume: s.raeume,
+    raeume: rk.raeume,
     ebf: def({ modus: g.ebfModus, manuellM2: g.ebfModus === 'manuell' ? g.ebfManuellM2 : undefined }),
     rest: s.raeume.length ? h.rest : undefined,
   });
-  return { huelle, raumweise: heizlastRaumweise(e, { sia: daten.sia, fws: daten.fws }), fehlend };
+  return { huelle, raumweise: heizlastRaumweise(e, { sia: daten.sia, fws: daten.fws }), fehlend, raumBauteile: rk.konkret };
 }
 
 function heizflaechenArt(kats: Set<Kategorie>): { puffer: 'fbh' | 'heizkoerper' | 'gemischt'; mag: 'konvektoren' | 'plattenheizkoerper' | 'radiatoren' | 'fbh' | 'gemischt' } {
@@ -353,12 +444,16 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
   let huelle: HuelleErgebnis | null = null;
   let wwBisher: WarmwasserErgebnis | null = null;
   let gegenprobe: Gegenprobe | null = null;
+  let verbrauchsreihen: ReiheErgebnis[] = [];
+  let raumBauteile: RaumBauteilKonkret = {};
   let massgebend: HeizlastMassgebend = { wert: null, quelle: null, art: null, status: 'fehlt', label: 'Methode wählen' };
 
   if (s.methode === 'fws') {
     const r = fwsRechnen(s, daten, klima, ebf, heute, true);
     fws = r.fws;
     wwBisher = r.wwBisher;
+    verbrauchsreihen = r.reihen;
+    hinweis('verbrauch', r.reihenHinweise);
     r.fehlend.forEach((f) => fehlt('verbrauch', f.pfad, f.text));
     if (!fws && s.verbrauch.quelle !== 'rechnungen' && s.verbrauch.quelle !== 'wpBetriebsstunden' && s.verbrauch.quelle !== 'messung') fehlt('verbrauch', 'verbrauch.quelle', 'Ohne Verbrauch: für die Bauperioden-Schätzung fehlen EBF, Gebäudetyp oder Baujahr');
     if (fws) {
@@ -387,6 +482,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     hinweis('sanierungen', hh);
     huelle = r.huelle;
     raumweise = r.raumweise;
+    raumBauteile = r.raumBauteile;
     r.fehlend.forEach((f) => fehlt('huelle', f.pfad, f.text));
     if (!huelle) fehlt('huelle', 'gebaeude.baujahr', 'Für die Hülle fehlt das Baujahr');
     if (huelle) {
@@ -400,7 +496,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
       else massgebend = { wert: null, quelle: 'raumweise', art: 'raumweise', status: 'fehlt', label: raumweise.methode };
     }
     // Gegenprobe FWS nur mit echten Verbrauchsrechnungen
-    if (raumweise?.vollstaendig && raumweise.raeume.length && s.verbrauch.quelle === 'rechnungen' && s.verbrauch.eintraege.length) {
+    if (raumweise?.vollstaendig && raumweise.raeume.length && s.verbrauch.quelle === 'rechnungen' && s.verbrauch.reihen.length) {
       const fr = fwsRechnen(s, daten, klima, ebf, heute, s.verbrauch.wwBisher === true);
       if (fr.fws?.qhl) gegenprobe = { methode: 'fws', wert: fr.fws.qhl, vergleich: vergleichNormVerbrauch(raumweise.gebaeude, fr.fws.qhl, daten.fws) };
     }
@@ -596,7 +692,7 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     klima,
     thetaE,
     ebf,
-    heizlast: { massgebend, fws, raumweise, huelle, gegenprobe, spezifisch: spezHeizlast },
+    heizlast: { massgebend, fws, raumweise, huelle, gegenprobe, spezifisch: spezHeizlast, verbrauchsreihen, raumBauteile },
     plausi: { spezifisch },
     warmwasser: { bisher: wwBisher, kuenftig: wwKuenftig, zuschlag: zuschlagWw },
     zuschlaege: { qhl, qw, qoff, qas, sperrzeit, qh },

@@ -38,7 +38,9 @@ export function herkunftKurz(w: Wert<unknown>): string {
   let text = w.herkunft === 'fallback' && w.stufe === 'standardwert' ? 'Standardwert' : HERKUNFT_TEXT[w.herkunft];
   if (w.herkunft === 'schaetzung' || (w.herkunft === 'fallback' && w.stufe !== 'standardwert')) {
     const kopf = w.begruendung.split(/[:(—;]/)[0]?.trim() ?? '';
-    if (/^geschätzt\b/i.test(kopf) && kopf.length <= 40) text = kopf;
+    const baujahr = /(geschätzt|Standard) aus Baujahr \d{4}/.exec(w.begruendung);
+    if (/^(geschätzt|Standard)\b/i.test(kopf) && kopf.length <= 40) text = kopf;
+    else if (baujahr) text = baujahr[0];
   }
   if (w.unsicherheit !== undefined && w.unsicherheit > 0) text += ` · ±${fmt(w.unsicherheit, 0)} %`;
   return text;

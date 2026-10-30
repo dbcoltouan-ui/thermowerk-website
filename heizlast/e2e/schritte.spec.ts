@@ -23,7 +23,7 @@ const foto = async (page: Page, info: TestInfo, name: string) => {
   await page.evaluate(() => window.scrollTo(0, 0));
   // Lokal in docs/revision/shots-neu, gegen Staging nur in den Testausgabe-Ordner.
   const lokal = String(info.project.use.baseURL ?? '').includes('127.0.0.1');
-  await page.screenshot({ path: lokal ? `${SHOTS}/s7-${name}-${info.project.name}.png` : info.outputPath(`s7-${name}.png`), fullPage: true });
+  await page.screenshot({ path: lokal ? `${SHOTS}/s7b-${name}-${info.project.name}.png` : info.outputPath(`s7b-${name}.png`), fullPage: true });
 };
 
 test('FWS-Fall Moosseedorf: Projekt → Gebäude → Verbrauch → Heizlast', async ({ page }, info) => {
@@ -56,10 +56,15 @@ test('FWS-Fall Moosseedorf: Projekt → Gebäude → Verbrauch → Heizlast', as
   await page.getByTestId('schritt-verbrauch').click();
   await expect(page.getByTestId('abzug')).toHaveCount(0);
   await page.getByTestId('quelle-rechnungen').click();
-  await page.getByTestId('eintrag-neu').click();
-  await page.getByTestId('eintrag-1-traeger').selectOption({ label: 'Erdgas' });
-  await page.getByTestId('eintrag-1-jahr').fill('2024');
-  await page.getByTestId('eintrag-1-menge').fill('2500');
+  await page.getByTestId('reihe-neu').click();
+  await page.getByTestId('reihe-1-traeger').selectOption({ label: 'Erdgas' });
+  await page.getByTestId('reihe-1-art').selectOption({ label: 'Zeiträume oder Kalenderjahre' });
+  await page.getByTestId('reihe-1-zeitraum-neu').click();
+  await page.getByTestId('reihe-1-zeitraum-1-jahr').fill('2024');
+  await page.getByTestId('reihe-1-zeitraum-1-menge').fill('2500');
+  // Heizgradtage 2024 der Station Wynau stehen automatisch als Tabellenwert im Zeitraum (ganzes Jahr: keine Hochrechnung)
+  await expect(page.getByTestId('reihe-1-ergebnis-1-hgt')).toHaveAttribute('data-standard', 'ja');
+  await expect(page.getByTestId('reihe-1-ergebnis-1-anteil')).toHaveText('1.00');
   await page.getByTestId('eta-erdgas').fill('0.9');
 
   // Bedingte Felder: WW-Abzug nur bei «WW bisher über die Heizung»; Personen- oder Liter-Felder je Methode
@@ -136,7 +141,7 @@ test('Raumweise-Fall CH-EFH: Hülle, zwei Räume, Picker ohne stale Anzeige, Hei
   await r1.getByTestId(/-bauteil-1-flaeche$/).fill('19');
   await r1.getByTestId(/-bauteil-2-flaeche$/).fill('6');
 
-  // U erbt aus der Hülle (Standardwert im Feld) — Picker-Änderung wirkt sofort auf Feld und Raum (keine stale Anzeige)
+  // U erbt aus dem eigenen Typ «aw» (Standardwert im Feld) — Picker-Änderung wirkt sofort auf Feld und Raum (keine stale Anzeige)
   await expect(aw).toHaveAttribute('data-standard', 'ja');
   const uVorher = await aw.inputValue();
   const phiVorher = await r1.getByTestId('raum-1-phihl').textContent();
@@ -203,11 +208,12 @@ test('Moduswechsel: Daten bleiben, ruhende Angaben werden genannt', async ({ pag
   await page.getByTestId('methode-fws').click();
   await page.getByTestId('schritt-verbrauch').click();
   await page.getByTestId('quelle-rechnungen').click();
-  await page.getByTestId('eintrag-neu').click();
+  await page.getByTestId('reihe-neu').click();
+  await page.getByTestId('reihe-1-stand-neu').click();
   await page.getByTestId('schritt-projekt').click();
   await page.getByTestId('methode-raumweise').click();
   await expect(page.getByTestId('ruhende-angaben')).toContainText('Verbrauchsdaten (1 Einträge)');
   await page.getByTestId('methode-fws').click();
   await page.getByTestId('schritt-verbrauch').click();
-  await expect(page.getByTestId('eintrag-1')).toBeVisible();
+  await expect(page.getByTestId('reihe-1')).toBeVisible();
 });

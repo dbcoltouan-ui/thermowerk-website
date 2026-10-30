@@ -17,10 +17,11 @@ describe('Migration v1 → v2 (Shell-Entwurf Session 1)', () => {
     expect(h.ok).toBe(true);
     if (!h.ok) return;
     expect(h.vonVersion).toBe(1);
-    expect(h.state.meta.schemaVersion).toBe(2);
+    expect(h.state.meta.schemaVersion).toBe(SCHEMA_VERSION);
     expect(h.state.projekt.name).toBe('EFH Muster, Bern');
     expect(h.state.methode).toBe('raumweise');
     expect(h.protokoll[0]).toContain('v1 → v2');
+    expect(h.protokoll.some((z) => z.includes('v2 → v3'))).toBe(true);
     expect(h.protokoll.join(' ')).toContain('EFH Muster, Bern');
     expect(h.probleme).toEqual([]);
   });
@@ -38,8 +39,33 @@ describe('Migration v1 → v2 (Shell-Entwurf Session 1)', () => {
   });
 });
 
-describe('v2-Fixtures: Validierung ist verlustfrei für gültige Stände', () => {
-  for (const name of ['state-v2-fws-moosseedorf.json', 'state-v2-raumweise-efh.json']) {
+describe('Migration v2 → v3 (Session 7b: Verbrauchsreihen)', () => {
+  it('Moosseedorf v2 (eintraege) ergibt denselben State wie die v3-Fixture (reihen), Ergebnis identisch', () => {
+    const h = hydrateState(fixtureRoh('state-v2-fws-moosseedorf.json'), KONTEXT);
+    expect(h.ok).toBe(true);
+    if (!h.ok) return;
+    expect(h.vonVersion).toBe(2);
+    expect(h.protokoll.join(' ')).toContain('1 Verbrauchseinträge → 1 Reihe(n): erdgas (1)');
+    expect(h.probleme).toEqual([]);
+    expect(h.state).toEqual(JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json')));
+    const e2 = berechne(h.state, alleDaten());
+    const e3 = berechne(JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json')) as never, alleDaten());
+    expect(e2.zuschlaege.qh?.wert).toBeCloseTo(e3.zuschlaege.qh!.wert, 6);
+  });
+
+  it('raumweise v2 (explizite Arten/Anschlüsse) bleibt gültig und rechnet unverändert', () => {
+    const h = hydrateState(fixtureRoh('state-v2-raumweise-efh.json'), KONTEXT);
+    expect(h.ok && h.probleme).toEqual([]);
+    if (!h.ok) return;
+    expect(h.state.verbrauch.reihen).toEqual([]);
+    expect(h.state.raeume[2]!.bauteile[0]).toMatchObject({ art: 'dachSteil', anschluss: { art: 'aussen' } });
+    const e = berechne(h.state, alleDaten());
+    expect(e.heizlast.massgebend.wert!.wert).toBeCloseTo(2678.7, 0);
+  });
+});
+
+describe('v3-Fixtures: Validierung ist verlustfrei für gültige Stände', () => {
+  for (const name of ['state-v3-fws-moosseedorf.json', 'state-v3-raumweise-efh.json']) {
     it(`${name}: normalisiereState(fixture) = fixture (Schema-Spezifikation vollständig)`, () => {
       const roh = JSON.parse(fixtureRoh(name));
       const { state, probleme } = normalisiereState(roh, KONTEXT);
@@ -67,10 +93,11 @@ describe('Ablehnung und Fehlertoleranz', () => {
   });
 
   it('falsche Typen werden verworfen und protokolliert, der Rest bleibt', () => {
-    const roh = JSON.parse(fixtureRoh('state-v2-fws-moosseedorf.json'));
+    const roh = JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json'));
     roh.gebaeude.baujahr = 'neunzehnhundert';
-    roh.verbrauch.eintraege.push({ id: 'v2', energietraeger: 'kohle', menge: 5 });
-    roh.verbrauch.eintraege.push({ energietraeger: 'erdgas', menge: 5 });
+    roh.verbrauch.reihen.push({ id: 'r2', energietraeger: 'kohle', art: 'zeitraeume', zeitraeume: [] });
+    roh.verbrauch.reihen.push({ energietraeger: 'erdgas', art: 'zeitraeume' });
+    roh.verbrauch.reihen[0].zeitraeume.push({ id: 'v2', menge: 'viel', jahr: 2023 });
     roh.raeume = [{ id: 'r1', name: 'A', typ: 'wohnen', bauteile: [{ id: 'b1', flaecheM2: 'x', anschluss: { art: 'mond' } }] }];
     roh.waermeabgabe.raeume = { r1: { heizflaechen: [{ id: 'h1', bauart: 'kachelofen' }, { id: 'h2', bauart: 'platte_22', hoeheMm: 600, typenschild: { qNW: 1000 } }] } };
     roh.methode = 'bauchgefuehl';
@@ -79,7 +106,9 @@ describe('Ablehnung und Fehlertoleranz', () => {
     expect(h.ok).toBe(true);
     if (!h.ok) return;
     expect(h.state.gebaeude.baujahr).toBeUndefined();
-    expect(h.state.verbrauch.eintraege.map((e) => e.id)).toEqual(['v1']);
+    expect(h.state.verbrauch.reihen.map((r) => r.id)).toEqual(['r-erdgas']);
+    expect(h.state.verbrauch.reihen[0]!.zeitraeume!.map((e) => e.id)).toEqual(['v1', 'v2']);
+    expect(h.state.verbrauch.reihen[0]!.zeitraeume![1]!.menge).toBe(0);
     expect(h.state.raeume[0]!.bauteile[0]).toMatchObject({ flaecheM2: 0, anschluss: { art: 'aussen' } });
     expect(h.state.waermeabgabe.raeume.r1!.heizflaechen).toEqual([{ id: 'h2', bauart: 'platte_22', hoeheMm: 600 }]);
     expect(h.state.methode).toBeNull();
@@ -89,7 +118,7 @@ describe('Ablehnung und Fehlertoleranz', () => {
   });
 
   it('doppelte ids in Listen werden verworfen (stabile Referenzen)', () => {
-    const roh = JSON.parse(fixtureRoh('state-v2-raumweise-efh.json'));
+    const roh = JSON.parse(fixtureRoh('state-v3-raumweise-efh.json'));
     roh.raeume.push({ ...roh.raeume[0] });
     const h = hydrateState(roh, KONTEXT);
     expect(h.ok && h.state.raeume.length).toBe(3);

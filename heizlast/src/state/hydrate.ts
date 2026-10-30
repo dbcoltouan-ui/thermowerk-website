@@ -9,7 +9,9 @@
  * Versionen:
  *  - v1: Shell-Entwurf aus Session 1 (`{ projektname, methode, aktiverSchritt? }`, ohne `meta`) — die
  *    einzige Vorgängerform des Neubaus. Ein Objekt ohne `schemaVersion`, das so aussieht, gilt als v1.
- *  - v2: dieses Schema (schema.ts).
+ *  - v2: Schema Session 6 (Verbrauch als flache Liste `verbrauch.eintraege`).
+ *  - v3: Session 7b — `verbrauch.reihen` (eine Reihe je Energieträger mit Erfassungsart) statt `eintraege`;
+ *    Raum-Bauteile dürfen generische Art (`boden`/`decke`) und Anschluss `auto` tragen (bestehende bleiben gültig).
  * Projekte des alten Tools (`objekt`, `heizung`, `detail` …) sind ausdrücklich nicht importierbar
  * (Entscheid Daniel, KONTEXT §2 «State») und werden mit klarer Meldung abgelehnt.
  */
@@ -46,8 +48,32 @@ const v1ZuV2: Migration = (raw, k) => {
   return { raw: s as unknown as Roh, protokoll };
 };
 
+/** v2 → v3: `verbrauch.eintraege` (flach, je Eintrag ein Energieträger) → `verbrauch.reihen` (eine Reihe je Träger, Art «Zeiträume»). */
+const v2ZuV3: Migration = (raw) => {
+  const protokoll: string[] = ['v2 → v3: Verbrauchseinträge in Reihen je Energieträger überführt (Session 7b)'];
+  const out: Roh = { ...raw, meta: { ...(istObjekt(raw.meta) ? raw.meta : {}), schemaVersion: 3 } };
+  const v = istObjekt(raw.verbrauch) ? { ...raw.verbrauch } : {};
+  const eintraege = Array.isArray(v.eintraege) ? (v.eintraege as unknown[]) : [];
+  const reihen: Roh[] = [];
+  for (const e of eintraege) {
+    if (!istObjekt(e) || typeof e.energietraeger !== 'string') continue;
+    let r = reihen.find((x) => x.energietraeger === e.energietraeger);
+    if (!r) {
+      r = { id: `r-${e.energietraeger}`, energietraeger: e.energietraeger, art: 'zeitraeume', zeitraeume: [] };
+      reihen.push(r);
+    }
+    const { energietraeger: _t, ...rest } = e;
+    (r.zeitraeume as Roh[]).push(rest);
+  }
+  if (eintraege.length) protokoll.push(`${eintraege.length} Verbrauchseinträge → ${reihen.length} Reihe(n): ${reihen.map((r) => `${String(r.energietraeger)} (${(r.zeitraeume as Roh[]).length})`).join(', ')}`);
+  delete v.eintraege;
+  v.reihen = reihen;
+  out.verbrauch = v;
+  return { raw: out, protokoll };
+};
+
 /** Migrationskette: Schlüssel = Ausgangsversion. Neue Versionen hängen hier einen Schritt an. */
-export const MIGRATIONEN: Readonly<Record<number, Migration>> = { 1: v1ZuV2 };
+export const MIGRATIONEN: Readonly<Record<number, Migration>> = { 1: v1ZuV2, 2: v2ZuV3 };
 
 const ALT_TOOL_SCHLUESSEL = ['objekt', 'heizung', 'detail', 'stammdaten'];
 

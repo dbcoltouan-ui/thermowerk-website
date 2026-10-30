@@ -31,7 +31,7 @@
 
 ## Heizlast — Neubau (seit 2026-10-29, Ordner `heizlast/`)
 
-Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
+Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Seit Session 7b (2026-10-30): State-Schema v3 (`verbrauch.reihen` je Energieträger, Migration v2→v3), Heizgradtage aus MeteoSchweiz Open Data (`heizlast/data/heizgradtage.json`, erneuern mit `node scripts/heizgradtage-bauen.mjs` im Ordner `heizlast/`), Standard-Bauteiltypen im Kern. Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
 
 ---
 

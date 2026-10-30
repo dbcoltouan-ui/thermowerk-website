@@ -164,3 +164,17 @@ Legende Status: **P** = Primärquelle (Norm, Hersteller-Datenblatt, Behörde), *
 | θe ohne Standort/Station: −8 °C (überschreibbar; mit Station gilt deren Wert) | `klimastationen.json` `standardThetaE.thetaEC` | Thermowerk-Annahme (`tw-abgeleitet`) |
 | WP-Übergrösse gelb bis +37 %, darüber rot; zu klein bis −9 % gelb | `fws.json` `geraetewahl.rotAbUebergroesseProzent`, `knappGelbBis` | Thermowerk-Annahme (`tw-annahme`) |
 | Auslegungs-VL ohne Heizflächen: FBH 35 °C, Radiatoren/gemischt 55 °C | `heizkoerper-tabellen.json` `auslegung.standardVLJeSystemC` | Thermowerk-Annahme (`tw-annahme`), überschreibbar |
+
+## 8. `heizgradtage.json` — Monats-Heizgradtage (Session 7b, 2026-10-30)
+
+| Datei / Tabelle | Zahl | Quelle | Status |
+|---|---|---|---|
+| Tagesmittel je Station (Parameter `tre200d0`, Lufttemperatur 2 m) | z. B. Bern/Zollikofen 1.–31.1.2024 → HGT 554 Kd (Handsumme 554.1) | MeteoSchweiz OGD SwissMetNet, `https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/<abk>/ogd-smn_<abk>_d_historical.csv` + `_recent.csv`, abgerufen 2026-10-30 (CC-BY-ähnliche OGD-Nutzung, Quellenangabe nötig) | B (Test `tests/kern/heizgradtage.test.ts`) |
+| Definition HGT 20/12 | Σ (20 − θ_Tagesmittel) über Tage mit θ < 12 °C | SIA 2028 Tabelle 6 / SIA 380/1; MeteoSchweiz Heizgradtage | B |
+| Kontrolle Mittel 1984–2003 (Referenzperiode SIA 2028) je Station | Bern 3 504 vs. SIA 3 513 (−0.3 %); alle 40 Stationen −0.1 … −0.7 % | SIA 2028-C1:2015 Tabelle 6 (`klimastationen.json hgt2012Kd`) | B (Test: ±1 %) |
+| Teilmonate | anteilig nach Tagen aus dem Monatswert (±5 %) | — | A (Thermowerk-Annahme; Tageswerte nicht im Repo) |
+| Hochrechnungs-Regel Teiljahr | Jahresanteil = HGT(Zeitraum) / mittlere Jahres-HGT der ⌈Tage/366⌉ Kalenderjahre bis zum Zeitraumende; ganze Kalenderjahre nach Tagen (Kurs) | `fws.json verbrauch` (`tw-annahme`), Daniel 30.10. (Klimabereinigung getrennt: «ein = alles bereinigt, aus = laut Kurs») | A |
+| Streuungs-Ampel: Zeiträume ab 60 % der Jahres-HGT oder ab 300 Tagen | `fws.json verbrauch.streuung.mindestHgtAnteil` 0.6 | tw-annahme (eine ganze Heizperiode Sept.–Mai ≈ 0.95) | A |
+| Lückenhinweis ab 14 Tagen | `fws.json verbrauch.lueckeHinweisAbTagen` | tw-annahme | A |
+
+Stationen: alle 40 SIA-2028-Stationen über die SwissMetNet-Abkürzung (`klimastationen.json abk`); Bern-Liebefeld (SIA) = Reihe BER (Zollikofen), Zürich-MeteoSchweiz = SMA, Grand-St-Bernard = GSB. Erzeugung: `node scripts/heizgradtage-bauen.mjs` (Monate mit mehr als 3 fehlenden Tagen → `null`, bis 3 fehlende Tage anteilig hochgerechnet; `luecken` je Jahr). Datenstand `_meta.zeitraum` (2015-01 bis 2026-09 beim Lauf vom 30.10.2026).

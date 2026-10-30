@@ -12,11 +12,13 @@ import { batch, computed, signal } from '@preact/signals';
 import type { Datensatz } from '../daten/index';
 import type { Ergebnis } from '../kern/berechne';
 import { berechne } from '../kern/berechne';
-import type { RaumEingabe } from '../kern/raumweise';
+import type { RaumState } from './schema';
 import type { HeizflaecheEingabe, HeizkreisEingabe } from '../kern/waermeabgabe';
 import { heizflaecheBauartWechseln } from '../kern/waermeabgabe';
 import type { Bauart } from '../kern/waermeabgabe';
-import { standardBauteiltypen } from '../kern/huelle';
+import type { BauteilArt } from '../kern/huelle';
+import { bauteilArtLabel, standardBauteiltypen } from '../kern/huelle';
+import { istStandardTypId, standardTypId } from '../kern/standardtypen';
 import type { Methode, State } from './schema';
 import { neuerState } from './schema';
 
@@ -82,13 +84,15 @@ export interface Store {
   ersetze: (s: State) => void;
   neu: () => State;
   setzeMethode: (m: Methode) => void;
-  raumHinzufuegen: (teil?: Partial<RaumEingabe>) => string;
+  raumHinzufuegen: (teil?: Partial<RaumState>) => string;
   raumEntfernen: (id: string) => void;
   heizkreisHinzufuegen: (teil?: Partial<HeizkreisEingabe>) => string;
   heizkreisEntfernen: (id: string, ersatzId?: string) => void;
   heizflaecheHinzufuegen: (raumId: string, bauart: Bauart) => string;
   heizflaecheBauart: (raumId: string, hfId: string, bauart: Bauart) => void;
   standardBauteiltypenAnlegen: () => void;
+  /** Legt für eine Bauteilart einen eigenen Typ an (Kopie des Standards, leer = Epochen-Default) und verweist alle Raum-Bauteile dieser Art ohne eigenen Typ darauf; gibt die id zurück. */
+  standardTypAnpassen: (art: BauteilArt) => string;
   /** Hängt ein Element mit neuer id an die Liste unter `listenPfad` an (z. B. `sanierungen`, `raeume.r1.bauteile`); gibt die id zurück. */
   hinzufuegen: (listenPfad: string, element: Record<string, unknown>, praefix: string) => string;
 }
@@ -181,6 +185,25 @@ export function erstelleStore(o: StoreOptionen): Store {
         if (!r) return s;
         return { ...s, waermeabgabe: { ...s.waermeabgabe, raeume: { ...s.waermeabgabe.raeume, [raumId]: { ...r, heizflaechen: r.heizflaechen.map((hf) => (hf.id === hfId ? heizflaecheBauartWechseln(hf, bauart, o.daten.hk) : hf)) } } } };
       }),
+    standardTypAnpassen: (art) => {
+      const id = neueId('t');
+      aktion((s) => {
+        const typ = { id, art, bezeichnung: bauteilArtLabel(art, o.daten.huelle) };
+        const raeume = s.raeume.map((r) => ({
+          ...r,
+          bauteile: r.bauteile.map((b) => {
+            const eigener = b.typId && !istStandardTypId(b.typId) && s.huelle.bauteiltypen.some((t) => t.id === b.typId);
+            if (eigener) return b;
+            // Nur Bauteile, deren konkrete Art dieser Art entspricht (generische Arten bleiben generisch, wenn sie nicht passen).
+            if (b.art !== art && b.typId !== standardTypId(art)) return b;
+            const { art: _a, ...rest } = b;
+            return { ...rest, typId: id };
+          }),
+        }));
+        return { ...s, huelle: { ...s.huelle, bauteiltypen: [...s.huelle.bauteiltypen, typ] }, raeume };
+      });
+      return id;
+    },
     hinzufuegen: (listenPfad, element, praefix) => {
       const id = neueId(praefix);
       aktion((s) => {

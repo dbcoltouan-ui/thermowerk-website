@@ -47,8 +47,11 @@ const FAELLE: ReadonlyArray<[string, State, string, boolean]> = [
   ['raumweise: Einsparung nicht, Stufen ja', raumweise, 'sanierungen.s1.einsparungProzent', false],
   ['raumweise: Sanierungs-Stufen relevant', raumweise, 'sanierungen.s1.stufen', true],
   // Verbrauch vorhanden?
-  ['Verbrauch offen: Raster nicht relevant', fws, 'verbrauch.eintraege', false],
-  ['Rechnungen: Raster relevant', setze(fws, { 'verbrauch.quelle': 'rechnungen' }), 'verbrauch.eintraege', true],
+  ['Verbrauch offen: Reihen nicht relevant', fws, 'verbrauch.reihen', false],
+  ['Rechnungen: Reihen relevant', setze(fws, { 'verbrauch.quelle': 'rechnungen' }), 'verbrauch.reihen', true],
+  ['Reihe Lieferungen: Ablesungen relevant, Zeiträume nicht', setze(fws, { 'verbrauch.quelle': 'rechnungen', 'verbrauch.reihen': [{ id: 'r1', energietraeger: 'heizoel', art: 'lieferungen' }] }), 'verbrauch.reihen.r1.ablesungen', true],
+  ['Reihe Lieferungen: Zeiträume nicht relevant', setze(fws, { 'verbrauch.quelle': 'rechnungen', 'verbrauch.reihen': [{ id: 'r1', energietraeger: 'heizoel', art: 'lieferungen' }] }), 'verbrauch.reihen.r1.zeitraeume.e1.menge', false],
+  ['Reihe Zählerstände relevant', setze(fws, { 'verbrauch.quelle': 'rechnungen', 'verbrauch.reihen': [{ id: 'r1', energietraeger: 'erdgas', art: 'zaehlerstaende' }] }), 'verbrauch.reihen.r1.zaehlerstaende.z1.stand', true],
   ['WP-Zähler: Raster nicht, Betriebsstunden ja', setze(fws, { 'verbrauch.quelle': 'wpBetriebsstunden' }), 'verbrauch.wpBetriebsstunden.zaehlerH', true],
   ['keine Daten: t_voll nicht relevant', setze(fws, { 'verbrauch.quelle': 'keine' }), 'verbrauch.bedarfsart', false],
   // Keller / Dach / EBF

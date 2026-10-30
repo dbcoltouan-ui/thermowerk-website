@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.3.0",
-    "stand": "2026-10-29",
+    "version": "1.4.0",
+    "stand": "2026-10-30",
     "beschreibung": "Fachdaten FWS-Modus (Verbrauchsmethode nach FWS/AWB Kurs Modul 3, Version 1-2025) inkl. Warmwasser, Zuschläge, Speicher, Puffer, Bivalenz. Keine Rechenlogik; jede Tabelle nennt ihre Quelle über `quelle` (IDs aus `_meta.quellen`). Werte in SI-nahen Einheiten (kWh, kW, h, l, K); Konvention siehe `heizwerte`.",
     "quellen": [
       {
@@ -365,25 +365,27 @@
     }
   },
   "verbrauch": {
-    "beschreibung": "Regeln für das Jahresraster der Verbrauchseinträge (Kern Session 3): Jahreswert je Energieträger = Σ Menge · 365 / Σ Tage (Mittel über alle Einträge), Summe nur über verschiedene Energieträger (bivalent). Überlappende Zeiträume desselben Trägers sind ein Fehler. Streuung der annualisierten Einzelwerte als Ampel.",
+    "beschreibung": "Regeln für die Verbrauchszeiträume (Kern Session 3, erweitert Session 7b): Jahreswert je Energieträger = Σ Menge / Σ Jahresanteil der Zeiträume (Mittel über alle Zeiträume), Summe nur über verschiedene Energieträger (bivalent). Jahresanteil: ganzes Kalenderjahr = Tage/365 (Kurs); kürzere oder längere Zeiträume = HGT(Zeitraum)/Jahres-HGT der umgebenden Kalenderjahre (heizgradtage.json), ohne Heizgradtage Tage/365 mit Warnung. Mit Klimabereinigung gilt für alle Zeiträume HGT(Zeitraum)/HGT_norm. Überlappende Zeiträume desselben Trägers sind ein Fehler. Streuung der hochgerechneten Einzelwerte als Ampel.",
     "quelle": [
       "fws-m3",
       "fws-rechenwege",
       "tw-annahme"
     ],
     "fundstelle": "Folie 29 (durchschnittlicher Verbrauch, min. ca. 3–5 relevante Jahre); Aufgabe 2 (Ø der letzten 5 Jahre)",
-    "datumsregel": "Eintrag mit `jahr` zählt als 365 Tage (Kalenderjahr); Eintrag mit `von`/`bis` zählt die Kalendertage inklusive beider Grenzen. Lieferungen werden als Zeitraum «Tank voll bis Tank voll» erfasst.",
+    "datumsregel": "Eintrag mit `jahr` zählt als 365 Tage (Kalenderjahr); Eintrag mit `von`/`bis` zählt die Kalendertage inklusive beider Grenzen (`bis` als JJJJ-MM = Monatsende). Lieferungen mit Tank-/Lagerständen: Verbrauch = Stand alt + Σ Lieferungen − Stand neu, Zeitraum vom alten bis zum Tag vor dem neuen Stand; ein Stand am Tag einer Lieferung gilt als Stand vor der Lieferung (FWS-Rechner «Tankinhalt Anfang»). Zählerstände: Differenz aufeinanderfolgender Stände.",
     "mindestJahreEmpfohlen": 3,
     "maxJahreEmpfohlen": 5,
+    "lueckeHinweisAbTagen": 14,
     "streuung": {
-      "beschreibung": "Grösste relative Abweichung eines annualisierten Einzelwerts vom Mittel (nur Einträge ab `mindestTageJeEintrag`). Schwellen sind eine Thermowerk-Annahme; der Kurs nennt keine Zahl.",
+      "beschreibung": "Grösste relative Abweichung eines hochgerechneten Einzelwerts vom Mittel. Berücksichtigt werden Zeiträume ab `mindestTageJeEintrag` Tagen oder — mit Heizgradtagen — ab `mindestHgtAnteil` der Jahres-HGT (eine ganze Heizperiode). Schwellen sind eine Thermowerk-Annahme; der Kurs nennt keine Zahl.",
       "mindestTageJeEintrag": 300,
+      "mindestHgtAnteil": 0.6,
       "gelbAbProzent": 10,
       "rotAbProzent": 20
     }
   },
   "klimabereinigung": {
-    "beschreibung": "Optionale Heizgradtag-Korrektur je Verbrauchseintrag: Heizanteil × HGT_norm / HGT_ist. NICHT Bestandteil der FWS-Methode (Kurs mittelt nur über 3–5 Jahre); Default aus, im Bericht als «Klimabereinigung (nicht FWS-Kurs)» auszuweisen (Befund FACH-07). HGT_norm aus klimastationen.json (hgt2012Kd), HGT_ist aus HEV-/MeteoSchweiz-Tabellen je Jahr und Station (Eingabe).",
+    "beschreibung": "Optionale Heizgradtag-Korrektur für alle Verbrauchszeiträume: Heizanteil × HGT_norm / HGT_ist (Session 7b: auch ganze Jahre; Jahresanteil = HGT_ist/HGT_norm). NICHT Bestandteil der FWS-Methode (Kurs mittelt nur über 3–5 Jahre); Default aus, im Bericht als «Klimabereinigung (nicht FWS-Kurs)» auszuweisen (Befund FACH-07). HGT_norm aus klimastationen.json (hgt2012Kd), HGT_ist automatisch aus heizgradtage.json (MeteoSchweiz-Monatswerte je Station), manuell überschreibbar.",
     "quelle": [
       "tw-annahme"
     ],

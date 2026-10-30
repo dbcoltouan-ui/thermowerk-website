@@ -1,6 +1,6 @@
 import type { SanierungState } from '../../state/schema';
 import { daten, lese, rel, setze, store } from '../bindung';
-import { AuswahlFeld, Abschnitt, Raster, SegmentFeld, TextFeld, ZahlFeld } from '../komponenten/Felder';
+import { AuswahlFeld, Abschnitt, MonatFeld, Raster, SegmentFeld, TextFeld, ZahlFeld } from '../komponenten/Felder';
 import { WertAnzeige } from '../komponenten/Herkunft';
 import { Meldungen } from '../komponenten/Meldungen';
 import { zahl } from '../format';
@@ -26,7 +26,7 @@ function SanierungZeile({ san, nr }: { san: SanierungState; nr: number }) {
       <Raster spalten={3}>
         <AuswahlFeld pfad={`${p}.massnahme`} label="Massnahme" optionen={MASSNAHMEN} testid={`sanierung-${nr}-massnahme`} beiWahl={(w) => w && setze(`${p}.massnahme`, w)} />
         <SegmentFeld pfad={`${p}.status`} label="Stand" optionen={[{ wert: 'ausgefuehrt', label: 'ausgeführt' }, { wert: 'geplant', label: 'geplant' }]} testid={`sanierung-${nr}-status`} />
-        <TextFeld pfad={`${p}.datum`} label="Jahr bzw. Datum" platzhalter="2015 oder 2015-09" muster={/^\d{4}(-\d{2}(-\d{2})?)?$/} musterText="Als JJJJ, JJJJ-MM oder JJJJ-MM-TT eingeben." testid={`sanierung-${nr}-datum`} />
+        <MonatFeld pfad={`${p}.datum`} label={san.status === 'geplant' ? 'Geplant für (Monat/Jahr)' : 'Ausgeführt im (Monat/Jahr)'} vonJahr={1950} nurJahrErlaubt testid={`sanierung-${nr}-datum`} info="Monat und Jahr genügen. Bei der Verbrauchsmethode teilt das Datum die Verbrauchszeiträume in «vor» und «nach» der Massnahme (FWS-Rechenweg mit Teilperioden); raumweise bestimmt es die Dämm-Standards der Sanierungsepoche." />
       </Raster>
       {san.massnahme === 'individuell' && <TextFeld pfad={`${p}.bezeichnung`} label="Bezeichnung" testid={`sanierung-${nr}-bezeichnung`} />}
       {rel(`${p}.einsparungProzent`) && (
@@ -63,6 +63,43 @@ function SanierungZeile({ san, nr }: { san: SanierungState; nr: number }) {
         </fieldset>
       )}
       {rel(`${p}.uOverride`) && <ZahlFeld pfad={`${p}.uOverride`} label="U-Wert nach Sanierung (falls bekannt)" einheit="W/m²K" min={0.05} max={6} dez={2} testid={`sanierung-${nr}-u`} />}
+      {san.status === 'ausgefuehrt' && e.heizlast.fws && e.heizlast.fws.traeger.length > 0 && <WirkungAufZeitraeume sanId={san.id} nr={nr} />}
+    </div>
+  );
+}
+
+const datumKurz = (ms: number) => {
+  const d = new Date(ms);
+  return `${d.getUTCDate()}.${d.getUTCMonth() + 1}.${d.getUTCFullYear()}`;
+};
+
+/** Welche Verbrauchszeiträume eine ausgeführte Massnahme betrifft (aus dem Ergebnis, Session 7b). */
+function WirkungAufZeitraeume({ sanId, nr }: { sanId: string; nr: number }) {
+  const fws = store.ergebnis.value.heizlast.fws;
+  if (!fws) return null;
+  const zeilen = fws.traeger.flatMap((t) =>
+    t.zeitraeume.flatMap((z) => {
+      const b = z.sanierung.bezug.find((x) => x.id === sanId);
+      if (!b) return [];
+      return [{ key: `${t.energietraeger}-${z.id}`, text: `${datumKurz(z.zeitraum.vonMs)} – ${datumKurz(z.zeitraum.bisMs)}`, lage: b.lage, faktor: z.sanierung.faktorIst / z.sanierung.faktorUnsaniert, sub: z.sanierung.subperioden }];
+    }),
+  );
+  if (!zeilen.length) return <p class="zeile-info" data-testid={`sanierung-${nr}-wirkung`}>Ohne Datum keine Zuordnung zu den Verbrauchszeiträumen (gilt als vor dem Betrachtungszeitraum).</p>;
+  return (
+    <div class="wirkung" data-testid={`sanierung-${nr}-wirkung`}>
+      <span class="feld__label">Wirkung auf die Verbrauchszeiträume</span>
+      <ul class="wirkung__liste">
+        {zeilen.map((z) => (
+          <li class={`wirkung__zeile wirkung__zeile--${z.lage}`} key={z.key} data-lage={z.lage}>
+            <span>{z.text}</span>
+            <span class="mute">
+              {z.lage === 'nachher' && 'nach der Massnahme — bereits enthalten'}
+              {z.lage === 'vorher' && `vor der Massnahme — wird mit Faktor ${z.faktor.toFixed(3)} auf heute umgerechnet`}
+              {z.lage === 'innerhalb' && `Massnahme mitten im Zeitraum — Teilperioden ${z.sub.map((sp) => `${sp.tage} d × ${sp.faktor.toFixed(2)}`).join(' + ')}`}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

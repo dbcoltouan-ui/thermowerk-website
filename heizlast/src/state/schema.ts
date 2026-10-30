@@ -16,18 +16,20 @@
  * verworfen und protokolliert (`probleme`), Pflichtteile bekommen Standardwerte. Sie läuft beim Laden
  * (hydrate.ts), nicht bei jedem Tastendruck.
  */
-import type { Bedarfsart, EtaAngabe, Massnahme, VerbrauchsEintrag } from '../kern/fws';
+import type { Bedarfsart, EtaAngabe, Massnahme } from '../kern/fws';
+import type { Ablesung, Erfassungsart, Lieferung, VerbrauchsReihe, Zaehlerstand, ZeitraumEintrag } from '../kern/verbrauchsreihe';
 import { ENERGIETRAEGER } from '../kern/typen';
 import type { Energietraeger, Gebaeudetyp, Konvention, WpQuelle } from '../kern/typen';
 import type { BauteilArt, Stufen } from '../kern/huelle';
 import type { Anschluss, RaumBauteilEingabe, RaumEingabe, RestEingabe } from '../kern/raumweise';
+import type { AnschlussAuto, RaumBauteilArtGenerisch } from '../kern/standardtypen';
 import type { HeizflaecheEingabe, HeizkreisEingabe } from '../kern/waermeabgabe';
 import { BAUARTEN } from '../kern/waermeabgabe';
 import type { Zusatzverbraucher } from '../kern/zuschlaege';
 import type { Energiestandard } from '../kern/plausi';
 import type { Dichtheit, Lueftungskonzept } from '../daten/sia384';
 
-export const SCHEMA_VERSION = 2 as const;
+export const SCHEMA_VERSION = 3 as const;
 
 export type Methode = 'fws' | 'raumweise';
 /** Woher die FWS-Heizlast kommt (Schritt 3A «Verbrauchsdaten vorhanden?»). */
@@ -107,10 +109,20 @@ export interface SanierungState {
   uOverride?: number;
 }
 
+/** Verbrauchsreihe je Energieträger (Session 7b): Erfassungsart + Einträge mit stabilen ids. */
+export interface VerbrauchsReiheState extends VerbrauchsReihe {
+  id: string;
+  art: Erfassungsart;
+  zeitraeume?: (ZeitraumEintrag & { id: string })[];
+  ablesungen?: (Ablesung & { id: string })[];
+  lieferungen?: (Lieferung & { id: string })[];
+  zaehlerstaende?: (Zaehlerstand & { id: string })[];
+}
+
 export interface VerbrauchState {
   quelle: VerbrauchsQuelle | null;
-  /** Jahresraster: Kalenderjahr oder Zeitraum von–bis je Energieträger. */
-  eintraege: VerbrauchsEintrag[];
+  /** Eine Reihe je Energieträger: Zeiträume/Kalenderjahre, Lieferungen + Tankstände oder Zählerstände (v3). */
+  reihen: VerbrauchsReiheState[];
   eta: Partial<Record<Energietraeger, EtaAngabe>>;
   konvention: Konvention;
   bedarfsart: Bedarfsart;
@@ -130,6 +142,21 @@ export interface HuelleBauteiltyp {
   bezeichnung?: string;
   stufen?: Stufen;
   uOverride?: number;
+}
+
+/**
+ * Raum-Bauteil im State (Session 7b): `art` darf generisch sein (`boden`/`decke` → Kern wählt Keller-/Erdreichboden
+ * bzw. Dach/Estrichdecke nach Gebäude) und `anschluss` darf `auto` sein (aus Keller/Dachform des Gebäudes).
+ * Ohne `typId` leitet der Kern einen Standard-Bauteiltyp aus Baujahr und Sanierungen ab (nicht im State).
+ */
+export interface RaumBauteilState extends Omit<RaumBauteilEingabe, 'art' | 'anschluss'> {
+  id: string;
+  art?: RaumBauteilArtGenerisch;
+  anschluss: Anschluss | AnschlussAuto;
+}
+
+export interface RaumState extends Omit<RaumEingabe, 'bauteile'> {
+  bauteile: RaumBauteilState[];
 }
 
 export interface HuelleState {
@@ -218,7 +245,7 @@ export interface State {
   verbrauch: VerbrauchState;
   huelle: HuelleState;
   /** Räume — eine Liste für beide Modi (raumweise: mit Bauteilen; FWS: nur für Heizflächen). */
-  raeume: RaumEingabe[];
+  raeume: RaumState[];
   warmwasser: WarmwasserState;
   waermeabgabe: WaermeabgabeState;
   zuschlaege: ZuschlaegeState;
@@ -244,7 +271,7 @@ export function neuerState(o: { id: string; jetzt: string }): State {
     sanierungen: [],
     verbrauch: {
       quelle: null,
-      eintraege: [],
+      reihen: [],
       eta: {},
       konvention: 'fwsKurs',
       bedarfsart: 'raumwaerme_wohnen',
@@ -371,7 +398,9 @@ function mitId(v: unknown, pfad: string, p: Probleme): v is Record<string, unkno
 const ENERGIEN: readonly string[] = ENERGIETRAEGER;
 const MASSNAHMEN: readonly string[] = ['fenster', 'fassade', 'estrich', 'kellerdecke', 'individuell'];
 const BAUTEIL_ARTEN: readonly string[] = ['aussenwand', 'dachSteil', 'dachFlach', 'deckeEstrich', 'bodenKeller', 'bodenErdreich', 'fenster', 'tuer', 'innenwand', 'innendecke', 'innentuer'];
+const RAUM_BAUTEIL_ARTEN: readonly string[] = [...BAUTEIL_ARTEN, 'boden', 'decke'];
 const ZIRKULATION: readonly string[] = ['keine', 'rohrAnRohr', 'separat', 'unbekannt', 'warmhalteband'];
+const ERFASSUNGSARTEN: readonly string[] = ['zeitraeume', 'lieferungen', 'zaehlerstaende'];
 
 const STUFEN_SPEC: Record<string, Feldtyp> = { bauweise: 'text', dickeM: 'zahl', daemmung: 'bool', daemmstoff: 'text', daemmdickeM: 'zahl', generation: 'text', rahmen: 'text', typ: 'text' };
 
@@ -392,10 +421,11 @@ function wwAngaben(raw: unknown, pfad: string, p: Probleme): WwAngaben {
   return { ...neueWwAngaben(), ...f } as WwAngaben;
 }
 
-function anschluss(raw: unknown, pfad: string, p: Probleme): Anschluss {
+function anschluss(raw: unknown, pfad: string, p: Probleme): Anschluss | AnschlussAuto {
   const art = istObjekt(raw) ? raw.art : undefined;
   switch (art) {
     case 'aussen':
+    case 'auto':
       return { art };
     case 'unbeheizt':
       return { art, ...felder(raw, { situation: ['keller', 'dachraum', 'garage', 'treppenhaus', 'nebenraum'], nd3: objekt({ lage: ['seitlich', 'keller', 'estrich'], flaechen: ['eineFlaeche', 'zweiFlaechen', 'mehrFlaechen'], dicht: 'bool' }), bU: 'zahl', thetaNachbarC: 'zahl' }, pfad, p) } as Anschluss;
@@ -413,16 +443,39 @@ function anschluss(raw: unknown, pfad: string, p: Probleme): Anschluss {
   }
 }
 
-function raumBauteil(v: unknown, pfad: string, p: Probleme): RaumBauteilEingabe | null {
+function raumBauteil(v: unknown, pfad: string, p: Probleme): RaumBauteilState | null {
   if (!mitId(v, pfad, p)) return null;
-  const f = felder(v, { id: 'text', typId: 'text', art: BAUTEIL_ARTEN, bezeichnung: 'text', flaecheM2: 'zahl', uOverride: 'zahl' }, pfad, p);
-  return { ...f, flaecheM2: (f.flaecheM2 as number | undefined) ?? 0, anschluss: anschluss(v.anschluss, `${pfad}.anschluss`, p) } as RaumBauteilEingabe;
+  const f = felder(v, { id: 'text', typId: 'text', art: RAUM_BAUTEIL_ARTEN, bezeichnung: 'text', flaecheM2: 'zahl', uOverride: 'zahl' }, pfad, p);
+  return { ...f, flaecheM2: (f.flaecheM2 as number | undefined) ?? 0, anschluss: anschluss(v.anschluss, `${pfad}.anschluss`, p) } as RaumBauteilState;
 }
 
-function raum(v: unknown, pfad: string, p: Probleme): RaumEingabe | null {
+function raum(v: unknown, pfad: string, p: Probleme): RaumState | null {
   if (!mitId(v, pfad, p)) return null;
   const f = felder(v, { id: 'text', name: 'text', geschoss: 'text', typ: 'text', flaecheM2: 'zahl', laengeM: 'zahl', breiteM: 'zahl', hoeheM: 'zahl', thetaIntC: 'zahl', nMinOverride: 'zahl', zuluft: 'bool', aussenbezug: 'bool', beheizt: 'bool', inEbf: 'bool' }, pfad, p);
-  return { ...f, name: (f.name as string | undefined) ?? '', typ: (f.typ as string | undefined) ?? 'wohnen', bauteile: liste(v.bauteile, `${pfad}.bauteile`, p, (x, q) => raumBauteil(x, q, p)) } as RaumEingabe;
+  return { ...f, name: (f.name as string | undefined) ?? '', typ: (f.typ as string | undefined) ?? 'wohnen', bauteile: liste(v.bauteile, `${pfad}.bauteile`, p, (x, q) => raumBauteil(x, q, p)) } as RaumState;
+}
+
+function verbrauchsReihe(v: unknown, pfad: string, p: Probleme): VerbrauchsReiheState | null {
+  if (!mitId(v, pfad, p)) return null;
+  const f = felder(v, { id: 'text', energietraeger: ENERGIEN, art: ERFASSUNGSARTEN }, pfad, p);
+  if (!f.energietraeger) return null;
+  const art = (f.art as Erfassungsart | undefined) ?? 'zeitraeume';
+  const reihe: VerbrauchsReiheState = { id: f.id as string, energietraeger: f.energietraeger as Energietraeger, art };
+  const mitListe = <T>(key: 'zeitraeume' | 'ablesungen' | 'lieferungen' | 'zaehlerstaende', spec: Record<string, Feldtyp>, pflicht: string[]) => {
+    if (v[key] === undefined) return;
+    const l = liste(v[key], `${pfad}.${key}`, p, (x, q) => {
+      if (!mitId(x, q, p)) return null;
+      const e = felder(x, { id: 'text', ...spec }, q, p);
+      for (const k of pflicht) if (e[k] === undefined) e[k] = k === 'datum' ? '' : 0;
+      return e as unknown as T;
+    });
+    (reihe as unknown as Record<string, unknown>)[key] = l;
+  };
+  mitListe('zeitraeume', { menge: 'zahl', jahr: 'zahl', von: 'text', bis: 'text', hgtIstKd: 'zahl' }, ['menge']);
+  mitListe('ablesungen', { datum: 'text', bestand: 'zahl', hgtIstKd: 'zahl' }, ['datum', 'bestand']);
+  mitListe('lieferungen', { datum: 'text', menge: 'zahl' }, ['datum', 'menge']);
+  mitListe('zaehlerstaende', { datum: 'text', stand: 'zahl', hgtIstKd: 'zahl' }, ['datum', 'stand']);
+  return reihe;
 }
 
 function heizflaeche(v: unknown, pfad: string, p: Probleme): HeizflaecheEingabe | null {
@@ -536,12 +589,7 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
     ...basis.verbrauch,
     ...vf,
     quelle: nullbarEnum(v.quelle, ['rechnungen', 'wpBetriebsstunden', 'messung', 'keine'] as const, 'verbrauch.quelle', p),
-    eintraege: liste(v.eintraege, 'verbrauch.eintraege', p, (x, q) => {
-      if (!mitId(x, q, p)) return null;
-      const f = felder(x, { id: 'text', energietraeger: ENERGIEN, menge: 'zahl', jahr: 'zahl', von: 'text', bis: 'text', hgtIstKd: 'zahl' }, q, p);
-      if (!f.energietraeger) return null;
-      return { menge: 0, ...f } as unknown as VerbrauchsEintrag;
-    }),
+    reihen: liste(v.reihen, 'verbrauch.reihen', p, (x, q) => verbrauchsReihe(x, q, p)),
     eta,
     wwBisher: nullbarBool(v.wwBisher, 'verbrauch.wwBisher', p),
     abzug: wwAngaben(v.abzug, 'verbrauch.abzug', p),
