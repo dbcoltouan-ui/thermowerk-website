@@ -478,3 +478,46 @@ describe('Herkunft an jedem Wert', () => {
     expect(r.annahmen.some((a) => a.stufe === 'standardwert' && a.begruendung.includes('Ziel-Vorlauf 55'))).toBe(true);
   });
 });
+
+describe('Standardwerte leerer Masse (Session 8: sichtbar im Feld)', () => {
+  // Property (KONTEXT §2 Kaskade): Bestätigen eines Standardwerts ändert nichts — die angezeigte Zahl ist genau die, mit
+  // der der Kern rechnet. Externer Anker: B2 Guss 10 Gl. H 600 mit Standard-Tiefe 160 mm (Befund-Band 600–780 W @70/55).
+  const fall = (hf: HeizflaecheEingabe, typ = 'wohnen') => waermeabgabe({ raeume: [raum(600, [hf], { typ })] }, daten).raeume[0]!.heizflaechen[0]!;
+
+  it('Guss: Tiefe 160 mm (Standardwert) und Gliedbreite aus DIN-Tabelle; Bestätigen ändert Q_N nicht', () => {
+    const ohne = fall({ id: 'g', bauart: 'guss_glieder', hoeheMm: 600, glieder: 10 });
+    expect(ohne.standardwerte.tiefeMm).toMatchObject({ wert: 160, herkunft: 'fallback', stufe: 'standardwert' });
+    expect(ohne.standardwerte.gliedbreiteMm?.herkunft).toBe('tabelle');
+    expect(ohne.standardwerte.glieder).toBeUndefined();
+    const mit = fall({ id: 'g', bauart: 'guss_glieder', hoeheMm: 600, glieder: 10, tiefeMm: ohne.standardwerte.tiefeMm!.wert as number });
+    expect(mit.standardwerte.tiefeMm).toBeUndefined();
+    expect(mit.qN!.wert).toBeCloseTo(ohne.qN!.wert, 6);
+  });
+
+  it('Gliederzahl aus der Länge als Schätzung — gleiche Zahl wie in der Normleistung', () => {
+    const l = fall({ id: 'g', bauart: 'guss_glieder', hoeheMm: 600, laengeMm: 600, tiefeMm: 160 });
+    const n = l.standardwerte.glieder!;
+    expect(n).toMatchObject({ wert: 10, herkunft: 'schaetzung' });
+    const z = fall({ id: 'g', bauart: 'guss_glieder', hoeheMm: 600, glieder: 10, tiefeMm: 160 });
+    expect(l.qN!.wert).toBeCloseTo(z.qN!.wert, 6);
+    // Röhren: (L − 26) / 46 (Zehnder Charleston)
+    expect(fall({ id: 'r', bauart: 'roehren_3', hoeheMm: 600, laengeMm: 486 }).standardwerte.glieder?.wert).toBe(10);
+  });
+
+  it('FBH: VA 150 mm und Belag Rλ,B 0.10 (Bad 0.00) als Standardwert; mit Belag Tabellenwert; Bestätigen ändert nichts', () => {
+    const w = fall({ id: 'f', bauart: 'fbh', flaecheM2: 10 });
+    expect(w.standardwerte.verlegeabstandMm?.wert).toBe(150);
+    expect(w.standardwerte.rlb).toMatchObject({ wert: 0.1, stufe: 'standardwert' });
+    expect(fall({ id: 'f', bauart: 'fbh', flaecheM2: 10 }, 'bad').standardwerte.rlb?.wert).toBe(0);
+    expect(fall({ id: 'f', bauart: 'fbh', flaecheM2: 10, belag: 'parkett' }).standardwerte.rlb?.herkunft).toBe('tabelle');
+    const best = fall({ id: 'f', bauart: 'fbh', flaecheM2: 10, verlegeabstandMm: 150, rlb: 0.1 });
+    expect(best.standardwerte).toEqual({});
+    expect(best.qN!.wert).toBeCloseTo(w.qN!.wert, 6);
+  });
+
+  it('Konvektor-Einbau und Design-Typ als Standardwert; Platte ohne Standardwerte', () => {
+    expect(fall({ id: 'k', bauart: 'konvektor_passiv', hoeheMm: 200, tiefeMm: 100, laengeMm: 1000 }).standardwerte.einbau?.wert).toBe('verkleidet');
+    expect(fall({ id: 'v', bauart: 'design_vertikal', hoeheMm: 1800, laengeMm: 500 }).standardwerte.designTyp?.wert).toBe('22');
+    expect(fall({ id: 'p', bauart: 'platte_22', hoeheMm: 600, laengeMm: 1000 }).standardwerte).toEqual({});
+  });
+});

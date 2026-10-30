@@ -172,8 +172,16 @@ export interface HeizflaecheErgebnis {
   vlZiel: Wert;
   /** Leistung bei vlZiel/vlZiel − Spreizung/θ_int [W]. */
   qZiel: Wert | null;
+  /**
+   * Werte, die der Kern für nicht angegebene Masse einsetzt (Standardwert, Tabelle, aus der Länge geschätzt) —
+   * die UI zeigt sie als Zahl im Feld mit Herkunft (Daniel 29.10. «Standardwerte sichtbar»).
+   */
+  standardwerte: StandardMasse;
   hinweise: Hinweis[];
 }
+
+/** Eingesetzte Werte für leere Mass-Felder einer Heizfläche (nur Felder, für die der Kern etwas einsetzt). */
+export type StandardMasse = Partial<Record<MassFeld, Wert<number> | Wert<string>>>;
 
 export type MassnahmeArt = 'typUpgrade' | 'laenge' | 'glieder' | 'fbh' | 'geblaesekonvektor' | 'hybrid';
 
@@ -218,6 +226,8 @@ export interface KritischerRaum {
 }
 
 export interface WaermeabgabeGebaeude {
+  /** Ziel-Vorlauf für Deckung und Massnahmen (Eingabe oder Standardwert 55 °C) — Standard der Heizkreis-Vorläufe. */
+  zielVL: Wert;
   /** Einzige VL für Gerätefilter, JAZ-Schätzung und Bericht [°C]. */
   auslegungsVL: Wert | null;
   /** Wert aus den Heizflächen (auch wenn ein Override gilt). */
@@ -393,7 +403,51 @@ export function relevanteMasse(bauart: Bauart, daten: HkDaten): MassFeld[] {
   }
 }
 
-const PLATTEN_REIHENFOLGE: ReadonlyArray<Bauart> = ['platte_10', 'platte_11', 'platte_20', 'platte_21', 'platte_22', 'platte_30', 'platte_33'];
+/**
+ * Standardwerte für leere Mass-Felder — genau die Zahlen, die `qnAusMassen` einsetzt (gleiche Daten, gleiche Regeln),
+ * damit die UI sie als Zahl mit Herkunft im Feld zeigen kann. Nur für Felder, die die Bauart nutzt und die leer sind.
+ */
+export function standardMasse(e: HeizflaecheEingabe, raumTyp: string | undefined, daten: HkDaten): StandardMasse {
+  const out: StandardMasse = {};
+  const a = daten.auslegung;
+  const kat = kategorieVon(e.bauart, daten);
+  const quelleA = quellenText(a.quelle, daten);
+  const leer = (v: number | undefined) => !(v !== undefined && v > 0);
+  if (kat === 'glieder') {
+    const tab = e.bauart === 'stahl_glieder' ? daten.glieder.stahl : daten.glieder.guss;
+    if (leer(e.tiefeMm)) out.tiefeMm = fallback(a.gussTiefeDefaultMm, 'mm', `Bautiefe ${fmt(a.gussTiefeDefaultMm, 0)} mm — häufigste Bautiefe im CH-Bestand (Standardwert)`, { stufe: 'standardwert', quelle: quelleA });
+    const breite = leer(e.gliedbreiteMm) ? tab.gliedbreiteMm : e.gliedbreiteMm!;
+    if (leer(e.gliedbreiteMm)) out.gliedbreiteMm = tabelle(tab.gliedbreiteMm, 'mm', `Gliedbreite ${fmt(tab.gliedbreiteMm, 0)} mm (${e.bauart === 'stahl_glieder' ? 'Stahl' : 'Guss'}-Glieder DIN 4703)`, quellenText(daten.glieder.quelle, daten));
+    const n = leer(e.glieder) ? gliederAusLaenge(e.laengeMm, breite) : null;
+    if (n !== null) out.glieder = schaetzung(n, 'Gl.', `${n} Glieder aus Baulänge ${fmt(e.laengeMm ?? 0, 0)} mm / ${fmt(breite, 0)} mm — Glieder zählen ist genauer`, { stufe: 'ausLaenge' });
+  }
+  if (kat === 'roehren' && leer(e.glieder)) {
+    const ch = daten.roehren.charleston;
+    const n = gliederAusLaenge(e.laengeMm, ch.gliedbreiteMm, 26);
+    if (n !== null) out.glieder = schaetzung(n, 'Gl.', `${n} Glieder aus Baulänge: (${fmt(e.laengeMm ?? 0, 0)} − 26) / ${fmt(ch.gliedbreiteMm, 0)} mm — Glieder zählen ist genauer`, { stufe: 'ausLaenge' });
+  }
+  if (kat === 'konvektor' && e.bauart !== 'konvektor_geblaese' && !e.einbau) {
+    const einbau = a.konvektorEinbauDefault === 'unterflur' ? 'unterflur' : 'verkleidet';
+    out.einbau = fallback<string>(einbau, '', `Einbau ${einbau === 'unterflur' ? 'Unterflur' : 'verkleidet (Wand/Bank)'} (Standardwert)`, { stufe: 'standardwert', quelle: quelleA });
+  }
+  if (kat === 'vertikal' && !e.designTyp) out.designTyp = fallback<string>('22', '', 'Typ 22 (2 Platten mit Konvektorblechen, Standardwert)', { stufe: 'standardwert', quelle: quelleA });
+  if (e.bauart === 'fbh') {
+    if (leer(e.verlegeabstandMm)) out.verlegeabstandMm = fallback(a.fbhDefault.verlegeabstandMm, 'mm', `Verlegeabstand ${fmt(a.fbhDefault.verlegeabstandMm, 0)} mm (Standardwert)`, { stufe: 'standardwert', quelle: quelleA });
+    if (!(e.rlb !== undefined && e.rlb >= 0)) {
+      if (e.belag) {
+        const r = daten.fbh.rlbTypisch[e.belag];
+        out.rlb = tabelle(r, 'm²K/W', `Wärmeleitwiderstand Belag ${e.belag}: Rλ,B ${fmt(r, 2)} m²K/W (typisch)`, quellenText(daten.fbh.quelle, daten));
+      } else {
+        const bad = raumTyp === 'bad' || raumTyp === 'dusche';
+        const r = bad ? a.fbhDefault.rlbBad : a.fbhDefault.rlb;
+        out.rlb = fallback(r, 'm²K/W', `Belag Rλ,B ${fmt(r, 2)} m²K/W (${bad ? 'Bad, Keramik' : 'Wohnraum'}, Standardwert)`, { stufe: 'standardwert', quelle: quelleA });
+      }
+    }
+  }
+  return out;
+}
+
+const PLATTEN_REIHENFOLGE: ReadonlyArray<Bauart> =['platte_10', 'platte_11', 'platte_20', 'platte_21', 'platte_22', 'platte_30', 'platte_33'];
 
 /**
  * Typ-Wechsel (Befund HK-20): neue Heizfläche mit gleicher ID, Kreis und Bezeichnung; Masse bleiben nur, wenn die neue
@@ -1196,6 +1250,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
         spreizung: x.spreizung,
         vlZiel: x.vlZiel,
         qZiel,
+        standardwerte: standardMasse(x.a.e, r.typ, hk),
         hinweise: x.a.hinweise,
       };
     });
@@ -1298,6 +1353,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
     else urteil = `Ungeeignet ohne Massnahmen: Auslegungs-Vorlauf ${fmt(t, 0)} °C > ${fmt(kritischBis, 0)} °C${wer} — Heizkörper in den kritischen Räumen vergrössern.`;
   }
   const gebaeude: WaermeabgabeGebaeude = {
+    zielVL: zielGebaeude,
     auslegungsVL,
     auslegungsVLAusHeizflaechen: ausHf,
     ampel: gAmpel,

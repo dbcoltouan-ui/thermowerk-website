@@ -7,7 +7,7 @@
  * Wer eine eigene Zahl eintippt, überschreibt; «Standard verwenden» löscht die eigene Angabe wieder.
  */
 import type { ComponentChildren } from 'preact';
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { Wert } from '../../kern/wert';
 import { hinweiseFuer, lese, parseZahl, setze, zahlFuerFeld } from '../bindung';
 import { HerkunftChip, herkunftKlasse } from './Herkunft';
@@ -94,6 +94,15 @@ export function ZahlFeld({ pfad, label, einheit, info, min, max, ganz, faktor = 
   const [fehler, setFehler] = useState<string | null>(null);
   const roh = lese<number>(pfad);
   const hatEigen = roh !== undefined;
+  // Wird der Wert von aussen geändert (Typ-Wechsel, Zurücksetzen, Laden), während das Feld noch Text hält, gilt der
+  // neue Wert — keine stale Anzeige (Session 8). Eigene Eingaben ändern `roh` passend zum Text und bleiben stehen.
+  useEffect(() => {
+    if (text === null) return;
+    const n = parseZahl(text);
+    const geschrieben = n === undefined || Number.isNaN(n) ? undefined : n * faktor;
+    if (Number.isNaN(n ?? 0)) return;
+    if (geschrieben === undefined ? roh !== undefined : roh === undefined || Math.abs(geschrieben - roh) > 1e-9 * Math.max(1, Math.abs(roh))) setText(null);
+  }, [roh]);
   const zeigtStandard = !hatEigen && !!standard && text === null;
   const anzeige = text ?? (hatEigen ? zahlFuerFeld(roh / faktor, dez) : standard ? zahlFuerFeld(standard.wert / faktor, dez ?? 2) : '');
 

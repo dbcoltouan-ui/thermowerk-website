@@ -154,6 +154,13 @@ function DashboardInhalt({ schritte, status }: Props) {
             Massgebend: {kritisch.map((r) => `${r.name} ${r.tVLReq === null ? '> 90' : fmt(r.tVLReq, 0)} °C`).join(', ')}
           </p>
         )}
+        {wab && wab.gebaeude.raeumeBewertet > 0 && (
+          <p class="dashboard__klein" data-testid="kpi-raeume-rot">
+            {wab.gebaeude.raeumeRot === 0
+              ? `Alle ${wab.gebaeude.raeumeBewertet} Räume bei ${fmt(wab.gebaeude.zielVL.wert, 0)} °C gedeckt`
+              : `${wab.gebaeude.raeumeRot} von ${wab.gebaeude.raeumeBewertet} Räumen: Heizfläche zu klein bei ${fmt(wab.gebaeude.zielVL.wert, 0)} °C`}
+          </p>
+        )}
       </div>
 
       <div class="dashboard__zeile">

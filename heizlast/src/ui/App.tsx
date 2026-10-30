@@ -1,5 +1,5 @@
 import { verwaltung } from '../state/app';
-import { aktiverSchritt, ergebnis, geheZu, speicherfehler } from '../state/ui';
+import { aktiverSchritt, aktiveZusatz, ergebnis, geheZu, geheZuZusatz, speicherfehler } from '../state/ui';
 import { Dashboard, DashboardLeiste } from './komponenten/Dashboard';
 import { Schrittleiste } from './komponenten/Schrittleiste';
 import { SchrittSeite } from './komponenten/SchrittSeite';
@@ -12,7 +12,13 @@ import { HuelleRaeume } from './seiten/HuelleRaeume';
 import { Platzhalter } from './seiten/Platzhalter';
 import { ProjektMethode } from './seiten/ProjektMethode';
 import { Sanierungen } from './seiten/Sanierungen';
+import { Speicher } from './seiten/Speicher';
 import { Verbrauch } from './seiten/Verbrauch';
+import { Waermeabgabe } from './seiten/Waermeabgabe';
+import { Waermepumpe } from './seiten/Waermepumpe';
+import { Warmwasser } from './seiten/Warmwasser';
+import { ZusatzSeite } from './seiten/Zusatz';
+import { Zuschlaege } from './seiten/Zuschlaege';
 
 function Seite({ schritt }: { schritt: SchrittDef }) {
   switch (schritt.id) {
@@ -28,6 +34,16 @@ function Seite({ schritt }: { schritt: SchrittDef }) {
       return <HuelleRaeume />;
     case 'heizlast':
       return <Heizlast />;
+    case 'warmwasser':
+      return <Warmwasser />;
+    case 'waermeabgabe':
+      return <Waermeabgabe />;
+    case 'zuschlaege':
+      return <Zuschlaege />;
+    case 'speicher':
+      return <Speicher />;
+    case 'waermepumpe':
+      return <Waermepumpe />;
     default:
       return <Platzhalter schritt={schritt} />;
   }
@@ -43,11 +59,12 @@ export function App() {
   // Status je Schritt aus dem einen Ergebnis (berechne), nie aus eigener UI-Logik.
   const status = e.status;
   const meldungen = verwaltung.ladeMeldungen.value;
+  const zusatz = aktiveZusatz.value;
 
   return (
     <div class="shell">
       <Topbar />
-      <Schrittleiste schritte={schritte} aktiv={schritt.id} status={status} onWahl={geheZu} />
+      <Schrittleiste schritte={schritte} aktiv={zusatz ? null : schritt.id} status={status} onWahl={geheZu} zusatz={zusatz} onZusatz={() => geheZuZusatz('foerderung')} />
       <main class="haupt">
         <div class="haupt__spalte">
           {speicherfehler.value && (
@@ -65,9 +82,13 @@ export function App() {
               </ul>
             </details>
           )}
-          <SchrittSeite schritt={schritt} vorher={schritte[i - 1]} nachher={schritte[i + 1]} onWahl={(s) => geheZu(s.id)}>
-            <Seite schritt={schritt} />
-          </SchrittSeite>
+          {zusatz ? (
+            <ZusatzSeite zurueck={schritt} />
+          ) : (
+            <SchrittSeite schritt={schritt} vorher={schritte[i - 1]} nachher={schritte[i + 1]} onWahl={(s) => geheZu(s.id)}>
+              <Seite schritt={schritt} />
+            </SchrittSeite>
+          )}
         </div>
         <Dashboard schritte={schritte} status={status} />
       </main>

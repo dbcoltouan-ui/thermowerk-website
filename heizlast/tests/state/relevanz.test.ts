@@ -72,6 +72,11 @@ const FAELLE: ReadonlyArray<[string, State, string, boolean]> = [
   // HK vorhanden
   ['ohne Heizflächen: Wärmeabgabesystem relevant', fws, 'waermeabgabe.system', true],
   ['ohne Heizflächen: Ziel-VL/alte Heizkurve nicht relevant', fws, 'waermeabgabe.heizkurveAlt', false],
+  // Session 8: Wärmeabgabe-Maske
+  ['Raum nicht ausgeklammert: Grund nicht relevant', setze(fws, { raeume: [{ id: 'r1', name: 'A', typ: 'wohnen', bauteile: [] }], 'waermeabgabe.raeume.r1': { heizflaechen: [] } }), 'waermeabgabe.raeume.r1.ausklammernGrund', false],
+  ['Raum ausgeklammert: Grund relevant', setze(fws, { raeume: [{ id: 'r1', name: 'A', typ: 'wohnen', bauteile: [] }], 'waermeabgabe.raeume.r1': { heizflaechen: [], ausklammern: true } }), 'waermeabgabe.raeume.r1.ausklammernGrund', true],
+  ['ohne Heizkreise: Kreis-Zuordnung nicht relevant', setze(fws, { raeume: [{ id: 'r1', name: 'A', typ: 'wohnen', bauteile: [] }], 'waermeabgabe.raeume.r1': { heizflaechen: [{ id: 'h1', bauart: 'platte_22' }] } }), 'waermeabgabe.raeume.r1.heizflaechen.h1.kreisId', false],
+  ['mit Heizkreis: Kreis-Zuordnung relevant', setze(fws, { raeume: [{ id: 'r1', name: 'A', typ: 'wohnen', bauteile: [] }], 'waermeabgabe.heizkreise': [{ id: 'k1' }], 'waermeabgabe.raeume.r1': { heizflaechen: [{ id: 'h1', bauart: 'platte_22' }] } }), 'waermeabgabe.raeume.r1.heizflaechen.h1.kreisId', true],
 ];
 
 describe('relevant(pfad, state) — Relevanz-Tabelle', () => {

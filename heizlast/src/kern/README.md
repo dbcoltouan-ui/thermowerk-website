@@ -16,7 +16,7 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `klima.ts` | 4 | Standort → SIA-2028-Station (PLZ/Kanton), θe mit Höhenkorrektur, Jahresmittel, HGT; Override mit Herkunft |
 | `huelle.ts` | 4 | Bauteiltypen auf Gebäudeebene: Stufen-Picker, EINE Schichtkette (Epochen-Default Bestand → bekannte Stufen → ISO 6946 → Clamp), Sanierung ab Jahr, Override, Fenster/Türen/Innenbauteile |
 | `raumweise.ts` | 4 | Räume und Bauteile (Referenz auf Hüllentyp + Fläche + Anschluss), Φ_T mit ΔU_WB/b_u/U_equiv, Φ_V = V·n_min·0.34, Σ Räume und saldierte Gebäude-Heizlast, EBF aus Räumen, nicht erfasster Rest |
-| `waermeabgabe.ts` | 5 | Heizkörper-Modul: Q_N je Heizfläche (Typenschild/Modell/Bauart+Massen/alte Heizkurve), n aus einer Tabelle, Minderungen, Raum-Deckung, θ_VL,req (Bisektion), Gebäude-Auslegungs-VL + Ampel, Massnahmen |
+| `waermeabgabe.ts` | 5/8 | Heizkörper-Modul: Q_N je Heizfläche (Typenschild/Modell/Bauart+Massen/alte Heizkurve), n aus einer Tabelle, Minderungen, Raum-Deckung, θ_VL,req (Bisektion), Gebäude-Auslegungs-VL + Ampel, Massnahmen; Standardwerte leerer Masse (S8) |
 | `berechne.ts`, `relevanz.ts`, `geraet.ts` | 6 | Orchestrierung (einziger Rechenpfad), Relevanz bedingter Felder, WP-Gerätefilter/Dimensionierung/Bivalenz |
 | `verbrauchsreihe.ts` | 7b | Vier Eingabearten je Energieträger → Zeiträume mit Menge und Rechenweg (Lieferungen + Tank-/Lagerstände, Zählerstände, von–bis, Kalenderjahr), Prüfungen, Heizgradtage je Zeitraum |
 | `heizgradtage.ts` | 7b | HGT 20/12 je Zeitraum aus Monatswerten (Teilmonate anteilig), Jahresreferenz für die Hochrechnung |
@@ -193,3 +193,11 @@ eintragMitHgt(zeitraum, { stationKey, hgt: heizgradtageDaten(), klima: klimaDate
 ### `standardtypen.ts`
 
 `konkretisiereBauteil(bauteil, { keller, dachform, dachraumBeheizt }, eigeneTypen)` → Kern-Bauteil mit konkreter Art/Anschluss und `typId` (eigener Typ oder `std-<art>`), Flags `standardTyp`, `ausGebaeude`; `anschlussAuto(art, gebaeude)`, `konkreteArt(art, anschluss, gebaeude)`, `standardTypenFuer(arten, huelleDaten())`, `standardTypId`, `istStandardTypId`, `ALLE_ARTEN`. `berechne()` löst die benötigten Standard-Typen mit `huelleAufloesen` auf (Begründung «Standard aus Baujahr …», Sanierungen aus der Liste wirken); ihr U zählt nur als Annahme, wenn es vererbt wird. `Ergebnis.heizlast.raumBauteile[raumId][bauteilId]` liefert die Konkretisierung für die UI.
+
+## Kern-API Session 8 (Ergänzungen für die Schritte 5–9)
+
+- `waermeabgabe.ts`: `standardMasse(heizflaeche, raumTyp, hk) → StandardMasse` — die Werte, die der Kern für leere Mass-Felder einsetzt (Guss-/Stahlglieder: Bautiefe 160 mm Standardwert, Gliedbreite aus DIN 4703, Gliederzahl aus der Länge als Schätzung; Röhren: Gliederzahl aus (L − 26)/46; Konvektor: Einbau; Vertikal: Typ 22; FBH: Verlegeabstand 150 mm, Rλ,B aus Belag oder Standard 0.10/Bad 0.00). Jedes `HeizflaecheErgebnis` trägt sie als `standardwerte`; die UI zeigt sie als Zahl mit Herkunft. Property-Test: Bestätigen eines Standardwerts ändert Q_N nicht. `WaermeabgabeGebaeude.zielVL` = Ziel-Vorlauf (Eingabe oder Standardwert 55 °C, Standard der Heizkreis-Vorläufe).
+- `geraet.ts`: `GeraetErgebnis.filterVorlaufStandard` = Filter-Vorlauf ohne eigene Angabe (Auslegungs-VL bzw. höhere WW-Ladetemperatur); `GewaehltesGeraet.modulation { minW, maxW, anteilMinAnQh }` aus `waermepumpen.json modulationKW` (nur 5 Geräte erfasst), sonst `null`. Keine Ampel für die Modulation (keine belegte Schwelle).
+- `berechne.ts`: im FWS-Modus wird die Wärmeabgabe gerechnet, sobald Räume erfasst sind (Raumheizlast nach Fläche verteilt schon vor der ersten Heizfläche sichtbar); Rechenwerte unverändert (Test Moosseedorf + Raum 20 m² → Φ_HL 1 364.7 W).
+- `relevanz.ts`: `waermeabgabe.raeume.*.ausklammernGrund` (nur ausgeklammert), `waermeabgabe.raeume.*.heizflaechen.*.kreisId` (nur mit Heizkreisen).
+- JAZ: bewusst nicht geschätzt (README «Offene Punkte», Session 8).

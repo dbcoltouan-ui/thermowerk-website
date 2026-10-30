@@ -551,7 +551,8 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
   for (const rid of Object.keys(wa.raeume)) if (!raumIds.has(rid) && (wa.raeume[rid]?.heizflaechen.length ?? 0) > 0) hinweis('waermeabgabe', [{ stufe: 'warnung', code: 'waermeabgabe.raumFehlt', text: `Heizflächen zu einem gelöschten Raum («${rid}») werden ignoriert.`, pfad: `waermeabgabe.raeume.${rid}` }]);
   let wab: WaermeabgabeErgebnis | null = null;
   const hfDa = heizflaechenVorhanden(s);
-  if (hfDa || wa.auslegungsVLOverrideC !== undefined || wa.heizkreise.some((k) => k.tVLC !== undefined)) {
+  // FWS: Räume gibt es nur für die Heizflächen — die verteilte Raumheizlast ist schon vor der ersten Heizfläche sichtbar (Session 8).
+  if (hfDa || wa.auslegungsVLOverrideC !== undefined || wa.heizkreise.some((k) => k.tVLC !== undefined) || (s.methode === 'fws' && s.raeume.length > 0)) {
     const rwRaeume = new Map((raumweise?.raeume ?? []).map((r) => [r.id, r]));
     const raeume: WaermeabgabeRaumEingabe[] = s.raeume.map((r) => {
       const st = wa.raeume[r.id];

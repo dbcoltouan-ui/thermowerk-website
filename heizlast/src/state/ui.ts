@@ -23,9 +23,21 @@ export function setzeMethode(neu: Methode): void {
   store.setzeMethode(neu);
 }
 
+/** Zusatzmodule (Förderung, Bewilligung, Offerte) — eigene Navigationsgruppe ausserhalb der Schrittfolge (Anbindung Session 11). */
+export type ZusatzId = 'foerderung' | 'bewilligung' | 'offerte';
+/** Offenes Zusatzmodul; null = die Schrittfolge ist aktiv. */
+export const aktiveZusatz = signal<ZusatzId | null>(null);
+
 /** Springt zu einem Schritt (nur sichtbare Schritte) und an den Seitenanfang. */
 export function geheZu(id: SchrittId): void {
   if (!store.ergebnis.value.relevanteSchritte.includes(id)) return;
+  aktiveZusatz.value = null;
   aktiverSchritt.value = id;
+  if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+}
+
+/** Öffnet ein Zusatzmodul (der zuletzt offene Schritt bleibt gemerkt). */
+export function geheZuZusatz(id: ZusatzId): void {
+  aktiveZusatz.value = id;
   if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
 }

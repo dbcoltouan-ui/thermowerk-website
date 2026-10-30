@@ -98,6 +98,8 @@ export const RELEVANZ_REGELN: ReadonlyArray<RelevanzRegel> = [
   // Schritt 6 Wärmeabgabe
   { muster: 'waermeabgabe.raeume.*', wenn: 'Raum existiert', pruefe: (s, [id]) => raumVorhanden(s, id) },
   { muster: 'waermeabgabe.raeume.*.phiHLManuellW', wenn: 'FWS (keine raumweise Heizlast)', pruefe: fws },
+  { muster: 'waermeabgabe.raeume.*.ausklammernGrund', wenn: 'Raum ausgeklammert', pruefe: (s, [id]) => s.waermeabgabe.raeume[id ?? '']?.ausklammern === true },
+  { muster: 'waermeabgabe.raeume.*.heizflaechen.*.kreisId', wenn: 'Heizkreise erfasst', pruefe: (s) => s.waermeabgabe.heizkreise.length > 0 },
   { muster: 'waermeabgabe.system', wenn: 'keine Heizflächen erfasst (sonst aus den Heizflächen abgeleitet)', pruefe: (s) => !heizflaechenVorhanden(s) },
   { muster: 'waermeabgabe.zielVLC', wenn: 'Heizflächen erfasst', pruefe: heizflaechenVorhanden },
   { muster: 'waermeabgabe.heizkurveAlt', wenn: 'Heizflächen erfasst', pruefe: heizflaechenVorhanden },

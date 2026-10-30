@@ -1354,3 +1354,336 @@ select.eingabe__feld {
   max-width: 100%;
   min-width: 0;
 }
+
+/* =========================================================================
+   Session 8 — Schritte 5–9, Zusatzmodule
+   ========================================================================= */
+
+/* Kurze Faktenliste (WW-Zuschlag u. a.) */
+.faktenliste {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-8);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--ink-100);
+  font-size: var(--fs-sm);
+}
+.faktenliste dt {
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+}
+.faktenliste dd {
+  margin: 0;
+  font-weight: var(--fw-medium);
+}
+.faktenliste .wert,
+.leistung__fakten .wert {
+  justify-content: flex-start;
+}
+
+/* ---- Wärmeabgabe: Gebäude-Box ---- */
+.wa-gebaeude[data-ampel='gruen'] {
+  border-left-color: var(--ok-500);
+}
+.wa-gebaeude[data-ampel='gelb'] {
+  border-left-color: var(--warn-500);
+}
+.wa-gebaeude[data-ampel='rot'] {
+  border-left-color: var(--bad-500);
+}
+.wa-gebaeude[data-ampel='grau'] {
+  border-left: 6px dashed var(--ink-300);
+}
+.wa-gebaeude .leistung__kopf {
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-3);
+}
+.wa-gebaeude .leistung__kopf .mute {
+  font-size: var(--fs-xs);
+}
+.wa-gebaeude__urteil {
+  font-size: var(--fs-md);
+  color: var(--ink-800);
+  max-width: 72ch;
+}
+
+/* ---- Wärmeabgabe: Raum ---- */
+.wa-raum[data-ampel='gruen'] {
+  border-top-color: var(--ok-500);
+}
+.wa-raum[data-ampel='gelb'] {
+  border-top-color: var(--warn-500);
+}
+.wa-raum[data-ampel='rot'] {
+  border-top-color: var(--bad-500);
+}
+.wa-raum__name {
+  font-size: var(--fs-lg);
+  color: var(--brand-500);
+  align-self: center;
+}
+.wa-raum__vl {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.wa-raum__vl--gruen {
+  color: var(--ok-500);
+}
+.wa-raum__vl--gelb {
+  color: var(--warn-500);
+}
+.wa-raum__vl--rot {
+  color: var(--bad-500);
+}
+.wa-raum__vl--grau {
+  color: var(--ink-400);
+}
+.wa-raum__fuss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-4);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--ink-100);
+}
+.wa-raum__fuss .feld {
+  flex: 1 1 220px;
+}
+
+/* Heizfläche */
+.hf-liste {
+  display: grid;
+  gap: var(--s-3);
+}
+.hf {
+  display: grid;
+  gap: var(--s-3);
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink-50);
+  border-left: 3px solid var(--brand-300);
+}
+.hf__kopf {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--s-2) var(--s-4);
+  align-items: start;
+}
+.hf__weg {
+  margin-top: 26px;
+}
+.hf__masse {
+  align-items: start;
+}
+.hf__mass {
+  display: grid;
+  gap: var(--s-1);
+  justify-items: start;
+  min-width: 0;
+}
+.hf__mass > .feld {
+  width: 100%;
+}
+.hf__genauer {
+  display: grid;
+  gap: var(--s-3);
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: var(--s-2);
+}
+.hf__typenschild {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-2) var(--s-4);
+}
+.hf__typenschild > .feld__hinweise {
+  grid-column: 1 / -1;
+}
+.hf__minderungen {
+  display: grid;
+  gap: var(--s-2);
+}
+.hf__ergebnis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-6);
+  font-size: var(--fs-sm);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--ink-200);
+}
+.hf__ergebnis > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-1);
+  flex-wrap: wrap;
+}
+
+/* Live-Zeile je Raum */
+.wa-live {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  background: var(--brand-50);
+  border-left: 3px solid var(--brand-500);
+}
+.wa-live__werte {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--s-2) var(--s-4);
+  font-size: var(--fs-sm);
+}
+.wa-live__werte dt {
+  font-size: var(--fs-xs);
+  color: var(--ink-600);
+}
+.wa-live__werte dd {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.wa-live__werte .wert {
+  justify-content: flex-start;
+}
+.wa-live__vl .wert__zahl {
+  font-size: var(--fs-lg);
+}
+.wa-massnahmen__liste {
+  margin: var(--s-2) 0 0;
+  padding-left: var(--s-5);
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-800);
+}
+
+/* ---- Zuschläge ---- */
+.zusatz {
+  display: grid;
+  gap: var(--s-3);
+}
+.zusatz__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-1);
+}
+.zusatz__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--s-4);
+  align-items: center;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--ink-100);
+  font-size: var(--fs-sm);
+}
+.zusatz__wert {
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+}
+.zusatz__neu {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--s-3);
+  align-items: end;
+}
+.rechenweg__schritt--summe {
+  font-size: var(--fs-md);
+}
+
+/* ---- Speicher, Wärmepumpe ---- */
+.tabelle__massgebend td {
+  font-weight: var(--fw-semibold);
+}
+.badge--warn {
+  color: var(--ink-800);
+  border-color: var(--warn-500);
+  background: var(--warn-100);
+}
+.geraete td:first-child {
+  min-width: 140px;
+}
+.geraete__gewaehlt td {
+  background: var(--brand-50);
+}
+.geraete .zahl .ampel-punkt {
+  display: inline-block;
+  vertical-align: middle;
+}
+.wp-fakten {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ---- Zusatzmodule ---- */
+.zusatz-nav {
+  margin-bottom: var(--s-2);
+}
+.zusatz-nav .segment__knopf[aria-selected='true'] {
+  background: var(--brand-500);
+  color: #fff;
+  font-weight: var(--fw-medium);
+}
+.inhalt__nr--zusatz {
+  color: var(--accent-500);
+}
+
+@media (max-width: 640px) {
+  .hf {
+    padding: var(--s-3);
+  }
+  .hf__kopf {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .hf__kopf > .feld:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .hf__weg {
+    margin-top: 22px;
+  }
+  .hf__masse {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .hf__typenschild {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wa-live__werte {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .zusatz__neu {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .zusatz__neu > .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .wa-raum__fuss {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.hf,
+.hf__genauer,
+.wa-live,
+.zusatz {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Feld, das nur einen Ergebniswert zeigt (gleiches Raster wie Eingaben, Wert linksbündig) */
+.feld--wert {
+  align-content: start;
+  gap: var(--s-2);
+}
+.feld--wert .wert {
+  justify-content: flex-start;
+  min-height: 38px;
+  align-items: center;
+}
+.geraete td > .badge,
+.tabelle__massgebend .badge {
+  margin-left: 6px;
+}

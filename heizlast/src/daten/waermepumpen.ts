@@ -26,6 +26,8 @@ export interface WpGeraet {
   copA7W35: number | null;
   copA2W35: number | null;
   vorlaufMaxC: number | null;
+  /** Modulationsbereich [min, max] in kW (nur bei wenigen Geräten erfasst). */
+  modulationKW: number[] | null;
   mindestPufferLiter: number | null;
   schallNachtMaxDb: number | null;
   preisChf: number | null;

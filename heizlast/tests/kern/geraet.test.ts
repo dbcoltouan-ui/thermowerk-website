@@ -136,3 +136,24 @@ describe('Skala Auslegungs-Vorlauf', () => {
     expect(skalaVorlauf(hk, null).ampel).toBe('grau');
   });
 });
+
+describe('Filter-Vorlauf-Standard und Modulation (Session 8)', () => {
+  const qh = eingabe(10000, 'W');
+  const vl = eingabe(58, '°C');
+  it('Standard = Auslegungs-VL bzw. höhere WW-Ladetemperatur; eigene Angabe ersetzt nur den Filterwert', () => {
+    expect(geraetWaehlen({ qh, auslegungsVL: vl, filter: { quelle: 'luftWasser' } }, { fws, wp }).filterVorlaufStandard?.wert).toBe(58);
+    const ww = geraetWaehlen({ qh, auslegungsVL: eingabe(45, '°C'), wwLadetemperaturC: 60, filter: { quelle: 'luftWasser' } }, { fws, wp });
+    expect(ww.filterVorlaufStandard?.wert).toBe(60);
+    expect(ww.filterVorlauf?.wert).toBe(60);
+    const o = geraetWaehlen({ qh, auslegungsVL: vl, filter: { quelle: 'luftWasser', vorlaufC: 65 } }, { fws, wp });
+    expect(o.filterVorlauf).toMatchObject({ wert: 65, herkunft: 'override' });
+    expect(o.filterVorlaufStandard?.wert).toBe(58);
+  });
+  it('Modulation aus der Datenbank (Oertli, Katalog): untere Grenze als Anteil von Q_h; ohne Eintrag null', () => {
+    const g = geraetWaehlen({ qh: eingabe(8000, 'W'), auslegungsVL: vl, filter: { quelle: 'luftWasser' }, auswahlId: 'OE-0006' }, { fws, wp }).gewaehlt!;
+    expect(g.modulation!.minW.wert).toBeCloseTo(2100, 6);
+    expect(g.modulation!.maxW.wert).toBeCloseTo(8300, 6);
+    expect(g.modulation!.anteilMinAnQh!.wert).toBeCloseTo(2100 / 8000, 6);
+    expect(geraetWaehlen({ qh, auslegungsVL: vl, filter: { quelle: 'luftWasser' }, auswahlId: 'BO-0003' }, { fws, wp }).gewaehlt!.modulation).toBeNull();
+  });
+});

@@ -86,15 +86,26 @@ export interface GewaehltesGeraet {
   qWpMassgebend: Wert;
   vorlaufMax: Wert | null;
   mindestPuffer: Wert | null;
+  /** Modulationsbereich laut Gerätedatenbank (nur wenn erfasst) und Anteil der unteren Grenze an Q_h. */
+  modulation: Modulation | null;
   dimensionierung: Dimensionierung;
   bivalenz: Bivalenz;
   hinweise: Hinweis[];
+}
+
+export interface Modulation {
+  minW: Wert;
+  maxW: Wert;
+  /** Untere Modulationsgrenze / Q_h [-]; null ohne Q_h. Je kleiner, desto weniger taktet die WP in der Übergangszeit. */
+  anteilMinAnQh: Wert | null;
 }
 
 export interface GeraetErgebnis {
   quelle: WpQuelle;
   /** Vorlauf, mit dem gefiltert wird [°C]. */
   filterVorlauf: Wert | null;
+  /** Vorlauf, mit dem ohne eigene Angabe gefiltert würde (Auslegungs-VL bzw. WW-Ladetemperatur) — Standardwert des Filterfelds. */
+  filterVorlaufStandard: Wert | null;
   qWpMin: number | null;
   qWpMax: number | null;
   liste: GeraetTreffer[];
@@ -168,17 +179,18 @@ export function geraetWaehlen(e: GeraetEingabe, daten: { fws: FwsDaten; wp: WpDa
   const qh = e.qh?.wert ?? 0;
 
   // Vorlauf für den Filter: Override > Auslegungs-VL; WW-Ladetemperatur, wenn die WP Warmwasser bereitet.
+  const mitWw = (basis: Wert | null): Wert | null =>
+    e.wwLadetemperaturC !== undefined && (!basis || e.wwLadetemperaturC > basis.wert)
+      ? berechnet(e.wwLadetemperaturC, '°C', `Filter-Vorlauf = WW-Ladetemperatur ${fmt(e.wwLadetemperaturC, 0)} °C (höher als Heizungs-Vorlauf${basis ? ` ${fmt(basis.wert, 1)} °C` : ''})`, [])
+      : basis;
+  const filterVorlaufStandard = mitWw(e.auslegungsVL);
   let filterVorlauf: Wert | null = null;
   if (e.filter.vorlaufC !== undefined) {
     filterVorlauf = { wert: e.filter.vorlaufC, einheit: '°C', herkunft: 'override', begruendung: `Filter-Vorlauf manuell ${fmt(e.filter.vorlaufC, 0)} °C${e.auslegungsVL ? ` (Auslegungs-VL ${fmt(e.auslegungsVL.wert, 1)} °C)` : ''}` };
     annahmen.push(filterVorlauf);
     if (e.auslegungsVL && e.filter.vorlaufC + 0.5 < e.auslegungsVL.wert) hinweise.push({ stufe: 'warnung', code: 'geraet.filterVorlaufZuTief', text: `Filter-Vorlauf ${fmt(e.filter.vorlaufC, 0)} °C liegt unter der Auslegungs-VL ${fmt(e.auslegungsVL.wert, 1)} °C.`, pfad: 'geraet.filterOverrides.vorlaufC' });
-  } else if (e.auslegungsVL) {
-    filterVorlauf = e.auslegungsVL;
-  }
-  if (e.wwLadetemperaturC !== undefined && (!filterVorlauf || e.wwLadetemperaturC > filterVorlauf.wert)) {
-    filterVorlauf = berechnet(e.wwLadetemperaturC, '°C', `Filter-Vorlauf = WW-Ladetemperatur ${fmt(e.wwLadetemperaturC, 0)} °C (höher als Heizungs-Vorlauf${filterVorlauf ? ` ${fmt(filterVorlauf.wert, 1)} °C` : ''})`, []);
-  }
+    filterVorlauf = mitWw(filterVorlauf);
+  } else filterVorlauf = filterVorlaufStandard;
 
   const tol = e.filter.toleranzUntenProzent ?? g.filterToleranzUntenProzent;
   if (e.filter.toleranzUntenProzent === undefined) {
@@ -227,10 +239,18 @@ export function geraetWaehlen(e: GeraetEingabe, daten: { fws: FwsDaten; wp: WpDa
         if (e.qWpAuslegungW > qWpW * 1.05) gh.push({ stufe: 'warnung', code: 'geraet.auslegungUeberNenn', text: `Leistung am Auslegungspunkt (${fmt(e.qWpAuslegungW / 1000, 1)} kW) liegt über dem Datenbankwert bei A−7/W35 (${fmt(qWpW / 1000, 1)} kW) — Datenblatt prüfen.`, pfad: 'geraet.qWpAuslegungW' });
       } else gh.push({ stufe: 'info', code: 'geraet.kennlinie', text: `${g.hinweise[0] ?? ''} Datenblattwert bei θe und Auslegungs-VL kann eingetragen werden.`, pfad: 'geraet.qWpAuslegungW' });
       const qM = qWpMassgebend.wert;
-      gewaehlt = { id: d.id, bezeichnung: geraetBezeichnung(d), qWp, qWpMassgebend, vorlaufMax, mindestPuffer, dimensionierung: dimensionierung(qh, qM, daten.fws), bivalenz: bivalenz(qh, qM, daten.fws), hinweise: gh };
+      let modulation: Modulation | null = null;
+      const mod = d.modulationKW;
+      if (mod && mod.length === 2 && mod[0]! > 0 && mod[1]! >= mod[0]!) {
+        const minW = tabelle(mod[0]! * 1000, 'W', `Untere Modulationsgrenze ${fmt(mod[0]!, 1)} kW (Gerätedatenbank)`, quelleText);
+        const maxW = tabelle(mod[1]! * 1000, 'W', `Obere Modulationsgrenze ${fmt(mod[1]!, 1)} kW (Gerätedatenbank)`, quelleText);
+        const anteil = qh > 0 ? berechnet(minW.wert / qh, '', `Q_min / Q_h = ${fmt(minW.wert / 1000, 2)} / ${fmt(qh / 1000, 2)} kW = ${fmt((minW.wert / qh) * 100, 0)} %`, [minW]) : null;
+        modulation = { minW, maxW, anteilMinAnQh: anteil };
+      }
+      gewaehlt = { id: d.id, bezeichnung: geraetBezeichnung(d), qWp, qWpMassgebend, vorlaufMax, mindestPuffer, modulation, dimensionierung: dimensionierung(qh, qM, daten.fws), bivalenz: bivalenz(qh, qM, daten.fws), hinweise: gh };
       if (gewaehlt.bivalenz.energieanteil && gewaehlt.bivalenz.energieanteil.herkunft !== 'berechnet') annahmen.push(gewaehlt.bivalenz.energieanteil);
       hinweise.push(...gh);
     }
   }
-  return { quelle: e.filter.quelle, filterVorlauf, qWpMin: qMin, qWpMax: qMax, liste, gewaehlt, annahmen, hinweise };
+  return { quelle: e.filter.quelle, filterVorlauf, filterVorlaufStandard, qWpMin: qMin, qWpMax: qMax, liste, gewaehlt, annahmen, hinweise };
 }

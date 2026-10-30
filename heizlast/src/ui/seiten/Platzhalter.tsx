@@ -1,11 +1,6 @@
 import type { SchrittDef } from '../schritte';
 
 const SESSION: Record<string, string> = {
-  warmwasser: 'Session 8',
-  waermeabgabe: 'Session 8',
-  zuschlaege: 'Session 8',
-  speicher: 'Session 8',
-  waermepumpe: 'Session 8',
   bericht: 'Session 9',
 };
 

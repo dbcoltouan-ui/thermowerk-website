@@ -253,3 +253,30 @@ describe('berechne — Fälle und Leitplanken', () => {
     expect(e.waermeabgabe?.raeume.some((r) => r.id === 'wohnen') ?? false).toBe(false);
   });
 });
+
+describe('berechne — FWS mit Räumen nur für Heizflächen (Session 8)', () => {
+  // Moosseedorf Q_hl 9 304.7 W (Handrechnung), EBF 150 m², FWS Folie 33: EBF ≈ NWF × 1.10
+  // → Raum 20 m²: 9 304.7 / 150 × 1.10 × 20 = 1 364.7 W (Verteilung nach Fläche, Schätzung).
+  const basis = fixture('state-v3-fws-moosseedorf.json');
+  const mitRaum = setzeImState(basis, 'raeume', [{ id: 'r1', name: 'Wohnen', typ: 'wohnen', flaecheM2: 20, bauteile: [] }]);
+
+  it('Raumheizlast ist schon ohne Heizfläche sichtbar; Auslegungs-VL bleibt der Standardwert', () => {
+    const e = berechne(mitRaum, daten);
+    const r = e.waermeabgabe!.raeume[0]!;
+    erwarteNahe(r.phiHL!.wert, 1364.7, 0.1, 'Φ_HL verteilt');
+    expect(r.phiHL!.herkunft).toBe('schaetzung');
+    expect(e.auslegungsVL).toMatchObject({ wert: 55, herkunft: 'fallback' });
+    expect(e.zuschlaege.qh!.wert).toBeCloseTo(berechne(basis, daten).zuschlaege.qh!.wert, 6);
+  });
+
+  it('Guss 10 Glieder H 600 im Raum → θ_VL,req wird die eine Auslegungs-VL (Gerätefilter, MAG)', () => {
+    // 10 m² → Φ_HL ≈ 682 W; Q_N ≈ 960 W (Befund B2: 96 W/Glied) → erreichbar unter 90 °C
+    const s = setzeImState(setzeImState(mitRaum, 'raeume.r1.flaecheM2', 10), 'waermeabgabe.raeume.r1', { heizflaechen: [{ id: 'h1', bauart: 'guss_glieder', hoeheMm: 600, glieder: 10 }] });
+    const e = berechne(s, daten);
+    const r = e.waermeabgabe!.raeume[0]!;
+    expect(r.tVLReq).not.toBeNull();
+    expect(e.auslegungsVL.wert).toBeCloseTo(r.tVLReq!.wert, 6);
+    expect(e.geraet.filterVorlaufStandard!.wert).toBeGreaterThanOrEqual(r.tVLReq!.wert - 1e-6);
+    expect(e.speicher.mag!.n.begruendung).toContain(`${Math.round(r.tVLReq!.wert)} °C`);
+  });
+});
