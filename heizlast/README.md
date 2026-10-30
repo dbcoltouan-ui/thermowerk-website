@@ -18,7 +18,8 @@ Verbindliche Grundlage: `docs/revision/KONTEXT.md` (Zweck, Architektur-Entscheid
 | 7b | **erledigt** (2026-10-30) | Fixes nach Test durch Daniel: Verbrauchserfassung wie im FWS-Rechner oder besser (`src/kern/verbrauchsreihe.ts`: Lieferungen + Tank-/Lagerstände, Zählerstände, Zeiträume taggenau/monatsgenau, Kalenderjahr; Prüfungen; Hochrechnung nach Heizgradtag-Anteil), Heizgradtage automatisch (`data/heizgradtage.json` aus MeteoSchweiz Open Data, `src/kern/heizgradtage.ts`), Klimabereinigung «alles oder nichts», Sanierungswirkung je Zeitraum sichtbar; raumweise ohne Pflicht-Klick (Standard-Bauteiltypen im Kern, `src/kern/standardtypen.ts`, generische Arten boden/decke + Anschluss «wie Gebäude»); Mobil: Popover im Viewport, Schrittleiste zentriert, kein horizontales Scrollen; State v3 mit Migration v2→v3 |
 | 8 | **erledigt** (2026-10-30) | UI Teil 2: Schritt 5 Warmwasser künftig (bedingte Felder, Ladetemperatur → ΔT, Q_w), 6 Wärmeabgabe (Heizkreise, Ziel-Vorlauf, Räume — im FWS-Modus eigene Raumliste nur für Heizflächen —, «+ Heizfläche» mit Maske nach Bauart, «Genauer» mit Modell/Typenschild/Einbau, Live-Zeile Φ_HL · Σ Q · Deckung · θ_VL,req · Ampel · Massnahmen, Gebäude-Box mit Auslegungs-VL-Skala, Ausklammern, Override, alte Heizkurve), 7 Zuschläge & Leistung, 8 Speicher & Hydraulik (WW-Speicher, Puffer mit Kriterien/Override/abgewählt, MAG/SV), 9 Wärmepumpe (Filter mit Herkunft der VL, Liste, Auswahl mit WP-Grössen-Skala, Bivalenz, Modulation); Kern-Ergänzungen `standardwerte`, `filterVorlaufStandard`, `modulation`; Playwright `e2e/waermeabgabe.spec.ts`. Nachtrag (Entscheid Daniel 13:02): keine Zusatzmodule (Förderung/Bewilligung/Offerte gestrichen, Platzhalter entfernt), keine JAZ und kein Hinweis darauf, State v4 ohne `zusatz` |
 | 9 | **erledigt** (2026-10-30) | Bericht: `src/bericht/` (Preact-Komponente aus dem einen Ergebnis, Kapitel nur wenn vollständig ableitbar: Objekt, Zusammenfassung, Rechenweg je Modus — FWS mit Zeitraum-Tabelle je Energieträger inkl. Herleitung der Menge, Heizgradtagen mit Herkunft, Jahresanteil, Sanierungs-Teilperioden; raumweise mit U·A·b-Tabelle je Raum und Bauteil-Grundlage —, Warmwasser, Zuschläge, **Wärmeabgabe** mit Fazit WP-Tauglichkeit, Speicher, Wärmepumpe, Plausibilität, Annahmen & Unsicherheiten, Normen/Quellen), Druck-CSS A4 nach BROSCH_CSS, Schritt 10 mit Vollständigkeits-Check (offene Pflichtangaben sperren, Warnungen übersteuerbar, ohne Gerät nur Warnung), PDF über den Druckdialog, JSON-Export + Laden aus Datei (`verwaltung.importieren`, hydrateState); `data/firma.json` (Absender), Logo `public/img/logo.png`; Tests `tests/bericht/bericht.test.tsx` (Bericht = Dashboard, Relevanz, Export), Playwright `e2e/bericht.spec.ts` (Druck-Smoke Desktop/Mobil, PDF) |
-| 10, 12 | offen | siehe `docs/revision/PLAN.md` §3 — Session 11 (Zusatzmodule) entfällt |
+| 10 | **erledigt** (2026-10-30) | Backend & Cloud-Sync: Anmeldung neu (`functions/api/heizlast-auth.js` + `functions/_lib/heizlast-sitzung.js`: HMAC-signiertes Cookie mit Ablauf 30 d, Sitzungen in D1 mit Widerruf, zeitkonstanter Passwortvergleich, Sperre 5 Fehlversuche / 15 min), Projekte des Neubaus `functions/api/heizlast-projekte.js` (Validierung, Locking 409, 404, keine D1-Texte nach aussen), D1-Schema `migrations/0003_heizlast_neu.sql`; Client `src/state/cloud.ts` + Cloud-Sync in `persistenz.ts` (eine Liste lokal + Cloud, Konflikt-Dialog «überschreiben / Kopie», Drift nur markiert, Status offline/angemeldet in der Topbar); 63 neue Tests + Playwright zwei Browser |
+| 12 | offen | siehe `docs/revision/PLAN.md` §3 — Session 11 (Zusatzmodule) entfällt |
 
 Staging-URL: `https://thermowerk.ch/heizlast-neu/` (bzw. `*.pages.dev/heizlast-neu/`). Das Live-Tool unter `/heizlast/` bleibt bis Session 12 unverändert.
 
@@ -72,7 +73,7 @@ Im Ordner `heizlast/` (Node ≥ 22):
 | `npm run build` | tsc + Vite-Build nach `../public/heizlast-neu/` |
 | `npm run e2e:install` | Chromium für Playwright (einmalig) |
 | `npm run e2e` | Playwright-Smoke (baut, startet Preview, Desktop + Mobil; Screenshots nach `docs/revision/shots-neu/`) |
-| `npm run e2e:staging` | dieselben Durchläufe gegen die deployte Staging-URL (`STAGING_URL` überschreibbar) |
+| `npm run e2e:staging` | dieselben Durchläufe gegen die deployte Staging-URL (`STAGING_URL` überschreibbar; ohne `cloud.spec.ts`, die braucht das Test-Passwort und läuft nur lokal gegen die Functions im Testprozess) |
 
 Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Astro. Cloudflare Pages liefert `dist/` aus, der Vite-Output liegt darin unter `heizlast-neu/`.
 
@@ -80,7 +81,24 @@ Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Ast
 
 - Build-Befehl im Pages-Projekt: `npm run build` (Root). Output: `dist` (wrangler.toml `pages_build_output_dir`).
 - Node-Version: `.node-version` im Root = 22 (Vite 6 braucht ≥ 20.19). Falls im Dashboard `NODE_VERSION` gesetzt ist, muss er ≥ 22 sein.
-- Backend bleibt `functions/api/heizlast-*.js` + D1 `thermowerk-data`; Neubau der Auth in Session 10.
+- Backend: Pages Functions unter `functions/api/` + D1 `thermowerk-data` (Binding `DB`). Umgebungsvariablen (Production): `HEIZLAST_PASSWORD` (Login-Passwort), `HEIZLAST_COOKIE_SECRET` (≥ 32 Zeichen, signiert die Cookies). Fehlt eine, antworten die Endpoints mit 500 und nennen sie. Die Tabellen legen die Functions beim ersten Zugriff selbst an (gleich `migrations/0003_heizlast_neu.sql`, Test vergleicht beide).
+
+## Backend-Endpoints (Session 10)
+
+Alle Antworten JSON mit `Cache-Control: no-store`; D1-Fehler nur ins Log, nach aussen «Serverfehler».
+
+| Endpoint | Zweck |
+|---|---|
+| `POST /api/heizlast-auth` `{ password }` | 200 `{ success, ablauf }` + Cookie `tw_heizlast_auth` (HttpOnly, Secure, SameSite=Lax, 30 Tage) · 401 falsch · 429 gesperrt (`Retry-After`, `wartenS`) · 400 ohne Passwort |
+| `GET /api/heizlast-auth` | 200 `{ authed, ablauf? }` (Signatur, Ablauf und Sitzung in D1 geprüft) |
+| `DELETE /api/heizlast-auth` | widerruft die Sitzung in D1, löscht das Cookie |
+| `GET /api/heizlast-projekte` | Liste `{ ok, projekte: [{ id, name, methode, schemaVersion, qhW, qhlW, erstellt, version }] }` (ohne State) |
+| `GET /api/heizlast-projekte?id=` | `{ ok, projekt: { …, stateJson } }` · 404 |
+| `PUT /api/heizlast-projekte?id=` `{ stateJson, basisVersion, qhW?, qhlW? }` | `basisVersion: null` = anlegen (201, 409 falls vorhanden); sonst ändern (200, 409 mit Server-Stand `konflikt.projekt` falls neuer, 404 falls in der Cloud gelöscht). Prüft id-Format `^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$`, ≤ 512 KB, gültiges JSON, `meta.id` = id, `meta.schemaVersion` 1 … aktuelle (`src/state/version.ts`); 400/413/415 sonst. Der Server rechnet und migriert nicht. |
+| `DELETE /api/heizlast-projekte?id=[&version=]` | 200 · 404 · 409 (Version veraltet) |
+| `/api/heizlast-projects` | **altes Tool** (Tabelle `heizlast_project`), unverändert bis zum Go-Live, aber mit derselben sicheren Anmeldung; entfällt in Session 12 |
+
+Cookie: `v1.<tokenId>.<ablauf>.<HMAC-SHA256>`; gültig nur mit Sitzung in `heizlast_sitzung` (nicht widerrufen). Sperre: `login_attempts` speichert den HMAC der IP, keine Klartext-IP. Client: `src/state/cloud.ts` (Antworten → Status: offline, abgemeldet, nicht gefunden, abgelehnt, Konflikt), Abgleich in `persistenz.ts` (Speichern lädt im Hintergrund hoch; Anmelden lädt lokal gespeicherte Projekte hoch; in der Cloud gelöschte Projekte werden nur markiert und erst beim ausdrücklichen Speichern wieder angelegt).
 
 ## Datenquellen
 
@@ -90,7 +108,8 @@ Als Annahme gekennzeichnet (nicht öffentlich belegbar): Höhengradient θe 0.6 
 
 ## Offene Punkte
 
-- Sessions 10 und 12 gemäss Plan (Session 11 entfällt).
+- Session 12 gemäss Plan (Session 11 entfällt). Beim Go-Live: `functions/api/heizlast-projects.js` und Tabelle `heizlast_project` (altes Tool) archivieren.
+- Session 10: Cloud-Tests laufen lokal gegen die echten Functions (Vitest + Playwright mit SQLite über `node:sqlite`, Node ≥ 22.13; Laufzeit-Kontrolle mit `wrangler pages dev`, siehe PROTOKOLL). Gegen Staging prüft Claude ohne Passwort (gefälschtes Cookie 401, falsches Passwort 401, Sperre 429, Konfiguration vorhanden); die echte Anmeldung testet Daniel (Claude gibt kein echtes Passwort ein). Projekte des alten Tools bleiben in `heizlast_project` und erscheinen nicht im Neubau (nicht importierbar, Entscheid Daniel).
 - Session 9: PDF entsteht über den Druckdialog des Browsers (keine Seitenzahlen; Chrome/Safari drucken Kopf-/Fusszeile nach eigener Einstellung). Lange Quellenketten (z. B. alle Datenblätter einer Heizkörper-Tabelle) werden im Annahmen-Kapitel auf die ersten Angaben gekürzt («u. a.»), vollständig in `data/*.json`.
 - Grundsatz (Daniel 30.10.): nur einbauen, was vollständig und belegt ableitbar ist — sonst weglassen, ohne Verweis in der App.
 - Session 8, JAZ: **nicht eingebaut** und in der App nicht erwähnt (Grundsatz oben). Begründung: Die greifbaren Kurzverfahren (VDI 4650 Bin-Methode, GEG/BEG-Mindestwerte in Wissensbasis I) sind deutsch und brauchen Stundenhäufigkeiten der Aussentemperatur je Station sowie COP-Kennwerte bei der Auslegungs-VL; die Gerätedatenbank kennt den COP nur bei W35, die FWS-Unterlagen enthalten keine JAZ-Formel — nicht vollständig ableitbar.

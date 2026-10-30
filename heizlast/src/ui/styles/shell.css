@@ -80,16 +80,65 @@
   display: flex;
   gap: var(--s-1);
 }
-.topbar .btn {
+.topbar__aktionen .btn {
   border-color: transparent;
   background: transparent;
   color: #fff;
 }
-.topbar .btn:hover:not(:disabled) {
+.topbar__aktionen .btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.12);
 }
-.topbar .btn--primary {
+.topbar__aktionen .btn--primary {
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ---- Cloud-Status (Session 10): Punkt + Kurztext, Klick öffnet die Projekte ---- */
+.cloudchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cloudchip:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.cloudchip__punkt {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--ink-400);
+}
+.cloudchip--angemeldet .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--angemeldet {
+  background: var(--ok-500);
+}
+.cloudchip--ausstehend .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--ausstehend,
+.cloudchip--abgleich .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--abgleich,
+.cloudchip--offline .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--offline {
+  background: var(--warn-500);
+}
+.cloudchip--konflikt .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--konflikt,
+.cloudchip--fehler .cloudchip__punkt,
+.cloudchip__punkt.cloudchip--fehler {
+  background: var(--bad-500);
+}
+.cloudchip--konflikt {
+  border-color: #fff;
+  font-weight: var(--fw-semibold);
 }
 
 /* ---- Schrittleiste ---- */
@@ -545,14 +594,26 @@
     gap: var(--s-2);
     padding: 0 var(--s-3);
   }
-  .topbar__marke small,
+  /* Mobil: Projektname vor Marke; Cloud nur als Punkt, Text nur bei Offline/Konflikt (Langtext im Tooltip und im Projekte-Dialog). */
+  .topbar__marke,
   .topbar__aktionen [data-testid='projekte'] + .btn {
     display: none;
   }
-  .topbar__projekt {
-    padding-left: var(--s-2);
+  .cloudchip {
+    padding: 6px 7px;
   }
-  .topbar .btn {
+  .cloudchip__text {
+    display: none;
+  }
+  .cloudchip--offline .cloudchip__text,
+  .cloudchip--konflikt .cloudchip__text {
+    display: inline;
+  }
+  .topbar__projekt {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .topbar__aktionen .btn {
     padding: 8px;
   }
   .haupt {

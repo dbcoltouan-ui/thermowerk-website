@@ -29,7 +29,10 @@ import type { Zusatzverbraucher } from '../kern/zuschlaege';
 import type { Energiestandard } from '../kern/plausi';
 import type { Dichtheit, Lueftungskonzept } from '../daten/sia384';
 
-export const SCHEMA_VERSION = 4 as const;
+import { SCHEMA_VERSION } from './version';
+
+/** Aktuelle Schemaversion (eigene Datei `version.ts`, damit das Backend sie ohne Kern importieren kann). */
+export { SCHEMA_VERSION };
 
 export type Methode = 'fws' | 'raumweise';
 /** Woher die FWS-Heizlast kommt (Schritt 3A «Verbrauchsdaten vorhanden?»). */

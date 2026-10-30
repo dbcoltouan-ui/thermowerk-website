@@ -21,3 +21,6 @@ heizlast/test-results/
 heizlast/test-results-staging/
 heizlast/playwright-report/
 public/heizlast-neu/
+
+# wrangler (lokale Builds / pages dev)
+.wrangler/

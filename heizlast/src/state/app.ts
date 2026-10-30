@@ -3,6 +3,7 @@
  * `erstelleStore` / `erstelleProjektverwaltung`; dieses Modul wird nur von der UI importiert.
  */
 import { alleDaten } from '../daten/index';
+import { erstelleCloud } from './cloud';
 import { browserSpeicher, erstelleProjektverwaltung } from './persistenz';
 import { erstelleStore } from './store';
 
@@ -12,4 +13,5 @@ export const verwaltung = erstelleProjektverwaltung({
   store,
   speicher: browserSpeicher(),
   bestaetigen: (frage) => globalThis.confirm?.(frage) ?? false,
+  cloud: erstelleCloud(),
 });

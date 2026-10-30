@@ -1,6 +1,8 @@
-// Cloudflare Pages Function: Heizlast-Projekte (Liste / Laden / Speichern / Loeschen)
-// Backend ist jetzt Cloudflare D1 (Binding env.DB, Tabelle heizlast_project).
-// Alle Endpoints erfordern den Auth-Cookie (gesetzt via /api/heizlast-auth).
+// Cloudflare Pages Function: Heizlast-Projekte des ALTEN Tools unter /heizlast/ (Liste / Laden / Speichern / Loeschen)
+// Backend ist Cloudflare D1 (Binding env.DB, Tabelle heizlast_project).
+// Seit Session 10 (2026-10-30) gilt dieselbe sichere Anmeldung wie fuer den Neubau (signiertes Cookie +
+// Sitzung in D1, siehe _lib/heizlast-sitzung.js); sonst unveraendert, damit das alte Tool bis zum Go-Live
+// laeuft. Der Neubau nutzt /api/heizlast-projekte. Diese Datei faellt beim Go-Live (Session 12) weg.
 //
 // Response-Shape (wird vom Single-File-HTML-Client unter /heizlast/ genutzt):
 //   GET            → { success, projects: [ { _id, projectName, customerName, address, qhl, qh, ebf, status, notes, createdAt, updatedAt } ] }
@@ -8,17 +10,7 @@
 //   POST           → { success, id }
 //   DELETE ?id=    → { success: true }
 
-function checkAuth(context) {
-  const cookie = context.request.headers.get('Cookie') || '';
-  return cookie.includes('tw_heizlast_auth=');
-}
-
-function unauthorized() {
-  return new Response(JSON.stringify({ success: false, error: 'Nicht autorisiert' }), {
-    status: 401,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+import { anmeldungPruefen } from '../_lib/heizlast-sitzung.js';
 
 function jsonError(status, error) {
   return new Response(JSON.stringify({ success: false, error }), {
@@ -56,7 +48,8 @@ function rowToProject(row, { withState } = { withState: false }) {
 // GET /api/heizlast-projects              → Liste (ohne state_json)
 // GET /api/heizlast-projects?id=<uuid>    → Einzelprojekt inkl. state_json
 export async function onRequestGet(context) {
-  if (!checkAuth(context)) return unauthorized();
+  const auth = await anmeldungPruefen(context);
+  if (!auth.ok) return auth.antwort;
   const db = context.env.DB;
   if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 
@@ -88,7 +81,8 @@ export async function onRequestGet(context) {
 // POST /api/heizlast-projects  → create-or-replace
 // Body: { id?, projectName, customerName, address, qhl, qh, ebf, stateJson, status, notes, createdAt? }
 export async function onRequestPost(context) {
-  if (!checkAuth(context)) return unauthorized();
+  const auth = await anmeldungPruefen(context);
+  if (!auth.ok) return auth.antwort;
   const db = context.env.DB;
   if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 
@@ -136,7 +130,8 @@ export async function onRequestPost(context) {
 
 // DELETE /api/heizlast-projects?id=<uuid>
 export async function onRequestDelete(context) {
-  if (!checkAuth(context)) return unauthorized();
+  const auth = await anmeldungPruefen(context);
+  if (!auth.ok) return auth.antwort;
   const db = context.env.DB;
   if (!db) return jsonError(500, 'D1-Binding fehlt (env.DB)');
 

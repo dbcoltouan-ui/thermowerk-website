@@ -1047,6 +1047,75 @@ select.eingabe__feld {
   align-items: center;
 }
 
+/* ---- Cloud (Session 10): Bereich im Projekte-Dialog, Marke je Projekt, Konflikt-Dialog ---- */
+.cloudbereich {
+  display: grid;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink-50);
+  border-left: 3px solid var(--ink-300);
+  min-width: 0;
+}
+.cloudbereich--angemeldet {
+  border-left-color: var(--ok-500);
+}
+.cloudbereich--ausstehend,
+.cloudbereich--abgleich,
+.cloudbereich--offline {
+  border-left-color: var(--warn-500);
+}
+.cloudbereich--fehler,
+.cloudbereich--konflikt {
+  border-left-color: var(--bad-500);
+}
+.cloudbereich__status {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.cloudbereich__aktionen,
+.konflikt__aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.cloudbereich__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+.cloudbereich__zeile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: 4px;
+}
+.cloudbereich__zeile .eingabe {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.cloudmarke {
+  justify-self: start;
+  padding: 0 6px;
+  font-size: var(--fs-xs);
+  border: 1px solid var(--ink-200);
+  color: var(--ink-700);
+}
+.cloudmarke--synchron {
+  border-color: var(--ok-500);
+  color: var(--ok-500);
+}
+.cloudmarke--lokalNeuer,
+.cloudmarke--serverNeuer,
+.cloudmarke--nichtMehrInCloud {
+  border-color: var(--warn-500);
+  color: var(--warn-500);
+}
+.konflikt__aktionen {
+  margin: var(--s-4) 0 var(--s-3);
+}
+
 /* ---- Verbrauchsreihen (Session 7b) ---- */
 .reihe {
   display: grid;

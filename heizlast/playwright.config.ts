@@ -5,6 +5,8 @@ const BASE = `http://127.0.0.1:${PORT}/heizlast-neu/`;
 
 export default defineConfig({
   testDir: './e2e',
+  // Nur gegen das echte Backend (Staging): braucht /api/heizlast-auth.
+  testIgnore: ['cloud-staging.spec.ts'],
   timeout: 30_000,
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,

@@ -5,6 +5,7 @@
 # wrangler wird hier nur fuer D1-Verwaltung genutzt:
 #   wrangler d1 execute thermowerk-data --file=migrations/0001_contact_submission.sql
 #   wrangler d1 execute thermowerk-data --file=migrations/0002_heizlast_project.sql
+#   wrangler d1 execute thermowerk-data --remote --file=migrations/0003_heizlast_neu.sql   (optional: die Heizlast-Functions legen diese Tabellen selbst an)
 #   wrangler d1 execute thermowerk-data --command="SELECT COUNT(*) FROM contact_submission"
 
 name = "thermowerk-website"

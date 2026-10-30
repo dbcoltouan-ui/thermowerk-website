@@ -3,6 +3,7 @@ import { verwaltung } from '../../state/app';
 import { geheZu, projektnameAnzeige, speicherfehler, speicherstatus } from '../../state/ui';
 import { kW } from '../format';
 import { methodeKurz } from '../ergebnisTexte';
+import { CloudBereich, CloudChip, datumZeit, KonfliktDialog, ZUSTAND } from './Cloud';
 
 const STATUS: Record<string, string> = {
   neu: 'Neues Projekt',
@@ -11,19 +12,19 @@ const STATUS: Record<string, string> = {
   fehler: 'Speichern fehlgeschlagen',
 };
 
-function datum(iso: string): string {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('de-CH', { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-/** Projektliste (lokal; Cloud folgt in Session 10). Laden fragt bei ungespeicherten Änderungen nach. */
+/**
+ * Projektliste: lokale und Cloud-Projekte in einer Liste (jedes Projekt einmal, mit Abgleich-Zustand), oben
+ * Anmeldung/Cloud-Status. Laden fragt bei ungespeicherten Änderungen nach; Öffnen eines Cloud-Projekts lädt es.
+ */
 function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [meldung, setMeldung] = useState<string | null>(null);
   useEffect(() => {
     const d = ref.current;
     if (d && !d.open) d.showModal?.();
+    void verwaltung.cloudAbgleichen();
   }, []);
-  const liste = verwaltung.liste.value;
+  const liste = verwaltung.zeilen.value;
   return (
     <dialog ref={ref} class="dialog" onClose={onSchliessen} onCancel={onSchliessen} aria-labelledby="projekte-titel" data-testid="projekte-dialog">
       <div class="dialog__kopf">
@@ -32,6 +33,12 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
           Schliessen
         </button>
       </div>
+      <CloudBereich />
+      {meldung && (
+        <p class="meldung meldung--warnung" role="alert" data-testid="projekte-meldung">
+          {meldung}
+        </p>
+      )}
       {liste.length === 0 ? (
         <p class="leerzustand">Noch keine Projekte gespeichert. «Speichern» legt das aktuelle Projekt hier ab.</p>
       ) : (
@@ -41,8 +48,13 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
               <div>
                 <strong>{p.name || 'Ohne Namen'}</strong>
                 <span class="mute">
-                  {methodeKurz(p.methode)}, Q<sub>h</sub> {kW(p.qhW)}, gespeichert {datum(p.gespeichert)}
+                  {methodeKurz(p.methode)}, Q<sub>h</sub> {kW(p.qhW)}, gespeichert {datumZeit(p.datum)}
                 </span>
+                {p.cloud && (
+                  <span class={`cloudmarke cloudmarke--${p.cloud}`} data-testid={`projekt-${p.id}-cloud`} data-zustand={p.cloud}>
+                    {ZUSTAND[p.cloud]}
+                  </span>
+                )}
               </div>
               <div class="projektliste__aktionen">
                 <button
@@ -61,8 +73,16 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
                 <button
                   type="button"
                   class="btn btn--ghost link-knopf--gefahr"
-                  onClick={() => {
-                    if (globalThis.confirm?.(`Projekt «${p.name || 'Ohne Namen'}» endgültig löschen?`)) verwaltung.loeschen(p.id);
+                  onClick={async () => {
+                    const name = p.name || 'Ohne Namen';
+                    const inCloud = p.cloud === 'synchron' || p.cloud === 'lokalNeuer' || p.cloud === 'serverNeuer' || p.cloud === 'nurCloud';
+                    if (!inCloud) {
+                      if (globalThis.confirm?.(`Projekt «${name}» auf diesem Gerät endgültig löschen?`)) verwaltung.loeschen(p.id);
+                      return;
+                    }
+                    if (!globalThis.confirm?.(`Projekt «${name}» endgültig löschen — auf diesem Gerät und in der Cloud (für alle Geräte)?`)) return;
+                    const r = await verwaltung.ueberallLoeschen(p.id);
+                    setMeldung(r.ok ? null : r.text);
                   }}
                   data-testid={`projekt-${p.id}-loeschen`}
                 >
@@ -102,6 +122,7 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
 
 export function Topbar() {
   const [projekteOffen, setProjekteOffen] = useState(false);
+  const cloudAus = verwaltung.cloudStatus.value === 'aus';
   return (
     <header class="topbar">
       <div class="topbar__marke">
@@ -115,6 +136,7 @@ export function Topbar() {
           {STATUS[speicherstatus.value]}
         </span>
       </div>
+      {!cloudAus && <CloudChip onKlick={() => setProjekteOffen(true)} />}
       <div class="topbar__aktionen">
         <button type="button" class="btn btn--ghost" onClick={async () => { if (await verwaltung.neu()) geheZu('projekt'); }} data-testid="projekt-neu">
           Neu
@@ -130,6 +152,7 @@ export function Topbar() {
         </button>
       </div>
       {projekteOffen && <ProjekteDialog onSchliessen={() => setProjekteOffen(false)} />}
+      <KonfliktDialog />
     </header>
   );
 }

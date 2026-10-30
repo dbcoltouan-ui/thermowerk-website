@@ -31,7 +31,7 @@
 
 ## Heizlast — Neubau (seit 2026-10-29, Ordner `heizlast/`)
 
-Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Seit Session 7b (2026-10-30): State-Schema v3 (`verbrauch.reihen` je Energieträger, Migration v2→v3), Heizgradtage aus MeteoSchweiz Open Data (`heizlast/data/heizgradtage.json`, erneuern mit `node scripts/heizgradtage-bauen.mjs` im Ordner `heizlast/`), Standard-Bauteiltypen im Kern. Seit Session 8 (2026-10-30): Schritte 5–9 inkl. Heizkörper-Modul (Wärmeabgabe), State-Schema v4; **Fokus ist das Heizkörper-Modul — Förderung, Bewilligung und Offerte werden nicht gebaut (Session 11 entfällt)**, und es wird nur eingebaut, was vollständig und belegt ableitbar ist (z. B. keine JAZ, kein Hinweis darauf). Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
+Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Seit Session 7b (2026-10-30): State-Schema v3 (`verbrauch.reihen` je Energieträger, Migration v2→v3), Heizgradtage aus MeteoSchweiz Open Data (`heizlast/data/heizgradtage.json`, erneuern mit `node scripts/heizgradtage-bauen.mjs` im Ordner `heizlast/`), Standard-Bauteiltypen im Kern. Seit Session 8 (2026-10-30): Schritte 5–9 inkl. Heizkörper-Modul (Wärmeabgabe), State-Schema v4; **Fokus ist das Heizkörper-Modul — Förderung, Bewilligung und Offerte werden nicht gebaut (Session 11 entfällt)**, und es wird nur eingebaut, was vollständig und belegt ableitbar ist (z. B. keine JAZ, kein Hinweis darauf). Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. **Seit Session 10 (2026-10-30): Backend neu** — `functions/api/heizlast-auth.js` (HMAC-signiertes Cookie `tw_heizlast_auth`, Sitzungen in D1 mit Widerruf, Sperre 5 Fehlversuche/15 min; auch das alte Tool meldet sich darüber an, gleiche Antwortform), Projekte des Neubaus über `functions/api/heizlast-projekte.js` (D1-Tabelle `heizlast_projekt`, optimistisches Locking), gemeinsame Hilfen in `functions/_lib/` (keine Routen), Schema `migrations/0003_heizlast_neu.sql` (Functions legen die Tabellen beim ersten Zugriff selbst an). Das alte `functions/api/heizlast-projects.js` (Tabelle `heizlast_project`) prüft jetzt dieselbe sichere Anmeldung und fällt in Session 12 weg. Endpoints und Details: `heizlast/README.md` Abschnitt «Backend-Endpoints». Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
 
 ---
 
@@ -44,7 +44,7 @@ Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `hei
 - **Live-Deploy:** `C:\Users\Daniel\Documents\thermowerk-website\public\heizlast\index.html` (+ `style.css`, `img/`)
 - **Backend-Endpoints bleiben im Website-Repo aktiv:** `functions/api/heizlast-auth.js` + `functions/api/heizlast-projects.js` (bedienen jetzt den Single-File-Rechner statt Astro).
 - **Datenbank:** Cloudflare D1 (`thermowerk-data`, Region WEUR) — unverändert.
-- **Auth:** Cookie `tw_heizlast_auth` (HttpOnly, Secure, SameSite=Lax).
+- **Auth:** Cookie `tw_heizlast_auth` (HttpOnly, Secure, SameSite=Lax), seit 2026-10-30 HMAC-signiert mit Sitzung in D1 (siehe Abschnitt «Heizlast — Neubau»).
 
 ### Wichtige Doku im Final-Heizlast-Ordner
 - `BACKUP-GUIDE.md` — wann/wie Backups, Rollback-Prozedur, Claude-Workflow
@@ -91,7 +91,7 @@ Export-Modal bietet vier abwählbare Elemente: Rechenweg (Default an), drei Noti
 ## Stack (Website)
 - **Astro 5.5** – statisches Framework
 - **Cloudflare Pages** – Hosting, auto-deploy per GitHub Push (thermowerk-website.pages.dev)
-- **Cloudflare D1** – Datenbank für Heizlast-Projekte (Binding `HEIZLAST_DB`)
+- **Cloudflare D1** – Datenbank für Kontaktanfragen und Heizlast-Projekte (Binding `DB`)
 - **Cloudflare Pages Functions** – serverseitige API (`functions/api/*.js`)
 - **Sanity CMS** – vollständig integriert (Project ID: `wpbatz1m`, Dataset: `production`)
   - Studio: https://thermowerk.sanity.studio
@@ -113,8 +113,10 @@ Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
 - Umgebungsvariablen (nie in Git!): `.env` → `SANITY_API_TOKEN`
 - Cloudflare Pages Functions:
   - `functions/api/contact.js` (Kontaktformular → D1 + Resend)
-  - `functions/api/heizlast-auth.js` (Login/Logout, Cookie-basiert)
-  - `functions/api/heizlast-projects.js` (Projekt-Liste, Save, Load, Delete gegen D1)
+  - `functions/api/heizlast-auth.js` (Login/Logout, signiertes Cookie + Sitzung in D1, Sperre nach Fehlversuchen)
+  - `functions/api/heizlast-projekte.js` (Projekte des Heizlast-Neubaus, D1 `heizlast_projekt`)
+  - `functions/api/heizlast-projects.js` (Projekte des alten Tools, D1 `heizlast_project`, bis Go-Live)
+  - `functions/_lib/` (gemeinsame Hilfen ohne eigene Route)
 - Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien)
 - Doku: `docs/` (z. B. Resend-API-Key-Screenshot)
 - Sanity-Client: `src/lib/sanity.ts` (`getAllSections()`, `getSingleton()`, `getPage()`)
@@ -140,8 +142,8 @@ Bei jeder Publish-Aktion im Dataset `production` wird ein POST an den Cloudflare
 - `SANITY_PROJECT_ID` = `wpbatz1m`
 - `SANITY_API_TOKEN` = Editor-Token (Sanity-Fetch in Build + ggf. Writes)
 - `RESEND_API_KEY` = API-Key für E-Mail-Versand aus `contact.js`
-- D1-Binding `DB` (Tabelle `contact_submission`) + `HEIZLAST_DB` für Heizlast-Endpoints
-- `HEIZLAST_AUTH_PASSWORD` + `HEIZLAST_COOKIE_SECRET` für Auth-Flow
+- D1-Binding `DB` (Datenbank `thermowerk-data`: Tabellen `contact_submission`, `heizlast_project` (altes Tool), `heizlast_projekt`, `heizlast_sitzung`, `login_attempts`) — ein Binding für alle Endpoints (ein `HEIZLAST_DB` gibt es nicht)
+- `HEIZLAST_PASSWORD` (Login-Passwort Heizlast) + `HEIZLAST_COOKIE_SECRET` (≥ 32 Zeichen, signiert die Login-Cookies; fehlt es, antwortet `/api/heizlast-auth` mit 500 «Server-Konfiguration fehlt»)
 
 ## Kontaktformular (D1 + Resend, seit Phase 2 Migration 2026-04-21)
 Ein einziger POST aus dem Browser an `/api/contact` (siehe `src/pages/index.astro`). Die CF-Function:
