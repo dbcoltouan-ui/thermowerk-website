@@ -168,29 +168,26 @@ function Gewaehlt() {
             <dd><WertAnzeige wert={g.mindestPuffer} text={zahl(g.mindestPuffer.wert, 'l')} /></dd>
           </div>
         )}
-        <div>
-          <dt>Modulation</dt>
-          <dd data-testid="wp-modulation">
-            {mod ? (
-              <>
-                {kW(mod.minW.wert, 1)} – {kW(mod.maxW.wert, 1)}
-                {mod.anteilMinAnQh && <span class="mute"> · untere Grenze {fmt(mod.anteilMinAnQh.wert * 100, 0)} % von Q<sub>h</sub></span>}
-              </>
-            ) : (
-              <span class="mute">nicht in der Datenbank — Datenblatt</span>
-            )}
-          </dd>
-        </div>
+        {mod && (
+          <div>
+            <dt>Modulation</dt>
+            <dd data-testid="wp-modulation">
+              {kW(mod.minW.wert, 1)} – {kW(mod.maxW.wert, 1)}
+              {mod.anteilMinAnQh && <span class="mute"> · untere Grenze {fmt(mod.anteilMinAnQh.wert * 100, 0)} % von Q<sub>h</sub></span>}
+            </dd>
+          </div>
+        )}
       </dl>
-      <p class="zeile-info" data-testid="wp-jaz">
-        Jahresarbeitszahl: hier bewusst nicht geschätzt — es gibt keine belegte Kurzformel für Schweizer Verhältnisse, und die Datenbank kennt den COP nur bei W35. Für eine JAZ-Angabe das Rechentool WPesti (FWS) oder die Herstellersoftware verwenden.
-      </p>
       <Meldungen schritt="waermepumpe" ohne={[...LISTE_CODES, ...FELD_CODES]} testid="wp-meldungen" />
     </Abschnitt>
   );
 }
 
-/** Schritt 9 — Wärmepumpe: Filter (Auslegungs-VL aus Schritt 6, Q_h aus Schritt 7), Liste aus dem Ergebnis, Auswahl mit Skala, Bivalenz, Modulation. */
+/**
+ * Schritt 9 — Wärmepumpe: Filter (Auslegungs-VL aus Schritt 6, Q_h aus Schritt 7), Liste aus dem Ergebnis, Auswahl mit Skala,
+ * Bivalenz, Modulation (nur wenn in der Datenbank erfasst). Keine JAZ: nicht vollständig ableitbar (Daniel 30.10.: nur
+ * einbauen, was komplett und ableitbar ist — sonst weglassen, ohne Verweis).
+ */
 export function Waermepumpe() {
   return (
     <>

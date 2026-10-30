@@ -257,7 +257,7 @@ describe('berechne — Fälle und Leitplanken', () => {
 describe('berechne — FWS mit Räumen nur für Heizflächen (Session 8)', () => {
   // Moosseedorf Q_hl 9 304.7 W (Handrechnung), EBF 150 m², FWS Folie 33: EBF ≈ NWF × 1.10
   // → Raum 20 m²: 9 304.7 / 150 × 1.10 × 20 = 1 364.7 W (Verteilung nach Fläche, Schätzung).
-  const basis = fixture('state-v3-fws-moosseedorf.json');
+  const basis = fixture('state-v4-fws-moosseedorf.json');
   const mitRaum = setzeImState(basis, 'raeume', [{ id: 'r1', name: 'Wohnen', typ: 'wohnen', flaecheM2: 20, bauteile: [] }]);
 
   it('Raumheizlast ist schon ohne Heizfläche sichtbar; Auslegungs-VL bleibt der Standardwert', () => {

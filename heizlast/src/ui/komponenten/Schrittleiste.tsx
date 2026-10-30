@@ -4,25 +4,21 @@ import { STATUS_TEXT } from '../schritte';
 
 interface Props {
   schritte: ReadonlyArray<SchrittDef>;
-  /** Aktiver Schritt; null, solange ein Zusatzmodul offen ist. */
-  aktiv: SchrittId | null;
+  aktiv: SchrittId;
   status: Partial<Record<string, SchrittStatus>>;
   onWahl: (id: SchrittId) => void;
-  /** Offenes Zusatzmodul (eigene Gruppe am Ende der Leiste, ohne Status). */
-  zusatz?: string | null;
-  onZusatz?: () => void;
 }
 
 /**
  * Schrittleiste: nur relevante Schritte, Status je Schritt aus dem Ergebnis. Sticky unter der Topbar;
  * mobil kompakt (Nummern, aktiver Schritt mit Titel), der aktive Schritt wird in den sichtbaren Bereich gerollt.
  */
-export function Schrittleiste({ schritte, aktiv, status, onWahl, zusatz = null, onZusatz }: Props) {
+export function Schrittleiste({ schritte, aktiv, status, onWahl }: Props) {
   const liste = useRef<HTMLOListElement>(null);
   // Aktiven Schritt horizontal in die Mitte der Leiste rollen — nur die Leiste scrollt, nie die Seite (Session 7b).
   useEffect(() => {
     const l = liste.current;
-    const el = l?.querySelector<HTMLElement>('[aria-current="step"], [aria-current="page"]');
+    const el = l?.querySelector<HTMLElement>('[aria-current="step"]');
     if (!l || !el) return;
     const lr = l.getBoundingClientRect();
     const er = el.getBoundingClientRect();
@@ -31,7 +27,7 @@ export function Schrittleiste({ schritte, aktiv, status, onWahl, zusatz = null, 
     const links = Math.max(0, Math.min(max, ziel));
     if (typeof l.scrollTo === 'function') l.scrollTo({ left: links, behavior: 'smooth' });
     else l.scrollLeft = links;
-  }, [aktiv, zusatz]);
+  }, [aktiv]);
   const index = schritte.findIndex((s) => s.id === aktiv);
   return (
     <nav class="stepper" aria-label="Schritte">
@@ -48,17 +44,9 @@ export function Schrittleiste({ schritte, aktiv, status, onWahl, zusatz = null, 
             </li>
           );
         })}
-        {onZusatz && (
-          <li class="stepper__schritt stepper__schritt--zusatz">
-            <button type="button" class="stepper__btn stepper__btn--zusatz" aria-current={zusatz ? 'page' : undefined} onClick={onZusatz} data-testid="schritt-zusatz" title="Zusatzmodule: Förderung, Bewilligung, Offerte">
-              <span class="stepper__nr">+</span>
-              <span class="stepper__titel">Zusatzmodule</span>
-            </button>
-          </li>
-        )}
       </ol>
       <span class="stepper__position" aria-hidden="true">
-        {zusatz ? '+' : `${index + 1}/${schritte.length}`}
+        {index + 1}/{schritte.length}
       </span>
     </nav>
   );

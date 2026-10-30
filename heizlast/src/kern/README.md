@@ -21,7 +21,6 @@ Einziger Rechenpfad ab Session 6: `berechne(state, daten) → Ergebnis`. Jeder b
 | `verbrauchsreihe.ts` | 7b | Vier Eingabearten je Energieträger → Zeiträume mit Menge und Rechenweg (Lieferungen + Tank-/Lagerstände, Zählerstände, von–bis, Kalenderjahr), Prüfungen, Heizgradtage je Zeitraum |
 | `heizgradtage.ts` | 7b | HGT 20/12 je Zeitraum aus Monatswerten (Teilmonate anteilig), Jahresreferenz für die Hochrechnung |
 | `standardtypen.ts` | 7b | Standard-Bauteiltypen ohne eigenen Typ, generische Raum-Bauteilarten `boden`/`decke`, Anschluss `auto` aus Keller/Dachform |
-| `zusatz/` | 11 | Förderung, Bewilligung, Offerte |
 
 ## Konventionen
 
@@ -200,4 +199,4 @@ eintragMitHgt(zeitraum, { stationKey, hgt: heizgradtageDaten(), klima: klimaDate
 - `geraet.ts`: `GeraetErgebnis.filterVorlaufStandard` = Filter-Vorlauf ohne eigene Angabe (Auslegungs-VL bzw. höhere WW-Ladetemperatur); `GewaehltesGeraet.modulation { minW, maxW, anteilMinAnQh }` aus `waermepumpen.json modulationKW` (nur 5 Geräte erfasst), sonst `null`. Keine Ampel für die Modulation (keine belegte Schwelle).
 - `berechne.ts`: im FWS-Modus wird die Wärmeabgabe gerechnet, sobald Räume erfasst sind (Raumheizlast nach Fläche verteilt schon vor der ersten Heizfläche sichtbar); Rechenwerte unverändert (Test Moosseedorf + Raum 20 m² → Φ_HL 1 364.7 W).
 - `relevanz.ts`: `waermeabgabe.raeume.*.ausklammernGrund` (nur ausgeklammert), `waermeabgabe.raeume.*.heizflaechen.*.kreisId` (nur mit Heizkreisen).
-- JAZ: bewusst nicht geschätzt (README «Offene Punkte», Session 8).
+- Keine JAZ (nicht vollständig ableitbar, Grundsatz Daniel 30.10.); die UI zeigt die Modulation nur, wenn sie in der Datenbank erfasst ist.

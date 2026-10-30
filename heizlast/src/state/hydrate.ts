@@ -12,6 +12,7 @@
  *  - v2: Schema Session 6 (Verbrauch als flache Liste `verbrauch.eintraege`).
  *  - v3: Session 7b — `verbrauch.reihen` (eine Reihe je Energieträger mit Erfassungsart) statt `eintraege`;
  *    Raum-Bauteile dürfen generische Art (`boden`/`decke`) und Anschluss `auto` tragen (bestehende bleiben gültig).
+ *  - v4: Session 8 (Nachtrag 30.10.) — Platzhalter `zusatz` (Förderung/Bewilligung/Offerte) entfällt: nicht im Umfang (Daniel).
  * Projekte des alten Tools (`objekt`, `heizung`, `detail` …) sind ausdrücklich nicht importierbar
  * (Entscheid Daniel, KONTEXT §2 «State») und werden mit klarer Meldung abgelehnt.
  */
@@ -72,8 +73,17 @@ const v2ZuV3: Migration = (raw) => {
   return { raw: out, protokoll };
 };
 
+/** v3 → v4: Platzhalter der Zusatzmodule entfernen (Förderung, Bewilligung, Offerte sind nicht im Umfang, Daniel 30.10.). */
+const v3ZuV4: Migration = (raw) => {
+  const protokoll: string[] = [];
+  const { zusatz, ...rest } = raw;
+  const inhalt = istObjekt(zusatz) ? Object.values(zusatz).some((x) => istObjekt(x) && Object.keys(x).length > 0) : false;
+  if (inhalt) protokoll.push('v3 → v4: Angaben zu Förderung/Bewilligung/Offerte entfernt (nicht mehr im Umfang)');
+  return { raw: { ...rest, meta: { ...(istObjekt(raw.meta) ? raw.meta : {}), schemaVersion: 4 } }, protokoll };
+};
+
 /** Migrationskette: Schlüssel = Ausgangsversion. Neue Versionen hängen hier einen Schritt an. */
-export const MIGRATIONEN: Readonly<Record<number, Migration>> = { 1: v1ZuV2, 2: v2ZuV3 };
+export const MIGRATIONEN: Readonly<Record<number, Migration>> = { 1: v1ZuV2, 2: v2ZuV3, 3: v3ZuV4 };
 
 const ALT_TOOL_SCHLUESSEL = ['objekt', 'heizung', 'detail', 'stammdaten'];
 

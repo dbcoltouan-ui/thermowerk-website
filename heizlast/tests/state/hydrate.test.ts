@@ -39,17 +39,17 @@ describe('Migration v1 → v2 (Shell-Entwurf Session 1)', () => {
   });
 });
 
-describe('Migration v2 → v3 (Session 7b: Verbrauchsreihen)', () => {
-  it('Moosseedorf v2 (eintraege) ergibt denselben State wie die v3-Fixture (reihen), Ergebnis identisch', () => {
+describe('Migration v2 → v3 → v4 (Session 7b: Verbrauchsreihen; Session 8: ohne Zusatzmodule)', () => {
+  it('Moosseedorf v2 (eintraege) ergibt denselben State wie die v4-Fixture (reihen, ohne zusatz), Ergebnis identisch', () => {
     const h = hydrateState(fixtureRoh('state-v2-fws-moosseedorf.json'), KONTEXT);
     expect(h.ok).toBe(true);
     if (!h.ok) return;
     expect(h.vonVersion).toBe(2);
     expect(h.protokoll.join(' ')).toContain('1 Verbrauchseinträge → 1 Reihe(n): erdgas (1)');
     expect(h.probleme).toEqual([]);
-    expect(h.state).toEqual(JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json')));
+    expect(h.state).toEqual(JSON.parse(fixtureRoh('state-v4-fws-moosseedorf.json')));
     const e2 = berechne(h.state, alleDaten());
-    const e3 = berechne(JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json')) as never, alleDaten());
+    const e3 = berechne(JSON.parse(fixtureRoh('state-v4-fws-moosseedorf.json')) as never, alleDaten());
     expect(e2.zuschlaege.qh?.wert).toBeCloseTo(e3.zuschlaege.qh!.wert, 6);
   });
 
@@ -64,8 +64,30 @@ describe('Migration v2 → v3 (Session 7b: Verbrauchsreihen)', () => {
   });
 });
 
-describe('v3-Fixtures: Validierung ist verlustfrei für gültige Stände', () => {
-  for (const name of ['state-v3-fws-moosseedorf.json', 'state-v3-raumweise-efh.json']) {
+describe('Migration v3 → v4 (Session 8: Platzhalter der Zusatzmodule entfällt)', () => {
+  for (const n of ['fws-moosseedorf', 'raumweise-efh']) {
+    it(`state-v3-${n}: leerer Platzhalter fällt still weg, sonst identisch mit v4, Ergebnis unverändert`, () => {
+      const h = hydrateState(fixtureRoh(`state-v3-${n}.json`), KONTEXT);
+      expect(h.ok).toBe(true);
+      if (!h.ok) return;
+      expect(h.vonVersion).toBe(3);
+      expect(h.protokoll).toEqual([]);
+      expect(h.probleme).toEqual([]);
+      expect(h.state).toEqual(JSON.parse(fixtureRoh(`state-v4-${n}.json`)));
+      expect(berechne(h.state, alleDaten()).zuschlaege.qh?.wert).toBeCloseTo(berechne(JSON.parse(fixtureRoh(`state-v4-${n}.json`)) as never, alleDaten()).zuschlaege.qh!.wert, 6);
+    });
+  }
+  it('erfasste Angaben im Platzhalter werden protokolliert entfernt', () => {
+    const roh = JSON.parse(fixtureRoh('state-v3-fws-moosseedorf.json'));
+    roh.zusatz.offerte = { paket: 'standard' };
+    const h = hydrateState(roh, KONTEXT);
+    expect(h.ok && h.protokoll.join(' ')).toContain('Förderung/Bewilligung/Offerte entfernt');
+    expect(h.ok && 'zusatz' in h.state).toBe(false);
+  });
+});
+
+describe('v4-Fixtures: Validierung ist verlustfrei für gültige Stände', () => {
+  for (const name of ['state-v4-fws-moosseedorf.json', 'state-v4-raumweise-efh.json']) {
     it(`${name}: normalisiereState(fixture) = fixture (Schema-Spezifikation vollständig)`, () => {
       const roh = JSON.parse(fixtureRoh(name));
       const { state, probleme } = normalisiereState(roh, KONTEXT);

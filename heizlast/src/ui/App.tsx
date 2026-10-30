@@ -1,5 +1,5 @@
 import { verwaltung } from '../state/app';
-import { aktiverSchritt, aktiveZusatz, ergebnis, geheZu, geheZuZusatz, speicherfehler } from '../state/ui';
+import { aktiverSchritt, ergebnis, geheZu, speicherfehler } from '../state/ui';
 import { Dashboard, DashboardLeiste } from './komponenten/Dashboard';
 import { Schrittleiste } from './komponenten/Schrittleiste';
 import { SchrittSeite } from './komponenten/SchrittSeite';
@@ -17,7 +17,6 @@ import { Verbrauch } from './seiten/Verbrauch';
 import { Waermeabgabe } from './seiten/Waermeabgabe';
 import { Waermepumpe } from './seiten/Waermepumpe';
 import { Warmwasser } from './seiten/Warmwasser';
-import { ZusatzSeite } from './seiten/Zusatz';
 import { Zuschlaege } from './seiten/Zuschlaege';
 
 function Seite({ schritt }: { schritt: SchrittDef }) {
@@ -59,12 +58,11 @@ export function App() {
   // Status je Schritt aus dem einen Ergebnis (berechne), nie aus eigener UI-Logik.
   const status = e.status;
   const meldungen = verwaltung.ladeMeldungen.value;
-  const zusatz = aktiveZusatz.value;
 
   return (
     <div class="shell">
       <Topbar />
-      <Schrittleiste schritte={schritte} aktiv={zusatz ? null : schritt.id} status={status} onWahl={geheZu} zusatz={zusatz} onZusatz={() => geheZuZusatz('foerderung')} />
+      <Schrittleiste schritte={schritte} aktiv={schritt.id} status={status} onWahl={geheZu} />
       <main class="haupt">
         <div class="haupt__spalte">
           {speicherfehler.value && (
@@ -82,13 +80,9 @@ export function App() {
               </ul>
             </details>
           )}
-          {zusatz ? (
-            <ZusatzSeite zurueck={schritt} />
-          ) : (
-            <SchrittSeite schritt={schritt} vorher={schritte[i - 1]} nachher={schritte[i + 1]} onWahl={(s) => geheZu(s.id)}>
-              <Seite schritt={schritt} />
-            </SchrittSeite>
-          )}
+          <SchrittSeite schritt={schritt} vorher={schritte[i - 1]} nachher={schritte[i + 1]} onWahl={(s) => geheZu(s.id)}>
+            <Seite schritt={schritt} />
+          </SchrittSeite>
         </div>
         <Dashboard schritte={schritte} status={status} />
       </main>

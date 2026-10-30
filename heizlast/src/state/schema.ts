@@ -1,5 +1,5 @@
 /**
- * State-Schema v2 (Session 6; KONTEXT §2 «State», «Eine Quelle der Wahrheit»).
+ * State-Schema (Session 6, v3 seit Session 7b, v4 seit Session 8: ohne Zusatzmodule; KONTEXT §2 «State», «Eine Quelle der Wahrheit»).
  *
  * Der State enthält NUR Rohangaben des Nutzers. Abgeleitete Werte (U-Werte, Q_N, EBF aus Räumen,
  * θe, Heizlasten, Speichervolumen …) entstehen ausschliesslich in `berechne(state, daten)` und werden
@@ -29,7 +29,7 @@ import type { Zusatzverbraucher } from '../kern/zuschlaege';
 import type { Energiestandard } from '../kern/plausi';
 import type { Dichtheit, Lueftungskonzept } from '../daten/sia384';
 
-export const SCHEMA_VERSION = 3 as const;
+export const SCHEMA_VERSION = 4 as const;
 
 export type Methode = 'fws' | 'raumweise';
 /** Woher die FWS-Heizlast kommt (Schritt 3A «Verbrauchsdaten vorhanden?»). */
@@ -221,13 +221,6 @@ export interface GeraetState {
   filterOverrides: { toleranzUntenProzent?: number; aufstellung?: 'aussen' | 'innen'; schallNachtMaxDb?: number; vorlaufC?: number };
 }
 
-/** Zusatzmodule (Anbindung Session 11) — hier nur Platz im Schema, Inhalt frei. */
-export interface ZusatzState {
-  foerderung: Record<string, unknown>;
-  bewilligung: Record<string, unknown>;
-  offerte: Record<string, unknown>;
-}
-
 export interface MetaState {
   schemaVersion: typeof SCHEMA_VERSION;
   id: string;
@@ -251,7 +244,6 @@ export interface State {
   zuschlaege: ZuschlaegeState;
   speicher: SpeicherState;
   geraet: GeraetState;
-  zusatz: ZusatzState;
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -288,7 +280,6 @@ export function neuerState(o: { id: string; jetzt: string }): State {
     zuschlaege: { sperrzeitAktiv: null, zusatz: [] },
     speicher: { ww: {}, puffer: { aktiv: null, einzelraumregelung: null, sperrzeitUeberbrueckung: false }, mag: {} },
     geraet: { quelle: 'luftWasser', auswahlId: null, filterOverrides: {} },
-    zusatz: { foerderung: {}, bewilligung: {}, offerte: {} },
   };
 }
 
@@ -355,11 +346,6 @@ const textliste: Pruefer = (v, pfad, p) => {
     return undefined;
   }
   return v.filter((x): x is string => typeof x === 'string');
-};
-const freiesObjekt: Pruefer = (v, pfad, p) => {
-  if (istObjekt(v)) return JSON.parse(JSON.stringify(v)) as Record<string, unknown>;
-  p.push(`${pfad}: kein Objekt — verworfen`);
-  return undefined;
 };
 
 /** Liste von Objekten mit id; Elemente ohne gültige id oder Pflichtfeld werden verworfen. */
@@ -665,13 +651,6 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
     filterOverrides: felder(ge.filterOverrides, { toleranzUntenProzent: 'zahl', aufstellung: ['aussen', 'innen'], schallNachtMaxDb: 'zahl', vorlaufC: 'zahl' }, 'geraet.filterOverrides', p),
   };
 
-  const zu = istObjekt(r.zusatz) ? r.zusatz : {};
-  const zusatz: ZusatzState = {
-    foerderung: (pruefeFeld(zu.foerderung, freiesObjekt, 'zusatz.foerderung', p) as Record<string, unknown> | undefined) ?? {},
-    bewilligung: (pruefeFeld(zu.bewilligung, freiesObjekt, 'zusatz.bewilligung', p) as Record<string, unknown> | undefined) ?? {},
-    offerte: (pruefeFeld(zu.offerte, freiesObjekt, 'zusatz.offerte', p) as Record<string, unknown> | undefined) ?? {},
-  };
-
   const state: State = {
     meta,
     projekt: { name: '', ...projekt },
@@ -686,7 +665,6 @@ export function normalisiereState(raw: unknown, o: { id: string; jetzt: string }
     zuschlaege,
     speicher,
     geraet,
-    zusatz,
   };
   return { state, probleme: p };
 }

@@ -180,29 +180,6 @@
   outline: 2px solid var(--brand-500);
   outline-offset: 1px;
 }
-/* Zusatzmodule: eigene Gruppe am Ende der Leiste, abgetrennt, ohne Status */
-.stepper__schritt--zusatz {
-  margin-left: var(--s-2);
-  padding-left: var(--s-2);
-  border-left: 1px solid var(--c-border);
-}
-.stepper__btn--zusatz .stepper__nr {
-  border-style: dashed;
-  color: var(--accent-500);
-}
-.stepper__btn[aria-current='page'] {
-  color: var(--brand-500);
-  font-weight: var(--fw-semibold);
-}
-.stepper__btn[aria-current='page']::after {
-  content: '';
-  position: absolute;
-  left: var(--s-3);
-  right: var(--s-3);
-  bottom: 0;
-  height: 2px;
-  background: var(--accent-500);
-}
 .stepper__position {
   display: none;
   padding: 0 var(--s-3);
@@ -593,8 +570,7 @@
   .stepper__btn .stepper__titel {
     display: none;
   }
-  .stepper__btn[aria-current='step'] .stepper__titel,
-  .stepper__btn[aria-current='page'] .stepper__titel {
+  .stepper__btn[aria-current='step'] .stepper__titel {
     display: inline;
   }
   .stepper__position {

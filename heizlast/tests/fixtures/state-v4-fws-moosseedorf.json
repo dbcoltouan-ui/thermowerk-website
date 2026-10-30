@@ -1,0 +1,36 @@
+{
+  "meta": { "schemaVersion": 4, "id": "p-moosseedorf", "erstellt": "2026-10-29T08:00:00.000Z", "geaendert": "2026-10-29T08:30:00.000Z" },
+  "projekt": { "name": "Referenzhaus Moosseedorf", "bezugsdatum": "2026-10-29" },
+  "methode": "fws",
+  "gebaeude": {
+    "typ": "efh",
+    "standort": { "plz": "3302", "ort": "Moosseedorf", "kanton": "BE", "hoeheM": 550 },
+    "baujahr": 1988,
+    "wohneinheiten": 1,
+    "keller": null,
+    "dachform": null,
+    "ebfModus": "manuell",
+    "ebfManuellM2": 150,
+    "energiestandard": "keiner"
+  },
+  "sanierungen": [],
+  "verbrauch": {
+    "quelle": "rechnungen",
+    "reihen": [{ "id": "r-erdgas", "energietraeger": "erdgas", "art": "zeitraeume", "zeitraeume": [{ "id": "v1", "menge": 2500, "jahr": 2024 }] }],
+    "eta": { "erdgas": { "wert": 0.9 } },
+    "konvention": "fwsKurs",
+    "bedarfsart": "raumwaerme_wohnen",
+    "klimabereinigung": false,
+    "wwBisher": true,
+    "abzug": { "methode": "direkt", "vwuLiterTag": 180, "speicherverlustProzent": 10, "zirkulation": "keine", "ausstossProzent": 15 },
+    "wpBetriebsstunden": {},
+    "messung": {}
+  },
+  "huelle": { "bauteiltypen": [], "lueftung": {}, "waermebruecken": {}, "erdreich": {}, "rest": { "modus": "keiner" } },
+  "raeume": [],
+  "warmwasser": { "wwKuenftig": true, "methode": "direkt", "vwuLiterTag": 180, "speicherverlustProzent": 10, "zirkulation": "keine", "ausstossProzent": 15 },
+  "waermeabgabe": { "heizkreise": [], "raeume": {} },
+  "zuschlaege": { "sperrzeitAktiv": true, "sperrzeitH": 2, "zusatz": [] },
+  "speicher": { "ww": {}, "puffer": { "aktiv": null, "einzelraumregelung": false, "sperrzeitUeberbrueckung": false }, "mag": {} },
+  "geraet": { "quelle": "luftWasser", "auswahlId": null, "filterOverrides": {} }
+}

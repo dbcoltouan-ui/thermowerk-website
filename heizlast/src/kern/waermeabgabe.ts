@@ -228,7 +228,7 @@ export interface KritischerRaum {
 export interface WaermeabgabeGebaeude {
   /** Ziel-Vorlauf für Deckung und Massnahmen (Eingabe oder Standardwert 55 °C) — Standard der Heizkreis-Vorläufe. */
   zielVL: Wert;
-  /** Einzige VL für Gerätefilter, JAZ-Schätzung und Bericht [°C]. */
+  /** Einzige VL für Gerätefilter, MAG und Bericht [°C]. */
   auslegungsVL: Wert | null;
   /** Wert aus den Heizflächen (auch wenn ein Override gilt). */
   auslegungsVLAusHeizflaechen: Wert | null;
@@ -1336,7 +1336,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
     annahmenRoh.push(auslegungsVL);
     if (ausHf && e.auslegungsVLOverrideC + 0.5 < ausHf.wert) {
       hinweise.push(h('warnung', 'waermeabgabe.gebaeude.overrideZuTief', `Manuelle Auslegungs-VL ${fmt(e.auslegungsVLOverrideC, 0)} °C liegt unter dem Bedarf der Heizflächen (${fmt(ausHf.wert, 1)} °C, ${massgebend?.name ?? ''}) — Räume werden nicht warm.`, 'waermeabgabe.auslegungsVLOverrideC'));
-    } else hinweise.push(h('info', 'waermeabgabe.gebaeude.override', 'Auslegungs-VL manuell gesetzt — Gerätefilter, JAZ und Bericht verwenden diesen Wert.', 'waermeabgabe.auslegungsVLOverrideC'));
+    } else hinweise.push(h('info', 'waermeabgabe.gebaeude.override', 'Auslegungs-VL manuell gesetzt — Gerätefilter, Ausdehnungsgefäss und Bericht verwenden diesen Wert.', 'waermeabgabe.auslegungsVLOverrideC'));
   }
   const gutBis = hk.ampel.vorlaufC.gutBis;
   const kritischBis = hk.ampel.vorlaufC.kritischBis;

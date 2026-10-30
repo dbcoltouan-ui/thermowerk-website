@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /**
- * Session 8 — Schritte 5–9 und Zusatzmodule über die Oberfläche (Desktop 1280 / Mobil 390).
+ * Session 8 — Schritte 5–9 über die Oberfläche (Desktop 1280 / Mobil 390).
  * Sollwerte extern:
  *  - Befund B2 (befund_heizkoerper.md §5): Gussradiator 10 Glieder H 600 T 160 ≈ 94–96 W/Glied bei 75/65/20 (V&N).
  *    Bad der CH-EFH-Handrechnung (tests/kern/raumweise.test.ts): Φ_HL 570.3 W bei θint 22 °C, Kreis 55/45 (10 K)
@@ -74,7 +74,7 @@ async function keinHorizontalesScrollen(page: Page, name: string) {
 }
 
 test('HK-Fluss: Guss 10 Glieder im Bad → θ_VL,req → Auslegungs-VL → Dashboard → Gerätefilter', async ({ page }, info) => {
-  await vorbelegen(page, fixture('state-v3-raumweise-efh.json'));
+  await vorbelegen(page, fixture('state-v4-raumweise-efh.json'));
   await page.getByTestId('schritt-waermeabgabe').click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wärmeabgabe');
 
@@ -142,7 +142,7 @@ test('HK-Fluss: Guss 10 Glieder im Bad → θ_VL,req → Auslegungs-VL → Dashb
 });
 
 test('Mischraum und Typ-Wechsel: FBH + Platten summiert; Platte → Platte behält die Nische, Guss setzt Masse zurück', async ({ page }, info) => {
-  await vorbelegen(page, fixture('state-v3-raumweise-efh.json'));
+  await vorbelegen(page, fixture('state-v4-raumweise-efh.json'));
   await page.getByTestId('schritt-waermeabgabe').click();
   const wohnen = page.getByTestId('wa-raum-1');
   const vorher = await zahlAus(page, 'wa-raum-1-qsumme');
@@ -248,7 +248,7 @@ test('FWS-Modus (Moosseedorf über Reihe/Kalenderjahr): Heizfläche ohne raumwei
 
 test('Warmwasser künftig ja/nein: bedingte Felder, Auftraggeber-Fall bis Zuschläge, Speicher und Dashboard', async ({ page }, info) => {
   // Moosseedorf: WW bisher über die Heizung (Abzug in Schritt 3)
-  await vorbelegen(page, fixture('state-v3-fws-moosseedorf.json'));
+  await vorbelegen(page, fixture('state-v4-fws-moosseedorf.json'));
   await page.getByTestId('schritt-warmwasser').click();
   await expect(page.getByTestId('wwk-vwu')).toHaveValue('180');
   await expect(page.getByTestId('wwk-personen')).toHaveCount(0);
@@ -295,7 +295,7 @@ test('Warmwasser künftig ja/nein: bedingte Felder, Auftraggeber-Fall bis Zuschl
 });
 
 test('Zuschläge, Puffer abgewählt/Override und Gerätewahl wirken bis ins Dashboard', async ({ page }, info) => {
-  await vorbelegen(page, fixture('state-v3-fws-moosseedorf.json'));
+  await vorbelegen(page, fixture('state-v4-fws-moosseedorf.json'));
   // Schritt 7: Sperrzeit 2 h/d (Fixture), verbundenes System dazu → Q_h steigt um genau diese Leistung
   await page.getByTestId('schritt-zuschlaege').click();
   await expect(page.getByTestId('sperrzeit-h')).toHaveValue('2');
@@ -320,7 +320,7 @@ test('Zuschläge, Puffer abgewählt/Override und Gerätewahl wirken bis ins Dash
   await expect(page.getByTestId('wp-skala-wert')).toHaveText('−11 %');
   await expect(page.getByTestId('wp-skala')).toHaveAttribute('data-ampel', 'rot');
   await expect(page.getByTestId('wp-bivalenz')).toContainText('%');
-  await expect(page.getByTestId('wp-jaz')).toContainText('WPesti');
+  await expect(page.getByTestId('wp-gewaehlt')).not.toContainText('Jahresarbeitszahl');
   await foto(page, info, 'waermepumpe');
   let dash = await dashboard(page, info);
   await expect(dash.getByTestId('kpi-wp')).toContainText('9.5 kW');
@@ -346,8 +346,8 @@ test('Zuschläge, Puffer abgewählt/Override und Gerätewahl wirken bis ins Dash
   await zuklappen(page, info);
 });
 
-test('Zusatzmodule als eigene Gruppe; Schritte 5–9 ohne horizontales Scrollen (gefüllte Seiten)', async ({ page }, info) => {
-  const s = fixture('state-v3-raumweise-efh.json');
+test('Raumtemperatur je Raum wirkt auf Raumheizlast und nötigen Vorlauf; Schritte 5–9 ohne horizontales Scrollen', async ({ page }, info) => {
+  const s = fixture('state-v4-raumweise-efh.json');
   s.waermeabgabe.raeume.bad = { heizflaechen: [{ id: 'hfb', bauart: 'guss_glieder', kreisId: 'k1', hoeheMm: 600, glieder: 10 }] };
   s.waermeabgabe.raeume.flur = { heizflaechen: [{ id: 'hff', bauart: 'fbh', flaecheM2: 4 }] };
   await vorbelegen(page, s);
@@ -355,22 +355,26 @@ test('Zusatzmodule als eigene Gruppe; Schritte 5–9 ohne horizontales Scrollen 
     await page.getByTestId(`schritt-${schritt}`).click();
     await keinHorizontalesScrollen(page, schritt);
   }
-  // Genauer-Bereich und Massnahmen offen ebenfalls ohne Überbreite
+  // Genauer-Bereich offen ebenfalls ohne Überbreite
   await page.getByTestId('schritt-waermeabgabe').click();
   await page.getByTestId('wa-raum-1-hf-1-genauer').locator('summary').click();
   await keinHorizontalesScrollen(page, 'waermeabgabe/genauer');
 
-  // Zusatzmodule: eigene Gruppe in der Leiste, nicht in Weiter/Zurück
+  // Raumtemperatur Bad 22 → 24 °C (eigene Angabe im Raum, Schritt 3): Raumheizlast und nötiger Vorlauf steigen
+  const phiVorher = await zahlAus(page, 'wa-raum-2-live-phihl');
+  const vlVorher = await zahlAus(page, 'wa-raum-2-tvlreq');
+  await page.getByTestId('schritt-huelle').click();
+  await expect(page.getByTestId('raum-2-thetaint')).toHaveValue('22');
+  await expect(page.getByTestId('raum-2-thetaint')).toHaveAttribute('data-standard', 'ja');
+  await page.getByTestId('raum-2-thetaint').fill('24');
+  await page.getByTestId('schritt-waermeabgabe').click();
+  await expect(page.getByTestId('wa-raum-2-info')).toContainText('24 °C');
+  expect(await zahlAus(page, 'wa-raum-2-live-phihl')).toBeGreaterThan(phiVorher);
+  expect(await zahlAus(page, 'wa-raum-2-tvlreq')).toBeGreaterThan(vlVorher);
+  await foto(page, info, 'raumtemperatur');
+
+  // Bericht ist das Ende der Schrittfolge (keine Zusatzmodule, Daniel 30.10.)
   await page.getByTestId('schritt-bericht').click();
   await expect(page.getByTestId('weiter')).toBeDisabled();
-  await page.getByTestId('schritt-zusatz').click();
-  await expect(page.getByTestId('zusatz-foerderung')).toBeVisible();
-  await expect(page.getByTestId('schritt-zusatz')).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('.stepper__btn[aria-current="step"]')).toHaveCount(0);
-  await page.getByTestId('zusatz-tab-offerte').click();
-  await expect(page.getByTestId('zusatz-offerte')).toBeVisible();
-  await keinHorizontalesScrollen(page, 'zusatz');
-  await foto(page, info, 'zusatz');
-  await page.getByTestId('zusatz-zurueck').click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Bericht');
+  await expect(page.getByTestId('schritt-zusatz')).toHaveCount(0);
 });

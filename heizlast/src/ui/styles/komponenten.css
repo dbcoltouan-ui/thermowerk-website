@@ -1356,7 +1356,7 @@ select.eingabe__feld {
 }
 
 /* =========================================================================
-   Session 8 — Schritte 5–9, Zusatzmodule
+   Session 8 — Schritte 5–9
    ========================================================================= */
 
 /* Kurze Faktenliste (WW-Zuschlag u. a.) */
@@ -1616,19 +1616,6 @@ select.eingabe__feld {
 .wp-fakten {
   border-top: 0;
   padding-top: 0;
-}
-
-/* ---- Zusatzmodule ---- */
-.zusatz-nav {
-  margin-bottom: var(--s-2);
-}
-.zusatz-nav .segment__knopf[aria-selected='true'] {
-  background: var(--brand-500);
-  color: #fff;
-  font-weight: var(--fw-medium);
-}
-.inhalt__nr--zusatz {
-  color: var(--accent-500);
 }
 
 @media (max-width: 640px) {
