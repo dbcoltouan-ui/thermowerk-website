@@ -28,6 +28,7 @@
     "@preact/preset-vite": "^2.10.0",
     "@types/node": "^22.20.5",
     "eslint": "^9.0.0",
+    "preact-render-to-string": "^6.8.2",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.0.0",
     "vite": "^6.0.0",

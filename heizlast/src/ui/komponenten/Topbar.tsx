@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { verwaltung } from '../../state/app';
 import { geheZu, projektnameAnzeige, speicherfehler, speicherstatus } from '../../state/ui';
 import { kW } from '../format';
+import { methodeKurz } from '../ergebnisTexte';
 
 const STATUS: Record<string, string> = {
   neu: 'Neues Projekt',
@@ -40,7 +41,7 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
               <div>
                 <strong>{p.name || 'Ohne Namen'}</strong>
                 <span class="mute">
-                  {p.methode === 'fws' ? 'FWS-Kurs' : p.methode === 'raumweise' ? 'SIA 384/2' : 'Methode offen'}, Q<sub>h</sub> {kW(p.qhW)}, gespeichert {datum(p.gespeichert)}
+                  {methodeKurz(p.methode)}, Q<sub>h</sub> {kW(p.qhW)}, gespeichert {datum(p.gespeichert)}
                 </span>
               </div>
               <div class="projektliste__aktionen">
@@ -72,6 +73,29 @@ function ProjekteDialog({ onSchliessen }: { onSchliessen: () => void }) {
           ))}
         </ul>
       )}
+      <div class="dialog__fuss">
+        <label class="btn" for="projekt-datei">
+          Projekt aus Datei laden (JSON)
+        </label>
+        <input
+          id="projekt-datei"
+          class="visually-hidden"
+          type="file"
+          accept="application/json,.json"
+          data-testid="projekt-datei"
+          onChange={async (ev) => {
+            const input = ev.currentTarget as HTMLInputElement;
+            const datei = input.files?.[0];
+            input.value = '';
+            if (!datei) return;
+            if (await verwaltung.importieren(await datei.text())) {
+              onSchliessen();
+              geheZu('projekt');
+            } else onSchliessen();
+          }}
+        />
+        <span class="zeile-info zeile-info--klein">Datei aus «Projekt als Datei» in Schritt 10.</span>
+      </div>
     </dialog>
   );
 }
@@ -98,7 +122,7 @@ export function Topbar() {
         <button type="button" class="btn btn--ghost" onClick={() => setProjekteOffen(true)} data-testid="projekte">
           Projekte
         </button>
-        <button type="button" class="btn btn--ghost" disabled title="Bericht und Export folgen mit Schritt 10">
+        <button type="button" class="btn btn--ghost" onClick={() => geheZu('bericht')} data-testid="export">
           Export
         </button>
         <button type="button" class="btn btn--primary" onClick={() => verwaltung.speichern()} data-testid="projekt-speichern">

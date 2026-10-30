@@ -6,6 +6,7 @@ import { WertAnzeige } from '../komponenten/Herkunft';
 import { Fehlend, Meldungen } from '../komponenten/Meldungen';
 import { Skala } from '../komponenten/Skala';
 import { kW, zahl } from '../format';
+import { filterVorlaufHerkunft } from '../ergebnisTexte';
 
 const G = daten.fws.geraetewahl;
 /** Filtertoleranz als sichtbarer Standardwert (dieselbe Zahl nimmt der Kern ohne Angabe). */
@@ -14,19 +15,6 @@ const TOLERANZ_STD: Wert = { wert: G.filterToleranzUntenProzent, einheit: '%', h
 const LISTE_CODES = ['geraet.keineTreffer', 'geraet.qhFehlt', 'geraet.quelleNichtInDb'];
 const FELD_CODES = ['geraet.filterVorlaufZuTief', 'geraet.kennlinie', 'geraet.auslegungUeberNenn'];
 const AMPEL_TEXT = { gruen: 'passt', gelb: 'knapp/gross', rot: 'passt nicht', grau: '—' } as const;
-
-/** Woher der Filter-Vorlauf kommt — Klartext aus dem Ergebnis (keine eigene Rechnung). */
-function vorlaufHerkunft(): string {
-  const e = store.ergebnis.value;
-  const std = e.geraet.filterVorlaufStandard;
-  if (!std) return '';
-  if (std !== e.auslegungsVL) return `aus der Warmwasser-Ladetemperatur (höher als der Heizungs-Vorlauf ${zahl(e.auslegungsVL.wert, '°C', 1)})`;
-  const g = e.waermeabgabe?.gebaeude;
-  if (e.auslegungsVL.stufe === 'heizflaechen' && g?.massgebenderRaum) return `aus Heizflächen, max. Raum: ${g.massgebenderRaum.name}`;
-  if (e.auslegungsVL.stufe === 'heizkreis') return 'höchster Heizkreis-Vorlauf (Schritt 6)';
-  if (e.auslegungsVL.herkunft === 'override') return 'Auslegungs-Vorlauf manuell (Schritt 6)';
-  return 'Standardwert des Wärmeabgabesystems (Schritt 6) — mit erfassten Heizflächen genauer';
-}
 
 function Filter() {
   const e = store.ergebnis.value;
@@ -38,7 +26,7 @@ function Filter() {
         <div class="hf__mass">
           <ZahlFeld pfad="geraet.filterOverrides.vorlaufC" label="Vorlauf für den Filter" einheit="°C" min={25} max={80} dez={1} standard={ge.filterVorlaufStandard} zuruecksetzenText="Auslegungs-VL verwenden" testid="wp-vorlauf" />
           <span class="zeile-info zeile-info--klein" data-testid="wp-vorlauf-herkunft">
-            {lese('geraet.filterOverrides.vorlaufC') === undefined ? vorlaufHerkunft() : 'eigene Angabe'}
+            {lese('geraet.filterOverrides.vorlaufC') === undefined ? filterVorlaufHerkunft(e) : 'eigene Angabe'}
           </span>
         </div>
         <div class="feld feld--wert">

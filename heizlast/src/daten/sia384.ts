@@ -42,7 +42,7 @@ export interface Sia3842Daten {
   nMin: {
     beschreibung: string;
     quelle: string[];
-    lueftungskonzepte: { key: string; label: string; default?: boolean }[];
+    lueftungskonzepte: { key: string; kurz: string; label: string; default?: boolean }[];
     raumtypen: { key: string; label: string }[];
     tabelle: Record<string, Record<string, { neubau: number; altbau: number }>>;
     zuordnungRaumtypZuNmin: Record<string, string | string[]>;

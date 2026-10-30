@@ -192,6 +192,11 @@ const Q_ERDREICH = 'ISO 13370 (U_equiv Bodenplatte) mit f_g1/f_g2/f_GW nach EN 1
 /* Hilfsfunktionen                                                                                 */
 /* ---------------------------------------------------------------------------------------------- */
 
+/** Kurzbezeichnung des Lüftungskonzepts für Begründungen und Bericht (sia384-2.json `kurz`). */
+export function konzeptKurz(key: Lueftungskonzept, daten: Sia3842Daten): string {
+  return daten.nMin.lueftungskonzepte.find((k) => k.key === key)?.kurz ?? key;
+}
+
 export function raumtyp(key: string, daten: Sia3842Daten) {
   return daten.innentemperaturen.raumtypen.find((r) => r.key === key);
 }
@@ -401,7 +406,7 @@ function raumAufloesen(r: RaumEingabe, ctx: Kontext, gesamtHinweise: Hinweis[]):
     nMin = override(r.nMinOverride, 'h⁻¹', `n_min ${fmt(r.nMinOverride, 2)} h⁻¹ manuell`);
   } else {
     const n = nMinFuerRaum({ typ: r.typ, zuluft: r.zuluft, aussenbezug }, ctx.konzept, ctx.dichtheit, sia);
-    nMin = tabelle(n.wert, 'h⁻¹', `n_min ${fmt(n.wert, 2)} h⁻¹ (Tabelle NA.7: ${ctx.konzept}, ${n.nminTyp}, ${ctx.dichtheit === 'altbau' ? 'Bestand ohne Luftdichtheitsnachweis' : 'Neubau-Dichtheit'})`, Q_NMIN, { stufe: 'tabelle_na7', unsicherheit: 30 });
+    nMin = tabelle(n.wert, 'h⁻¹', `n_min ${fmt(n.wert, 2)} h⁻¹ (Tabelle NA.7: ${konzeptKurz(ctx.konzept, sia)}, ${(sia.nMin.raumtypen.find((x) => x.key === n.nminTyp)?.label ?? n.nminTyp).split(' (')[0]}, ${ctx.dichtheit === 'altbau' ? 'Bestand ohne Luftdichtheitsnachweis' : 'Neubau-Dichtheit'})`, Q_NMIN, { stufe: 'tabelle_na7', unsicherheit: 30 });
   }
   const cp = sia.methode.luftWaermekapazitaetWhM3K;
   const hVW = volumen.wert * nMin.wert * cp;
@@ -628,7 +633,7 @@ export function heizlastRaumweise(e: RaumweiseEingabe, daten: { sia: Sia3842Date
   const fehler = hinweise.some((h) => h.stufe === 'fehler') || e.huelle.hinweise.some((h) => h.stufe === 'fehler');
 
   return {
-    methode: `${sia.methode.bezeichnungBericht}; ΔU_WB ${fmt(deltaUWb.wert, 2)} pauschal; Lüftung n_min Tabelle NA.7 (${konzept}, ${dichtheit}); kein Infiltrations-/Wiederaufheizterm`,
+    methode: `${sia.methode.bezeichnungBericht}; ΔU_WB ${fmt(deltaUWb.wert, 2)} W/(m²·K) pauschal; Lüftung n_min Tabelle NA.7 (${konzeptKurz(konzept, sia)}, ${dichtheit === 'altbau' ? 'Bestand ohne Luftdichtheitsnachweis' : 'Neubau-Dichtheit'}); kein Infiltrations-/Wiederaufheizterm`,
     thetaE: e.thetaE,
     deltaUWb,
     nMinDichtheit: dichtheit,

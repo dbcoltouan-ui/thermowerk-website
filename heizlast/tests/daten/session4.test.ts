@@ -75,7 +75,7 @@ describe('klimastationen.json 1.1.0 — Jahresmittel-Regression', () => {
 
 describe('sia384-2.json 1.1.0 und fws.json 1.2.0', () => {
   it('Erdreich-Formelparameter (Wand 0.3 m, Rsi 0.17, B\' Standard 5 m, f_g1 1.45); EBF-Faktor 1.10 (Spanne 1.10–1.15, Folie 33)', () => {
-    expect(s._meta.version).toBe('1.1.0');
+    expect(Number(s._meta.version.split('.')[1])).toBeGreaterThanOrEqual(1); // ≥ 1.1.0 (Session 9: 1.2.0 Kurzlabels Lüftungskonzepte)
     expect(s.erdreich.formelIso13370).toMatchObject({ wandDickeDefaultM: 0.3, rsiAbwaerts: 0.17, bStrichDefaultM: 5 });
     expect(s.erdreich.faktoren.fG1).toBe(1.45);
     expect(Number(f._meta.version.split('.')[1])).toBeGreaterThanOrEqual(2); // ≥ 1.2.0 (Session 6: 1.3.0 geraetewahl)

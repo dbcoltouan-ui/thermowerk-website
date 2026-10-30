@@ -11,7 +11,8 @@ import { Abschnitt, AuswahlFeld, DatumFeld, FeldHinweise, JaNeinFeld, MonatFeld,
 import { WertAnzeige } from '../komponenten/Herkunft';
 import { Fehlend, Meldungen } from '../komponenten/Meldungen';
 import { Info } from '../komponenten/Popover';
-import { kW, zahl } from '../format';
+import { datumKurz, einheitAnzeige, kW, zahl } from '../format';
+import { sanierungBezugTexte } from '../ergebnisTexte';
 import { WwAngaben } from './WwAngaben';
 
 const QUELLEN = [
@@ -22,26 +23,10 @@ const QUELLEN = [
 ] as const;
 
 const STREUUNG = daten.fws.verbrauch.streuung;
-const MONATE_KURZ = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
 function traegerInfo(t: Energietraeger) {
   const konv = store.state.value.verbrauch.konvention;
   return daten.fws.heizwerte.konventionen[konv]?.traeger[t];
-}
-
-/** Anzeige-Einheit (Daten: ASCII, z. B. m3n → m³). */
-function einheitAnzeige(e: string | undefined): string {
-  return (e ?? '').replace('m3n', 'm³').replace('m3', 'm³');
-}
-
-function datumKurz(ms: number): string {
-  const d = new Date(ms);
-  return `${d.getUTCDate()}.${d.getUTCMonth() + 1}.${d.getUTCFullYear()}`;
-}
-
-function datumMonat(ms: number): string {
-  const d = new Date(ms);
-  return `${MONATE_KURZ[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 type ZeitraumModus = 'jahr' | 'monate' | 'tage';
@@ -230,13 +215,13 @@ function Zaehlerstaende({ reihe, p, einheit, t }: { reihe: VerbrauchsReiheState;
 /* ---------------------------------------------------------------------------------------------- */
 
 function SanierungText({ z }: { z: ZeitraumErgebnis }) {
-  const s = z.sanierung;
-  if (!s.bezug.length) return <span class="mute">—</span>;
+  const texte = sanierungBezugTexte(z);
+  if (!texte.length) return <span class="mute">—</span>;
   return (
     <span class="sanierungsbezug">
-      {s.bezug.map((b) => (
-        <span class={`sanierungsbezug__eintrag sanierungsbezug__eintrag--${b.lage}`} key={`${b.id ?? b.label}${b.datumMs}`}>
-          {b.label} {datumMonat(b.datumMs)}: {b.lage === 'innerhalb' ? `mitten im Zeitraum (${s.subperioden.map((sp) => `${sp.tage} d × ${sp.faktor.toFixed(2)}`).join(' + ')})` : b.lage === 'vorher' ? `nach dem Zeitraum — Verbrauch wird um Faktor ${(s.faktorIst / s.faktorUnsaniert).toFixed(3)} umgerechnet` : 'vor dem Zeitraum — bereits im Verbrauch enthalten'}
+      {texte.map((b) => (
+        <span class={`sanierungsbezug__eintrag sanierungsbezug__eintrag--${b.lage}`} key={b.schluessel}>
+          {b.text}
         </span>
       ))}
     </span>

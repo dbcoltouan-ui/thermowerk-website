@@ -4,6 +4,7 @@ import { aktiverSchritt, ergebnis, geheZu } from '../../state/ui';
 import type { SchrittDef, SchrittStatus } from '../schritte';
 import { SCHRITTE, STATUS_TEXT } from '../schritte';
 import { kW, zahl } from '../format';
+import { methodeKurz } from '../ergebnisTexte';
 import { fmt } from '../../kern/wert';
 import { herkunftKlasse, herkunftKurz, WertAnzeige } from './Herkunft';
 import { Skala } from './Skala';
@@ -100,7 +101,7 @@ function DashboardInhalt({ schritte, status }: Props) {
           {kW(qh?.wert)}
         </span>
         <span class="kennzahl__marken">
-          {e.methode ? <span class="badge badge--brand" data-testid="kpi-methode">{e.methode === 'fws' ? 'FWS-Kurs' : 'SIA 384/2'}</span> : <span class="mute">Methode wählen</span>}
+          {e.methode ? <span class="badge badge--brand" data-testid="kpi-methode">{methodeKurz(e.methode)}</span> : <span class="mute">Methode wählen</span>}
           {e.methode && (
             <span class={`status status--${m.status}`} data-testid="kpi-status">
               {STATUS_BADGE[m.status]}

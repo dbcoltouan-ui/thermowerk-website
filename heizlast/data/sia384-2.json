@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.1.0",
-    "stand": "2026-10-29",
+    "version": "1.2.0",
+    "stand": "2026-10-30",
     "beschreibung": "Tabellen für die raumweise Norm-Heizlast nach SIA 384/2:2020 (Anwendung von SN EN 12831-1:2017 in der Schweiz): Mindestluftwechsel n_min je Raumtyp × Lüftungskonzept, Reduktionsfaktoren b_u unbeheizter Räume, Wärmebrückenzuschlag ΔU_WB (pauschal), äquivalenter U-Wert gegen Erdreich (B'-Tabelle), Rsi/Rse, Innentemperaturen je Raumtyp, Methodenregeln (kein n50-Term, kein Wiederaufheizzuschlag, saldierte Gebäude-Heizlast). Wo der SIA-Normtext nicht öffentlich ist, sind die belegten Ersatztabellen der gleichzeitig revidierten nationalen Anhänge (SIA 384.201-C1:2014, SN EN 12831-1/C1:2020) und DIN-Tabellen (Wissensbasis) verwendet und als solche gekennzeichnet. Keine Rechenlogik.",
     "quellen": [
       {
@@ -124,19 +124,23 @@
     "lueftungskonzepte": [
       {
         "key": "natuerlich",
+        "kurz": "Fensterlüftung",
         "label": "Natürliche Lüftung (ohne oder mit kurzfristig betriebenen Abluftanlagen in Küche/Bad/WC)",
         "default": true
       },
       {
         "key": "wrg",
+        "kurz": "Komfortlüftung mit WRG",
         "label": "Einfache Lüftungsanlage mit Wärmerückgewinnung (Komfortlüftung)"
       },
       {
         "key": "lufterwaermung",
+        "kurz": "Lüftungsanlage mit Lufterwärmung",
         "label": "Lüftungsanlage mit Lufterwärmung / Zulufttemperatur max. 3 K unter Raumtemperatur"
       },
       {
         "key": "abluftDauer",
+        "kurz": "Abluftanlage im Dauerbetrieb",
         "label": "Abluftanlage im Dauerbetrieb"
       }
     ],

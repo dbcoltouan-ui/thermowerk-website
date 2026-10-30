@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "stand": "2026-10-30",
+    "beschreibung": "Absender im Kopf des Berichts (Session 9). Gleiche Angaben wie Fusszeile und Impressum der Website thermowerk.ch.",
+    "quellen": [
+      {
+        "id": "website-thermowerk",
+        "titel": "thermowerk.ch, Fusszeile und Impressum (src/components/Footer.astro, src/pages/impressum.astro), Stand 2026-10-30",
+        "art": "intern"
+      }
+    ]
+  },
+  "marke": "Thermowerk",
+  "firma": "Gebäudetechnik Coltouan",
+  "adresse": "Rankstrasse 18",
+  "plzOrt": "8413 Neftenbach",
+  "telefon": "+41 76 504 03 68",
+  "email": "info@thermowerk.ch",
+  "web": "thermowerk.ch",
+  "uid": "CHE-489.162.528",
+  "logo": "img/logo.png",
+  "quelle": ["website-thermowerk"]
+}

@@ -6,10 +6,10 @@ import { SchrittSeite } from './komponenten/SchrittSeite';
 import { Topbar } from './komponenten/Topbar';
 import { sichtbareSchritte } from './schritte';
 import type { SchrittDef } from './schritte';
+import { BerichtSeite } from './seiten/BerichtSeite';
 import { Gebaeude } from './seiten/Gebaeude';
 import { Heizlast } from './seiten/Heizlast';
 import { HuelleRaeume } from './seiten/HuelleRaeume';
-import { Platzhalter } from './seiten/Platzhalter';
 import { ProjektMethode } from './seiten/ProjektMethode';
 import { Sanierungen } from './seiten/Sanierungen';
 import { Speicher } from './seiten/Speicher';
@@ -43,8 +43,8 @@ function Seite({ schritt }: { schritt: SchrittDef }) {
       return <Speicher />;
     case 'waermepumpe':
       return <Waermepumpe />;
-    default:
-      return <Platzhalter schritt={schritt} />;
+    case 'bericht':
+      return <BerichtSeite />;
   }
 }
 

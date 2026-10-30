@@ -48,7 +48,7 @@ export default defineConfig({
   server: { port: 5173 },
   preview: { port: 4173 },
   test: {
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     exclude: ['e2e/**', 'node_modules/**', 'referenz/**'],
     environment: 'node',
   },

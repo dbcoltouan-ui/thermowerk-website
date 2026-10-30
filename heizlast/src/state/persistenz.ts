@@ -266,6 +266,8 @@ export interface Projektverwaltung {
   speichern(): SpeicherErgebnis;
   neu(): Promise<boolean>;
   laden(id: string): Promise<boolean>;
+  /** Projekt aus einer exportierten JSON-Datei (Session 9) — gleicher Ladepfad `hydrateState`, Rückfrage bei ungespeicherten Änderungen. */
+  importieren(text: string): Promise<boolean>;
   loeschen(id: string): SpeicherErgebnis;
 }
 
@@ -367,6 +369,21 @@ export function erstelleProjektverwaltung(o: {
       basisHash.value = stateHash(h.state);
       ladeMeldungen.value = [...h.protokoll, ...h.probleme];
       meldeErgebnis(speichereEntwurf(speicher, h.state, basisHash.value));
+      return true;
+    },
+    async importieren(text) {
+      const h = hydrateState(text, kontext());
+      if (!h.ok) {
+        ladeMeldungen.value = [h.text];
+        return false;
+      }
+      if (!(await rueckfrage('Ungespeicherte Änderungen verwerfen und das Projekt aus der Datei laden?'))) return false;
+      autosave.abbrechen();
+      store.ersetze(h.state);
+      // Wie ein neu erfasstes Projekt: erst «Speichern» legt es in der Projektliste ab.
+      basisHash.value = null;
+      ladeMeldungen.value = [`Aus Datei geladen: «${h.state.projekt.name || 'Ohne Namen'}» (Schema ${h.vonVersion}).`, ...h.protokoll, ...h.probleme];
+      meldeErgebnis(speichereEntwurf(speicher, h.state, null));
       return true;
     },
     loeschen(id) {
