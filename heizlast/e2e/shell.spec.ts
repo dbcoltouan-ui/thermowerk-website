@@ -52,24 +52,32 @@ test('Dashboard: Seitenleiste auf Desktop, Leiste auf Mobil', async ({ page }, i
   }
 });
 
-test('Topbar zeigt das Firmenlogo (Desktop voll mit «Heizlast», mobil nur Emblem) und lässt dem Projektnamen Platz', async ({ page }) => {
+test('Topbar weiss mit ganzem Firmenlogo (Desktop links mit «Heizlast», mobil mittig über der Projektzeile, die beim Scrollen stehen bleibt)', async ({ page }) => {
   await page.goto('./');
   const vw = page.viewportSize()!;
-  const marke = page.getByTestId('topbar-marke');
-  const voll = marke.locator('.topbar__logo--voll');
-  const emblem = marke.locator('.topbar__logo--emblem');
   const mobil = vw.width <= 640;
-  const sichtbar = mobil ? emblem : voll;
-  await expect(sichtbar).toBeVisible();
-  await expect(sichtbar).toHaveAttribute('alt', 'Thermowerk');
-  await expect(mobil ? voll : emblem).toBeHidden();
-  await expect(marke.locator('.topbar__produkt')).toBeVisible({ visible: !mobil });
-  expect(await sichtbar.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
-  const box = (await sichtbar.boundingBox())!;
-  expect(box.height).toBeGreaterThanOrEqual(26);
-  expect(box.height).toBeLessThanOrEqual(32);
+  const logo = page.getByTestId('topbar-marke').locator('.topbar__logo');
+  await expect(logo).toBeVisible();
+  await expect(logo).toHaveAttribute('alt', 'Thermowerk');
+  expect(await logo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  expect(await page.locator('.topbar').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(255, 255, 255)');
+  await expect(page.getByTestId('topbar-marke').locator('.topbar__produkt')).toBeVisible({ visible: !mobil });
+  const box = (await logo.boundingBox())!;
+  const name = (await page.getByTestId('projektname').boundingBox())!;
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(vw.width);
-  await expect(page.getByTestId('projektname')).toBeVisible();
+  if (mobil) {
+    expect(Math.abs(box.x + box.width / 2 - vw.width / 2)).toBeLessThanOrEqual(2);
+    expect(box.width).toBeGreaterThanOrEqual(280);
+    expect(name.y).toBeGreaterThanOrEqual(box.y + box.height);
+  } else {
+    expect(box.height).toBeGreaterThanOrEqual(30);
+    expect(box.x).toBeLessThan(40);
+    expect(Math.abs(name.y + name.height / 2 - (box.y + box.height / 2))).toBeLessThanOrEqual(6);
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(vw.width);
+  // Nach dem Scrollen: Projektzeile und Schrittleiste bleiben oben sichtbar
+  await page.mouse.wheel(0, 800);
+  await expect(page.getByTestId('projekt-speichern')).toBeInViewport();
+  await expect(page.locator('.stepper')).toBeInViewport();
 });

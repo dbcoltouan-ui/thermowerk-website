@@ -25,38 +25,27 @@
   align-items: center;
   gap: var(--s-4);
   padding: 0 var(--s-5);
-  background: var(--brand-500);
-  color: #fff;
+  background: var(--ink-0);
+  color: var(--brand-500);
+  border-bottom: 1px solid var(--ink-200);
 }
 .topbar__marke {
   display: flex;
   align-items: center;
-  align-self: stretch;
   gap: var(--s-3);
   white-space: nowrap;
 }
-/* Logo auf eigener weisser Fläche: Navy-«WERK» und rotes «THERM» wären auf dem Navy-Grund nicht lesbar. */
-.topbar__logoflaeche {
-  display: flex;
-  align-items: center;
-  align-self: stretch;
-  margin-left: calc(-1 * var(--s-5));
-  padding: 0 var(--s-4) 0 var(--s-5);
-  background: var(--ink-0);
-}
 .topbar__logo {
   display: block;
-  height: 30px;
+  height: 36px;
   width: auto;
 }
-.topbar__logo--emblem {
-  display: none;
-}
 .topbar__produkt {
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--ink-200);
   font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
   letter-spacing: 0.02em;
-  color: #fff;
 }
 .topbar__projekt {
   flex: 1;
@@ -65,18 +54,18 @@
   align-items: baseline;
   gap: var(--s-3);
   padding-left: var(--s-4);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid var(--ink-200);
   overflow: hidden;
 }
 .topbar__projektname {
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .topbar__status {
   font-size: var(--fs-xs);
-  color: var(--brand-100);
+  color: var(--ink-500);
   white-space: nowrap;
 }
 .topbar__status--ungespeichert::before {
@@ -95,18 +84,22 @@
 }
 .topbar__aktionen {
   display: flex;
-  gap: var(--s-1);
+  gap: var(--s-2);
 }
 .topbar__aktionen .btn {
-  border-color: transparent;
-  background: transparent;
-  color: #fff;
+  border: 1px solid var(--brand-500);
+  background: var(--ink-0);
+  color: var(--brand-500);
 }
 .topbar__aktionen .btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--brand-50);
 }
 .topbar__aktionen .btn--primary {
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--brand-500);
+  color: #fff;
+}
+.topbar__aktionen .btn--primary:hover:not(:disabled) {
+  background: var(--brand-600);
 }
 
 /* ---- Cloud-Status (Session 10): Punkt + Kurztext, Klick öffnet die Projekte ---- */
@@ -116,17 +109,17 @@
   gap: 6px;
   flex: none;
   padding: 4px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--ink-300);
   border-radius: var(--r-sm);
-  background: transparent;
-  color: #fff;
+  background: var(--ink-0);
+  color: var(--brand-500);
   font: inherit;
   font-size: var(--fs-xs);
   white-space: nowrap;
   cursor: pointer;
 }
 .cloudchip:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--brand-50);
 }
 .cloudchip__punkt {
   display: inline-block;
@@ -154,7 +147,7 @@
   background: var(--bad-500);
 }
 .cloudchip--konflikt {
-  border-color: #fff;
+  border-color: var(--bad-500);
   font-weight: var(--fw-semibold);
 }
 
@@ -605,27 +598,34 @@
 @media (max-width: 640px) {
   :root {
     --topbar-h: 52px;
+    --logo-zeile-h: 64px;
     --stepper-h: 44px;
   }
+  /* Mobil: oben das ganze Logo mittig (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
   .topbar {
-    gap: var(--s-2);
+    top: calc(-1 * var(--logo-zeile-h));
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0 var(--s-2);
     padding: 0 var(--s-3);
   }
-  /* Mobil: Cloud nur als Punkt, Text nur bei Offline/Konflikt (Langtext im Tooltip und im Projekte-Dialog). */
-  /* Mobil: nur das Emblem, kompakt; «Heizlast» entfällt, damit der Projektname Platz behält. */
+  .topbar__marke {
+    flex: 0 0 calc(100% + 2 * var(--s-3));
+    justify-content: center;
+    height: var(--logo-zeile-h);
+    margin: 0 calc(-1 * var(--s-3));
+    padding: 0 var(--s-3);
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .topbar__logo {
+    width: min(100%, 340px);
+    height: auto;
+  }
   .topbar__produkt,
-  .topbar__logo--voll,
   .topbar__aktionen [data-testid='projekte'] + .btn {
     display: none;
   }
-  .topbar__logo--emblem {
-    display: block;
-    height: 28px;
-  }
-  .topbar__logoflaeche {
-    margin-left: calc(-1 * var(--s-3));
-    padding: 0 var(--s-2) 0 var(--s-3);
-  }
+  /* Cloud nur als Punkt, Text nur bei Offline/Konflikt (Langtext im Tooltip und im Projekte-Dialog). */
   .cloudchip {
     padding: 6px 7px;
   }
@@ -637,11 +637,16 @@
     display: inline;
   }
   .topbar__projekt {
+    height: var(--topbar-h);
+    align-items: center;
     padding-left: 0;
     border-left: 0;
   }
+  .topbar__aktionen {
+    gap: 6px;
+  }
   .topbar__aktionen .btn {
-    padding: 8px 6px;
+    padding: 7px 9px;
   }
   .haupt {
     padding: var(--s-5) var(--s-4) calc(var(--s-12) + 60px);
