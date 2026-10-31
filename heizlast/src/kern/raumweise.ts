@@ -149,6 +149,8 @@ export interface RaumErgebnis {
 export interface RestErgebnis {
   modus: 'huellflaechen' | 'spezifisch';
   flaeche: Wert;
+  /** Spezifische Heizlast Φ' des Rests [W/m²] (nur Modus «spezifisch»: Schätzung aus Bauperiode oder Override). */
+  phiSpez: Wert | null;
   phiHL: Wert;
   bauteile: BauteilErgebnis[];
   phiV: Wert | null;
@@ -471,7 +473,7 @@ function restAufloesen(rest: RestEingabe, e: RaumweiseEingabe, ctx: Kontext, sum
     const w = phiSpez.wert * flaeche.wert;
     const phiHL = berechnet(w, 'W', `Rest Φ = Φ' ${fmt(phiSpez.wert, 0)} W/m² × ${fmt(flaeche.wert, 0)} m² = ${fmt(w, 0)} W (Schätzung, nicht raumweise)`, [phiSpez, flaeche], { quelle: 'FWS M3 Folie 37' });
     hinweise.push({ stufe: 'info', code: 'rest.schaetzung', text: `Nicht raumweise erfasster Rest (${fmt(flaeche.wert, 0)} m²) als Φ'·A geschätzt — nur grob; Hüllflächen eingeben für bessere Genauigkeit.`, pfad: 'rest' });
-    return { modus: 'spezifisch', flaeche, phiHL, bauteile: [], phiV: null, hinweise };
+    return { modus: 'spezifisch', flaeche, phiSpez, phiHL, bauteile: [], phiV: null, hinweise };
   }
 
   // Hüllflächen-Rest: Bauteile mit Hüllen-U, θint Standard, Lüftung «weitere»
@@ -500,7 +502,7 @@ function restAufloesen(rest: RestEingabe, e: RaumweiseEingabe, ctx: Kontext, sum
   const phiHL = berechnet(w, 'W', `Rest Φ = Σ Φ_T ${fmt(phiTW, 0)} + Φ_V ${fmt(phiVW, 0)} = ${fmt(w, 0)} W (Hüllflächen-Eingabe, nicht raumweise)`, [...bauteile.map((b) => b.phiT), phiV], { quelle: Q_METHODE });
   if (!bauteile.length) hinweise.push({ stufe: 'warnung', code: 'rest.ohneFlaechen', text: 'Rest über Hüllflächen gewählt, aber keine Flächen angegeben — nur Lüftung gerechnet.', pfad: 'rest' });
   hinweise.push({ stufe: 'info', code: 'rest.huellflaechen', text: `Nicht raumweise erfasster Rest (${fmt(flaeche.wert, 0)} m²) aus Hüllflächen-Eingabe gerechnet (Schätzung: θint 20 °C, Lüftung wie Wohnraum).`, pfad: 'rest' });
-  return { modus: 'huellflaechen', flaeche, phiHL, bauteile, phiV, hinweise };
+  return { modus: 'huellflaechen', flaeche, phiSpez: null, phiHL, bauteile, phiV, hinweise };
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -627,8 +629,9 @@ export function heizlastRaumweise(e: RaumweiseEingabe, daten: { sia: Sia3842Date
   const erdFaktor = raeume.flatMap((r) => r.bauteile).find((b) => b.anschluss === 'erdreich')?.faktor ?? null;
 
   annahmen.push(...sammleAnnahmen([e.thetaE, deltaUWb, geschosshoehe, bStrich, brauchtErdreich ? thetaMittel : null, ebf]));
-  for (const r of raeume) annahmen.push(...sammleAnnahmen([r.thetaInt, r.nMin, r.hoehe.herkunft === 'fallback' ? null : null, ...r.bauteile.map((b) => b.faktor)]));
-  if (rest) annahmen.push(...sammleAnnahmen([rest.flaeche, ...rest.bauteile.map((b) => b.faktor)]));
+  // Eigene U-Werte je Raum-Bauteil sind Overrides und gehören ins Annahmen-Protokoll (KONTEXT §2; Audit S12, UX §3.2); Hüllen-U kommen aus huelle.annahmen.
+  for (const r of raeume) annahmen.push(...sammleAnnahmen([r.thetaInt, r.nMin, ...r.bauteile.map((b) => b.faktor), ...r.bauteile.map((b) => (b.u.herkunft === 'override' ? b.u : null))]));
+  if (rest) annahmen.push(...sammleAnnahmen([rest.flaeche, rest.phiSpez, ...rest.bauteile.map((b) => b.faktor)]));
   // Hüllen-Annahmen (U-Werte) kommen aus huelle.annahmen (dort gesammelt) — hier nicht doppelt.
   const fehler = hinweise.some((h) => h.stufe === 'fehler') || e.huelle.hinweise.some((h) => h.stufe === 'fehler');
 

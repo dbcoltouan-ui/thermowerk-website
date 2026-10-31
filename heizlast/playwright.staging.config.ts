@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  testMatch: ['shell.spec.ts', 'schritte.spec.ts', 'verbrauch.spec.ts', 'mobil.spec.ts', 'kette.spec.ts', 'waermeabgabe.spec.ts', 'bericht.spec.ts', 'cloud-staging.spec.ts'],
+  testMatch: ['shell.spec.ts', 'schritte.spec.ts', 'verbrauch.spec.ts', 'mobil.spec.ts', 'kette.spec.ts', 'waermeabgabe.spec.ts', 'bericht.spec.ts', 'abnahme.spec.ts', 'cloud-staging.spec.ts'],
   timeout: 60_000,
   retries: 1,
   reporter: 'list',

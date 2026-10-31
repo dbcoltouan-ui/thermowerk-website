@@ -82,6 +82,7 @@ function Liste() {
                   <td>
                     {g.bezeichnung}
                     {g.unplausibel && <span class="badge badge--warn" title="Datenbank-Werte unplausibel — Datenblatt prüfen"> prüfen</span>}
+                    {g.schallUnbekannt && <span class="badge badge--warn" title="Kein Schallwert in der Datenbank — Schallfilter nicht geprüft, Datenblatt beiziehen" data-testid={`geraet-${g.id}-schall-unbekannt`}> Schall unbekannt</span>}
                   </td>
                   <td class="zahl">{kW(g.qWpW, 1)}</td>
                   <td class="zahl nur-breit">{zahl(g.vorlaufMaxC, '°C')}</td>

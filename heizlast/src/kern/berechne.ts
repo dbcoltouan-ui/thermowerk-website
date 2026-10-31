@@ -532,6 +532,11 @@ export function berechne(s: State, daten: Datensatz): Ergebnis {
     hinweis('speicher', wwSp.hinweise);
     annahme('speicher', wwSp.annahmen);
   }
+  // Audit S12 (Fachlogik N1): t_voll «Raumwärme und Warmwasser» gilt im Kurs nur, wenn Q_n das Warmwasser enthält und kein separater
+  // Abzug/Zuschlag gerechnet wird — die Kombination zählt das Warmwasser doppelt (Q_hl −13 %) und wird gemeldet.
+  if (s.methode === 'fws' && fws && s.verbrauch.bedarfsart === 'raumwaerme_ww_wohnen' && (fws.wwAbzug || zuschlagWw)) {
+    hinweis('verbrauch', [{ stufe: 'warnung', code: 'tvoll.wwDoppelt', text: `Volllaststunden «Raumwärme und Warmwasser» (${fmt(fws.tvoll.wert, 0)} h/a) zusammen mit ${fws.wwAbzug ? 'dem Warmwasser-Abzug vom Verbrauch' : ''}${fws.wwAbzug && zuschlagWw ? ' und ' : ''}${zuschlagWw ? 'dem Leistungszuschlag Q_w' : ''}: Das Warmwasser wird so doppelt berücksichtigt (Kurs: 2 300 h/a nur, wenn Q_n das Warmwasser enthält und kein Abzug/Zuschlag folgt). Nutzung «Raumwärme, Wohngebäude» wählen.`, pfad: 'verbrauch.bedarfsart' }]);
+  }
 
   // Schritt 7: Zuschläge und Auslegungsleistung
   const z = s.zuschlaege;

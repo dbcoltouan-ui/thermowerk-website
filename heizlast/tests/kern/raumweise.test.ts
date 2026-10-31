@@ -294,6 +294,7 @@ describe('Hülle → Raum (FLOW-02): Raumbauteile referenzieren Gebäude-Bauteil
     expect(b.u.wert).toBe(0.4);
     expect(b.u.herkunft).toBe('override');
     expect(b.u.begruendung).toContain('Hülle: 1.09');
+    expect(r.annahmen).toContain(b.u);
     const r2 = heizlastRaumweise({ thetaE: thetaEEingabe(-8), huelle: h, baujahr: 1965, raeume: [{ id: 'x', name: 'X', typ: 'wohnen', flaecheM2: 10, bauteile: [{ id: 'q', typId: 'gibtEsNicht', flaecheM2: 5, anschluss: { art: 'aussen' } }] }] }, daten);
     expect(r2.hinweise.some((x) => x.code === 'raum.typFehlt')).toBe(true);
     expect(r2.vollstaendig).toBe(false);
@@ -358,6 +359,9 @@ describe('EBF und nicht raumweise erfasster Rest (FACH-22, FLOW-13)', () => {
     expect(r.summeMitRest.wert).toBeCloseTo(r.summeRaeume.wert + 117 * 56.5, 1);
     expect(r.hinweise.some((x) => x.code === 'rest.schaetzung')).toBe(true);
     expect(r.annahmen.some((a) => a.einheit === 'm²' && a.wert === 117)).toBe(true);
+    // Die Φ'-Schätzung selbst (Bandmitte, ±29 %) steht im Annahmen-Protokoll (Audit S12, Fachlogik N2)
+    expect(r.rest!.phiSpez).toMatchObject({ wert: 56.5, herkunft: 'schaetzung' });
+    expect(r.annahmen).toContain(r.rest!.phiSpez);
     pruefeWert(r.rest!.phiHL, 'Rest');
   });
   it('Rest über Hüllflächen (AW 60 m², Fenster 15, Dach 50, Boden 50 Keller, 100 m³): Hüllen-U, b_u, ΔU_WB und Lüftung «weitere» — kein «1 m² pro m² EBF»', () => {

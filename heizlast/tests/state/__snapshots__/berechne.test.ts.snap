@@ -64,7 +64,7 @@ exports[`berechne — FWS-Modus (Moosseedorf) > Snapshot 1`] = `
 
 exports[`berechne — raumweise (CH-EFH von Hand) > Snapshot 1`] = `
 {
-  "annahmen": 27,
+  "annahmen": 36,
   "auslegungsVL": {
     "herkunft": "berechnet",
     "wert": 60,

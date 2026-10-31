@@ -55,6 +55,10 @@ export interface GeraetTreffer {
   ampel: Ampel;
   unplausibel: boolean;
   preisChf: number | null;
+  /** Schallleistung nachts [dB(A)] aus der Datenbank; null = kein Wert hinterlegt. */
+  schallNachtMaxDb: number | null;
+  /** Schallfilter gesetzt, aber Gerät ohne Schallwert — nicht geprüft, nur gekennzeichnet (DATA-04). */
+  schallUnbekannt: boolean;
 }
 
 export interface Dimensionierung {
@@ -209,11 +213,14 @@ export function geraetWaehlen(e: GeraetEingabe, daten: { fws: FwsDaten; wp: WpDa
       if (!(qWpW > 0) || qWpW < qMin || qWpW > qMax) continue;
       if (filterVorlauf && d.vorlaufMaxC !== null && d.vorlaufMaxC < filterVorlauf.wert) continue;
       if (e.filter.aufstellung && d.aufstellung && d.aufstellung !== e.filter.aufstellung) continue;
-      if (e.filter.schallNachtMaxDb !== undefined && d.schallNachtMaxDb !== null && d.schallNachtMaxDb > e.filter.schallNachtMaxDb) continue;
+      const schallFilter = e.filter.schallNachtMaxDb !== undefined;
+      if (schallFilter && d.schallNachtMaxDb !== null && d.schallNachtMaxDb > e.filter.schallNachtMaxDb!) continue;
       const dim = dimensionierung(qh, qWpW, daten.fws);
-      liste.push({ id: d.id, bezeichnung: geraetBezeichnung(d), qWpW, vorlaufMaxC: d.vorlaufMaxC, verhaeltnis: dim.verhaeltnis.wert, uebergroesseProzent: dim.uebergroesse.wert, ampel: dim.ampel, unplausibel: d.plausibilitaet.unplausibel, preisChf: d.preisChf });
+      liste.push({ id: d.id, bezeichnung: geraetBezeichnung(d), qWpW, vorlaufMaxC: d.vorlaufMaxC, verhaeltnis: dim.verhaeltnis.wert, uebergroesseProzent: dim.uebergroesse.wert, ampel: dim.ampel, unplausibel: d.plausibilitaet.unplausibel, preisChf: d.preisChf, schallNachtMaxDb: d.schallNachtMaxDb, schallUnbekannt: schallFilter && d.schallNachtMaxDb === null });
     }
     liste.sort((a, b) => Math.abs(a.qWpW - qh) - Math.abs(b.qWpW - qh));
+    const ohneSchall = liste.filter((g) => g.schallUnbekannt).length;
+    if (ohneSchall > 0) hinweise.push({ stufe: 'info', code: 'geraet.schallUnbekannt', text: `Schallfilter: ${ohneSchall} ${ohneSchall === 1 ? 'Gerät hat' : 'Geräte haben'} keinen Schallwert in der Datenbank — als «Schall unbekannt» gekennzeichnet, nicht geprüft (Datenblatt).`, pfad: 'geraet.filterOverrides.schallNachtMaxDb' });
     if (!liste.length) hinweise.push({ stufe: 'warnung', code: 'geraet.keineTreffer', text: `Kein Gerät der Datenbank passt (Q_WP ${fmt(qMin / 1000, 1)}–${fmt(qMax / 1000, 1)} kW${filterVorlauf ? `, Vorlauf ≥ ${fmt(filterVorlauf.wert, 0)} °C` : ''}).` });
     if (quelleDb !== 'luft' && !daten.wp.geraete.some((d) => d.quelle === quelleDb)) hinweise.push({ stufe: 'info', code: 'geraet.quelleNichtInDb', text: 'Die Gerätedatenbank enthält heute nur Luft/Wasser-Wärmepumpen.' });
   }

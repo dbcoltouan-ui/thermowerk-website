@@ -98,6 +98,9 @@ describe('Lieferungen und Tank-/Lagerstände (Öl)', () => {
     expect(erg.qhl!.wert).toBeCloseTo(((3800 / anteil) * 10.5 * 0.85 * 1000) / 2000, 3);
     expect(hinweise.some((h) => h.code === 'verbrauch.hgt.fehlt')).toBe(false);
     expect(t.zeitraeume[0]!.inStreuung).toBe(true); // ≥ 60 % der Jahres-HGT
+    // Heizgradtage bestimmen den Jahresanteil → im Annahmen-Protokoll (Audit S12)
+    expect(erg.annahmen).toContain(t.zeitraeume[0]!.hgtIst);
+    expect(erg.annahmen).toContain(t.zeitraeume[0]!.hgtRef);
   });
 
   it('ohne Station: Hochrechnung nach Tagen als Fallback mit Warnung', () => {
@@ -194,6 +197,10 @@ describe('Zählerstände (Gas)', () => {
     expect(an.qnHeizungIst!.wert).toBeCloseTo((aus.qnHeizungIst!.wert * (1096 / 365) * 3513) / summeHgt, 6);
     expect(an.qnHeizungIst!.wert).toBeGreaterThan(aus.qnHeizungIst!.wert); // 2022–2024 wärmer als 1984–2003
     expect(an.klimabereinigungAktiv).toBe(true);
+    // Normjahr-HGT und Ist-HGT je Zeitraum stehen im Annahmen-Protokoll; ohne Klimabereinigung ganze Jahre nicht (Kurs: nach Tagen)
+    expect(an.annahmen.some((a) => a.einheit === 'Kd' && /Normjahr/.test(a.begruendung))).toBe(true);
+    for (const z of t.zeitraeume) expect(an.annahmen).toContain(z.hgtIst);
+    expect(aus.annahmen.some((a) => a.einheit === 'Kd')).toBe(false);
   });
 });
 

@@ -27,7 +27,7 @@ function RechenwegFws() {
   const f = store.ergebnis.value.heizlast.fws;
   if (!f) return null;
   return (
-    <Abschnitt titel="Rechenweg (FWS-Kurs Modul 3)" testid="rechenweg-fws">
+    <Abschnitt titel="Rechenweg (FWS-Kurs Modul 3)" text={f.klimabereinigungAktiv ? 'Klimabereinigung aktiv — nicht FWS-Kurs: alle Zeiträume (auch ganze Kalenderjahre) sind mit ihren Heizgradtagen auf das SIA-2028-Normjahr der Station umgerechnet (Klimafaktor je Zeitraum in Schritt 3).' : undefined} testid="rechenweg-fws">
       <ol class="rechenweg">
         {f.traeger.map((t) => (
           <Schritt key={t.energietraeger} label={`Nutzwärme ${daten.fws.heizwerte.konventionen.fwsKurs?.traeger[t.energietraeger]?.label ?? t.energietraeger}`} wert={t.qnBrutto} text={zahl(t.qnBrutto.wert, 'kWh/a')} />

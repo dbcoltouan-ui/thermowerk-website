@@ -1,7 +1,7 @@
 {
  "_meta": {
   "version": "1.0.0",
-  "stand": "2026-10-30",
+  "stand": "2026-10-31",
   "beschreibung": "Monats-Heizgradtage HGT 20/12 [Kd] je SIA-2028-Station, 2015-01 bis 2026-09, aus MeteoSchweiz-Tagesmitteln (tre200d0, SwissMetNet). HGT 20/12 = Σ (20 − θ_Tagesmittel) über Tage mit θ < 12 °C. Monate mit mehr als 3 fehlenden Tagen sind null; bis 3 fehlende Tage anteilig hochgerechnet (luecken). Erzeugt mit scripts/heizgradtage-bauen.mjs. Keine Rechenlogik.",
   "quellen": [
    {
@@ -9,14 +9,14 @@
     "titel": "MeteoSchweiz Open Government Data, automatische Wetterstationen (SwissMetNet), Tageswerte: Parameter tre200d0 «Lufttemperatur 2 m über Boden; Tagesmittel» (ogd-smn_<station>_d_historical.csv / _recent.csv)",
     "art": "Behördendaten (OGD, opendata.swiss «BY» — Quellenangabe nötig)",
     "url": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/",
-    "abgerufen": "2026-10-30"
+    "abgerufen": "2026-10-31"
    },
    {
     "id": "meteoschweiz-hgt",
     "titel": "MeteoSchweiz, Definition Heizgradtage HGT 20/12 (Raumtemperatur 20 °C, Heizgrenze 12 °C, Tagesmittel) — gleiche Definition wie SIA 2028 Tabelle 6 / SIA 380/1",
     "art": "Fachdokumentation",
     "url": "https://www.meteoschweiz.admin.ch/service-und-publikationen/applikationen/heizgradtage.html",
-    "abgerufen": "2026-10-30"
+    "abgerufen": "2026-10-31"
    },
    {
     "id": "sia2028-c1",

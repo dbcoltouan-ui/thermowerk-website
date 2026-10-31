@@ -77,6 +77,27 @@ describe('Gerätefilter', () => {
     expect(o.filterVorlauf!.herkunft).toBe('override');
     expect(o.hinweise.some((h) => h.code === 'geraet.filterVorlaufZuTief')).toBe(true);
   });
+  it('Schallfilter: Geräte über dem Grenzwert fallen weg, Geräte ohne Schallwert bleiben als «Schall unbekannt» gekennzeichnet mit Hinweis (DATA-04)', () => {
+    const ohne = geraetWaehlen({ qh, auslegungsVL: null, filter: { quelle: 'luftWasser' } }, { fws, wp });
+    expect(ohne.liste.every((g) => !g.schallUnbekannt)).toBe(true);
+    expect(ohne.hinweise.some((h) => h.code === 'geraet.schallUnbekannt')).toBe(false);
+    const r = geraetWaehlen({ qh, auslegungsVL: null, filter: { quelle: 'luftWasser', schallNachtMaxDb: 30 } }, { fws, wp });
+    expect(r.liste.length).toBeGreaterThan(0);
+    for (const g of r.liste) {
+      const d = wp.geraete.find((x) => x.id === g.id)!;
+      expect(g.schallNachtMaxDb).toBe(d.schallNachtMaxDb);
+      if (d.schallNachtMaxDb === null) expect(g.schallUnbekannt).toBe(true);
+      else {
+        expect(d.schallNachtMaxDb).toBeLessThanOrEqual(30);
+        expect(g.schallUnbekannt).toBe(false);
+      }
+    }
+    const unbekannt = r.liste.filter((g) => g.schallUnbekannt).length;
+    expect(unbekannt).toBeGreaterThan(0);
+    const h = r.hinweise.find((x) => x.code === 'geraet.schallUnbekannt');
+    expect(h?.text).toContain(`${unbekannt} `);
+    expect(h?.pfad).toBe('geraet.filterOverrides.schallNachtMaxDb');
+  });
   it('Brauchwasser-WP als Auswahl → Fehler; unbekannte id → Warnung', () => {
     const ww = wp.geraete.find((d) => d.kategorie === 'brauchwasser')!;
     const r = geraetWaehlen({ qh, auslegungsVL: null, filter: { quelle: 'luftWasser' }, auswahlId: ww.id }, { fws, wp });

@@ -214,6 +214,8 @@ export interface RaumWaermeabgabe {
   /** Nötige Vorlauftemperatur [°C]; null bei fehlender Heizlast/Heizfläche oder nicht erreichbar. */
   tVLReq: Wert | null;
   erreichbar: boolean;
+  /** Heizflächen hinter einem Mischer (gedeckelter Kreis) decken Φ_HL beim Kreis-Vorlauf nicht; θ_VL,req gilt dann ohne Deckel (Audit S12, HK §3.1). */
+  mischerGrenze: { kreisVLC: number; qBeiKreisVL: number } | null;
   massnahmen: Massnahme[];
   hinweise: Hinweis[];
 }
@@ -1092,11 +1094,12 @@ function massnahmenFuerRaum(b: Betrieb[], phi: number, tInt: number, tVLReq: num
         }
       }
     }
-    // (c) FBH als Ersatz: Auslegung 35/28 °C (Standardsystem, Oberflächengrenze), WP fährt dafür tief
+    // (c) FBH als Ersatz: Auslegung 35/28 °C (Standardsystem, Oberflächengrenze), WP fährt dafür tief — nur, wenn der Raum noch keine Flächenheizung hat
     const fbh = normleistung({ id: '_fbh', bauart: 'fbh', flaecheM2: 1 }, daten, { raumTyp });
     const bz = BEZUG_FLAECHE;
     const qFbh = fbh.qN ? leistung(fbh, 1, bz.tVL, bz.tRL, tInt) : 0;
-    if (qFbh > 0) {
+    const hatFlaechenheizung = b.some((x) => x.a.kat === 'flaeche');
+    if (qFbh > 0 && !hatFlaechenheizung) {
       const aNoetig = phi / qFbh;
       const passt = raumFlaecheM2 ? aNoetig <= raumFlaecheM2 * 0.8 : null;
       out.push({
@@ -1262,6 +1265,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
     let ampel: Ampel = 'grau';
     let tVLReq: Wert | null = null;
     let erreichbar = true;
+    let mischerGrenze: { kreisVLC: number; qBeiKreisVL: number } | null = null;
     let massnahmen: Massnahme[] = [];
     if (mitQ.length) {
       const teile = hfErg.map((x) => x.qZiel).filter((x): x is Wert => !!x);
@@ -1278,14 +1282,34 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
         deckung = berechnet(d, '-', `Deckung = Σ Q ${fmt(qZiel.wert, 0)} W / Φ_HL ${fmt(phiHL.wert, 0)} W = ${fmt(d * 100, 0)} %`, [qZiel, phiHL]);
         ampel = ampelDeckung(d, hk);
         if (d >= hk.ampel.starkUeberdimensioniertAb) rh.push(h('info', 'waermeabgabe.raum.ueberdimensioniert', `${r.name}: Heizfläche deckt ${fmt(d * 100, 0)} % — Reserve für tiefere Vorlauftemperatur.`));
-        const t = tVLReqFuer(mitQ, phiHL.wert, thetaInt.wert, hk);
+        let t = tVLReqFuer(mitQ, phiHL.wert, thetaInt.wert, hk);
+        let rechenBasis = mitQ;
+        const gedeckelt = mitQ.filter((x) => x.vlMax !== undefined);
+        if (t === null && gedeckelt.length) {
+          // Deckel des Mischerkreises ist die Grenze, nicht die Heizfläche: θ_VL,req ohne Deckel bestimmen (Audit S12, HK §3.1)
+          const ohneDeckel: Betrieb[] = mitQ.map(({ vlMax: _v, ...x }) => x);
+          const t2 = tVLReqFuer(ohneDeckel, phiHL.wert, thetaInt.wert, hk);
+          if (t2 !== null) {
+            const kreisVL = Math.max(...gedeckelt.map((x) => x.vlMax!));
+            const qKreis = summeBei(mitQ, kreisVL, thetaInt.wert);
+            mischerGrenze = { kreisVLC: kreisVL, qBeiKreisVL: qKreis };
+            t = t2;
+            rechenBasis = ohneDeckel;
+            rh.push(h('warnung', 'waermeabgabe.raum.mischerGrenze', `${r.name}: Der gemischte Heizkreis ist auf ${fmt(kreisVL, 0)} °C begrenzt — die Heizflächen liefern dort ${fmt(qKreis, 0)} W von Φ_HL ${fmt(phiHL.wert, 0)} W. Kreis-Vorlauf auf ${fmt(t2, 0)} °C anheben oder Heizfläche vergrössern.`, `raeume.${r.id}`));
+          }
+        }
         erreichbar = t !== null;
         const spr = [...new Set(mitQ.map((x) => fmt(x.spreizung.wert, 0)))].join('/');
         tVLReq = t === null
           ? null
-          : berechnet(t, '°C', `θ_VL,req = ${fmt(t, 1)} °C: Σ Q(θ_VL, θ_VL − ${spr} K, ${fmt(thetaInt.wert, 0)} °C) = Φ_HL ${fmt(phiHL.wert, 0)} W (Bisektion, log. Übertemperatur)`, [phiHL, ...mitQ.map((x) => x.a.qN)]);
-        if (!erreichbar) rh.push(h('warnung', 'waermeabgabe.raum.nichtErreichbar', `${r.name}: Heizflächen decken Φ_HL ${fmt(phiHL.wert, 0)} W auch bei ${fmt(vlMax, 0)} °C nicht.`, `raeume.${r.id}`));
-        if (d < hk.ampel.deckung.gruenAb) massnahmen = massnahmenFuerRaum(mitQ, phiHL.wert, thetaInt.wert, t, r.flaecheM2, vlZielRaum.wert, r.typ, hk);
+          : berechnet(t, '°C', `θ_VL,req = ${fmt(t, 1)} °C: Σ Q(θ_VL, θ_VL − ${spr} K, ${fmt(thetaInt.wert, 0)} °C) = Φ_HL ${fmt(phiHL.wert, 0)} W (Bisektion, log. Übertemperatur${mischerGrenze ? `; ohne Mischer-Grenze ${fmt(mischerGrenze.kreisVLC, 0)} °C` : ''})`, [phiHL, ...mitQ.map((x) => x.a.qN)]);
+        if (!erreichbar) {
+          const nurFlaeche = mitQ.every((x) => x.a.kat === 'flaeche');
+          rh.push(h('warnung', 'waermeabgabe.raum.nichtErreichbar', nurFlaeche
+            ? `${r.name}: Die Flächenheizung deckt Φ_HL ${fmt(phiHL.wert, 0)} W auch bei maximaler Oberflächentemperatur nicht — belegte Fläche vergrössern oder zusätzliche Heizfläche.`
+            : `${r.name}: Heizflächen decken Φ_HL ${fmt(phiHL.wert, 0)} W auch bei ${fmt(vlMax, 0)} °C nicht.`, `raeume.${r.id}`));
+        }
+        if (d < hk.ampel.deckung.gruenAb) massnahmen = massnahmenFuerRaum(rechenBasis, phiHL.wert, thetaInt.wert, t, r.flaecheM2, vlZielRaum.wert, r.typ, hk);
       }
     } else if (beheizt && !r.heizflaechen.length) {
       rh.push(h('info', 'waermeabgabe.raum.ohneHeizflaeche', `${r.name}: keine Heizfläche erfasst.`, `raeume.${r.id}`));
@@ -1305,6 +1329,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
       ampel,
       tVLReq,
       erreichbar,
+      mischerGrenze,
       massnahmen,
       hinweise: rh,
     });
@@ -1319,8 +1344,11 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
   let ausHf: Wert | null = null;
   if (massgebend) {
     const rr = raeume.find((r) => r.id === massgebend.raumId)!;
+    const nurFlaecheMassgebend = rr.heizflaechen.length > 0 && rr.heizflaechen.every((x) => x.kategorie === 'flaeche');
     ausHf = massgebend.tVLReq === null
-      ? berechnet(vlMax, '°C', `Auslegungs-VL ≥ ${fmt(vlMax, 0)} °C: ${massgebend.name} wird auch bei ${fmt(vlMax, 0)} °C nicht gedeckt`, [], { stufe: 'heizflaechen' })
+      ? berechnet(vlMax, '°C', nurFlaecheMassgebend
+        ? `Auslegungs-VL ≥ ${fmt(vlMax, 0)} °C: Flächenheizung in ${massgebend.name} zu klein (auch bei maximaler Oberflächentemperatur nicht gedeckt)`
+        : `Auslegungs-VL ≥ ${fmt(vlMax, 0)} °C: ${massgebend.name} wird auch bei ${fmt(vlMax, 0)} °C nicht gedeckt`, [], { stufe: 'heizflaechen' })
       : berechnet(massgebend.tVLReq, '°C', `Auslegungs-VL = max θ_VL,req = ${fmt(massgebend.tVLReq, 1)} °C (massgebend: ${massgebend.name}; ${bewertet.length} Räume bewertet)`, [rr.tVLReq], { stufe: 'heizflaechen' });
   } else {
     const kreisVL = (e.heizkreise ?? []).map((k) => k.tVLC).filter((t): t is number => t !== undefined);
@@ -1347,7 +1375,11 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
     const unerreichbar = !e.auslegungsVLOverrideC && massgebend?.tVLReq === null;
     gAmpel = unerreichbar ? 'rot' : ampelVorlauf(t, hk);
     const wer = massgebend ? ` (massgebend: ${massgebend.name})` : '';
-    if (unerreichbar) urteil = `Ungeeignet ohne Massnahmen: ${massgebend?.name} wird auch mit ${fmt(vlMax, 0)} °C nicht warm — Heizfläche vergrössern.`;
+    const rrM = massgebend ? raeume.find((r) => r.id === massgebend.raumId) : undefined;
+    const nurFlaecheUrteil = !!rrM && rrM.heizflaechen.length > 0 && rrM.heizflaechen.every((x) => x.kategorie === 'flaeche');
+    if (unerreichbar) urteil = nurFlaecheUrteil
+      ? `Ungeeignet ohne Massnahmen: Flächenheizung in ${massgebend?.name} zu klein — wird auch bei maximaler Oberflächentemperatur nicht warm; Fläche vergrössern oder zusätzliche Heizfläche.`
+      : `Ungeeignet ohne Massnahmen: ${massgebend?.name} wird auch mit ${fmt(vlMax, 0)} °C nicht warm — Heizfläche vergrössern.`;
     else if (gAmpel === 'gruen') urteil = `Gut für Wärmepumpe: Auslegungs-Vorlauf ${fmt(t, 0)} °C ≤ ${fmt(gutBis, 0)} °C${wer}.`;
     else if (gAmpel === 'gelb') urteil = `Kritisch: Auslegungs-Vorlauf ${fmt(t, 0)} °C (${fmt(gutBis, 0)}–${fmt(kritischBis, 0)} °C)${wer} — Hochtemperatur-WP, Hybrid oder Tausch einzelner Heizkörper.`;
     else urteil = `Ungeeignet ohne Massnahmen: Auslegungs-Vorlauf ${fmt(t, 0)} °C > ${fmt(kritischBis, 0)} °C${wer} — Heizkörper in den kritischen Räumen vergrössern.`;

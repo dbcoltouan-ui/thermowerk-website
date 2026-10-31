@@ -754,7 +754,17 @@ export function heizlastFws(e: FwsEingabe, daten: FwsDaten): FwsErgebnis {
     const unsW = traeger.reduce((s, t) => s + t.qnHeizungUnsaniert.wert, 0);
     qnIst = berechnet(istW, 'kWh/a', `Q_n,Heizung = ${fmt(istW, 0)} kWh/a (Ist-Zustand${klimaAktiv ? ', Klimabereinigung HGT — nicht FWS-Kurs' : ''})`, traeger.map((t) => t.qnHeizungIst));
     qnUns = berechnet(unsW, 'kWh/a', `Q_n,Heizung vor Sanierungen = ${fmt(unsW, 0)} kWh/a`, traeger.map((t) => t.qnHeizungUnsaniert));
-    for (const t of traeger) annahmen.push(...sammleAnnahmen([t.heizwert, t.eta]));
+    for (const t of traeger) {
+      annahmen.push(...sammleAnnahmen([t.heizwert, t.eta]));
+      // Heizgradtage bestimmen den Jahresanteil (Hochrechnung bzw. Klimabereinigung) — je Zeitraum als Annahme (Audit S12, UX §3.1).
+      for (const z of t.zeitraeume) {
+        if (z.anteilBasis === 'hgt' || z.klimaFaktor !== null) annahmen.push(...sammleAnnahmen([z.hgtIst, z.hgtRef]));
+        if (z.klimaFaktor !== null) {
+          const n = e.verbrauch.eintraege.find((x) => x.id === z.id)?.hgtNorm;
+          if (n && !annahmen.includes(n)) annahmen.push(...sammleAnnahmen([n]));
+        }
+      }
+    }
   } else if (e.methode === 'wpBetriebsstunden') {
     const b = e.wpBetriebsstunden;
     if (!b || !(b.zaehlerH > 0) || !(b.betriebsjahre > 0) || !((b.qWpW ?? 0) > 0 || ((b.stromKwhA ?? 0) > 0 && (b.cop ?? 0) > 0))) {

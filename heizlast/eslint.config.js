@@ -51,6 +51,11 @@ export default tseslint.config(
     },
   },
   {
+    // Audit-Proben Session 12 (dokumentierte Prüfläufe) und Hilfsskripte dürfen protokollieren.
+    files: ['tests/audit-s12/**/*.{ts,tsx}', 'scripts/_s12/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
     // Node-Skripte (Datengeneratoren): Node-Globals erlaubt.
     files: ['scripts/**/*.mjs'],
     languageOptions: { globals: { process: 'readonly', fetch: 'readonly', console: 'readonly' } },

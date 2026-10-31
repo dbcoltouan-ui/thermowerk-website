@@ -168,6 +168,23 @@ describe('berechne — Fälle und Leitplanken', () => {
     expect(['gruen', 'gelb', 'rot']).toContain(e2.heizlast.gegenprobe!.vergleich.ampel);
   });
 
+  it('Bedarfsart «Raumwärme und Warmwasser» (t_voll 2 300) zusammen mit WW-Abzug oder Q_w → Warnung «doppelt» am Feld (Audit S12, Fachlogik N1)', () => {
+    const s = fixture('state-v4-fws-moosseedorf.json');
+    const ohne = berechne(s, daten);
+    expect(ohne.hinweise.some((h) => h.code === 'tvoll.wwDoppelt')).toBe(false);
+    s.verbrauch.bedarfsart = 'raumwaerme_ww_wohnen';
+    const e = berechne(s, daten);
+    const h = e.hinweise.find((x) => x.code === 'tvoll.wwDoppelt');
+    expect(h?.stufe).toBe('warnung');
+    expect(h?.pfad).toBe('verbrauch.bedarfsart');
+    expect(h?.text).toContain('Abzug');
+    expect(h?.text).toContain('Q_w');
+    expect(e.heizlast.fws!.tvoll.wert).toBe(2300);
+    // ohne Abzug und ohne Q_w (WW separat) ist die Bedarfsart legitim → keine Warnung
+    s.verbrauch.wwBisher = false;
+    s.warmwasser.wwKuenftig = false;
+    expect(berechne(s, daten).hinweise.some((x) => x.code === 'tvoll.wwDoppelt')).toBe(false);
+  });
   it('FWS ohne Verbrauch: Bauperioden-Schätzung mit Status «Schätzung»', () => {
     const s = setzeImState(fixture('state-v2-fws-moosseedorf.json'), 'verbrauch.quelle', 'keine');
     const e = berechne(s, daten);
