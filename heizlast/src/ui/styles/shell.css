@@ -598,7 +598,7 @@
 @media (max-width: 640px) {
   :root {
     --topbar-h: 52px;
-    --logo-zeile-h: 64px;
+    --logo-zeile-h: 40px;
     --stepper-h: 44px;
   }
   /* Mobil: oben das ganze Logo mittig (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
@@ -618,7 +618,7 @@
     border-bottom: 1px solid var(--ink-100);
   }
   .topbar__logo {
-    width: min(100%, 340px);
+    width: min(100%, 170px);
     height: auto;
   }
   .topbar__produkt,

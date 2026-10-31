@@ -68,7 +68,8 @@ test('Topbar weiss mit ganzem Firmenlogo (Desktop links mit «Heizlast», mobil 
   expect(box.x + box.width).toBeLessThanOrEqual(vw.width);
   if (mobil) {
     expect(Math.abs(box.x + box.width / 2 - vw.width / 2)).toBeLessThanOrEqual(2);
-    expect(box.width).toBeGreaterThanOrEqual(280);
+    expect(box.width).toBeGreaterThanOrEqual(150);
+    expect(box.width).toBeLessThanOrEqual(190);
     expect(name.y).toBeGreaterThanOrEqual(box.y + box.height);
   } else {
     expect(box.height).toBeGreaterThanOrEqual(30);
