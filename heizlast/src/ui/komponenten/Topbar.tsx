@@ -126,7 +126,11 @@ export function Topbar() {
   return (
     <header class="topbar">
       <div class="topbar__marke" data-testid="topbar-marke">
-        <img class="topbar__logo" src={`${import.meta.env.BASE_URL}img/logo.png`} alt="Thermowerk" width={900} height={130} />
+        <picture>
+          {/* Mobil nur die Wortmarke (ohne Unterzeile «Wärmepumpen & Klimatechnik») */}
+          <source media="(max-width: 640px)" srcset={`${import.meta.env.BASE_URL}img/logo-wortmarke.png`} width={898} height={84} />
+          <img class="topbar__logo" src={`${import.meta.env.BASE_URL}img/logo.png`} alt="Thermowerk" width={900} height={130} />
+        </picture>
         <span class="topbar__produkt">Heizlast</span>
       </div>
       <div class="topbar__projekt">

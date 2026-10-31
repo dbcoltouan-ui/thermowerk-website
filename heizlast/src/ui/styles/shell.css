@@ -35,6 +35,9 @@
   gap: var(--s-3);
   white-space: nowrap;
 }
+.topbar__marke picture {
+  display: flex;
+}
 .topbar__logo {
   display: block;
   height: 36px;
@@ -601,7 +604,7 @@
     --logo-zeile-h: 34px;
     --stepper-h: 44px;
   }
-  /* Mobil: oben das ganze Logo linksbündig in eigener Zeile (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
+  /* Mobil: oben die Wortmarke linksbündig in eigener Zeile (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
   .topbar {
     top: calc(-1 * var(--logo-zeile-h));
     height: auto;
@@ -618,7 +621,7 @@
     border-bottom: 1px solid var(--ink-100);
   }
   .topbar__logo {
-    width: min(100%, 128px);
+    width: min(100%, 154px);
     height: auto;
   }
   .topbar__produkt,

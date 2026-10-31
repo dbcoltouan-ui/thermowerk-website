@@ -52,7 +52,7 @@ test('Dashboard: Seitenleiste auf Desktop, Leiste auf Mobil', async ({ page }, i
   }
 });
 
-test('Topbar weiss mit ganzem Firmenlogo (Desktop links mit «Heizlast», mobil linksbündig über der Projektzeile, die beim Scrollen stehen bleibt)', async ({ page }) => {
+test('Topbar weiss mit ganzem Firmenlogo (Desktop links mit «Heizlast», mobil Wortmarke linksbündig über der Projektzeile, die beim Scrollen stehen bleibt)', async ({ page }) => {
   await page.goto('./');
   const vw = page.viewportSize()!;
   const mobil = vw.width <= 640;
@@ -68,8 +68,9 @@ test('Topbar weiss mit ganzem Firmenlogo (Desktop links mit «Heizlast», mobil 
   expect(box.x + box.width).toBeLessThanOrEqual(vw.width);
   if (mobil) {
     expect(Math.abs(box.x - name.x)).toBeLessThanOrEqual(2);
-    expect(box.width).toBeGreaterThanOrEqual(115);
-    expect(box.width).toBeLessThanOrEqual(140);
+    expect(box.width).toBeGreaterThanOrEqual(140);
+    expect(box.width).toBeLessThanOrEqual(170);
+    expect(await logo.evaluate((img: HTMLImageElement) => img.currentSrc)).toContain('logo-wortmarke.png');
     expect(name.y).toBeGreaterThanOrEqual(box.y + box.height);
   } else {
     expect(box.height).toBeGreaterThanOrEqual(30);
