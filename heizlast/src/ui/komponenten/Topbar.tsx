@@ -125,8 +125,12 @@ export function Topbar() {
   const cloudAus = verwaltung.cloudStatus.value === 'aus';
   return (
     <header class="topbar">
-      <div class="topbar__marke">
-        Thermowerk <small>Heizlast</small>
+      <div class="topbar__marke" data-testid="topbar-marke">
+        <span class="topbar__logoflaeche">
+          <img class="topbar__logo topbar__logo--voll" src={`${import.meta.env.BASE_URL}img/logo.png`} alt="Thermowerk" width={900} height={130} />
+          <img class="topbar__logo topbar__logo--emblem" src={`${import.meta.env.BASE_URL}img/emblem.png`} alt="Thermowerk" width={128} height={128} />
+        </span>
+        <span class="topbar__produkt">Heizlast</span>
       </div>
       <div class="topbar__projekt">
         <span class="topbar__projektname" data-testid="projektname">

@@ -30,16 +30,33 @@
 }
 .topbar__marke {
   display: flex;
-  align-items: baseline;
-  gap: var(--s-2);
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.01em;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--s-3);
   white-space: nowrap;
 }
-.topbar__marke small {
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-regular);
-  color: var(--brand-100);
+/* Logo auf eigener weisser Fläche: Navy-«WERK» und rotes «THERM» wären auf dem Navy-Grund nicht lesbar. */
+.topbar__logoflaeche {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  margin-left: calc(-1 * var(--s-5));
+  padding: 0 var(--s-4) 0 var(--s-5);
+  background: var(--ink-0);
+}
+.topbar__logo {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+.topbar__logo--emblem {
+  display: none;
+}
+.topbar__produkt {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+  color: #fff;
 }
 .topbar__projekt {
   flex: 1;
@@ -594,10 +611,20 @@
     gap: var(--s-2);
     padding: 0 var(--s-3);
   }
-  /* Mobil: Projektname vor Marke; Cloud nur als Punkt, Text nur bei Offline/Konflikt (Langtext im Tooltip und im Projekte-Dialog). */
-  .topbar__marke,
+  /* Mobil: Cloud nur als Punkt, Text nur bei Offline/Konflikt (Langtext im Tooltip und im Projekte-Dialog). */
+  /* Mobil: nur das Emblem, kompakt; «Heizlast» entfällt, damit der Projektname Platz behält. */
+  .topbar__produkt,
+  .topbar__logo--voll,
   .topbar__aktionen [data-testid='projekte'] + .btn {
     display: none;
+  }
+  .topbar__logo--emblem {
+    display: block;
+    height: 28px;
+  }
+  .topbar__logoflaeche {
+    margin-left: calc(-1 * var(--s-3));
+    padding: 0 var(--s-2) 0 var(--s-3);
   }
   .cloudchip {
     padding: 6px 7px;
@@ -614,7 +641,7 @@
     border-left: 0;
   }
   .topbar__aktionen .btn {
-    padding: 8px;
+    padding: 8px 6px;
   }
   .haupt {
     padding: var(--s-5) var(--s-4) calc(var(--s-12) + 60px);
