@@ -598,10 +598,10 @@
 @media (max-width: 640px) {
   :root {
     --topbar-h: 52px;
-    --logo-zeile-h: 40px;
+    --logo-zeile-h: 34px;
     --stepper-h: 44px;
   }
-  /* Mobil: oben das ganze Logo mittig (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
+  /* Mobil: oben das ganze Logo linksbündig in eigener Zeile (scrollt weg), darunter die Zeile Projekt + Knöpfe (bleibt stehen). */
   .topbar {
     top: calc(-1 * var(--logo-zeile-h));
     height: auto;
@@ -611,14 +611,14 @@
   }
   .topbar__marke {
     flex: 0 0 calc(100% + 2 * var(--s-3));
-    justify-content: center;
+    justify-content: flex-start;
     height: var(--logo-zeile-h);
     margin: 0 calc(-1 * var(--s-3));
     padding: 0 var(--s-3);
     border-bottom: 1px solid var(--ink-100);
   }
   .topbar__logo {
-    width: min(100%, 170px);
+    width: min(100%, 128px);
     height: auto;
   }
   .topbar__produkt,
