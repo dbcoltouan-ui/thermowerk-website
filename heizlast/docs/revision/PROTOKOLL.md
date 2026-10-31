@@ -382,3 +382,9 @@ Backup: Stand vor der Session = Commit 56d6423 (Regel 1).
 ### Prüfung
 - Commit 83b89d3 (Audit, Fixes, Referenzrechnungen) gepusht 12:27; Staging `/heizlast-neu/` liefert Build-Stempel 83b89d3 (Fetch); `npm run e2e:staging` 66/66 (inkl. `abnahme.spec.ts`, Cloud-Status aus dem echten Backend).
 - Nach Durchlauf 2: `npm test` 825/825, `npm run lint` 0 Fehler, `npm run build` ok; Playwright lokal 74/74 (Desktop + Mobil), auch mit dem Live-Pfad `/heizlast/` (Cutover-Stand vorbereitet).
+
+## 2026-10-31 13:14 — Session 12: Go-Live (Cutover-Prompt, Opus 5.5)
+Prompt: Logo und Feinschliff vor dem Cutover; Cutover (Vite-Output nach `/heizlast/`, altes Bundle und `heizlast-projects.js` nach `_to_delete/`, Redirect `/heizlast-neu/`, Tests/README/CLAUDE.md), Live-Prüfung, altes Tool als archiviert markieren; nach Freigabe Backups und Protokoll löschen.
+- Cutover-Commit 8794f56 war bereits gepusht und live (Build-Stempel geprüft); nicht neu aufgebaut.
+- Logo: Topbar zeigt `img/logo.png` auf weisser Fläche (Navy-«WERK» wäre auf Navy unlesbar), daneben «Heizlast»; mobil nur das Emblem (`img/emblem.png`, aus dem Logo geschnitten), Topbar-Knöpfe mobil schmaler, Projektname bleibt ganz sichtbar; Favicon/Apple-Touch-Icon aus dem Emblem; Bericht-Kopf unverändert. Belege `shots-neu/s12-logo-vorher/-nachher-*`, Prüfung in `e2e/shell.spec.ts`.
+- Prüfung: 825 Vitest, Lint 0, Playwright 76/76 lokal; Live: `/heizlast/` 200 mit neuem Build-Stempel, `/heizlast-neu/` → 301, `/api/heizlast-projekte` mit gefälschtem Cookie → 401, `/api/heizlast-projects` ohne Function (Pages liefert nur die Startseite, keine Daten).
