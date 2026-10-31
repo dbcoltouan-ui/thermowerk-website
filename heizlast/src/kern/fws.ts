@@ -761,7 +761,8 @@ export function heizlastFws(e: FwsEingabe, daten: FwsDaten): FwsErgebnis {
         if (z.anteilBasis === 'hgt' || z.klimaFaktor !== null) annahmen.push(...sammleAnnahmen([z.hgtIst, z.hgtRef]));
         if (z.klimaFaktor !== null) {
           const n = e.verbrauch.eintraege.find((x) => x.id === z.id)?.hgtNorm;
-          if (n && !annahmen.includes(n)) annahmen.push(...sammleAnnahmen([n]));
+          // Normjahr der Station ist für alle Zeiträume dasselbe — eine Zeile im Annahmen-Protokoll
+          if (n && !annahmen.some((a) => a.wert === n.wert && a.begruendung === n.begruendung)) annahmen.push(...sammleAnnahmen([n]));
         }
       }
     }

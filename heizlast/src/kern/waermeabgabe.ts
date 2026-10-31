@@ -1383,6 +1383,7 @@ export function waermeabgabe(e: WaermeabgabeEingabe, daten: WaermeabgabeDaten): 
     else if (gAmpel === 'gruen') urteil = `Gut für Wärmepumpe: Auslegungs-Vorlauf ${fmt(t, 0)} °C ≤ ${fmt(gutBis, 0)} °C${wer}.`;
     else if (gAmpel === 'gelb') urteil = `Kritisch: Auslegungs-Vorlauf ${fmt(t, 0)} °C (${fmt(gutBis, 0)}–${fmt(kritischBis, 0)} °C)${wer} — Hochtemperatur-WP, Hybrid oder Tausch einzelner Heizkörper.`;
     else urteil = `Ungeeignet ohne Massnahmen: Auslegungs-Vorlauf ${fmt(t, 0)} °C > ${fmt(kritischBis, 0)} °C${wer} — Heizkörper in den kritischen Räumen vergrössern.`;
+    if (!e.auslegungsVLOverrideC && rrM?.mischerGrenze) urteil += ` Der gemischte Kreis von ${rrM.name} ist auf ${fmt(rrM.mischerGrenze.kreisVLC, 0)} °C begrenzt und muss auf ${fmt(rrM.tVLReq?.wert ?? t, 0)} °C angehoben werden.`;
   }
   const gebaeude: WaermeabgabeGebaeude = {
     zielVL: zielGebaeude,

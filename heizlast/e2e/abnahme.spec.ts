@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 /**
  * Session 12 — Abnahme: externe Referenzrechnungen durch die Oberfläche bis in den Bericht (Desktop 1280 / Mobil 390).
- * Sollwerte ausschliesslich aus Kurslösungen (FWS M3 Aufgaben 1A/2/3/4, docs/fws), dem Befund (HK-Beispiele B1/B3,
+ * Sollwerte aus Kurslösungen (FWS M3 Aufgaben 1A/2/3/4, docs/fws), dem Befund (HK-Beispiele B1/B3,
  * befund_heizkoerper.md §5) und den Formblättern des Referenzhauses 238/5 (referenz/referenzhaus-etagenwohnung.json).
- * Nichts davon ist aus dem neuen Code abgeleitet.
+ * Ausnahme: der letzte Test (FWS-Rechner-Vergleich Öl) ist eine Regression auf Neubau-Werte; der externe Wert des
+ * FWS-Rechners (16.5 kW) und die Erklärung der Abweichung stehen in docs/revision/audit-s12/fws-vergleich.md.
  */
 const SHOTS = 'docs/revision/shots-neu';
 const lokal = (info: TestInfo) => String(info.project.use.baseURL ?? '').includes('127.0.0.1');
@@ -117,7 +118,7 @@ test('Kurs Aufgabe 2 (EFH 1975 Bern, Öl 3 500 l inkl. WW 160 l/d, η 0.8, t_off
   await expect(page.getByTestId('abzug-speicherverlust')).toHaveValue('10');
   await expect(page.getByTestId('abzug-ausstoss')).toHaveValue('15');
   await page.getByTestId('abzug-zirkulation').selectOption({ label: 'Warmhalteband' });
-  nahe(await zahl(page, 'ww-abzug'), 4_258, 1.5, 'WW-Abzug (Kurs 4 309 multiplikativ)');
+  nahe(await zahl(page, 'ww-abzug'), 4_309, 1.5, 'WW-Abzug (Kurs 4 309 multiplikativ; Neubau additiv 4 258 = −1.2 %, PROTOKOLL S3)');
   // WW künftig über die WP, gleiche Angaben
   await page.getByTestId('schritt-warmwasser').click();
   await page.getByTestId('ww-kuenftig-ja').click();
@@ -158,12 +159,17 @@ test('Kurs Aufgabe 2 (EFH 1975 Bern, Öl 3 500 l inkl. WW 160 l/d, η 0.8, t_off
   await foto(page, info, 'kurs-2-bericht');
 });
 
-test('Kurs Aufgabe 3 (MFH Minergie-P, Wärmezähler 23 000 kWh/a, 408 m ü. M., 27.4 Personen gehoben): 11.5 / 5.64 / 17.14 kW', async ({ page }) => {
-  await fwsProjekt(page, 'Kurs Aufgabe 3', { typ: 'mfh', baujahr: '2012', hoehe: '408', ebf: '1200' });
+test('Kurs Aufgabe 3 (MFH Minergie-P, Wärmezähler 23 000 kWh/a, EBF 1 832 m², 27.4 Personen gehoben): 11.5 / 5.64 / 17.14 kW; 6.3 W/m² unplausibel', async ({ page }) => {
+  await fwsProjekt(page, 'Kurs Aufgabe 3', { typ: 'mfh', baujahr: '2012', hoehe: '408', ebf: '1832' });
   await page.getByTestId('schritt-verbrauch').click();
   await page.getByTestId('quelle-messung').click();
   await page.getByTestId('messung-qn').fill('23000');
   await expect(page.getByTestId('tvoll')).toHaveValue('2000');
+  // Pointe der Aufgabe: 11.5 kW / 1 832 m² = 6.3 W/m² liegt unter dem Minergie-P-Band — die Plausibilität meldet es
+  await page.getByTestId('schritt-heizlast').click();
+  await expect(page.getByTestId('heizlast-spez')).toContainText('6.3');
+  await expect(page.getByTestId('plausi')).not.toHaveAttribute('data-ampel', 'gruen');
+  await page.getByTestId('schritt-verbrauch').click();
   await page.getByTestId('schritt-warmwasser').click();
   await page.getByTestId('ww-kuenftig-ja').click();
   await page.getByTestId('wwk-methode-personen').click();
@@ -226,8 +232,8 @@ test('HK-Beispiele B1/B3 (Befund §5): Typ 22 600×1000 @55/45 = 842–873 W; Ra
   await page.getByTestId('wa-raum-1-hf-1-laenge').fill('1000');
   await expect(page.getByTestId('wa-zielvl')).toHaveValue('55');
   const q55 = await zahl(page, 'wa-raum-1-hf-1-qziel');
-  expect(q55, 'B1 Q(55/45)').toBeGreaterThanOrEqual(842 * 0.98);
-  expect(q55, 'B1 Q(55/45)').toBeLessThanOrEqual(873 * 1.02);
+  expect(q55, 'B1 Q(55/45)').toBeGreaterThanOrEqual(842);
+  expect(q55, 'B1 Q(55/45)').toBeLessThanOrEqual(873);
   // B3: Raum 1 200 W, T21 600 × 800 → θ_VL,req ≈ 81 °C (Befund mit Q_N 1 032 W; neue Tabelle 1 064 W → 79.7, PROTOKOLL S5)
   await page.getByTestId('wa-raum-1-hf-1-bauart').selectOption('platte_21');
   await page.getByTestId('wa-raum-1-hf-1-laenge').fill('800');
@@ -270,6 +276,7 @@ test('Referenzhaus 238/5 (DIN EN 12831 Formblätter) aus Datei: Räume ±2 %, Σ
   await expect(page.getByTestId('heizlast-methode')).toContainText('SIA 384/2');
   for (const r of ref.raeume) {
     const ist = await zahl(page, `heizlast-raum-r${r.id}-phihl`);
+    // Flur: dokumentierte Abweichung −106 W statt −95 W (Formblatt rundet f_RT auf −0.18; PROTOKOLL S4) → ±12 W
     if (r.id === 3) expect(Math.abs(ist - r.soll.phiHL_W), `Flur ${ist} / ${r.soll.phiHL_W}`).toBeLessThanOrEqual(12);
     else nahe(ist, r.soll.phiHL_W, 2, `${r.name} Φ_HL`);
   }
@@ -277,6 +284,7 @@ test('Referenzhaus 238/5 (DIN EN 12831 Formblätter) aus Datei: Räume ±2 %, Σ
   nahe(summe, ref.soll_gebaeude.summe_raeume_W, 1, 'Σ Räume');
   const saldiert = await zahl(page, 'saldiert');
   expect(saldiert).toBeLessThanOrEqual(summe);
+  // Formblatt G 3 560 W (DIN-Erdreichfaktoren auf Gebäudeebene, nicht reproduzierbar) ist nur eine Schranke, kein Sollwert
   expect(saldiert).toBeGreaterThan(3560);
   await foto(page, info, '238-5-heizlast');
   // Bericht: dieselben Raumwerte, Gebäude saldiert = Dashboard
@@ -317,8 +325,9 @@ test('Gas mit Zählerständen (Session 7b): Differenzen je Kalenderjahr und Mitt
   nahe((await zahl(page, 'bericht-qhl')) * 1000, 11_950, 1, 'Bericht Q_hl');
 });
 
-test('FWS-Rechner-Vergleich Öl (burner-replacement.suissetec.ch 8.6.3, Bern): dieselben Tankstände durch die UI → 3 865 l/a, Q_hl 17.25 kW (Kurs) / 21.60 kW (Klimabereinigung SIA 2028)', async ({ page }) => {
-  // FWS-Rechner mit denselben Eingaben (SEPARATE/NO): t_voll 2 150, Hi 9.91, η 0.85, HGT 2 901 → Mittel 3 222 Kd, 4 220 l/a, Φ_H 16.5 kW (docs/revision/audit-s12/fws-vergleich.md)
+test('FWS-Rechner-Vergleich Öl (Regression auf Neubau-Werte; FWS-Rechner 16.5 kW, +4.5 % erklärt in fws-vergleich.md): 3 865 l/a, Q_hl 17.25 kW (Kurs) / 21.60 kW (Klimabereinigung SIA 2028)', async ({ page }) => {
+  // FWS-Rechner mit denselben Eingaben (SEPARATE/NO): t_voll 2 150, Hi 9.91, η 0.85, HGT 2 901 → Mittel 3 222 Kd, 4 220 l/a, Φ_H 16.5 kW.
+  // Neubau: 3 800 l × HGT_ref 2 805 / HGT 2 758 = 3 865 l/a; × 10.5 × 0.85 / 2 000 = 17.25 kW; SIA-Normjahr 3 513 Kd → 21.6 kW.
   await fwsProjekt(page, 'FWS-Vergleich Öl', { baujahr: '1975', plz: '3011', kanton: 'BE', ebf: '180' });
   await page.getByTestId('schritt-verbrauch').click();
   await page.getByTestId('quelle-rechnungen').click();

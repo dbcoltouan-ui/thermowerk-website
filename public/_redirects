@@ -1,0 +1,2 @@
+# Frueherer Staging-Pfad des Heizlast-Neubaus (bis Go-Live 2026-10-31) -> Live-Pfad
+/heizlast-neu/* /heizlast/:splat 301

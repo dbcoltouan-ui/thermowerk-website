@@ -35,7 +35,7 @@ export default tseslint.config(
       'docs/**',
       'playwright-report/**',
       'test-results/**',
-      '../public/heizlast-neu/**',
+      '../public/heizlast/**',
     ],
   },
   js.configs.recommended,

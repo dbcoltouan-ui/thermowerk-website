@@ -4,7 +4,6 @@
  * 5 Fehlversuche / 15 min je Absender, fehlende Konfiguration mit Klartext, keine Klartext-IP in D1.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as projekteAlt from '../../../functions/api/heizlast-projects.js';
 import { COOKIE_NAME, LAUFZEIT_S, passwortGleich, tokenErzeugen, tokenPruefen } from '../../../functions/_lib/heizlast-sitzung.js';
 import { anfrage, d1, TEST_PASSWORT, TEST_SECRET, testServer } from './hilfen';
 
@@ -51,13 +50,11 @@ describe('Login und Cookie', () => {
 });
 
 describe('Cookie-Prüfung (BUILD-06): nur signiert, nicht abgelaufen, Sitzung gültig', () => {
-  it('gefälschtes Cookie «x» → nicht angemeldet; Projekte → 401 (neu und alt)', async () => {
+  it('gefälschtes Cookie «x» → nicht angemeldet; Projekte → 401', async () => {
     const s = testServer();
     expect(await probe(s, `${COOKIE_NAME}=x`)).toEqual({ authed: false });
     const neu = await s.bearbeiten(anfrage('/api/heizlast-projekte', { cookie: `${COOKIE_NAME}=x` }));
     expect(neu.status).toBe(401);
-    const alt = await projekteAlt.onRequestGet({ request: anfrage('/api/heizlast-projects', { cookie: `${COOKIE_NAME}=x` }), env: s.env });
-    expect(alt!.status).toBe(401);
   });
 
   it('Teilstring-Trick (xyz_tw_heizlast_auth=…) zählt nicht, auch mit gültigem Wert', async () => {
@@ -205,17 +202,12 @@ describe('Datenbankfehler: kein D1-Text nach aussen', () => {
   });
 });
 
-describe('Altes Tool (bis Go-Live): gleiche Antwortform', () => {
-  it('POST/GET/DELETE liefern success/authed wie bisher; alte Projekte nur mit gültiger Sitzung', async () => {
+describe('Antwortform der Anmeldung (unverändert seit dem alten Tool)', () => {
+  it('POST/GET/DELETE liefern success/authed', async () => {
     const s = testServer();
     const b = s.browser();
     expect(await (await login(b, TEST_PASSWORT)).json()).toMatchObject({ success: true });
     expect(await (await b.fetch('/api/heizlast-auth')).json()).toMatchObject({ authed: true });
-    s.db.roh.exec(`CREATE TABLE heizlast_project (id TEXT PRIMARY KEY, project_name TEXT, customer_name TEXT, address TEXT, qhl REAL, qh REAL, ebf REAL, state_json TEXT, status TEXT, notes TEXT, created_at TEXT, updated_at TEXT)`);
-    const cookie = `${COOKIE_NAME}=${b.cookies.get(COOKIE_NAME)}`;
-    const alt = await projekteAlt.onRequestGet({ request: anfrage('/api/heizlast-projects', { cookie }), env: s.env });
-    expect(alt!.status).toBe(200);
-    expect(await alt!.json()).toMatchObject({ success: true, projects: [] });
     expect(await (await b.fetch('/api/heizlast-auth', { method: 'DELETE' })).json()).toEqual({ success: true });
   });
 });

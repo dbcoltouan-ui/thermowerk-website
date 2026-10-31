@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4173;
-const BASE = `http://127.0.0.1:${PORT}/heizlast-neu/`;
+const BASE = `http://127.0.0.1:${PORT}/heizlast/`;
 
 export default defineConfig({
   testDir: './e2e',

@@ -16,8 +16,8 @@ function buildStempel() {
 }
 
 
-// Staging-Pfad bis zum Go-Live (Session 12): /heizlast-neu/ — Live /heizlast/ bleibt unberührt.
-export const BASE_PFAD = '/heizlast-neu/';
+// Live-Pfad seit dem Go-Live (Session 12, 2026-10-31); Staging war bis dahin /heizlast-neu/.
+export const BASE_PFAD = '/heizlast/';
 
 const alias = {
   '@kern': fileURLToPath(new URL('./src/kern', import.meta.url)),
@@ -40,7 +40,7 @@ export default defineConfig({
   resolve: { alias },
   build: {
     // Output direkt in den Astro-public-Ordner der Website → Pages liefert ihn mit aus.
-    outDir: fileURLToPath(new URL('../public/heizlast-neu', import.meta.url)),
+    outDir: fileURLToPath(new URL('../public/heizlast', import.meta.url)),
     emptyOutDir: true,
     sourcemap: false,
     target: 'es2022',

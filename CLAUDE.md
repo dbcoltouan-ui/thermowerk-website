@@ -13,78 +13,29 @@
 
 ---
 
-## ⚠️ OFFENER PUNKT (Stand 2026-07-06) — Push-Zugang nach Laptop-Neuaufsetzung
+## Git und Deploy (Stand 2026-10-31)
 
-**Kontext:** Daniel hat den Laptop komplett neu aufgesetzt und dabei bewusst alle alten Verknüpfungen gekappt (Git/Node-Installation, Windows Defender-Ausnahmen, Controlled Folder Access, die alte "Desktop Commander"-Direktverbindung zum echten Windows-Rechner). Grund: diese Verknüpfungen hatten den Laptop stark verlangsamt. Sanity-Konto ist ausserdem leer (Projekt weg — noch nicht untersucht warum).
-
-**Gewählte neue Lösung:** GitHub Fine-grained Personal Access Token (PAT), Scope: nur Repo `thermowerk-website`, Permission "Contents: Read and write". Vorteil: kein Git/Node auf dem Windows-Laptop nötig, keine Defender-Ausnahmen, kein Controlled-Folder-Access-Eintrag — Push läuft komplett über Claudes eigene Cloud-Sandbox (Linux-VM), die den Ordner per virtiofs mountet.
-
-**Status:**
-1. Daniel hat den Token bereits erstellt und im Chat geteilt (nicht in dieser Datei gespeichert — Sicherheitsgrund: CLAUDE.md liegt im Git-Tracking, `.git/config` NICHT).
-2. Token muss in `.git/config` beim `remote "origin"` als `https://<TOKEN>@github.com/dbcoltouan-ui/thermowerk-website.git` eingetragen werden — **das MUSS über die Linux-Sandbox (Bash-Tool) laufen**, NICHT über Edit/Write-Tool (die blocken `.git/*`-Pfade als geschützten Bereich).
-3. **Blocker:** Cowork-eigene VM (Linux-Sandbox) startete in der Session vom 2026-07-06 nicht ("VM service not running"). Daniel installiert Cowork deshalb neu.
-4. **Nächste Schritte sobald VM läuft:** Token erneut von Daniel erfragen (falls nicht mehr im Chat-Verlauf vorhanden) → `git remote set-url origin https://<TOKEN>@github.com/dbcoltouan-ui/thermowerk-website.git` im Bash-Tool ausführen → Testcommit pushen → danach normalen Workflow (siehe Git-Commit-Workflow weiter unten) nutzen, aber Git-Befehle jetzt über das **Bash-Tool (Linux-Sandbox)**, NICHT mehr über Desktop Commander (existiert in dieser Session nicht mehr).
-5. **Noch offen:** Bild mit iStock-Wasserzeichen auf der Live-Seite muss ersetzt werden — Daniel wollte in der nächsten Session zeigen, welches Bild betroffen ist (noch nicht identifiziert).
-6. **Token-Ablauf:** Fine-grained PATs laufen nach der gewählten Frist ab (meist max. 1 Jahr) — Daniel rechtzeitig an Erneuerung erinnern.
+Claude arbeitet in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos (`dbcoltouan-ui/thermowerk-website`, Verbindung über das Claude-Projekt «thermowerk»): Dateien dort ändern, Tests/Build laufen lassen, committen, `git push origin main` — Cloudflare Pages baut automatisch (1–3 Minuten), Claude verifiziert den Deploy per Fetch (Heizlast: Build-Stempel `<meta name="thermowerk-build">` unter `/heizlast/`). Kein Token in `.git/config`, kein Git/Node auf Daniels Laptop nötig; der frühere Weg über «Desktop Commander» auf dem Windows-Rechner (Abschnitte weiter unten) ist nur noch Referenz. Daniels Ordner liegen unter `D:\Users\Daniel\Documents\…` (Pfade mit `C:\Users\Daniel\…` in diesem Dokument sind veraltet). Offen seit Juli: ein Bild mit iStock-Wasserzeichen auf der Live-Seite (noch nicht identifiziert).
 
 ---
 
-## Heizlast — Neubau (seit 2026-10-29, Ordner `heizlast/`)
+## Heizlast-Rechner (Neubau, live seit 2026-10-31 unter `/heizlast/`)
 
-Der Heizlast-Rechner wird neu gebaut (Vite + Preact + TypeScript) im Ordner `heizlast/` dieses Repos. Verbindliche Grundlage: `heizlast/docs/revision/KONTEXT.md`, `PLAN.md` (Sessions 1–12), `BEFUND.md`; Stand und Befehle in `heizlast/README.md`. Seit Session 7b (2026-10-30): State-Schema v3 (`verbrauch.reihen` je Energieträger, Migration v2→v3), Heizgradtage aus MeteoSchweiz Open Data (`heizlast/data/heizgradtage.json`, erneuern mit `node scripts/heizgradtage-bauen.mjs` im Ordner `heizlast/`), Standard-Bauteiltypen im Kern. Seit Session 8 (2026-10-30): Schritte 5–9 inkl. Heizkörper-Modul (Wärmeabgabe), State-Schema v4; **Fokus ist das Heizkörper-Modul — Förderung, Bewilligung und Offerte werden nicht gebaut (Session 11 entfällt)**, und es wird nur eingebaut, was vollständig und belegt ableitbar ist (z. B. keine JAZ, kein Hinweis darauf). Der Root-Build (`npm run build`) baut zuerst `heizlast/` nach `public/heizlast-neu/` (Staging-URL `/heizlast-neu/`), dann Astro. Das Live-Tool unter `/heizlast/` (Abschnitt unten) bleibt bis zum Go-Live in Session 12 unverändert. **Seit Session 10 (2026-10-30): Backend neu** — `functions/api/heizlast-auth.js` (HMAC-signiertes Cookie `tw_heizlast_auth`, Sitzungen in D1 mit Widerruf, Sperre 5 Fehlversuche/15 min; auch das alte Tool meldet sich darüber an, gleiche Antwortform), Projekte des Neubaus über `functions/api/heizlast-projekte.js` (D1-Tabelle `heizlast_projekt`, optimistisches Locking), gemeinsame Hilfen in `functions/_lib/` (keine Routen), Schema `migrations/0003_heizlast_neu.sql` (Functions legen die Tabellen beim ersten Zugriff selbst an). Das alte `functions/api/heizlast-projects.js` (Tabelle `heizlast_project`) prüft jetzt dieselbe sichere Anmeldung und fällt in Session 12 weg. Endpoints und Details: `heizlast/README.md` Abschnitt «Backend-Endpoints». Pfade in diesem Dokument mit `C:\Users\Daniel\…` sind veraltet; aktuell liegt alles unter `D:\Users\Daniel\Documents\…`.
+Der Heizlast-Rechner ist seit dem Go-Live in Session 12 der **Neubau** im Ordner `heizlast/` dieses Repos (Vite 6 + Preact + TypeScript, strict). Das alte Single-File-Tool ist abgelöst: sein Bundle liegt unter `_to_delete/public-heizlast-alt/`, sein Endpoint `functions/api/heizlast-projects.js` unter `_to_delete/`; das Entwicklungsverzeichnis `D:\Users\Daniel\Documents\Thermowerk\Heizlast Tool\` ist als archiviert markiert (`ARCHIVIERT.md`). Nichts davon wird noch ausgeliefert oder gepflegt.
 
----
+**Was das Tool kann:** Heizlast in zwei Modi — FWS-Kurs Modul 3 (Verbrauchsmethode: Rechnungen, Lieferungen mit Tankständen, Zählerstände, WP-Betriebsstunden, Wärmezähler, Bauperiode) und raumweise nach SIA 384/2:2020 (Hüllen-Kaskade mit Standardaufbauten nach Baujahr) — dazu Warmwasser, Zuschläge, Speicher/Puffer/MAG, das **Heizkörper-Modul** (Q_N aus Bauart und Massen, nötige Vorlauftemperatur je Raum, Auslegungs-Vorlauf, WP-Tauglichkeit, Massnahmen), Gerätefilter (Luft/Wasser-WP-Datenbank), Bericht (PDF über den Druckdialog, JSON-Export/-Import), Projekte lokal und in der Cloud. Jeder berechnete oder angenommene Wert trägt Herkunft, Begründung und Unsicherheit. **Nicht im Umfang** (Entscheid Daniel 29./30.10.): Förderung, Bewilligung, Offerte, Hydraulik-Schemas, JAZ, Import alter Projekte.
 
-## Heizlast-Rechner — Single-File-Variante (aktueller Stand 2026-04-21)
+**Verbindliche Doku (im Repo, zuerst lesen):** `heizlast/README.md` (Session-Stand, Architektur, Befehle, Datenquellen, offene Punkte), `heizlast/docs/revision/KONTEXT.md` (Fachentscheide, Arbeitsregeln, Definition of Done), `PLAN.md`, `BEFUND.md` (Revision des alten Tools) und `docs/revision/audit-s12/AUDIT-S12.md` (Abnahme). Kern-API: `heizlast/src/kern/README.md`.
 
-> **Überblick:** Der alte Astro-v2-Rechner unter `/heizlast` ist entfernt. Stattdessen läuft jetzt ein **Single-File-HTML-Rechner** (~184 KB) aus dem konsolidierten Master-Ordner `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\` (seit 2026-04-22; vorher `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`). Dieser wird für das Live-Deploy 1:1 nach `thermowerk-website/public/heizlast/` kopiert — keine Astro-Komponenten, kein Build-Schritt für den Rechner selbst.
+**Architektur in einem Satz:** `state` (nur Rohangaben, Schema v4, Migrationen in `src/state/hydrate.ts`) → `berechne(state, daten)` (einziger Rechenpfad, `src/kern/`) → `Ergebnis` → UI (`src/ui/`, rechnet nichts), Bericht (`src/bericht/`), Persistenz (`src/state/persistenz.ts`, Cloud `cloud.ts`). Fachdaten nur in `heizlast/data/*.json` mit `_meta` (Version, Stand, Quellen). Regeln, die Build/Lint erzwingen: kein «ß»; `src/kern` und `src/daten` importieren nie aus UI/Bericht/preact.
 
-### Projekt-Struktur
-- **Entwicklung & Bearbeitung:** `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\index.html`
-- **Live-Deploy:** `C:\Users\Daniel\Documents\thermowerk-website\public\heizlast\index.html` (+ `style.css`, `img/`)
-- **Backend-Endpoints bleiben im Website-Repo aktiv:** `functions/api/heizlast-auth.js` + `functions/api/heizlast-projects.js` (bedienen jetzt den Single-File-Rechner statt Astro).
-- **Datenbank:** Cloudflare D1 (`thermowerk-data`, Region WEUR) — unverändert.
-- **Auth:** Cookie `tw_heizlast_auth` (HttpOnly, Secure, SameSite=Lax), seit 2026-10-30 HMAC-signiert mit Sitzung in D1 (siehe Abschnitt «Heizlast — Neubau»).
+**Befehle (im Ordner `heizlast/`, Node ≥ 22):** `npm test` (Vitest), `npm run lint` (eslint + tsc über alles), `npm run build` (tsc nur `src`/`data` + Vite nach `../public/heizlast/`, git-ignoriert), `npm run e2e` (Playwright Desktop 1280 + Mobil 390, baut und startet Preview), `npm run e2e:staging` (gegen die Live-URL). Der Root-Build `npm run build` baut zuerst `heizlast/`, dann Astro; Cloudflare Pages liefert `dist/` (Vite-Output darin unter `heizlast/`). `public/_redirects` leitet den früheren Staging-Pfad `/heizlast-neu/` auf `/heizlast/` um.
 
-### Wichtige Doku im Final-Heizlast-Ordner
-- `BACKUP-GUIDE.md` — wann/wie Backups, Rollback-Prozedur, Claude-Workflow
-- `CHANGELOG.md` — chronologische Liste der wichtigen Eingriffe
-- `STAND-DER-DINGE.md` — aktueller Stand (letzte + vorletzte Session)
-- `MIGRATION-GAMEPLAN.md` — Phasenübersicht
-- `reference/BEISPIELRECHNUNG.md`, `FWS-RECHENWEGE.md` — Rechenweg-Dokumentation
+**Backend:** `functions/api/heizlast-auth.js` (Login: HMAC-signiertes Cookie `tw_heizlast_auth`, Sitzungen in D1 mit Widerruf, Sperre 5 Fehlversuche / 15 min), `functions/api/heizlast-projekte.js` (Projekte, D1-Tabelle `heizlast_projekt`, optimistisches Locking), gemeinsame Hilfen `functions/_lib/` (keine Routen), Schema `migrations/0003_heizlast_neu.sql` (die Functions legen die Tabellen selbst an). Umgebungsvariablen: `HEIZLAST_PASSWORD`, `HEIZLAST_COOKIE_SECRET` (≥ 32 Zeichen). Die alte Tabelle `heizlast_project` bleibt als Archiv in D1 (nicht löschen, wird nicht gelesen). Endpoints und Antworten: `heizlast/README.md` Abschnitt «Backend-Endpoints».
 
-### Backup/Restore-Infrastruktur (Phase 6, 2026-04-21)
-Ordner `Thermowerk\Final Heizlast\scripts\` enthält vier Skripte:
-- `backup.ps1` + `backup.bat` — legt ZIP mit Zeitstempel in `Thermowerk\Final Heizlast\Backup\` an
-- `restore.ps1` + `restore.bat` — interaktive Auswahl aus vorhandenen Backups, legt vorher automatisch Safety-Snapshot an
+**Pflege — Heizgradtage (einziger wiederkehrender Handgriff):** `heizlast/data/heizgradtage.json` enthält Monats-Heizgradtage HGT 20/12 je SIA-Station aus MeteoSchweiz Open Data, von 2015-01 bis zum letzten vollständigen Monat des Erzeugungslaufs (`_meta.zeitraum`). Für neuere Verbrauchszeiträume meldet die App «keine Heizgradtage» und rechnet nach Tagen. Deshalb **etwa alle 1–3 Monate** (spätestens, wenn die Meldung auftaucht) im Ordner `heizlast/` ausführen: `node scripts/heizgradtage-bauen.mjs` (braucht Netz zu data.geo.admin.ch, dauert wenige Minuten), dann `npm test` (Schema-Test `tests/daten/meta.test.ts`, `tests/kern/heizgradtage.test.ts` grün), Datei committen und pushen. Claude macht das selbst, wenn Daniel es anstösst («Heizgradtage aktualisieren»).
 
-**Claude kann beide Skripte direkt ausführen:**
-```
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\scripts\backup.ps1"
-```
-
-**Daniel:** Doppelklick auf `backup.bat` oder `restore.bat` im Explorer.
-
-**Wann Backup machen:** vor grösseren Eingriffen am Rechenkern, UI-Refactorings, State-Migrationen, Live-Deploys mit mehr als einem Bugfix. NICHT nötig bei reinen Text-/CSS-Feinschliff-Änderungen. Siehe `Thermowerk\Final Heizlast\BACKUP-GUIDE.md` für Details.
-
-### Cloud-Sync-Eigenheiten (Phase 4.5 + 2026-04-21)
-- **localStorage-Keys:** `thermowerk-heizlast-projects-v1` (Projekt-Liste) + `thermowerk-heizlast-active-v1` (aktuelles Projekt).
-- **Mirror-Flag:** `meta.cloudMirror = true` markiert lokale Einträge, die eine synchronisierte Cloud-Kopie haben. Wird in `saveProject()` nach erfolgreichem `cloudSave()` gesetzt via Helper `markLocalAsCloudMirror()`.
-- **Drift-Cleanup:** `cloudList()` entfernt nach jedem Fetch lokale Mirror-Einträge, die nicht mehr in der Cloud sind (→ Remote-Delete kaskadiert auf alle Geräte).
-- **Asymmetrisches Löschen:** Cloud-Delete entfernt auch den lokalen Eintrag mit derselben ID. Lokales Löschen lässt die Cloud unberührt.
-- **Auto-Sync:** `visibilitychange` + `focus`-Listener rufen `cloudList()` beim Tab-Wechsel; zusätzlich beim Öffnen des Projekte-Modals.
-- **Projekte-Modal:** **Eine** konsolidierte Liste pro Projekt (nie doppelt angezeigt), Badge „Cloud" oder „Nur lokal" pro Eintrag, Matching über `meta.id ⇔ _id`.
-
-### Export-Optionen (2026-04-21)
-Export-Modal bietet vier abwählbare Elemente: Rechenweg (Default an), drei Notiz-Bereiche. Alles andere ist immer im Export enthalten.
-
-### Workflow: Änderung am Single-File-Rechner → Live
-1. Backup (wenn grösserer Eingriff): `Thermowerk\Final Heizlast\scripts\backup.ps1` laufen lassen.
-2. Edit in `Thermowerk\Final Heizlast\index.html`.
-3. Testen: Doppelklick auf `Thermowerk\Final Heizlast\index.html` im Explorer (lokal öffnen).
-4. Kopie auf Live: `thermowerk-website\public\heizlast\index.html` überschreiben (via Copy-Item oder Write-Tool).
-5. Commit + Push (`thermowerk-website`-Repo) → Cloudflare baut automatisch.
-6. Eintrag im `Thermowerk\Final Heizlast\CHANGELOG.md` ergänzen.
+**Arbeitsweise bei Änderungen:** KONTEXT §3/§4 gilt weiter — vor dem Start Commit-Stand notieren; Fachlogik nur mit externen Referenztests (Kurslösung, Norm, Datenblatt); jeder Fallback als `Wert` mit Herkunft; keine Rechenlogik in `src/ui/`; keine Daten-Kopien im Code; `README.md` nachführen; Tests, Lint, Build und Playwright grün, Deploy per Fetch der Live-URL (Build-Stempel `<meta name="thermowerk-build">`) verifizieren. Daniel ist Backup-Tester (Klicks im Browser, fachliche Plausibilität) — Entwicklung, Deploy und Prüfung sind Claudes Arbeit.
 
 ---
 
@@ -92,6 +43,7 @@ Export-Modal bietet vier abwählbare Elemente: Rechenweg (Default an), drei Noti
 - **Astro 5.5** – statisches Framework
 - **Cloudflare Pages** – Hosting, auto-deploy per GitHub Push (thermowerk-website.pages.dev)
 - **Cloudflare D1** – Datenbank für Kontaktanfragen und Heizlast-Projekte (Binding `DB`)
+- **Heizlast-Rechner** – eigener Vite/Preact-Build in `heizlast/`, ausgeliefert unter `/heizlast/` (siehe Abschnitt oben)
 - **Cloudflare Pages Functions** – serverseitige API (`functions/api/*.js`)
 - **Sanity CMS** – vollständig integriert (Project ID: `wpbatz1m`, Dataset: `production`)
   - Studio: https://thermowerk.sanity.studio
@@ -101,21 +53,20 @@ Export-Modal bietet vier abwählbare Elemente: Rechenweg (Default an), drei Noti
 - **Resend.com** – E-Mail-Versand (für Heizlast-Auth-Flow, falls aktiviert)
 
 ## Projekt-Dateipfade
-Projektordner: `C:\Users\Daniel\Documents\thermowerk-website`
+Projektordner (Daniels PC): `D:\Users\Daniel\Documents\thermowerk-website` (Claude arbeitet in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos)
 
 - Komponenten: `src/components/`
 - Globales CSS + Layout: `src/layouts/Layout.astro` (ALLES CSS ist hier, keine separaten CSS-Dateien)
 - Seitenaufbau + JS: `src/pages/index.astro`
 - Impressum: `src/pages/impressum.astro` (eigenständige Seite mit eigenem Header/Topbar/Footer inline, lädt Sanity-Daten via `getPage()`)
 - Datenschutz: `src/pages/datenschutz.astro` (gleiche Struktur wie Impressum)
-- Heizlast-Rechner (Live-Kopie): `public/heizlast/index.html` — wird aus `Thermowerk\Final Heizlast\` synchronisiert
+- Heizlast-Rechner: Quellcode `heizlast/` (Vite-Output `public/heizlast/` entsteht im Build, git-ignoriert)
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → `SANITY_API_TOKEN`
 - Cloudflare Pages Functions:
   - `functions/api/contact.js` (Kontaktformular → D1 + Resend)
   - `functions/api/heizlast-auth.js` (Login/Logout, signiertes Cookie + Sitzung in D1, Sperre nach Fehlversuchen)
-  - `functions/api/heizlast-projekte.js` (Projekte des Heizlast-Neubaus, D1 `heizlast_projekt`)
-  - `functions/api/heizlast-projects.js` (Projekte des alten Tools, D1 `heizlast_project`, bis Go-Live)
+  - `functions/api/heizlast-projekte.js` (Heizlast-Projekte, D1 `heizlast_projekt`)
   - `functions/_lib/` (gemeinsame Hilfen ohne eigene Route)
 - Sanity-Schemas: `sanity/schemas/` (16 Schema-Dateien)
 - Doku: `docs/` (z. B. Resend-API-Key-Screenshot)
@@ -142,7 +93,7 @@ Bei jeder Publish-Aktion im Dataset `production` wird ein POST an den Cloudflare
 - `SANITY_PROJECT_ID` = `wpbatz1m`
 - `SANITY_API_TOKEN` = Editor-Token (Sanity-Fetch in Build + ggf. Writes)
 - `RESEND_API_KEY` = API-Key für E-Mail-Versand aus `contact.js`
-- D1-Binding `DB` (Datenbank `thermowerk-data`: Tabellen `contact_submission`, `heizlast_project` (altes Tool), `heizlast_projekt`, `heizlast_sitzung`, `login_attempts`) — ein Binding für alle Endpoints (ein `HEIZLAST_DB` gibt es nicht)
+- D1-Binding `DB` (Datenbank `thermowerk-data`: Tabellen `contact_submission`, `heizlast_projekt`, `heizlast_sitzung`, `login_attempts`; `heizlast_project` = Archiv des alten Tools) — ein Binding für alle Endpoints (ein `HEIZLAST_DB` gibt es nicht)
 - `HEIZLAST_PASSWORD` (Login-Passwort Heizlast) + `HEIZLAST_COOKIE_SECRET` (≥ 32 Zeichen, signiert die Login-Cookies; fehlt es, antwortet `/api/heizlast-auth` mit 500 «Server-Konfiguration fehlt»)
 
 ## Kontaktformular (D1 + Resend, seit Phase 2 Migration 2026-04-21)

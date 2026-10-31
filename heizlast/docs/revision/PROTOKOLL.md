@@ -375,5 +375,10 @@ Backup: Stand vor der Session = Commit 56d6423 (Regel 1).
 - Daten: `heizgradtage.json` neu erzeugt (unverändert bis 2026-09, nur Datum).
 - Doku: `docs/revision/audit-s12/` (AUDIT-S12, vier Teilberichte, fws-vergleich, durchlauf2, FWS-PDFs/JSON), README, PLAN.
 
+### Zweiter Durchlauf (unabhängiger Prüfer, `audit-s12/durchlauf2.md`)
+- 8 Fix-Punkte geprüft: 8 behoben, keine offene KRITISCH/HOCH-ID; Build-Gate-Probe (Typfehler in einem Playwright-Spec: Build läuft, Lint fällt); Mischraum FBH + Heizkörper: θ_VL,req 75.8 °C über den Heizkörper, FBH gedeckelt, Gerätefilter bekommt den Wert. Sichtung `abnahme.spec.ts`/Fixture 238/5: Sollwerte extern bestätigt; fünf Bemerkungen zu Toleranzen/Benennung umgesetzt. Danach zwei NIEDRIG-Punkte behoben (Normjahr-Zeile einmal; Gebäude-Urteil nennt den Mischer-Anhub).
+- Nebenbefund des Prüfers: `tests/backend/auth.test.ts` prüfte noch den alten Endpoint — beim Cutover bereinigt.
+
 ### Prüfung
-- `npm test` 794/794, `npm run lint` 0 Fehler, `npm run build` ok; Playwright lokal 74/74 (Desktop + Mobil).
+- Commit 83b89d3 (Audit, Fixes, Referenzrechnungen) gepusht 12:27; Staging `/heizlast-neu/` liefert Build-Stempel 83b89d3 (Fetch); `npm run e2e:staging` 66/66 (inkl. `abnahme.spec.ts`, Cloud-Status aus dem echten Backend).
+- Nach Durchlauf 2: `npm test` 825/825, `npm run lint` 0 Fehler, `npm run build` ok; Playwright lokal 74/74 (Desktop + Mobil), auch mit dem Live-Pfad `/heizlast/` (Cutover-Stand vorbereitet).

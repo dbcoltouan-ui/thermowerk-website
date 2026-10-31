@@ -52,6 +52,8 @@ Sollwerte ausschliesslich extern (Kurslösungen FWS M3, Befund §5, Formblätter
 
 Siehe `fws-vergleich.md`: Öl +4.5 %, Gas +1.3 % (inkl. WW) gegenüber burner-replacement.suissetec.ch; alle Abweichungen auf Heizwert-Konvention (Hi vs. Ho, ±6 %), Volllaststunden je Station (Bern 2 150 vs. Kurs 2 000, +300 mit WW), Klimanormierung (Mittel 2016 ff. vs. Kurs/SIA 2028) und Warmwasser-Ansatz (2 W/m² vs. Folie 45/46) zurückgeführt — keine Rechenfehler.
 
-## 6. Prüfläufe
+## 6. Zweiter Durchlauf und Prüfläufe
 
-`npm test` 794/794 (Vitest, inkl. 154 Audit-Proben), `npm run lint` 0 Fehler, `npm run build` ok, Playwright lokal 74/74 (58 bestehend + 16 Abnahme, Desktop + Mobil).
+Zweiter Durchlauf (`durchlauf2.md`, unabhängiger Prüfer): alle 8 Fix-Punkte **behoben**, keine offene KRITISCH/HOCH-ID; Sichtung von `abnahme.spec.ts` und der 238/5-Fixture bestätigt die externen Sollwerte (fünf NIEDRIG-Bemerkungen zu Toleranzen/Benennung umgesetzt: Kurs-2-Abzug gegen den Kurswert 4 309, Kurs 3 mit EBF 1 832 m² und Plausibilitäts-Pointe, B1 auf das Originalband, Flur-Toleranz und Schranke benannt, Öl-Vergleich als Regression gekennzeichnet). Zwei weitere NIEDRIG-Punkte danach behoben (Normjahr-Zeile nur einmal im Annahmen-Protokoll; Gebäude-Urteil nennt den nötigen Mischer-Anhub).
+
+`npm test` 825/825 (Vitest, inkl. 185 Audit-Proben), `npm run lint` 0 Fehler, `npm run build` ok, Playwright lokal 74/74 (58 bestehend + 16 Abnahme, Desktop + Mobil), gegen das deployte Staging 66/66 (`e2e:staging`, Build 83b89d3).

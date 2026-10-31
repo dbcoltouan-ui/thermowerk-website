@@ -21,7 +21,7 @@ Verbindliche Grundlage: `docs/revision/KONTEXT.md` (Zweck, Architektur-Entscheid
 | 10 | **erledigt** (2026-10-30) | Backend & Cloud-Sync: Anmeldung neu (`functions/api/heizlast-auth.js` + `functions/_lib/heizlast-sitzung.js`: HMAC-signiertes Cookie mit Ablauf 30 d, Sitzungen in D1 mit Widerruf, zeitkonstanter Passwortvergleich, Sperre 5 Fehlversuche / 15 min), Projekte des Neubaus `functions/api/heizlast-projekte.js` (Validierung, Locking 409, 404, keine D1-Texte nach aussen), D1-Schema `migrations/0003_heizlast_neu.sql`; Client `src/state/cloud.ts` + Cloud-Sync in `persistenz.ts` (eine Liste lokal + Cloud, Konflikt-Dialog «überschreiben / Kopie», Drift nur markiert, Status offline/angemeldet in der Topbar); 63 neue Tests + Playwright zwei Browser |
 | 12 | **Audit erledigt** (2026-10-31), Go-Live nach Freigabe | Abnahme: vier unabhängige Prüfer über alle 198 Befund-IDs (`docs/revision/audit-s12/AUDIT-S12.md`: 0 KRITISCH/HOCH offen), Funktions-Checkliste, Referenzrechnungen durch die UI bis in den Bericht (`e2e/abnahme.spec.ts`: Kurs 1A/2/3/4, HK B1/B3, Referenzhaus 238/5, Gas/Öl), Vergleich mit dem FWS-Rechner (`audit-s12/fws-vergleich.md`), Fixes (Schallfilter, Annahmen-Protokoll HGT/U-Override/Rest-Φ′, Bedarfsart-Warnung, Mischerkreis, Build-Gate, Klimabereinigungs-Hinweis), zweiter Durchlauf; Session 11 (Zusatzmodule) entfällt |
 
-Staging-URL: `https://thermowerk.ch/heizlast-neu/` (bzw. `*.pages.dev/heizlast-neu/`). Das Live-Tool unter `/heizlast/` bleibt bis Session 12 unverändert.
+Live-URL seit dem Go-Live (Session 12, 2026-10-31): `https://thermowerk.ch/heizlast/` (bzw. `*.pages.dev/heizlast/`); der frühere Staging-Pfad `/heizlast-neu/` leitet dorthin um (`public/_redirects`). Das alte Single-File-Tool liegt unter `_to_delete/public-heizlast-alt/` (nicht mehr ausgeliefert).
 
 ## Architektur
 
@@ -67,15 +67,15 @@ Im Ordner `heizlast/` (Node ≥ 22):
 | Befehl | Zweck |
 |---|---|
 | `npm install` | Abhängigkeiten |
-| `npm run dev` | Entwicklungsserver (http://localhost:5173/heizlast-neu/) |
+| `npm run dev` | Entwicklungsserver (http://localhost:5173/heizlast/) |
 | `npm test` | Vitest |
-| `npm run build` | tsc (`tsconfig.build.json`: nur `src`/`data`) + Vite-Build nach `../public/heizlast-neu/` |
+| `npm run build` | tsc (`tsconfig.build.json`: nur `src`/`data`) + Vite-Build nach `../public/heizlast/` (git-ignoriert, entsteht im Pages-Build) |
 | `npm run lint` | eslint + tsc über alles (auch `tests/`, `e2e/`) |
 | `npm run e2e:install` | Chromium für Playwright (einmalig) |
 | `npm run e2e` | Playwright-Smoke (baut, startet Preview, Desktop + Mobil; Screenshots nach `docs/revision/shots-neu/`) |
-| `npm run e2e:staging` | dieselben Durchläufe gegen die deployte Staging-URL (`STAGING_URL` überschreibbar; ohne `cloud.spec.ts`, die braucht das Test-Passwort und läuft nur lokal gegen die Functions im Testprozess) |
+| `npm run e2e:staging` | dieselben Durchläufe gegen die deployte Live-URL (`STAGING_URL` überschreibbar; ohne `cloud.spec.ts`, die braucht das Test-Passwort und läuft nur lokal gegen die Functions im Testprozess) |
 
-Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Astro. Cloudflare Pages liefert `dist/` aus, der Vite-Output liegt darin unter `heizlast-neu/`.
+Im Repo-Root: `npm run build` baut zuerst `heizlast/` (inkl. `npm ci`), dann Astro. Cloudflare Pages liefert `dist/` aus, der Vite-Output liegt darin unter `heizlast/`.
 
 ## Deployment (Cloudflare Pages)
 
@@ -96,7 +96,7 @@ Alle Antworten JSON mit `Cache-Control: no-store`; D1-Fehler nur ins Log, nach a
 | `GET /api/heizlast-projekte?id=` | `{ ok, projekt: { …, stateJson } }` · 404 |
 | `PUT /api/heizlast-projekte?id=` `{ stateJson, basisVersion, qhW?, qhlW? }` | `basisVersion: null` = anlegen (201, 409 falls vorhanden); sonst ändern (200, 409 mit Server-Stand `konflikt.projekt` falls neuer, 404 falls in der Cloud gelöscht). Prüft id-Format `^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$`, ≤ 512 KB, gültiges JSON, `meta.id` = id, `meta.schemaVersion` 1 … aktuelle (`src/state/version.ts`); 400/413/415 sonst. Der Server rechnet und migriert nicht. |
 | `DELETE /api/heizlast-projekte?id=[&version=]` | 200 · 404 · 409 (Version veraltet) |
-| `/api/heizlast-projects` | **altes Tool** (Tabelle `heizlast_project`), unverändert bis zum Go-Live, aber mit derselben sicheren Anmeldung; entfällt in Session 12 |
+| `/api/heizlast-projects` | **entfernt beim Go-Live** (Datei unter `_to_delete/functions-api-heizlast-projects.js`); die D1-Tabelle `heizlast_project` des alten Tools bleibt als Archiv, wird nicht gelesen |
 
 Cookie: `v1.<tokenId>.<ablauf>.<HMAC-SHA256>`; gültig nur mit Sitzung in `heizlast_sitzung` (nicht widerrufen). Sperre: `login_attempts` speichert den HMAC der IP, keine Klartext-IP. Client: `src/state/cloud.ts` (Antworten → Status: offline, abgemeldet, nicht gefunden, abgelehnt, Konflikt), Abgleich in `persistenz.ts` (Speichern lädt im Hintergrund hoch; Anmelden lädt lokal gespeicherte Projekte hoch; in der Cloud gelöschte Projekte werden nur markiert und erst beim ausdrücklichen Speichern wieder angelegt).
 

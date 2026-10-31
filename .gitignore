@@ -20,7 +20,7 @@ heizlast/node_modules/
 heizlast/test-results/
 heizlast/test-results-staging/
 heizlast/playwright-report/
-public/heizlast-neu/
+public/heizlast/
 
 # wrangler (lokale Builds / pages dev)
 .wrangler/
