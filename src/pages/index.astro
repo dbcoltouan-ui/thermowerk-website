@@ -147,25 +147,158 @@ try {
       countObserver.observe(countEl);
     })();
 
-    /* Kontaktformular: ein einziger POST an /api/contact (D1 + Resend) */
+    /* Kontaktformular: ein einziger POST an /api/contact (D1 + Resend).
+       Seit 2026-11-10 mit Kontaktart (Nachricht / Rückruf / Beides) und Rückruf-Wunschzeiten (Raster Mo–Fr, 07–19). */
     (function() {
       var form = document.getElementById('contactForm');
       if (!form) return;
 
+      var DAYS = [['mo', 'Mo'], ['di', 'Di'], ['mi', 'Mi'], ['do', 'Do'], ['fr', 'Fr']];
+      var callback = document.getElementById('callback');
+      var grid = document.getElementById('cbGrid');
+      var summaryEl = document.getElementById('cbSummary');
+      var hint = document.getElementById('formHint');
+      var btn = form.querySelector('button[type="submit"]');
+      var baseText = form.getAttribute('data-button-text') || btn.textContent;
+      var cells = Array.prototype.slice.call(grid.querySelectorAll('.cell'));
+      var selected = {};
+
+      function mode() {
+        var r = form.querySelector('input[name="kontaktart"]:checked');
+        return r ? r.value : 'nachricht';
+      }
+      function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+      function applyMode() {
+        var m = mode();
+        var call = m !== 'nachricht';
+        callback.hidden = !call;
+        document.getElementById('phoneReq').hidden = !call;
+        document.getElementById('messageOpt').hidden = m !== 'rueckruf';
+        btn.textContent = m === 'rueckruf' ? 'Rückruf anfragen' : baseText;
+        hint.hidden = true;
+      }
+
+      function setCell(cell, on) {
+        var k = cell.getAttribute('data-key');
+        if (on) selected[k] = true; else delete selected[k];
+        cell.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      function keys() {
+        var out = [];
+        DAYS.forEach(function(d) {
+          for (var h = 7; h <= 18; h++) { if (selected[d[0] + '-' + h]) out.push(d[0] + '-' + h); }
+        });
+        return out;
+      }
+      function summary() {
+        var parts = [];
+        DAYS.forEach(function(d) {
+          var hrs = [];
+          for (var h = 7; h <= 18; h++) { if (selected[d[0] + '-' + h]) hrs.push(h); }
+          if (!hrs.length) return;
+          var ranges = [], start = hrs[0], prev = hrs[0];
+          for (var i = 1; i < hrs.length; i++) {
+            if (hrs[i] === prev + 1) { prev = hrs[i]; continue; }
+            ranges.push(pad(start) + '–' + pad(prev + 1)); start = prev = hrs[i];
+          }
+          ranges.push(pad(start) + '–' + pad(prev + 1));
+          parts.push('<span class="nw"><strong>' + d[1] + '</strong> ' + ranges.join(', ') + '</span>');
+        });
+        return parts.join(' · ');
+      }
+      function render() {
+        var s = summary();
+        summaryEl.innerHTML = s ? 'Ihre Wunschzeiten: ' + s : 'Noch keine Wunschzeit gewählt.';
+        if (s) hint.hidden = true;
+      }
+      function toggleGroup(list) {
+        var allOn = list.every(function(c) { return c.getAttribute('aria-pressed') === 'true'; });
+        list.forEach(function(c) { setCell(c, !allOn); });
+        render();
+      }
+
+      form.addEventListener('input', function() { hint.hidden = true; });
+
+      Array.prototype.forEach.call(form.querySelectorAll('input[name="kontaktart"]'), function(r) {
+        r.addEventListener('change', applyMode);
+      });
+
+      /* Einzelne Zelle: Klick/Tippen/Taste schaltet um; mit der Maus gedrückt halten und ziehen wählt mehrere */
+      var drag = null, suppressClick = false;
+      cells.forEach(function(cell) {
+        cell.addEventListener('pointerdown', function(e) {
+          if (e.pointerType !== 'mouse' || e.button !== 0) return;
+          e.preventDefault();
+          drag = { on: cell.getAttribute('aria-pressed') !== 'true' };
+          suppressClick = true;
+          setCell(cell, drag.on); render();
+        });
+        cell.addEventListener('pointerenter', function() {
+          if (!drag) return;
+          setCell(cell, drag.on); render();
+        });
+        cell.addEventListener('click', function() {
+          if (suppressClick) return;
+          setCell(cell, cell.getAttribute('aria-pressed') !== 'true'); render();
+        });
+      });
+      document.addEventListener('pointerup', function() {
+        if (!drag) return;
+        drag = null;
+        setTimeout(function() { suppressClick = false; }, 0);
+      });
+
+      Array.prototype.forEach.call(grid.querySelectorAll('.colhead'), function(h) {
+        h.addEventListener('click', function() {
+          var d = h.getAttribute('data-day');
+          toggleGroup(cells.filter(function(c) { return c.getAttribute('data-day') === d; }));
+        });
+      });
+      Array.prototype.forEach.call(grid.querySelectorAll('.rowhead'), function(h) {
+        var hr = h.getAttribute('data-hour');
+        var row = cells.filter(function(c) { return c.getAttribute('data-hour') === hr; });
+        h.addEventListener('click', function() { toggleGroup(row); });
+        h.addEventListener('pointerenter', function(e) { if (e.pointerType === 'mouse') row.forEach(function(c) { c.classList.add('hl'); }); });
+        h.addEventListener('pointerleave', function() { row.forEach(function(c) { c.classList.remove('hl'); }); });
+      });
+      document.getElementById('cbReset').addEventListener('click', function() {
+        cells.forEach(function(c) { setCell(c, false); });
+        render();
+      });
+
+      function fail(msg, el) {
+        hint.textContent = msg;
+        hint.hidden = false;
+        if (el && el.focus) el.focus();
+      }
+
       form.addEventListener('submit', function(e) {
         e.preventDefault();
-        var btn = form.querySelector('button[type="submit"]');
+        var m = mode();
+        var call = m !== 'nachricht';
+        var nameEl = form.querySelector('#name'), emailEl = form.querySelector('#email');
+        var phoneEl = form.querySelector('#phone'), msgEl = form.querySelector('#message');
+        var data = {
+          kontaktart: m,
+          name: nameEl.value.trim(),
+          email: emailEl.value.trim(),
+          phone: phoneEl.value.trim(),
+          interest: form.querySelector('#interest').value,
+          message: msgEl.value.trim(),
+          rueckruf_slots: call ? keys() : [],
+          botcheck: form.querySelector('input[name="botcheck"]').value
+        };
+        if (!data.name) return fail('Bitte geben Sie Ihren Namen ein.', nameEl);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return fail('Bitte geben Sie eine gültige E-Mail-Adresse ein.', emailEl);
+        if (call && data.phone.replace(/\D/g, '').length < 6) return fail('Für den Rückruf brauchen wir Ihre Telefonnummer.', phoneEl);
+        if (call && !data.rueckruf_slots.length) return fail('Bitte wählen Sie mindestens eine Wunschzeit für den Rückruf.', grid.querySelector('.cell'));
+        if (m !== 'rueckruf' && !data.message) return fail('Bitte schreiben Sie uns kurz Ihr Anliegen.', msgEl);
+        hint.hidden = true;
+
         var origText = btn.textContent;
         btn.textContent = 'Wird gesendet...';
         btn.disabled = true;
-
-        var data = {
-          name: form.querySelector('#name').value,
-          email: form.querySelector('#email').value,
-          phone: form.querySelector('#phone').value,
-          interest: form.querySelector('#interest').value,
-          message: form.querySelector('#message').value
-        };
 
         fetch('/api/contact', {
           method: 'POST',
@@ -175,7 +308,11 @@ try {
           .then(function(r) { return r.json().catch(function(){ return { success: false }; }); })
           .then(function(res) {
             if (res && res.success) {
+              if (call) {
+                document.getElementById('formSuccessText').textContent = 'Ihr Rückruf-Wunsch ist eingegangen. Wir rufen Sie nach Möglichkeit zu einer Ihrer Wunschzeiten an.';
+              }
               form.style.display = 'none';
+              document.getElementById('formError').style.display = 'none';
               document.getElementById('formSuccess').style.display = 'block';
             } else {
               document.getElementById('formError').style.display = 'block';
@@ -189,6 +326,9 @@ try {
             btn.disabled = false;
           });
       });
+
+      applyMode();
+      render();
     })();
 
     /* Smooth Scroll mit Header-Offset */

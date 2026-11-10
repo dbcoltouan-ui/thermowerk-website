@@ -15,7 +15,7 @@
 
 ## Git und Deploy (Stand 2026-10-31)
 
-Claude arbeitet in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos (`dbcoltouan-ui/thermowerk-website`, Verbindung über das Claude-Projekt «thermowerk»): Dateien dort ändern, Tests/Build laufen lassen, committen, `git push origin main` — Cloudflare Pages baut automatisch (1–3 Minuten), Claude verifiziert den Deploy per Fetch (Heizlast: Build-Stempel `<meta name="thermowerk-build">` unter `/heizlast/`). Kein Token in `.git/config`, kein Git/Node auf Daniels Laptop nötig; der frühere Weg über «Desktop Commander» auf dem Windows-Rechner (Abschnitte weiter unten) ist nur noch Referenz. Daniels Ordner liegen unter `D:\Users\Daniel\Documents\…` (Pfade mit `C:\Users\Daniel\…` in diesem Dokument sind veraltet). Offen seit Juli: ein Bild mit iStock-Wasserzeichen auf der Live-Seite (noch nicht identifiziert).
+Claude arbeitet in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos (`dbcoltouan-ui/thermowerk-website`, Verbindung über das Claude-Projekt «thermowerk»): Dateien dort ändern, Tests/Build laufen lassen, committen, `git push origin main` — Cloudflare Pages baut automatisch (1–3 Minuten), Claude verifiziert den Deploy per Fetch (Heizlast: Build-Stempel `<meta name="thermowerk-build">` unter `/heizlast/`). Kein Token in `.git/config`, kein Git/Node auf Daniels Laptop nötig; der frühere Weg über «Desktop Commander» auf dem Windows-Rechner (Abschnitte weiter unten) ist nur noch Referenz. **Arbeitsordner auf Daniels PC seit 10.11.2026: `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website`** (Kopie auf Stand `origin/main`). Der frühere Ordner `D:\Users\Daniel\Documents\thermowerk-website` bleibt nur als Backup liegen (Stand 06.07.2026, 34 Commits hinter GitHub) und wird nicht mehr bearbeitet. Auf dem PC sind Git für Windows (`C:\Program Files\Git\cmd\git.exe`, GitHub-Anmeldung im Git Credential Manager gespeichert) und Node 24 installiert: Claude kann dort über Desktop Commander (PowerShell) `git pull`, `git commit`, `git push` und `npx astro build` ausführen (verifiziert 10.11.2026). Andere Daniel-Ordner liegen unter `D:\Users\Daniel\Documents\…`; Pfade mit `C:\Users\Daniel\…` in diesem Dokument sind veraltet. Das Bild mit iStock-Wasserzeichen ist erledigt (Commit `60a0b1e` «Bild ausgetauscht», 06.07.2026). Sanity: Das Projekt `wpbatz1m` existiert seit Juli 2026 nicht mehr, die Seite zeigt die Fallback-Texte aus `src/components/*.astro` — Textänderungen direkt dort.
 
 ---
 
@@ -53,10 +53,10 @@ Der Heizlast-Rechner ist seit dem Go-Live in Session 12 der **Neubau** im Ordner
 - **Resend.com** – E-Mail-Versand (für Heizlast-Auth-Flow, falls aktiviert)
 
 ## Projekt-Dateipfade
-Projektordner (Daniels PC): `D:\Users\Daniel\Documents\thermowerk-website` (Claude arbeitet in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos)
+Projektordner (Daniels PC): `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website` (seit 10.11.2026; Backup des alten Stands: `D:\Users\Daniel\Documents\thermowerk-website`). Alternativ arbeitet Claude in seiner Cloud-Sandbox mit einem Klon des GitHub-Repos.
 
 - Komponenten: `src/components/`
-- Globales CSS + Layout: `src/layouts/Layout.astro` (ALLES CSS ist hier, keine separaten CSS-Dateien)
+- Globales CSS + Layout: `src/layouts/Layout.astro` (ALLES CSS ist hier, keine separaten CSS-Dateien — Ausnahme: die Styles für Kontaktart und Rückruf-Raster stehen scoped in `src/components/Contact.astro`)
 - Seitenaufbau + JS: `src/pages/index.astro`
 - Impressum: `src/pages/impressum.astro` (eigenständige Seite mit eigenem Header/Topbar/Footer inline, lädt Sanity-Daten via `getPage()`)
 - Datenschutz: `src/pages/datenschutz.astro` (gleiche Struktur wie Impressum)
@@ -64,7 +64,7 @@ Projektordner (Daniels PC): `D:\Users\Daniel\Documents\thermowerk-website` (Clau
 - Bilder: `public/img/`
 - Umgebungsvariablen (nie in Git!): `.env` → `SANITY_API_TOKEN`
 - Cloudflare Pages Functions:
-  - `functions/api/contact.js` (Kontaktformular → D1 + Resend)
+  - `functions/api/contact.js` (Kontaktformular mit Rückruf-Wunschzeiten → D1 + Resend + Karte in der Thermowerk-App)
   - `functions/api/heizlast-auth.js` (Login/Logout, signiertes Cookie + Sitzung in D1, Sperre nach Fehlversuchen)
   - `functions/api/heizlast-projekte.js` (Heizlast-Projekte, D1 `heizlast_projekt`)
   - `functions/_lib/` (gemeinsame Hilfen ohne eigene Route)
@@ -93,27 +93,39 @@ Bei jeder Publish-Aktion im Dataset `production` wird ein POST an den Cloudflare
 - `SANITY_PROJECT_ID` = `wpbatz1m`
 - `SANITY_API_TOKEN` = Editor-Token (Sanity-Fetch in Build + ggf. Writes)
 - `RESEND_API_KEY` = API-Key für E-Mail-Versand aus `contact.js`
+- `APP_API_KEY` = API-Schlüssel der Thermowerk-App (`settings.claude_api_key`), damit `contact.js` bei Rückruf-Wünschen eine Karte auf der Heute-Seite anlegt (`POST https://thermowerk.db-coltouan.workers.dev/api/tasks`); gesetzt 10.11.2026 über die Cloudflare-API, nur Production
 - D1-Binding `DB` (Datenbank `thermowerk-data`: Tabellen `contact_submission`, `heizlast_projekt`, `heizlast_sitzung`, `login_attempts`; `heizlast_project` = Archiv des alten Tools) — ein Binding für alle Endpoints (ein `HEIZLAST_DB` gibt es nicht)
 - `HEIZLAST_PASSWORD` (Login-Passwort Heizlast) + `HEIZLAST_COOKIE_SECRET` (≥ 32 Zeichen, signiert die Login-Cookies; fehlt es, antwortet `/api/heizlast-auth` mit 500 «Server-Konfiguration fehlt»)
 
-## Kontaktformular (D1 + Resend, seit Phase 2 Migration 2026-04-21)
-Ein einziger POST aus dem Browser an `/api/contact` (siehe `src/pages/index.astro`). Die CF-Function:
-1. Speichert die Anfrage in D1-Tabelle `contact_submission` (Binding `env.DB`, Status `neu`).
-2. Schickt eine Benachrichtigung via Resend an `daniel@thermowerk.ch` (`reply-to` = Kundenmail). D1 ist der Wahrheitsanker — wenn Resend scheitert, bleibt die Anfrage trotzdem gespeichert, Mail-Status geht in die Response.
+## Kontaktformular (D1 + Resend, seit Phase 2 Migration 2026-04-21; Rückruf-Wunschzeiten seit 2026-11-10)
+Ein einziger POST aus dem Browser an `/api/contact` (Formular `src/components/Contact.astro`, Script in `src/pages/index.astro`).
 
-Honeypot-Feld `botcheck` bricht Spam vor dem DB-Write ab. Sanity-Schreiben + Web3Forms-Hybrid aus der alten Lösung sind entfernt.
+**Formular:** Kontaktart `nachricht` (schriftlich) · `rueckruf` (wir rufen an) · `beides`. Bei Rückruf/Beides erscheint das Raster «Wann dürfen wir Sie anrufen?»: Mo–Fr, stundenweise 07–08 bis 18–19, Mehrfachauswahl (Zelle antippen; Tag bzw. Uhrzeit antippen = ganze Spalte/Zeile; am PC mit gedrückter Maus ziehen), Hinweis «Wunschzeiten», Zusammenfassung «Ihre Wunschzeiten: Di 13–15 · Fr 08–09». Pflicht: Name, E-Mail; bei Rückruf/Beides Telefon (≥ 6 Ziffern) und mindestens eine Wunschzeit; Nachricht Pflicht ausser bei «Rückruf» (dort «optional», Button «Rückruf anfragen»). Payload: `{kontaktart, name, email, phone, interest, message, rueckruf_slots:["di-13","fr-8",…], botcheck}` — Schlüssel = Tag-Startstunde, Raster muss in `Contact.astro` (cbDays/cbHours) und `contact.js` (DAYS/HOURS) gleich sein.
+
+**Die CF-Function:**
+1. Prüft die Pflichtfelder serverseitig (400 bei Fehler) und speichert in D1 `contact_submission` (Status `neu`, dazu `kontaktart`, `rueckruf_slots` JSON, `rueckruf_text` lesbar; Spalten aus `migrations/0004_contact_rueckruf.sql`, am 10.11.2026 per D1-API angewendet).
+2. Schickt die Benachrichtigung via Resend an `daniel@thermowerk.ch` (`reply-to` = Kundenmail; bei Rückruf Betreff «Rückruf-Wunsch: Name (Telefon) – Zeiten» und Zeitenblock oben).
+3. Nur bei Rückruf/Beides: Bestätigungsmail an den Kunden (Absender `noreply@thermowerk.ch`, Antwort an `info@thermowerk.ch`, Inhalt nur Telefonnummer + Wunschzeiten) und Karte in der Thermowerk-App (`Rückruf: Name, Telefon`, Bereich Kunden, fällig am Tag des nächsten gewählten Zeitfensters, Details mit Zeiten/Kontakt/Nachricht).
+
+D1 ist der Wahrheitsanker — scheitern Mail oder App-Karte, bleibt die Anfrage gespeichert; der Status steht in der Response (`mail`, `kunden_mail`, `app`). Honeypot-Feld `botcheck` bricht Spam vor dem DB-Write ab. Preview-Deployments (Branches) haben weder Resend- noch App-Schlüssel: dort wird nur gespeichert.
 
 ## Git-Commit-Workflow
 
 ### Wie Claude Änderungen macht
-1. Dateien lesen/editieren via **Read/Edit/Write-Tool** — Pfad `C:\Users\Daniel\Documents\thermowerk-website\...`
+> **Aktuell (seit 10.11.2026):** Ordner `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website`, Git über Desktop Commander in **PowerShell**:
+> ```
+> Set-Location "C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website"; git pull --ff-only; git add -A; git commit -F commitmsg.txt; git push
+> ```
+> Die Schritte unten sind der frühere Ablauf (Referenz).
+
+1. Dateien lesen/editieren via **Read/Edit/Write-Tool** — Pfad `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\...`
 2. Commit-Message schreiben via **Desktop Commander write_file**:
    ```
-   write_file("C:\Users\Daniel\Documents\thermowerk-website\commitmsg.txt", "Nachricht hier")
+   write_file("C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\commitmsg.txt", "Nachricht hier")
    ```
 3. Git-Befehle via **Desktop Commander start_process** (shell: **cmd**):
    ```
-   cd /d C:\Users\Daniel\Documents\thermowerk-website && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
+   cd /d "C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website" && git add -A && git commit -F commitmsg.txt && git push
    ```
 
 Claude macht das **selbstständig und vollständig** – kein manueller Schritt nötig.
@@ -185,7 +197,7 @@ Komponenten prüfen: `logo.image && typeof logo.image === 'object' && logo.image
 **Symptom:** `.git\index.lock` bleibt nach abgebrochenem Git-Prozess liegen; `del /f /q` in cmd hilft nicht.
 **Fix:** PowerShell `Remove-Item -Force`:
 ```powershell
-Remove-Item -Path "C:\Users\Daniel\Documents\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\.git\index.lock" -Force -ErrorAction SilentlyContinue
 ```
 NUR `Remove-Item` in PowerShell. Git-Befehle danach zurück in cmd.
 
@@ -202,7 +214,7 @@ NUR `Remove-Item` in PowerShell. Git-Befehle danach zurück in cmd.
 2. `commitmsg.txt` via Desktop Commander `write_file`.
 3. In cmd via Desktop Commander `start_process`:
    ```
-   cd /d C:\Users\Daniel\Documents\thermowerk-website && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe add -A && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe commit -F commitmsg.txt && C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe push
+   cd /d "C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website" && git add -A && git commit -F commitmsg.txt && git push
    ```
 4. Falls `.git\index.lock` hängt: Admin-PowerShell `Remove-Item …` (siehe oben), dann Schritt 3 retry.
 5. Falls FUSE-Cache stale (nur zu Diagnose): Linux-Bash `git update-index --refresh`.
@@ -210,10 +222,10 @@ NUR `Remove-Item` in PowerShell. Git-Befehle danach zurück in cmd.
 ## Windows-Setup (einmalig gemacht, 2026-04-17 — nur Referenz für Re-Install)
 
 **Windows Defender – Ausschlüsse:**
-- Ordner: `C:\Users\Daniel\Documents\thermowerk-website`
+- Ordner: `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website` (früher `C:\Users\Daniel\Documents\thermowerk-website`)
 - Ordner: `C:\Users\Daniel\AppData\Local\Packages\Claude_pzs8sxrjxfjjc`
 - Ordner: `C:\Users\Daniel\AppData\Roaming\Claude`
-- Ordner: `C:\Users\Daniel\AppData\Local\Programs\Git`
+- Ordner: `C:\Program Files\Git` (früher `C:\Users\Daniel\AppData\Local\Programs\Git`)
 - Ordner: `C:\Program Files\nodejs`
 - Prozesse: `git.exe`, `node.exe`
 
@@ -229,8 +241,8 @@ Neustart nach LongPath-Setting.
 **Cowork als Administrator:** Bei MSIX-Apps nicht möglich — Cowork bleibt im normalen User-Kontext. `C:\Users\Daniel\AppData\Roaming\Claude` ist eine virtuelle App-Sicht und aus normalem User-PowerShell heraus nicht auflösbar (Windows-Sandbox-Normalverhalten).
 
 ## Wichtige Hinweise
-- Git-Pfad: `C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe`
-- Shell für Git-Befehle: immer **cmd** (nicht PowerShell)
+- Git-Pfad: `C:\Program Files\Git\cmd\git.exe` (im PATH, `git` genügt; seit Neuinstallation Juli 2026)
+- Shell für Git-Befehle: PowerShell über Desktop Commander funktioniert (10.11.2026); Pfad wegen Leerzeichen/Umlaut immer in Anführungszeichen
 - Commit-Message **immer via `write_file`** schreiben (NICHT echo)
 - Commit-Message darf KEIN `1:1` oder ähnliche Sonderzeichen enthalten → immer `-F commitmsg.txt`
 - `.env` darf nie in Git landen (in .gitignore)

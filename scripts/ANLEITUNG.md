@@ -1,6 +1,6 @@
 # Thermowerk – Sync-Anleitung
 
-Alle Scripts liegen in `C:\Users\Daniel\Documents\thermowerk-website\scripts\`
+Alle Scripts liegen in `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\scripts\`
 Per Doppelklick auf die `.bat`-Datei ausführen.
 
 ---

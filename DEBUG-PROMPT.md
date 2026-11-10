@@ -11,12 +11,12 @@
   - alt: `C:\Users\Daniel\Documents\Claude\Projects\Final Heizlast\`
   - neu: `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\`
     Beim Umzug/Aufräumen wurden evtl. Dateien verschoben, umbenannt oder überschrieben. **Backups existieren** in `Thermowerk\Final Heizlast\Backup\` (ZIPs mit Zeitstempel).
-- Die **Live-Kopie** liegt unter `C:\Users\Daniel\Documents\thermowerk-website\public\heizlast\index.html`. Kann sein, dass Live und Master auseinander laufen.
+- Die **Live-Kopie** liegt unter `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\public\heizlast\index.html`. Kann sein, dass Live und Master auseinander laufen.
 - Daniel ist **Laie**, kein Entwickler. Keine nackten Shell-Kommandos. Jede geplante Aktion kurz in Klartext ankündigen, **vor** dem Zugriff.
 
 ## Pflichtlektüre (in dieser Reihenfolge, bevor du Code anfasst)
 
-1. `C:\Users\Daniel\Documents\thermowerk-website\CLAUDE.md` — Architektur-Überblick, Cowork-VM-Eigenheiten, Commit-Flow
+1. `C:\Users\dbcol\Desktop\Gebäudetechnik Coltouan\thermowerk-website\CLAUDE.md` — Architektur-Überblick, Cowork-VM-Eigenheiten, Commit-Flow
 2. `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\STAND-DER-DINGE.md` — letzter bekannter Stand
 3. `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\CHANGELOG.md` — was zuletzt geändert wurde
 4. `C:\Users\Daniel\Documents\Thermowerk\Final Heizlast\BACKUP-GUIDE.md` — Backup/Restore-Prozedur

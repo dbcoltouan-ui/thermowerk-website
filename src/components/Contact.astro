@@ -32,6 +32,18 @@ const defaultInterests = [
   { value: 'sonstiges', label: 'Sonstiges' },
 ];
 const interests = data?.formInterests?.length ? data.formInterests : defaultInterests;
+
+// Rückruf-Raster (Wunschzeiten): Mo–Fr, stundenweise 07–19. Schlüssel "di-13" = Dienstag 13–14 Uhr.
+// Muss mit DAYS/HOURS in functions/api/contact.js übereinstimmen.
+const cbDays = [
+  { key: 'mo', label: 'Mo', name: 'Montag' },
+  { key: 'di', label: 'Di', name: 'Dienstag' },
+  { key: 'mi', label: 'Mi', name: 'Mittwoch' },
+  { key: 'do', label: 'Do', name: 'Donnerstag' },
+  { key: 'fr', label: 'Fr', name: 'Freitag' },
+];
+const cbHours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+const pad2 = (n) => String(n).padStart(2, '0');
 ---
 <section class="contact section-padding" id="contact">
   <div class="container">
@@ -69,21 +81,32 @@ const interests = data?.formInterests?.length ? data.formInterests : defaultInte
         </div>
       </div>
       <div class="fade-up" style="transition-delay: 0.15s;">
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm" novalidate data-button-text={formButtonText}>
           <input type="hidden" name="botcheck" style="display:none">
+          <fieldset class="kontaktart">
+            <legend>Wie möchten Sie Kontakt aufnehmen?</legend>
+            <div class="seg">
+              <input type="radio" name="kontaktart" id="m-msg" value="nachricht" checked>
+              <label for="m-msg"><strong>Nachricht</strong><span>schriftlich</span></label>
+              <input type="radio" name="kontaktart" id="m-call" value="rueckruf">
+              <label for="m-call"><strong>Rückruf</strong><span>wir rufen an</span></label>
+              <input type="radio" name="kontaktart" id="m-both" value="beides">
+              <label for="m-both"><strong>Beides</strong><span>Nachricht + Rückruf</span></label>
+            </div>
+          </fieldset>
           <div class="form-row">
             <div class="form-group">
               <label for="name">Name *</label>
-              <input type="text" id="name" name="name" required placeholder="Ihr Name">
+              <input type="text" id="name" name="name" required autocomplete="name" placeholder="Ihr Name">
             </div>
             <div class="form-group">
-              <label for="phone">Telefon</label>
-              <input type="tel" id="phone" name="phone" placeholder="Ihre Telefonnummer">
+              <label for="phone">Telefon<span class="req" id="phoneReq" hidden> *</span></label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="Ihre Telefonnummer">
             </div>
           </div>
           <div class="form-group">
             <label for="email">E-Mail *</label>
-            <input type="email" id="email" name="email" required placeholder="Ihre E-Mail-Adresse">
+            <input type="email" id="email" name="email" required autocomplete="email" placeholder="Ihre E-Mail-Adresse">
           </div>
           <div class="form-group">
             <label for="interest">Ich interessiere mich für</label>
@@ -94,15 +117,43 @@ const interests = data?.formInterests?.length ? data.formInterests : defaultInte
               ))}
             </select>
           </div>
+          <div class="callback" id="callback" hidden>
+            <p class="cb-title">Wann dürfen wir Sie anrufen?</p>
+            <span class="cb-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Mehrfachauswahl möglich
+            </span>
+            <p class="cb-hint">Wählen Sie <strong>alle</strong> Tage und Zeiten, die Ihnen passen. Das sind Wunschzeiten – wir richten uns so gut wie möglich danach. Tipp: Tag oder Uhrzeit antippen wählt die ganze Spalte bzw. Zeile.</p>
+            <div class="cb-grid" id="cbGrid">
+              <div class="cb-corner">Uhrzeit</div>
+              {cbDays.map((d) => (
+                <button type="button" class="colhead" data-day={d.key} aria-label={`${d.name}: ganzen Tag wählen`}>{d.label}</button>
+              ))}
+              {cbHours.map((h) => (
+                <>
+                  <button type="button" class="rowhead" data-hour={h} aria-label={`${pad2(h)}–${pad2(h + 1)} Uhr an allen Tagen wählen`}>{pad2(h)}–{pad2(h + 1)}</button>
+                  {cbDays.map((d) => (
+                    <button type="button" class="cell" data-key={`${d.key}-${h}`} data-day={d.key} data-hour={h} aria-pressed="false" aria-label={`${d.name} ${pad2(h)}–${pad2(h + 1)} Uhr`}></button>
+                  ))}
+                </>
+              ))}
+            </div>
+            <div class="cb-foot">
+              <button type="button" class="cb-reset" id="cbReset">Auswahl zurücksetzen</button>
+              <span>Zeiten in Stunden, Mo–Fr</span>
+            </div>
+            <div class="cb-summary" id="cbSummary" aria-live="polite">Noch keine Wunschzeit gewählt.</div>
+          </div>
           <div class="form-group">
-            <label for="message">Nachricht</label>
+            <label for="message">Nachricht<span class="opt" id="messageOpt" hidden> (optional)</span></label>
             <textarea id="message" name="message" placeholder={formPlaceholderMessage}></textarea>
           </div>
+          <p class="form-hint-error" id="formHint" role="alert" hidden></p>
           <button type="submit" class="btn btn-primary btn-cta form-submit">{formButtonText}</button>
           <p class="form-note">{formNote}</p>
         </form>
         <div id="formSuccess" class="form-success" style="display:none">
-          <strong>Vielen Dank!</strong> Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns in Kürze bei Ihnen.
+          <strong>Vielen Dank!</strong> <span id="formSuccessText">Ihre Anfrage wurde erfolgreich gesendet. Wir melden uns in Kürze bei Ihnen.</span>
         </div>
         <div id="formError" class="form-error" style="display:none">
           <strong>Fehler:</strong> Ihre Anfrage konnte leider nicht gesendet werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.
@@ -111,3 +162,52 @@ const interests = data?.formInterests?.length ? data.formInterests : defaultInte
     </div>
   </div>
 </section>
+
+<style>
+  /* Kontaktart (Nachricht / Rückruf / Beides) */
+  .kontaktart { border: 0; padding: 0; margin: 0 0 clamp(14px, 2.5svh, 20px); min-width: 0; }
+  .kontaktart legend { font-size: clamp(13px, 1.4vw, 14px); font-weight: 600; margin-bottom: 8px; color: var(--dark); font-family: var(--font-heading); padding: 0; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; background: var(--white); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 12px 6px; text-align: center; cursor: pointer; transition: background 0.2s, color 0.2s; }
+  .seg label + input + label { border-left: 1px solid var(--border); }
+  .seg label strong { font-family: var(--font-heading); font-size: clamp(14px, 1.5vw, 15px); color: var(--navy); }
+  .seg label span { font-size: 12px; color: var(--mid-gray); line-height: 1.3; }
+  .seg input:checked + label { background: var(--navy); }
+  .seg input:checked + label strong, .seg input:checked + label span { color: var(--white); }
+  .seg input:focus-visible + label { outline: 2px solid var(--navy); outline-offset: -4px; }
+  .req { color: var(--red); }
+  .opt { font-weight: 400; color: var(--mid-gray); }
+
+  /* Rückruf-Raster */
+  .callback { background: var(--white); border: 1px solid var(--border); border-radius: 3px; padding: clamp(14px, 2vw, 20px); margin-bottom: clamp(14px, 2.5svh, 20px); }
+  .callback[hidden] { display: none; }
+  .cb-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(14px, 1.5vw, 16px); color: var(--dark); margin: 0 0 8px; }
+  .cb-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--blue-tint); color: var(--navy); font-weight: 600; font-size: 13px; padding: 4px 12px; border-radius: 999px; }
+  .cb-chip svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; }
+  .cb-hint { font-size: 13.5px; color: var(--mid-gray); margin: 8px 0 14px; line-height: 1.5; }
+  .cb-hint strong { color: var(--dark); }
+  .cb-grid { display: grid; grid-template-columns: 58px repeat(5, 1fr); gap: 5px; user-select: none; -webkit-user-select: none; }
+  .cb-corner { font-size: 11px; color: var(--mid-gray); align-self: end; padding: 0 0 6px 4px; }
+  .colhead, .rowhead { background: none; border: 0; padding: 4px; font-family: var(--font-heading); color: var(--navy); cursor: pointer; border-radius: 3px; }
+  .colhead { font-weight: 600; font-size: 14px; }
+  .rowhead { font-size: 13px; text-align: left; font-family: var(--font-body); color: var(--dark); }
+  .colhead:hover, .rowhead:hover { background: var(--light-gray); }
+  .cell { height: 32px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); cursor: pointer; padding: 0; position: relative; transition: background 0.12s, border-color 0.12s; touch-action: manipulation; }
+  .cell:hover { border-color: var(--navy); }
+  .cell.hl { background: var(--light-gray); }
+  .cell[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); }
+  .cell[aria-pressed="true"]::after { content: ''; position: absolute; left: 50%; top: 45%; width: 10px; height: 5px; border-left: 2px solid var(--white); border-bottom: 2px solid var(--white); transform: translate(-50%, -50%) rotate(-45deg); }
+  .cell:focus-visible, .colhead:focus-visible, .rowhead:focus-visible, .cb-reset:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+  .cb-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; margin-top: 12px; font-size: 13px; color: var(--mid-gray); }
+  .cb-foot span { white-space: nowrap; }
+  .cb-reset { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--navy); text-decoration: underline; cursor: pointer; white-space: nowrap; }
+  .cb-summary :global(.nw) { white-space: nowrap; }
+  .cb-summary { margin-top: 12px; padding: 10px 14px; border: 1px dashed var(--border); border-radius: 3px; background: var(--off-white); font-size: 14px; color: var(--dark); }
+  .form-hint-error { color: #C62828; font-size: 14px; text-align: center; margin: 0 0 12px; }
+  .form-hint-error[hidden] { display: none; }
+  @media (max-width: 640px) {
+    .cb-grid { grid-template-columns: 50px repeat(5, 1fr); gap: 4px; }
+    .cell { height: 30px; }
+  }
+</style>

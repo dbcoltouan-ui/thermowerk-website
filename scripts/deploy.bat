@@ -2,9 +2,9 @@
 chcp 65001 >nul
 echo === DEPLOY: Git commit + push ===
 echo.
-cd /d C:\Users\Daniel\Documents\thermowerk-website
+cd /d "%~dp0.."
 
-set GIT=C:\Users\Daniel\AppData\Local\Programs\Git\cmd\git.exe
+set GIT=git
 
 %GIT% status --short
 echo.
